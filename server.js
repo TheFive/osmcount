@@ -61,7 +61,11 @@ app.use('/count.html', function(req,res){
     var collection = db.collection('DataCollection');
     collection.count(function(err, count) {
     	res.set('Content-Type', 'text/html');
-    	res.end("There are " + count + " records.");
+    	if(err) {
+    		res.end(err);
+    	} else {
+    		res.end("There are " + count + " records.");
+    	}
     });  
 })
 
