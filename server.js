@@ -60,9 +60,10 @@ app.use('/count.html', function(req,res){
     // Fetch the collection test
     var collection = db.collection('DataCollection');
     collection.count(function(err, count) {
-          res.end("There are " + count + " records.");
-        });  
-	})
+    	res.set('Content-Type', 'text/html');
+    	res.end("There are " + count + " records.");
+    });  
+})
 
 
 app.use('/import.html', function(req,res){
@@ -181,6 +182,7 @@ app.use('/table.html', function(req,res){
 		tablebody +="</tr>"	;
 		tablebody += "";
 		text = "<html><body>"+beforetext+"<table border=\"1\">\n" + tableheader + tablebody + "</table></body></html>";
+		res.set('Content-Type', 'text/html');
 		res.end(text);
 	}));
 	});
