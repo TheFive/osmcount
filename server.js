@@ -101,11 +101,12 @@ app.use('/table.html', function(req,res){
     						];
     displayBundeslandText = [{$match: { measure: "AddrWOStreet"}},
     						 {$project: { schluessel: { $substr: ["$schluessel",0,2]},
-    						 			  countintern: "$count",
-    						 			  timestamp: "$timestamp"}},
-    						 {$group: { _id: { schluessel: "$schluessel",timestamp:"$timestamp"},
-    						 		    count: {$sum: "$countintern" }}},
-    						 {$sort: { schluessel:1,timestamp:1}},
+    						 			  timestamp: "$timestamp",
+    						 			  count: "$count"
+    						 			  }},
+    						 {$group: { _id: { row: "$schluessel",col:"$timestamp"},
+    						 		    cell: {$sum: "$count" }}},
+    						 {$sort: { _id:1}},
     						 
     						
     						];
@@ -116,6 +117,8 @@ app.use('/table.html', function(req,res){
     } 
     
     // change the Collection to a HTML Table
+    
+    console.log(JSON.stringify(displayBundeslandText));
     collection.aggregate(	displayBundeslandText
     
     
@@ -123,7 +126,7 @@ app.use('/table.html', function(req,res){
     	// first copy hole table in a 2 dimensional JavaScript map
     	// may be here is some performance potential :-)
     	if (err) {
-    		res.end("error");
+    		res.end("error"+err);
     		console.log(err);
     		return;
     	}
@@ -141,21 +144,29 @@ app.use('/table.html', function(req,res){
 			measure = items[i];
 			console.dir(measure);
 			
-			//generate new Header or Rows and Cell if necessary	
-			if (header.indexOf(measure.timestamp)<0) {
-				header.push(measure.timestamp);
-			}
-			if (firstColumn.indexOf(measure.schluessel)<0) {
-				firstColumn.push(measure.schluessel);
-			}
-			if (!Array.isArray(table[measure.schluessel])) {
-				table[measure.schluessel]=[];
+			row=measure._id.row;
+			col=measure._id.col;
+			
+			if (typeof(row)=='undefined' || typeof(col) == 'undefined') {
+				console.log("row or col undefined"+row+col);
 			}
 			
-			table[measure.schluessel][measure.timestamp]=parseInt(measure.count);
+			//generate new Header or Rows and Cell if necessary	
+			if (header.indexOf(col)<0) {
+				header.push(col);
+			}
+			if (firstColumn.indexOf(row)<0) {
+				firstColumn.push(row);
+			}
+			if (!Array.isArray(table[row])) {
+				table[row]=[];
+			}
+			
+			table[row][col]=parseInt(measure.cell);
 			//console.log(measure.schluessel+","+measure.timestamp+","+cell);
 			//console.log("-->"+table[measure.schluessel][measure.timestamp]);
 		}
+		
 		tableheader = "<th>Regioschlüssel</th>";
 		for (i=0;i<header.length;i++) {
 			tableheader +="<th>"+header[i]+"</th>";

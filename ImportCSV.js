@@ -100,11 +100,12 @@ exports.readCSV = function (db,defJson,filename,encoding) {
 				
 				//console.log("---- "+i+" "+z);
 				//console.log(key +":"+value);
-				if (typeof(defJSON)!='integer') {
+				console.log(key+typeof(defJSON[key]));
+				if (typeof(defJSON[key])!='number') {
 					//console.log(key + typeof(newData[value]));
 					newData[i-1][key]=value;
 				} else {
-					newData [i-1]=Integer.parseInt(value);
+					newData [i-1][key]=parseInt(value);
 				}
 			}
 		}
