@@ -89,37 +89,63 @@ app.use('/table.html', function(req,res){
     // To be Improved with Query or Aggregation Statments
     var collection = db.collection('DataCollection');
     
-    displayAllText =[{$match: { measure: "AddrWOStreet"}},
-    						 //{$project: { schluessel: "$schluessel",count: "$count",timestamp: "$timestamp"}},
-    						 {$group: { _id : "$_id" , 
-    						 		    count: {$sum: "$count"},
-    						 		    schluessel: {$first:"$schluessel"},
-    						 		    timestamp: {$last:"$timestamp"}}},
-    						 {$sort: { schluessel:1,timestamp:1}},
-    						 
-    						
-    						];
-    displayBundeslandText = [{$match: { measure: "AddrWOStreet"}},
-    						 {$project: { schluessel: { $substr: ["$schluessel",0,2]},
-    						 			  timestamp: "$timestamp",
-    						 			  count: "$count"
+
+
+    // Parse html parameters
+    displayMeasure="AddrWOStreet";    
+    if(typeof(req.param("measure"))!='undefined') {
+    	displayMeasure=req.param("measure");
+    }
+    
+    // length for the Regioschluessel
+    lengthOfKey=2;
+    if(typeof(req.param("lok")!='undefined')) {
+    	lengthOfKey=parseInt(req.param("lok"));
+    }
+    
+    // length of Timestamp
+    lengthOfTime=10;
+    if(req.param("period")=="year") {
+    	lengthOfTime=4;
+    }
+    if(req.param("period")=="month") {
+    	lengthOfTime=7;
+    }
+    if(req.param("period")=="day") {
+    	lengthOfTime=10;
+    }
+    
+    
+    
+   
+    	
+    displayText = [{$match: { measure: displayMeasure}},
+    						 {$project: { schluessel: "$schluessel",
+    						 			  timestamp: {$substr: ["$timestamp",0,lengthOfTime]},
+    						 			  count: "$count",
+    						 			  schluessel2: "$schluessel",
+    						 			  timestamp2: "$timestamp",
     						 			  }},
     						 {$group: { _id: { row: "$schluessel",col:"$timestamp"},
+    						 		    count: {$last: "$count" },
+    						 		    schluessel:{$last: "$schluessel2"},
+    						 		    timestamp:{$last:"$timestamp2"}}},
+    						 {$project: { schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
+    						 			  time: {$substr: ["$timestamp",0,lengthOfTime]},
+    						 			  count: "$count"
+    						 			  }},
+    						 {$group: { _id: { row: "$schluessel",col:"$time"},
     						 		    cell: {$sum: "$count" }}},
     						 {$sort: { _id:1}},
     						 
     						
     						];
     // Bitte Checken, Parameter geht noch nicht
-    var aggFunc=displayAllText;   						
-    if (req.param("all")=="NO"){
-    	aggFunc=displayBundeslandText;
-    } 
+    var aggFunc=displayText;   						
+ 
     
-    // change the Collection to a HTML Table
-    
-    console.log(JSON.stringify(displayBundeslandText));
-    collection.aggregate(	displayBundeslandText
+    console.log(JSON.stringify(displayText));
+    collection.aggregate(	displayText
     
     
     						, (function(err, items) {
@@ -142,7 +168,7 @@ app.use('/table.html', function(req,res){
 			
 		
 			measure = items[i];
-			console.dir(measure);
+			//console.dir(measure);
 			
 			row=measure._id.row;
 			col=measure._id.col;
