@@ -180,7 +180,7 @@ app.use('/table.html', function(req,res){
 		tableheader += "</tr>";
 		tablebody +="</tr>"	;
 		tablebody += "";
-		text = "<html><body>"+beforetext+"<table border=\"1\">\n" + tableheader + tablebody + "</table></body></head></html>";
+		text = "<html><body>"+beforetext+"<table border=\"1\">\n" + tableheader + tablebody + "</table></body></html>";
 		res.end(text);
 	}));
 	});
