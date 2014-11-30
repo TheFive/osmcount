@@ -5,7 +5,7 @@ var format = require('util').format;
 
 
 // require own modules
-var importCSV=require('./importCSV');
+var importCSV=require('./ImportCSV');
 
 
 
