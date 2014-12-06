@@ -51,6 +51,12 @@ exports.schluessel = function () {
 								
 								console.log("key "+key+" value "+value);
 								schluesselMap[key]=value;
+							
+								while (key.charAt(key.length-1)=='0') {
+									key = key.slice(0,key.length-2);
+									console.log("key "+key+" value "+value);
+									schluesselMap[key]=value;
+								}
 							}
 						}
 					}
