@@ -1,14 +1,23 @@
-config=require('./configuration');
-async=require('async');
+// 
+// 
+// LoadDataFromDB.js
+//
+// This module loads static data from the database to have all relevant
+// keys in memory for display.
+//
+// current implemented: de:regionalschluessel map
+//
+//
 
-// Log the information from the file
-console.log(config.getConfiguration());
-
+var async=require('async');
 var mc = require('mongodb').MongoClient;
+
+var config=require('./configuration');
+
+
 var mongodb;
 var schluesselMap = Object();
 var dataLoaded = false;
-
 
 
 exports.schluessel = function () {
@@ -32,7 +41,11 @@ exports.schluessel = function () {
 			function(callback) {
 				console.log("doing c");
 				console.log(typeof(mongodb));	
-				mongodb.collection("OSMBoundaries").find({  }, function(err, result) {
+				mongodb.collection("OSMBoundaries").find( 
+							{ boundary : "administrative" , 
+							  admin_level: {$in: ['1','2','3','4','5','6','7','8','9']}
+							}, 
+							function(err, result) {
 				if (err) console.log(err);
 				result.count(function(err, count){
 					console.log("Total matches: "+count);
@@ -46,7 +59,7 @@ exports.schluessel = function () {
 						key=value="";
 						if (doc) {
 							key = doc["de:regionalschluessel"];
-							value = doc.name;
+							value = doc.name + '('+doc.admin_level+')';
 							if (typeof(key)!='undefined' && typeof(value) != 'undefined') {
 								
 								console.log("key "+key+" value "+value);
