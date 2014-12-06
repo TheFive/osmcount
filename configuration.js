@@ -1,6 +1,7 @@
 var fs, configurationFile;
+var path=require('path');
 
-configurationFile = 'configuration.json';
+configurationFile = path.resolve(__dirname, 'configuration.json');
 fs = require('fs');
 
 var configuration;
