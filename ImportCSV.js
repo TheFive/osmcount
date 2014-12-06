@@ -1,4 +1,5 @@
 fs=require("fs");
+var path=require('path');
 
 
 // Code for parsing simple CSV Files including ""
@@ -50,9 +51,14 @@ function clone(obj) {
 }
 
 
+
+
 // readCSV Function to import CSV to the Measure Database
 // Input: a MongoDB, a template JSON, CSV Filename, encoding 
 exports.readCSV = function (db,defJson,filename,encoding) {
+
+
+	filename = path.resolve(__dirname, filename);
 	
 	// Open the file and copy it to a string
 	// encoding is ignored yet
