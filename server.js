@@ -6,35 +6,20 @@ var format = require('util').format;
 
 // require own modules
 var importCSV=require('./ImportCSV');
-
-
-
+var loadDataFromDB = require('./LoadDataFromDB')
+var config = require('./configuration.js');
+config.initialise();
 var app = express();
 
 
 
-// Reading the configuration file
-
-var fs, configurationFile;
-
-configurationFile = 'configuration.json';
-fs = require('fs');
-
-var configuration = JSON.parse(
-  fs.readFileSync(configurationFile)
-);
-
-// Log the information from the file
-console.log(configuration);
 
 
-
+// Connecting to MongoDB is done twice yet, this has to be 
+// put in one place of control
 var mongodb;
 
-var mongodbConnectStr ='mongodb://'
-                   + configuration.username + ':'
-                   + configuration.password + '@'
-                   + configuration.database;
+var mongodbConnectStr = config.getDBString();
                    
 console.log("connect:"+mongodbConnectStr);
 
@@ -47,13 +32,17 @@ MongoClient.connect(mongodbConnectStr, function(err, db) {
 
 
 
+// small function to put mongoDB in the res variable 
+// (is there another way to publish the database in the source ?
 app.use(function(req, res, next){
     console.log(req.url);
     res.db = mongodb;
     next();
 });
 
-// Zeige eine Count Seite
+app.use('/', express.static(__dirname));
+
+// show the count page
 app.use('/count.html', function(req,res){
     db = res.db;
   
@@ -70,6 +59,7 @@ app.use('/count.html', function(req,res){
 })
 
 
+// Call the Import, to import test Data to the Database
 app.use('/import.html', function(req,res){
     db = res.db;
   
@@ -81,7 +71,30 @@ app.use('/import.html', function(req,res){
 	})
 
 
-// Zeige eine Tabelle Seite
+
+function generateLink(text, basis, param1,param2,param3)
+{
+  result ="";
+  result += text;
+  link = basis;
+  sep="?";
+  if (param1){
+  	link+= sep+param1;
+  	sep="&";
+  }
+  if (param2) {
+  	link+= sep+param2;
+  	sep="&";
+  }
+  if (param3) {
+  	link+= sep+param3;
+  	sep="&";
+  }
+  result = "<a href="+link+">"+result + "</a>";
+  return result;
+}
+// show the Data Table
+
 app.use('/table.html', function(req,res){
 	db = res.db;
   
@@ -105,15 +118,37 @@ app.use('/table.html', function(req,res){
     
     // length of Timestamp
     lengthOfTime=10;
+    periode="day";
     if(req.param("period")=="year") {
     	lengthOfTime=4;
+    	periode="year";
     }
     if(req.param("period")=="month") {
     	lengthOfTime=7;
+    	periode="month";
     }
     if(req.param("period")=="day") {
     	lengthOfTime=10;
+    	periode="day";
     }
+    
+    basisLink = "./table.html";
+    paramTime = "period="+periode;
+    paramMeasure = "measure="+displayMeasure;
+    paramLength = "lok+"+lengthOfKey;
+    
+    beforeText= "<h1>"+"Tabelle für Messung "+displayMeasure+"</h1>";
+    beforeText+= "Dargestellte Periode "+periode+"<br>";
+    beforeText+= generateLink("[Year]",basisLink,paramLength,"period=year",paramMeasure);
+    beforeText+= generateLink("[month]",basisLink,paramLength,"period=month",paramMeasure);
+    beforeText+= generateLink("[day]",basisLink,paramLength,"period=day",paramMeasure); 
+    beforeText+="<br>";  
+    beforeText+= "Schlüssellänge = "+lengthOfKey+"<br>";
+    beforeText+= generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure);
+    beforeText+= generateLink("[Middle]",basisLink,"lok=3",paramTime,paramMeasure);
+    beforeText+= generateLink("[detail]",basisLink,"lok=10",paramTime,paramMeasure);
+    
+    
     
     
     
@@ -127,7 +162,7 @@ app.use('/table.html', function(req,res){
     						 			  timestamp2: "$timestamp",
     						 			  }},
     						 {$group: { _id: { row: "$schluessel",col:"$timestamp"},
-    						 		    count: {$last: "$count" },
+    						 		    count	: {$last: "$count" },
     						 		    schluessel:{$last: "$schluessel2"},
     						 		    timestamp:{$last:"$timestamp2"}}},
     						 {$project: { schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
@@ -142,9 +177,10 @@ app.use('/table.html', function(req,res){
     						];
     // Bitte Checken, Parameter geht noch nicht
     var aggFunc=displayText;   						
- 
+ 	kreisnamen = loadDataFromDB.schluessel();
+ 	
     
-    console.log(JSON.stringify(displayText));
+    //console.log(JSON.stringify(displayText));
     collection.aggregate(	displayText
     
     
@@ -160,8 +196,6 @@ app.use('/table.html', function(req,res){
     	header = [];
 		firstColumn = [];
 		table =[]; 
-		
-		beforetext= "Table contains " + items.length+"  items";
 		
 		//iterate total result array
 		for (i=0;i < items.length;i++) {
@@ -193,47 +227,55 @@ app.use('/table.html', function(req,res){
 			//console.log("-->"+table[measure.schluessel][measure.timestamp]);
 		}
 		
+		
+		
 		tableheader = "<th>Regioschlüssel</th>";
 		for (i=0;i<header.length;i++) {
 			tableheader +="<th>"+header[i]+"</th>";
 		}
 		tableheader = "<tr>"+tableheader + "</tr>";
 		tablebody="";
-		for (i=0;i<firstColumn.length;i++)
 		{
-			schluessel = firstColumn[i];
-			var row = "<td>"+schluessel+"</td>";
-			for (z=0;z<header.length;z++) {
-				timestamp=header[z];
-				//console.log(schluessel+","+timestamp+"->"+table[schluessel][timestamp]);
-				var cell;
-				var content=table[schluessel][timestamp];
-				if (typeof(content) == "undefined") {
-					cell ="-";
-				} else {
-					cell = content;
+			for (i=0;i<firstColumn.length;i++)
+			{
+				schluessel = firstColumn[i];	
+				schluesselText=schluessel;
+				
+				if (typeof(kreisnamen[schluessel])!= 'undefined') {
+					schluesselText = kreisnamen[schluessel];
 				}
-					
-				row += "<td>"+cell+"</td>";
+				var row = "<td>"+schluesselText+"</td>";
+				for (z=0;z<header.length;z++) {
+					timestamp=header[z];
+					//console.log(schluessel+","+timestamp+"->"+table[schluessel][timestamp]);
+					var cell;
+					var content=table[schluessel][timestamp];
+					if (typeof(content) == "undefined") {
+						cell ="-";
+					} else {
+						cell = content;
+					}
+					row += "<td>"+cell+"</td>";
+				}
+				row = "<tr>"+row+"</tr>";
+				tablebody += row;
 			}
-			row = "<tr>"+row+"</tr>";
-			tablebody += row;
-		}
-		tableheader += "</tr>";
-		tablebody +="</tr>"	;
-		tablebody += "";
-		text = "<html><body>"+beforetext+"<table border=\"1\">\n" + tableheader + tablebody + "</table></body></html>";
-		res.set('Content-Type', 'text/html');
-		res.end(text);
-	}));
-	});
-	
+			tableheader += "</tr>";
+			tablebody +="</tr>"	;
+			tablebody += "";
+			text = "<html><body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table></body></html>";
+			res.set('Content-Type', 'text/html');
+			res.end(text);
+		};
+	})
+)
+})
  
 app.use('/', express.static(__dirname));
 app.get('/*', function(req, res) {
     res.status(404).sendFile(__dirname + '/error.html');
 });
-app.listen(configuration.serverport);
+app.listen(config.getServerPort());
 
-console.log("Server has started and is listening to localhost:"+configuration.serverport);
+console.log("Server has started and is listening to localhost:"+config.getServerPort());
 	

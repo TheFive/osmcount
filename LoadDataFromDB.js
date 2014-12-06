@@ -40,14 +40,6 @@ exports.schluessel = function () {
 				result.each(function(err, doc) {
 					if (doc == null) {
 						//schleife beendet
-						console.log("for Each Beendet");
-						console.log(Object.keys(schluesselMap).length);
-						for (i=0;i<10;i++) {
-							key=Object.keys(schluesselMap)[i]
-							console.log(typeof(key) + key + "--" + schluesselMap[key]);
-						}
-						console.log(schluesselMap["10"]);
-						console.log("dir Each Beendet"); 
 						dataLoaded=true;
 						callback(null); 
 					} else {

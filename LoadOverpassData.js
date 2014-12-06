@@ -20,6 +20,8 @@ rel(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."
 rel(r.associatedStreet:"house")->.asHouseRel; \
 ((.allHousesRel; - .asHouseRel); >>; );out ids;' 
 
+queryBoundaries='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out; \
+' 
 
 
 
@@ -49,8 +51,64 @@ function overpassQuery(query, cb, options) {
     });
 };
 
-console.log("Starting Query");
-overpassQuery(queryApotheke,function(error, data) {
+
+// Dubliziere die Verbindung mit der mongdb
+
+var fs, configurationFile;
+
+configurationFile = 'configuration.json';
+fs = require('fs');
+
+var configuration = JSON.parse(
+  fs.readFileSync(configurationFile)
+);
+
+// Log the information from the file
+console.log(configuration);
+
+
+boundariesFile = 'Boundaries OSM Nov 14.json';
+fs = require('fs');
+
+var boundariesJSON = JSON.parse(
+  fs.readFileSync(boundariesFile)
+);
+
+var mongodb;
+
+var mongodbConnectStr ='mongodb://'
+                   + configuration.username + ':'
+                   + configuration.password + '@'
+                   + configuration.database;
+                   
+console.log("connect:"+mongodbConnectStr);
+var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect(mongodbConnectStr, function(err, db) {
+  if (err) throw err;
+  mongodb = db;
+  console.log("Connected to Database mosmcount");
+  mongodb.createCollection("OSMBoundaries");
+ for (i = 0; i<boundariesJSON.elements.length;i++)
+    {
+      mongodb.collection("OSMBoundaries").insert(boundariesJSON.elements[i].tags, function(err,doc){});
+      
+    }
+
+  })
+
+
+
+
+
+
+
+
+
+
+
+/*
+overpassQuery(queryBoundaries,function(error, data) {
   if (error) {
   	console.log("Fehler bei Overpass Abfrage");
     console.dir(error);
@@ -66,12 +124,15 @@ overpassQuery(queryApotheke,function(error, data) {
     	if (data.charAt(i+3) != '"')  {continue}
     	result.count++;
     }
-    
-    console.dir(result);
-    return result;
-    
-    
-  
+    //console.dir(result);
+    r = JSON.parse(result);
+    for (i = 0; i<r.elements.length;i++)
+    {
+      console.log(r.elements[i].tags.name);
+      
+    }
   }
-  
 })
+*/
+
+   
