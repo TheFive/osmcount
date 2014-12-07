@@ -229,7 +229,7 @@ app.use('/table.html', function(req,res){
 		
 		
 		
-		tableheader = "<th>Regioschlüssel</th>";
+		tableheader = "<th>Regioschlüssel</th><th>Name</th>";
 		for (i=0;i<header.length;i++) {
 			tableheader +="<th>"+header[i]+"</th>";
 		}
@@ -244,7 +244,7 @@ app.use('/table.html', function(req,res){
 				if (typeof(kreisnamen[schluessel])!= 'undefined') {
 					schluesselText = kreisnamen[schluessel];
 				}
-				var row = "<td>"+schluesselText+"</td>";
+				var row = "<td>"+schluessel+"</td>"+"<td>"+schluesselText+"</td>";
 				for (z=0;z<header.length;z++) {
 					timestamp=header[z];
 					//console.log(schluessel+","+timestamp+"->"+table[schluessel][timestamp]);
