@@ -1,5 +1,7 @@
 
+// Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
 
+// To be changed to a more readable import routine
 
 queryApotheke='area["de:regionalschluessel"="03157"];(node(area)[amenity=pharmacy];way(area)[amenity=pharmacy];rel(area)[amenity=pharmacy]);out ids;'
 
