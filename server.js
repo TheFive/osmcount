@@ -1,4 +1,4 @@
-//require node modules (see package.json)
+//require node modules
 var express = require('express');
 var MongoClient = require('mongodb').MongoClient;
 var format = require('util').format;
@@ -10,6 +10,7 @@ var loadDataFromDB = require('./LoadDataFromDB')
 var config = require('./configuration.js');
 config.initialise();
 var app = express();
+
 
 
 
@@ -45,15 +46,19 @@ app.use('/', express.static(__dirname));
 // show the count page
 app.use('/count.html', function(req,res){
     db = res.db;
+    collectionName = 'DataCollection';
+     if(typeof(req.param("collection"))!='undefined') {
+     	collectionName = req.param("collection");
+     }
   
     // Fetch the collection test
-    var collection = db.collection('DataCollection');
+    var collection = db.collection(collectionName);
     collection.count(function(err, count) {
     	res.set('Content-Type', 'text/html');
     	if(err) {
     		res.end(err);
     	} else {
-    		res.end("There are " + count + " records.");
+    		res.end("There are " + count + " records in Collection "+ collectionName);
     	}
     });  
 })
