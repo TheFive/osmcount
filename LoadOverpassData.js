@@ -32,11 +32,12 @@ var request = require('request');
 function overpassQuery(query, cb, options) {
     options = options || {};
     request.post(options.overpassUrl || 'http://overpass-api.de/api/interpreter', function (error, response, body) {
-        var geojson;
 
         if (!error && response.statusCode === 200) {
+        	//console.log("http result from overpass");
             cb(undefined, body);
         } else if (error) {
+            //console.log("http error from overpass"+error);
             cb(error);
         } else if (response) {
             cb({
@@ -76,65 +77,38 @@ var boundariesJSON = JSON.parse(
   fs.readFileSync(boundariesFile)
 );
 
-var mongodb;
-
-var mongodbConnectStr ='mongodb://'
-                   + configuration.username + ':'
-                   + configuration.password + '@'
-                   + configuration.database;
-                   
-console.log("connect:"+mongodbConnectStr);
-var MongoClient = require('mongodb').MongoClient;
-
-MongoClient.connect(mongodbConnectStr, function(err, db) {
-  if (err) throw err;
-  mongodb = db;
-  console.log("Connected to Database mosmcount");
-  mongodb.createCollection("OSMBoundaries");
- for (i = 0; i<boundariesJSON.elements.length;i++)
-    {
-      mongodb.collection("OSMBoundaries").insert(boundariesJSON.elements[i].tags, function(err,doc){});
-      
-    }
-
-  })
 
 
 
 
 
+exports.runOverpass= function(query, measure,result, cb) {
+	//console.log("starteoverpass");
+	overpassQuery(query,function(error, data) {
+		//console.log("overpass fertig");
+		
+		if (error) {
+			//console.log("Fehler bei Overpass Abfrage");
+			//console.dir(error);
+			throw (err)
+		} else {
+			date = new Date();
+			result.timestamp=date.toJSON();
+			result.count=0;
+			result.data="";
+			result.measure=measure;
+			length= data.length;
+			for (i=0;i<length;i++) {
+				if (data.charAt(i) != 'i')  {continue}
+				if (data.charAt(i+1) != 'd')  {continue}
+				if (data.charAt(i+2) != '=')  {continue}
+				if (data.charAt(i+3) != '"')  {continue}
+				result.count++;
+			}
+			cb();
+		}
+	}
+)}
 
-
-
-
-
-
-/*
-overpassQuery(queryBoundaries,function(error, data) {
-  if (error) {
-  	console.log("Fehler bei Overpass Abfrage");
-    console.dir(error);
-  } else {
-    var result = new Object;
-    result.count=0;
-    result.data=data;
-    length= data.length;
-    for (i=0;i<length;i++) {
-    	if (data.charAt(i) != 'i')  {continue}
-    	if (data.charAt(i+1) != 'd')  {continue}
-    	if (data.charAt(i+2) != '=')  {continue}
-    	if (data.charAt(i+3) != '"')  {continue}
-    	result.count++;
-    }
-    //console.dir(result);
-    r = JSON.parse(result);
-    for (i = 0; i<r.elements.length;i++)
-    {
-      console.log(r.elements[i].tags.name);
-      
-    }
-  }
-})
-*/
 
    
