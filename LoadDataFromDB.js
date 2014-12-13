@@ -27,8 +27,8 @@ adminLevel = {'1':'admin_level 1',
               '4': 'Bundesland',
               '5': 'Regierungsbezirk',
               '6': 'Kreis',
-              '7': 'Ort (7)'
-              '8'; 'Ort (8),
+              '7': 'Ort (7)',
+              '8': 'Ort (8)',
               '9': 'Ortsteil (9)',
               '10': 'Ortsteil (10)',
               '11': 'Ortsteil (11)'        }

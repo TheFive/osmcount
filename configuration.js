@@ -17,6 +17,10 @@ var mongodb;
 
 
 
+
+
+
+
 exports.initialise = function() {
 	configuration = JSON.parse(fs.readFileSync(configurationFile));
 }
@@ -29,7 +33,26 @@ exports.getConfiguration = function() {
 }
 
 exports.getDB = function() {
-    if (typeof(mongodb)=='undefined') console.log("MongoDB Undefined");
+	async.series ( [
+		function (callback) {
+			if (typeof(mongodb == 'undefined')) {
+				var mongodbConnectStr = config.getDBString();
+                console.log("connect:"+mongodbConnectStr);
+				MongoClient.connect(mongodbConnectStr, function(err, db) {
+					if (err) throw err;
+					mongodb = db;
+					console.log("Connected to Database mosmcount");
+					callback();
+				})
+			} else {
+				callback();
+			}	
+		}
+		,
+		function (callback) {
+			if (typeof(mongodb == 'undefined')) console.log ("Mongodb undefined, why is series not working");
+			callback();
+		}])	
 	return mongodb;
 }
 
