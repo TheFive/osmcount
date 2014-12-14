@@ -1,4 +1,5 @@
 fs=require("fs");
+var util=require('./util.js');
 var path=require('path');
 
 
@@ -40,15 +41,6 @@ function parseCSV(str) {
     return arr;
 }
 
-// internal Function to duplicate an object
-function clone(obj) {
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-    }
-    return copy;
-}
 
 
 
@@ -99,7 +91,7 @@ exports.readCSV = function (db,defJson,filename,encoding) {
 		var collection = db.collection('DataCollection');
 		newData = [];
 		for (i=1;i<array.length;i++) {
-			newData[i-1] = clone(defJson);
+			newData[i-1] = util.clone(defJson);
 			for (z=0;z<array[0].length;z++) {
 				key = array[0][z];
 				value = array[i][z];

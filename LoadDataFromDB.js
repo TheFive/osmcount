@@ -15,6 +15,8 @@ var mc = require('mongodb').MongoClient;
 var config=require('./configuration');
 
 
+
+
 var mongodb;
 var schluesselMap = Object();
 var blaetterList = [];
@@ -34,7 +36,7 @@ adminLevel = {'1':'admin_level 1',
               '11': 'Ortsteil (11)'        }
 
 
-exports.schluessel = function () {
+exports.initialise = function (cb) {
 	if (!dataLoaded) {
 		async.series([
 			function(callback){ 
@@ -106,8 +108,10 @@ exports.schluessel = function () {
 			],
 			function(err) {
 				console.log("All Done");
+				cb();
 			}
 		)
 	}
-	return schluesselMap;
 }
+
+exports.schluessel = function() {return schluesselMap};

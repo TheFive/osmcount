@@ -23,9 +23,11 @@ exports.getDBString = function() {
 	return mongodbConnectStr;        
 }
 
-exports.initialise = function(callback) {
-	configuration = JSON.parse(fs.readFileSync(configurationFile));
-	if (typeof(mongodb == 'undefined')) {
+initialisedDB = false;
+exports.initialiseDB = function(callback) {
+    configuration=exports.getConfiguration();
+	if (!initialisedDB && typeof(mongodb == 'undefined')) {
+		initialisedDB=true;
 		var mongodbConnectStr = exports.getDBString();
 		console.log("connect:"+mongodbConnectStr);
 		MongoClient.connect(mongodbConnectStr, function(err, db) {
@@ -36,6 +38,11 @@ exports.initialise = function(callback) {
 		})
 	} 
 
+}
+
+exports.initialise = function(callback) {
+	configuration = JSON.parse(fs.readFileSync(configurationFile));
+	if (callback) callback();
 }
 
 
