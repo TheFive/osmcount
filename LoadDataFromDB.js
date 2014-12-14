@@ -15,11 +15,11 @@ var mc = require('mongodb').MongoClient;
 var config=require('./configuration');
 
 
-
+exports.schluesselMap = Object();
+exports.blaetter = [];
+blaetterList = exports.blaetter;
 
 var mongodb;
-var schluesselMap = Object();
-var blaetterList = [];
 var dataLoaded = false;
 var blaetterDefined = false;
 
@@ -70,17 +70,22 @@ exports.initialise = function (cb) {
 							key=value="";
 							if (doc) {
 								key = doc["de:regionalschluessel"];
-								value = doc.name + '('+doc.admin_level+')';
-								if (typeof(key)!='undefined' && typeof(value) != 'undefined') {
+								value = {};
+								value.name = doc.name ;
+								if (typeof(doc.admin_level)!= 'undefined') {
+									value.typ = adminLevel[doc.admin_level];
+								}
+								else value.typ = "-";
+								if (typeof(key)!='undefined' && typeof(value.name) != 'undefined') {
 								
 									console.log("key "+key+" value "+value);
-									schluesselMap[key]=value;
+									exports.schluesselMap[key]=value;
 									blaetterList.push(key);
 							
 									while (key.charAt(key.length-1)=='0') {
-										key = key.slice(0,key.length-2);
+										key = key.slice(0,key.length-1);
 										console.log("key "+key+" value "+value);
-										schluesselMap[key]=value;
+										exports.schluesselMap[key]=value;
 									}
 								}
 							}
@@ -114,4 +119,3 @@ exports.initialise = function (cb) {
 	}
 }
 
-exports.schluessel = function() {return schluesselMap};

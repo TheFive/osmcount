@@ -114,7 +114,7 @@ exports.table = function(req,res){
     
    
     	
-    displayText = [{$match: { measure: displayMeasure}},
+    query = [{$match: { measure: displayMeasure}},
     						 {$project: { schluessel: "$schluessel",
     						 			  timestamp: {$substr: ["$timestamp",0,lengthOfTime]},
     						 			  count: "$count",
@@ -136,12 +136,12 @@ exports.table = function(req,res){
     						
     						];
     // Bitte Checken, Parameter geht noch nicht
-    var aggFunc=displayText;   						
- 	kreisnamen = loadDataFromDB.schluessel();
+    var aggFunc=query;   						
+ 	kreisnamen = loadDataFromDB.schluesselMap;
  	
     
-    //console.log(JSON.stringify(displayText));
-    collection.aggregate(	displayText
+    //console.log(JSON.stringify(query));
+    collection.aggregate(	query
     
     
     						, (function(err, items) {
@@ -189,7 +189,7 @@ exports.table = function(req,res){
 		
 		
 		
-		tableheader = "<th>Regioschlüssel</th><th>Name</th>";
+		tableheader = "<th>Regioschlüssel</th><th>Name</th><th>Admin Level</th>";
 		for (i=0;i<header.length;i++) {
 			tableheader +="<th>"+header[i]+"</th>";
 		}
@@ -200,11 +200,14 @@ exports.table = function(req,res){
 			{
 				schluessel = firstColumn[i];	
 				schluesselText=schluessel;
+				schluesselTyp="-";
+				value = kreisnamen[schluessel];
 				
-				if (typeof(kreisnamen[schluessel])!= 'undefined') {
-					schluesselText = kreisnamen[schluessel];
+				if (typeof(value)!= 'undefined') {
+					schluesselText = value.name;
+					schluesselTyp = value.typ;
 				}
-				var row = "<td>"+schluessel+"</td>"+"<td>"+schluesselText+"</td>";
+				var row = "<td>"+schluessel+"</td>"+"<td>"+schluesselText+"</td>"+"<td>"+schluesselTyp+"</td>";
 				for (z=0;z<header.length;z++) {
 					timestamp=header[z];
 					//console.log(schluessel+","+timestamp+"->"+table[schluessel][timestamp]);
@@ -223,7 +226,8 @@ exports.table = function(req,res){
 			tableheader += "</tr>";
 			tablebody +="</tr>"	;
 			tablebody += "";
-			text = "<html><body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table></body></html>";
+			pagefooter = JSON.stringify(query);
+			text = "<html><body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table>"+pagefooter+"</body></html>";
 			res.set('Content-Type', 'text/html');
 			res.end(text);
 		};
