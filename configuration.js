@@ -32,7 +32,7 @@ exports.initialise = function(callback) {
 			if (err) throw err;
 			mongodb = db;
 			console.log("Connected to Database mosmcount");
-			callback();
+			if (callback) callback();
 		})
 	} 
 

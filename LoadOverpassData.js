@@ -90,7 +90,7 @@ exports.runOverpass= function(query, measure,result, cb) {
 		if (error) {
 			//console.log("Fehler bei Overpass Abfrage");
 			//console.dir(error);
-			throw (err)
+			throw (error)
 		} else {
 			date = new Date();
 			result.timestamp=date.toJSON();
