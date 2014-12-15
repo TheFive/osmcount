@@ -62,6 +62,7 @@ function saveJobState(job,cb) {
 // Creating async queue and start to initialise Database
 // (should be done in server in future)
 var q= async.queue(function (task,cb) {
+	console.log("Start next task");
 	task(cb);
 },1);
 
@@ -150,6 +151,21 @@ function insertNextJob(callback) {
 	var dateJSON = date.toJSON();
 	mongodb = config.getDB();
 
+}
+
+
+insertJobsToQueue = function(callback) {
+	console.log("Start Insert");
+	mongodb = config.getDB();
+	mongodb.collection("WorkerQueue").insert(LoadOverpassData.createQuery("AddrWOStreet"),
+		function (err, records) {
+			console.log ("All Inserted");
+			if (callback) callback();
+		})
+}
+
+exports.insertJobs = function() {
+	q.push(insertJobsToQueue);
 }
 
 

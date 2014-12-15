@@ -1,3 +1,4 @@
+var loadDataFromDB =   require('./LoadDataFromDB.js');
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
 
@@ -7,7 +8,7 @@ queryApotheke='area["de:regionalschluessel"="03157"];(node(area)[amenity=pharmac
 
 
 
-queryAddrWOStreet='area[type=boundary]["de:amtlicher_gemeindeschluessel"="03157"]->.boundaryarea; \
+queryAddrWOStreet='area[type=boundary]["de:amtlicher_gemeindeschluessel"="######"]->.boundaryarea; \
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \
  \
 way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \
@@ -110,5 +111,25 @@ exports.runOverpass= function(query, measure,result, cb) {
 	}
 )}
 
+exports.createQuery = function(aufgabe)
+{
+	jobs = [];
+	jetzt = new Date();
+	if (aufgabe == "AddrWOStreet") {
+		keys = loadDataFromDB.blaetter;
+		for (i =0;i<keys.length;i++) {		
+			job = {};
+			job.measure=aufgabe;
+			job.schluessel=keys[i];
+			job.status='open';
+			job.exectime = jetzt;
+			job.type = "overpass";
+			job.query = queryAddrWOStreet.replace('######',job.schluessel);
+			jobs.push(job);
+		}
+		return jobs;
+	}
+	return [];
+}
 
    

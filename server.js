@@ -6,6 +6,7 @@ var async   = require('async');
 var config         =  require('./configuration.js');
 var queue          =   require('./QueueWorker.js');
 var loadDataFromDB =   require('./LoadDataFromDB.js');
+var loadOverpassData = require('./loadOverpassData.js')
 var display        = require('./display.js');
 
 
@@ -36,6 +37,13 @@ app.use('/', express.static(__dirname));
 app.use('/count.html', display.count)
 app.use('/import.html', display.importCSV)
 app.use('/table.html', display.table)
+
+
+app.use('/list.html', function(req,res) {
+	jobs = loadOverpassData.createQuery("AddrWOStreet");
+	res.end(JSON.stringify(jobs))
+})
+
 app.get('/*', function(req, res) {
     res.status(404).sendFile(__dirname + '/error.html');
 });
@@ -46,6 +54,8 @@ app.listen(config.getServerPort());
 
 // Start Worker Queue loading Data
 queue.startQueue();
+
+queue.insertJobs();
 
 console.log("Server has started and is listening to localhost:"+config.getServerPort());
 	

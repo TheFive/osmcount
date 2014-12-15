@@ -39,21 +39,8 @@ adminLevel = {'1':'admin_level 1',
 exports.initialise = function (cb) {
 	if (!dataLoaded) {
 		async.series([
-			function(callback){ 
-				console.log("doing a");
-				config.initialise();
-				callback(null)
-			},
-			function(callback){ 
-				console.log("doing b");	
-				mc.connect(config.getDBString(), function(err, db) {
-					if (err) throw err;
-					mongodb = db;
-					console.log(typeof(mongodb));
-					console.log("Connected to Database mosmcount");
-					callback(null);
-				});	
-			},
+			config.initialise,
+			config.initailiseDB,
 			function(callback) {
 				mongodb.collection("OSMBoundaries").find( 
 							{ boundary : "administrative" , 
@@ -78,13 +65,13 @@ exports.initialise = function (cb) {
 								else value.typ = "-";
 								if (typeof(key)!='undefined' && typeof(value.name) != 'undefined') {
 								
-									console.log("key "+key+" value "+value);
+									//console.log("key "+key+" value "+value);
 									exports.schluesselMap[key]=value;
 									blaetterList.push(key);
 							
 									while (key.charAt(key.length-1)=='0') {
 										key = key.slice(0,key.length-1);
-										console.log("key "+key+" value "+value);
+										//console.log("key "+key+" value "+value);
 										exports.schluesselMap[key]=value;
 									}
 								}
@@ -97,7 +84,7 @@ exports.initialise = function (cb) {
 				if (!dataLoaded) {callback(null); return;}
 				if (blaetterDefined) {callback(null);return;}
 				blaetterList.sort();
-				console.log("Länge nach Sort: "+blaetterList.length);
+				//console.log("Länge nach Sort: "+blaetterList.length);
 				
 				for (i=blaetterList.length-2;i>=0;i--)
 				{
@@ -105,7 +92,7 @@ exports.initialise = function (cb) {
 						blaetterList.splice(i,1);
 					}
 				}
-				console.log("Länge nach Bereinigung: "+blaetterList.length);
+				//console.log("Länge nach Bereinigung: "+blaetterList.length);
 				blaetterDefined=true;
 				callback(null);
 			}
