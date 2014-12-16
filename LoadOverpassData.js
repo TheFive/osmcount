@@ -8,7 +8,7 @@ queryApotheke='area["de:regionalschluessel"="03157"];(node(area)[amenity=pharmac
 
 
 
-queryAddrWOStreet='area[type=boundary]["de:amtlicher_gemeindeschluessel"="######"]->.boundaryarea; \
+queryAddrWOStreet='area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea; \
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \
  \
 way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \
@@ -117,7 +117,8 @@ exports.createQuery = function(aufgabe)
 	jetzt = new Date();
 	if (aufgabe == "AddrWOStreet") {
 		keys = loadDataFromDB.blaetter;
-		for (i =0;i<keys.length;i++) {		
+		for (i =0;i<keys.length;i++) {	
+			console.log(keys[i]);	
 			job = {};
 			job.measure=aufgabe;
 			job.schluessel=keys[i];

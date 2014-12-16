@@ -19,7 +19,7 @@ exports.schluesselMap = Object();
 exports.blaetter = [];
 blaetterList = exports.blaetter;
 
-var mongodb;
+
 var dataLoaded = false;
 var blaetterDefined = false;
 
@@ -37,10 +37,9 @@ adminLevel = {'1':'admin_level 1',
 
 
 exports.initialise = function (cb) {
+	mongodb = config.getDB();
 	if (!dataLoaded) {
 		async.series([
-			config.initialise,
-			config.initailiseDB,
 			function(callback) {
 				mongodb.collection("OSMBoundaries").find( 
 							{ boundary : "administrative" , 

@@ -14,13 +14,17 @@ var app = express();
 
 
 async.auto( {
-	config: config.initialise,
-	mongodb: ["config",config.initialiseDB],
-	dbdata:  ["mongodb", loadDataFromDB.initialise]
-}, function (err) {
-	if (err) console.log(err);
-	console.log ("Initialising Fully Completed");
-})
+		config: config.initialise,
+		mongodb: ["config",config.initialiseDB],
+		dbdata:  ["mongodb", loadDataFromDB.initialise],
+		startQueue: ["dbdata",queue.startQueue],
+			insertJobs: ["startQueue",queue.insertJobs]
+	}, 
+	function (err) {
+		if (err) console.log(err);
+		console.log ("Initialising Fully Completed");
+	}
+)
 
 
 
@@ -52,10 +56,7 @@ app.get('/*', function(req, res) {
 // Start to lisen on port
 app.listen(config.getServerPort());
 
-// Start Worker Queue loading Data
-queue.startQueue();
 
-queue.insertJobs();
 
 console.log("Server has started and is listening to localhost:"+config.getServerPort());
 	

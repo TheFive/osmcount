@@ -23,21 +23,37 @@ exports.getDBString = function() {
 	return mongodbConnectStr;        
 }
 
-initialisedDB = false;
+var initialisedDB = 0;
+var initialiseCB = [];
 exports.initialiseDB = function(callback) {
-    configuration=exports.getConfiguration();
-	if (!initialisedDB && typeof(mongodb == 'undefined')) {
-		initialisedDB=true;
-		var mongodbConnectStr = exports.getDBString();
-		console.log("connect:"+mongodbConnectStr);
-		MongoClient.connect(mongodbConnectStr, function(err, db) {
-			if (err) throw err;
-			mongodb = db;
-			console.log("Connected to Database mosmcount");
-			if (callback) callback();
-		})
-	} 
 
+   
+    // Implement a run one behaviour
+    if (initialisedDB == 2) {
+    	// nothing to do
+    	if (callback) callback();
+    	return;
+    }
+    if (initialisedDB ==1) {
+    	// Initialising in Progress, extend Callback List
+    	if (callback) initialiseCB.push(callback);
+    	return;
+    }
+   if (callback) initialiseCB.push(callback);
+    configuration=exports.getConfiguration();
+	initialisedDB=1;
+	var mongodbConnectStr = exports.getDBString();
+	console.log("connect:"+mongodbConnectStr);
+	MongoClient.connect(mongodbConnectStr, function(err, db) {
+		if (err) throw err;
+		initialisedDB=2;
+		mongodb = db;
+		console.log("Connected to Database mosmcount");
+		while (initialiseCB.length>0) {
+			initialiseCB[0]();
+			initialiseCB.shift();
+		}
+	})
 }
 
 exports.initialise = function(callback) {

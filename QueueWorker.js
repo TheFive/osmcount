@@ -139,33 +139,31 @@ function doNextJob(callback) {
 	)
 }
 
-exports.startQueue =function() {
+exports.startQueue =function(cb) {
 	console.log("Start Queue");
 	q.push(config.initialiseDB);
 	q.push(doNextJob);
-}
-
-
-function insertNextJob(callback) {
-	var date= new Date();
-	var dateJSON = date.toJSON();
-	mongodb = config.getDB();
-
+	if (cb) cb();
 }
 
 
 insertJobsToQueue = function(callback) {
 	console.log("Start Insert");
 	mongodb = config.getDB();
-	mongodb.collection("WorkerQueue").insert(LoadOverpassData.createQuery("AddrWOStreet"),
+	jobs = lod.createQuery("AddrWOStreet");
+	console.dir(jobs);
+	mongodb.collection("WorkerQueue").insert(jobs,
 		function (err, records) {
-			console.log ("All Inserted");
+			if (err) console.log(err);
+			console.log ("All Inserted" +records.length);
 			if (callback) callback();
 		})
 }
 
-exports.insertJobs = function() {
+exports.insertJobs = function(cb) {
+	console.log("inserting jobs");
 	q.push(insertJobsToQueue);
+	if (cb) cb();
 }
 
 
