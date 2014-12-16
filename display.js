@@ -1,5 +1,7 @@
 var loadDataFromDB = require('./LoadDataFromDB')
 var importCSV=require('./ImportCSV');
+var debug   = require('debug')('display');
+
 
 
 exports.count = function(req,res){
@@ -26,7 +28,7 @@ exports.importCSV = function(req,res){
   
     // Fetch the collection test
     defJSON = { measure: "AddrWOStreet",  count: 0};
-    console.log("Count hat den typ"+typeof(defJSON["count"]));
+    debug("Count hat den typ"+typeof(defJSON["count"]));
     importCSV.readCSV(db,  defJSON,"allLF-UTF8.csv");
     res.end("File IMported Probably");
 	}
@@ -140,7 +142,7 @@ exports.table = function(req,res){
  	kreisnamen = loadDataFromDB.schluesselMap;
  	
     
-    //console.log(JSON.stringify(query));
+   
     collection.aggregate(	query
     
     
@@ -162,13 +164,12 @@ exports.table = function(req,res){
 			
 		
 			measure = items[i];
-			//console.dir(measure);
-			
+		
 			row=measure._id.row;
 			col=measure._id.col;
 			
 			if (typeof(row)=='undefined' || typeof(col) == 'undefined') {
-				console.log("row or col undefined"+row+col);
+				debug("row or col undefined"+row+col);
 			}
 			
 			//generate new Header or Rows and Cell if necessary	
@@ -183,8 +184,7 @@ exports.table = function(req,res){
 			}
 			
 			table[row][col]=parseInt(measure.cell);
-			//console.log(measure.schluessel+","+measure.timestamp+","+cell);
-			//console.log("-->"+table[measure.schluessel][measure.timestamp]);
+			
 		}
 		
 		
@@ -210,7 +210,7 @@ exports.table = function(req,res){
 				var row = "<td>"+schluessel+"</td>"+"<td>"+schluesselText+"</td>"+"<td>"+schluesselTyp+"</td>";
 				for (z=0;z<header.length;z++) {
 					timestamp=header[z];
-					//console.log(schluessel+","+timestamp+"->"+table[schluessel][timestamp]);
+					
 					var cell;
 					var content=table[schluessel][timestamp];
 					if (typeof(content) == "undefined") {

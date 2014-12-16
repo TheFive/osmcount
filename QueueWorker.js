@@ -2,6 +2,8 @@ var config = require('./configuration.js');
 var lod = require('./LoadOverpassData.js');
 var util = require('./util.js')
 var async=require('async');
+var debug   = require('debug')('QueueWorker');
+
 
 mongodb = config.getDB();
 
@@ -10,7 +12,7 @@ mongodb = config.getDB();
 function getNextJob(job,cb) {	
 	var date= new Date();
 	var dateJSON = date.toJSON();
-	console.log(dateJSON);
+	debug("Get Next Job with date %s",dateJSON);
 	mongodb = config.getDB();
 	mongodb.collection("WorkerQueue").findOne( 
 							{ status : "open" , 
@@ -18,7 +20,7 @@ function getNextJob(job,cb) {
 							}, function(err, obj) 
 	{
 	   if (err) {
-	    	console.log(err)
+	    	throw(err);
 	    	return;
 	   }
 	   util.copyObject(job ,obj);
@@ -33,7 +35,7 @@ function saveMeasure(result,cb) {
 	}
 	mongodb.collection("DataCollection").save(result,{w:1}, function (err, num){
 	    if (err) {
-	     	console.log(err);
+	     	debug(err);
 	     	cb()
 	     	return;
 		}
@@ -50,7 +52,7 @@ function saveJobState(job,cb) {
 	}
 	mongodb.collection("WorkerQueue").save(job,{w:1}, function (err, num){
 	    if (err) {
-	     	console.log(err);
+	     	debug(err);
 	     	cb()
 	     	return;
 		}
@@ -62,7 +64,7 @@ function saveJobState(job,cb) {
 // Creating async queue and start to initialise Database
 // (should be done in server in future)
 var q= async.queue(function (task,cb) {
-	console.log("Start next task");
+	debug("Start next task");
 	task(cb);
 },1);
 
@@ -80,7 +82,6 @@ function doNextJob(callback) {
 		function (callback) {
 
 			if (typeof(job.status)!='undefined' && job.status =="open") {
-				//console.dir(job);
 				job.status="working";
 				saveJobState(job,callback);
 			} else callback();
@@ -88,7 +89,7 @@ function doNextJob(callback) {
 		},
 		function (callback) {
 			if (typeof(job.status)!='undefined' && job.status =="working" && job.type == "console") {
-	    		console.dir(job.text);
+	    		debug(job.text);
 	    		job.status = "done";
 			}  
 			callback();
@@ -96,7 +97,7 @@ function doNextJob(callback) {
 		},
 		function (callback) {
 			if (typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpass") {
-		    		//console.dir(job.text);
+		    		
 		    		measure=job.measure;
 		    		query=job.query;
 		    		result= {};
@@ -124,12 +125,12 @@ function doNextJob(callback) {
 				}
 				date = new Date();
 				job.timestamp = date;
-				console.dir(job);
+			
 				saveJobState(job,callback);
 			} else callback();
 		}],
 		function () {
-			console.log("finished" + job.status);
+			debug("finished %s" ,job.status);
 			if (typeof(job.status)== 'undefined') {
 				q.push(util.waitOneMin);
 			}
@@ -140,7 +141,7 @@ function doNextJob(callback) {
 }
 
 exports.startQueue =function(cb) {
-	console.log("Start Queue");
+	debug("Start Queue");
 	q.push(config.initialiseDB);
 	q.push(doNextJob);
 	if (cb) cb();
@@ -148,20 +149,19 @@ exports.startQueue =function(cb) {
 
 
 insertJobsToQueue = function(callback) {
-	console.log("Start Insert");
+	debug("Start Insert");
 	mongodb = config.getDB();
 	jobs = lod.createQuery("AddrWOStreet");
-	console.dir(jobs);
 	mongodb.collection("WorkerQueue").insert(jobs,
 		function (err, records) {
 			if (err) console.log(err);
-			console.log ("All Inserted" +records.length);
+			debug("All Inserted %i" ,records.length);
 			if (callback) callback();
 		})
 }
 
 exports.insertJobs = function(cb) {
-	console.log("inserting jobs");
+	debug("inserting jobs");
 	q.push(insertJobsToQueue);
 	if (cb) cb();
 }

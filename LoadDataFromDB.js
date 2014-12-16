@@ -13,6 +13,8 @@ var async=require('async');
 var mc = require('mongodb').MongoClient;
 
 var config=require('./configuration');
+var debug   = require('debug')('LoadDataFromDB');
+
 
 
 exports.schluesselMap = Object();
@@ -63,14 +65,12 @@ exports.initialise = function (cb) {
 								}
 								else value.typ = "-";
 								if (typeof(key)!='undefined' && typeof(value.name) != 'undefined') {
-								
-									//console.log("key "+key+" value "+value);
 									exports.schluesselMap[key]=value;
 									blaetterList.push(key);
 							
 									while (key.charAt(key.length-1)=='0') {
 										key = key.slice(0,key.length-1);
-										//console.log("key "+key+" value "+value);
+										
 										exports.schluesselMap[key]=value;
 									}
 								}
@@ -83,7 +83,7 @@ exports.initialise = function (cb) {
 				if (!dataLoaded) {callback(null); return;}
 				if (blaetterDefined) {callback(null);return;}
 				blaetterList.sort();
-				//console.log("Länge nach Sort: "+blaetterList.length);
+				
 				
 				for (i=blaetterList.length-2;i>=0;i--)
 				{
@@ -91,14 +91,14 @@ exports.initialise = function (cb) {
 						blaetterList.splice(i,1);
 					}
 				}
-				//console.log("Länge nach Bereinigung: "+blaetterList.length);
+				
 				blaetterDefined=true;
 				callback(null);
 			}
 			
 			],
 			function(err) {
-				console.log("All Done");
+				debug("Initialising All Done");
 				cb();
 			}
 		)

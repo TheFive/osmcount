@@ -1,4 +1,6 @@
 var loadDataFromDB =   require('./LoadDataFromDB.js');
+var debug   = require('debug')('LoadOverpassData');
+
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
 
@@ -35,10 +37,8 @@ function overpassQuery(query, cb, options) {
     request.post(options.overpassUrl || 'http://overpass-api.de/api/interpreter', function (error, response, body) {
 
         if (!error && response.statusCode === 200) {
-        	//console.log("http result from overpass");
             cb(undefined, body);
         } else if (error) {
-            //console.log("http error from overpass"+error);
             cb(error);
         } else if (response) {
             cb({
@@ -68,7 +68,7 @@ var configuration = JSON.parse(
 );
 
 // Log the information from the file
-console.log(configuration);
+debug(configuration);
 
 
 boundariesFile = 'Boundaries OSM Nov 14.json';
@@ -84,13 +84,11 @@ var boundariesJSON = JSON.parse(
 
 
 exports.runOverpass= function(query, measure,result, cb) {
-	//console.log("starteoverpass");
 	overpassQuery(query,function(error, data) {
-		//console.log("overpass fertig");
+		
 		
 		if (error) {
-			//console.log("Fehler bei Overpass Abfrage");
-			//console.dir(error);
+			
 			throw (error)
 		} else {
 			date = new Date();
@@ -118,7 +116,7 @@ exports.createQuery = function(aufgabe)
 	if (aufgabe == "AddrWOStreet") {
 		keys = loadDataFromDB.blaetter;
 		for (i =0;i<keys.length;i++) {	
-			console.log(keys[i]);	
+			debug(keys[i]);	
 			job = {};
 			job.measure=aufgabe;
 			job.schluessel=keys[i];

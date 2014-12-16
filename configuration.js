@@ -1,6 +1,7 @@
 var fs, configurationFile;
-var path=require('path');
-var fs = require('fs');
+var path    = require('path');
+var fs      = require('fs');
+var debug   = require('debug')('configuration');
 
 
 
@@ -14,7 +15,7 @@ var MongoClient = require('mongodb').MongoClient;
 var mongodb ;
 
 
-exports.getDBString = function() {
+getDBString = function() {
 	configuration=exports.getConfiguration();
 	var mongodbConnectStr ='mongodb://'
                    + configuration.username + ':'
@@ -42,13 +43,13 @@ exports.initialiseDB = function(callback) {
    if (callback) initialiseCB.push(callback);
     configuration=exports.getConfiguration();
 	initialisedDB=1;
-	var mongodbConnectStr = exports.getDBString();
-	console.log("connect:"+mongodbConnectStr);
+	var mongodbConnectStr = getDBString();
+	debug("Connect to mongo db with string: %",mongodbConnectStr);
 	MongoClient.connect(mongodbConnectStr, function(err, db) {
 		if (err) throw err;
 		initialisedDB=2;
 		mongodb = db;
-		console.log("Connected to Database mosmcount");
+		debug("Connected to Database mosmcount");
 		while (initialiseCB.length>0) {
 			initialiseCB[0]();
 			initialiseCB.shift();

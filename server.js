@@ -1,6 +1,7 @@
 //require node modules
 var express = require('express');
 var async   = require('async');
+var debug   = require('debug')('server');
 
 // require own modules
 var config         =  require('./configuration.js');
@@ -13,25 +14,33 @@ var display        = require('./display.js');
 var app = express();
 
 
+
+// Initialise all Modules in the right sequence
+
+debug("Start Async Configuration");
 async.auto( {
 		config: config.initialise,
 		mongodb: ["config",config.initialiseDB],
 		dbdata:  ["mongodb", loadDataFromDB.initialise],
-		startQueue: ["dbdata",queue.startQueue],
-			insertJobs: ["startQueue",queue.insertJobs]
+		startQueue: ["dbdata",queue.startQueue]
+		
+		
+		//	,insertJobs: ["startQueue",queue.insertJobs]
 	}, 
 	function (err) {
-		if (err) console.log(err);
-		console.log ("Initialising Fully Completed");
+		if (err) throw(err);
+		debug("Async Configuration Ready");
 	}
 )
 
 
 
+
+debug("Initialising HTML Routes");
 // log every call and then call more detailled
 // and publish Mongo DB to all functions via res
 app.use(function(req, res, next){
-    console.log(req.url);
+    debug("Url Called: %s",req.url);
     res.db= config.getDB();
     next();
 });
@@ -53,6 +62,8 @@ app.get('/*', function(req, res) {
 });
 
 
+
+debug("Start Listening to Server Port");
 // Start to lisen on port
 app.listen(config.getServerPort());
 

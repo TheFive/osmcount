@@ -1,6 +1,8 @@
 fs=require("fs");
-var util=require('./util.js');
-var path=require('path');
+var util    = require('./util.js');
+var path    = require('path');
+var debug   = require('debug')('importCSV');
+
 
 
 // Code for parsing simple CSV Files including ""
@@ -56,12 +58,12 @@ exports.readCSV = function (db,defJson,filename,encoding) {
 	// encoding is ignored yet
 	fs.readFile(filename, 'UTF8', function (err,data) {
 		if (typeof(db)=='undefined') {
-			console.log("Internal Error db undefined");
+			debug("Internal Error db undefined");
 			return;
 		}
 		
 		if (err) {
-			console.log(err);
+			debug(err);
 			return;
 		}
 		
@@ -70,19 +72,19 @@ exports.readCSV = function (db,defJson,filename,encoding) {
 		
 		if(array.length<2) {
 			// CSV File is empty, log an error
-			console.log("Empty File "+filename);
+			debug("Empty File %s",filename);
 			return;
 		}
 		else {
 		    // just log the column and rows for debugging reasons
-			console.log("Number of Lines in CSV "+array.length);
-			console.log("Number of Columns in CSV"+array[0].length)
+			debug("Number of Lines in CSV "+array.length);
+			debug("Number of Columns in CSV"+array[0].length)
 		}
 		
 		// Quality Check, does all rows has the same count of columns ?
 		for (i=1;i<array.length;i++) {
 			if (array[0].length!=array[i].length) {
-				console.log("Invalid CSV File, Number of Columns differs "+filename +" Zeile "+i);
+				debug("Invalid CSV File, Number of Columns differs "+filename +" Zeile "+i);
 				return
 			}
 		}
@@ -95,12 +97,8 @@ exports.readCSV = function (db,defJson,filename,encoding) {
 			for (z=0;z<array[0].length;z++) {
 				key = array[0][z];
 				value = array[i][z];
-				
-				//console.log("---- "+i+" "+z);
-				//console.log(key +":"+value);
-				console.log(key+typeof(defJSON[key]));
+				debug(key+typeof(defJSON[key]));
 				if (typeof(defJSON[key])!='number') {
-					//console.log(key + typeof(newData[value]));
 					newData[i-1][key]=value;
 				} else {
 					newData [i-1][key]=parseInt(value);
