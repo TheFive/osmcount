@@ -88,11 +88,10 @@ exports.runOverpass= function(query, measure,result, cb) {
 		
 		
 		if (error) {
-			
 			throw (error)
 		} else {
 			date = new Date();
-			result.timestamp=date.toJSON();
+			result.timestamp=date;
 			result.count=0;
 			result.data="";
 			result.measure=measure;
@@ -109,10 +108,9 @@ exports.runOverpass= function(query, measure,result, cb) {
 	}
 )}
 
-exports.createQuery = function(aufgabe)
+exports.createQuery = function(aufgabe,exectime)
 {
 	jobs = [];
-	jetzt = new Date();
 	if (aufgabe == "AddrWOStreet") {
 		keys = loadDataFromDB.blaetter;
 		for (i =0;i<keys.length;i++) {	
@@ -121,7 +119,7 @@ exports.createQuery = function(aufgabe)
 			job.measure=aufgabe;
 			job.schluessel=keys[i];
 			job.status='open';
-			job.exectime = jetzt;
+			job.exectime = exectime;
 			job.type = "overpass";
 			job.query = queryAddrWOStreet.replace('######',job.schluessel);
 			jobs.push(job);
