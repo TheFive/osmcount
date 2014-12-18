@@ -4,11 +4,11 @@ var async   = require('async');
 var debug   = require('debug')('server');
 
 // require own modules
-var config         =  require('./configuration.js');
-var queue          =   require('./QueueWorker.js');
-var loadDataFromDB =   require('./LoadDataFromDB.js');
+var config           = require('./configuration.js');
+var queue            = require('./QueueWorker.js');
+var loadDataFromDB   = require('./LoadDataFromDB.js');
 var loadOverpassData = require('./loadOverpassData.js')
-var display        = require('./display.js');
+var display          = require('./display.js');
 
 
 var app = express();
