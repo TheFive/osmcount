@@ -34,7 +34,7 @@ exports.importCSV = function(req,res){
 	}
 	
 	
-function generateLink(text, basis, param1,param2,param3)
+function generateLink(text, basis, param1,param2,param3,param4)
 {
   result ="";
   result += text;
@@ -52,6 +52,10 @@ function generateLink(text, basis, param1,param2,param3)
   	link+= sep+param3;
   	sep="&";
   }
+  if (param4) {
+  	link+= sep+param4;
+  	sep="&";
+  }
   result = "<a href="+link+">"+result + "</a>";
   return result;
 }
@@ -65,7 +69,8 @@ exports.table = function(req,res){
     var collection = db.collection('DataCollection');
     
 
-
+	kreisnamen = loadDataFromDB.schluesselMap;
+ 
     // Parse html parameters
     displayMeasure="AddrWOStreet";    
     if(typeof(req.param("measure"))!='undefined') {
@@ -93,22 +98,38 @@ exports.table = function(req,res){
     	lengthOfTime=10;
     	periode="day";
     }
+    startWith="";
+    location=startWith;
+    locationType="-";
+    if(typeof(req.param("location"))!='undefined') {
+    	startWith=req.param("location");
+    	location=startWith;
+    	locationType="-";
+    	v = kreisnamen[startWith];
+    	if (typeof(v)!='undefined') {
+    		location=v.name;
+    		locationType=v.typ;
+    	}
+    }
+    
     
     basisLink = "./table.html";
     paramTime = "period="+periode;
     paramMeasure = "measure="+displayMeasure;
-    paramLength = "lok+"+lengthOfKey;
+    paramLength = "lok="+lengthOfKey;
+    paramLocation = "location="+startWith;
     
     beforeText= "<h1>"+"Tabelle für Messung "+displayMeasure+"</h1>";
+    beforeText+="<h2>"+startWith+","+location+","+locationType+"</h2>"
     beforeText+= "Dargestellte Periode "+periode+"<br>";
-    beforeText+= generateLink("[Year]",basisLink,paramLength,"period=year",paramMeasure);
-    beforeText+= generateLink("[month]",basisLink,paramLength,"period=month",paramMeasure);
-    beforeText+= generateLink("[day]",basisLink,paramLength,"period=day",paramMeasure); 
+    beforeText+= generateLink("[Year]",basisLink,paramLength,"period=year",paramMeasure,paramLocation);
+    beforeText+= generateLink("[month]",basisLink,paramLength,"period=month",paramMeasure,paramLocation);
+    beforeText+= generateLink("[day]",basisLink,paramLength,"period=day",paramMeasure,paramLocation); 
     beforeText+="<br>";  
     beforeText+= "Schlüssellänge = "+lengthOfKey+"<br>";
     beforeText+= generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure);
-    beforeText+= generateLink("[Middle]",basisLink,"lok=3",paramTime,paramMeasure);
-    beforeText+= generateLink("[detail]",basisLink,"lok=10",paramTime,paramMeasure);
+    beforeText+= generateLink("[Middle]",basisLink,"lok=3",paramTime,paramMeasure,paramLocation);
+    beforeText+= generateLink("[detail]",basisLink,"lok=12",paramTime,paramMeasure,paramLocation);
     
     
     
@@ -123,6 +144,7 @@ exports.table = function(req,res){
     						 			  schluessel2: "$schluessel",
     						 			  timestamp2: "$timestamp",
     						 			  }},
+    						 {$match: {schluessel: {$regex: "^"+startWith}}},
     						 {$group: { _id: { row: "$schluessel",col:"$timestamp"},
     						 		    count	: {$last: "$count" },
     						 		    schluessel:{$last: "$schluessel2"},
@@ -139,7 +161,6 @@ exports.table = function(req,res){
     						];
     // Bitte Checken, Parameter geht noch nicht
     var aggFunc=query;   						
- 	kreisnamen = loadDataFromDB.schluesselMap;
  	
     
    
@@ -207,7 +228,9 @@ exports.table = function(req,res){
 					schluesselText = value.name;
 					schluesselTyp = value.typ;
 				}
-				var row = "<td>"+schluessel+"</td>"+"<td>"+schluesselText+"</td>"+"<td>"+schluesselTyp+"</td>";
+				schluesselLink = generateLink(schluessel,basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,"location="+schluessel);
+ 
+				var row = "<td>"+schluesselLink+"</td>"+"<td>"+schluesselText+"</td>"+"<td>"+schluesselTyp+"</td>";
 				for (z=0;z<header.length;z++) {
 					timestamp=header[z];
 					
