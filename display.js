@@ -120,17 +120,25 @@ exports.table = function(req,res){
     paramLocation = "location="+startWith;
     
     beforeText= "<h1>"+"Tabelle für Messung "+displayMeasure+"</h1>";
-    beforeText+="<h2>"+startWith+","+location+","+locationType+"</h2>"
-    beforeText+= "Dargestellte Periode "+periode+"<br>";
+    if (startWith!="") {
+    	beforeText+="<h2>"+location+"("+startWith+","+locationType+")</h2>"
+    	beforeText+= generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure);
+    	beforeText+= "<br>";
+    } else {
+    	beforeText +="<h2>kein Filter</h2>";
+    }
+    beforeText+= "Dargestellte Periode "+periode+" (";
     beforeText+= generateLink("[Year]",basisLink,paramLength,"period=year",paramMeasure,paramLocation);
     beforeText+= generateLink("[month]",basisLink,paramLength,"period=month",paramMeasure,paramLocation);
     beforeText+= generateLink("[day]",basisLink,paramLength,"period=day",paramMeasure,paramLocation); 
-    beforeText+="<br>";  
-    beforeText+= "Schlüssellänge = "+lengthOfKey+"<br>";
-    beforeText+= generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure);
-    beforeText+= generateLink("[Middle]",basisLink,"lok=3",paramTime,paramMeasure,paramLocation);
-    beforeText+= generateLink("[detail]",basisLink,"lok=12",paramTime,paramMeasure,paramLocation);
+    beforeText+=")<br>";  
     
+    beforeText+= "Schlüssellänge = "+lengthOfKey+" (";
+    
+    
+    if (lengthOfKey >2) beforeText+= generateLink("weniger",basisLink,"lok="+(lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
+    if (lengthOfKey <12) beforeText+= generateLink("mehr",basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,paramLocation);
+    beforeText += ")<br>";
     
     
     
