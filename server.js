@@ -9,7 +9,7 @@ var debug   = require('debug')('server');
 var config           = require('./configuration.js');
 var queue            = require('./QueueWorker.js');
 var loadDataFromDB   = require('./LoadDataFromDB.js');
-var loadOverpassData = require('./loadOverpassData.js')
+var loadOverpassData = require('./LoadOverpassData.js')
 var display          = require('./display.js');
 
 
