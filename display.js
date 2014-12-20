@@ -1,7 +1,8 @@
 var loadDataFromDB = require('./LoadDataFromDB')
 var importCSV=require('./ImportCSV');
 var debug   = require('debug')('display');
-
+var path    = require('path');
+var fs      = require("fs");
 
 
 exports.count = function(req,res){
@@ -27,10 +28,28 @@ exports.importCSV = function(req,res){
     db = res.db;
   
     // Fetch the collection test
-    defJSON = { measure: "AddrWOStreet",  count: 0};
-    debug("Count hat den typ"+typeof(defJSON["count"]));
-    importCSV.readCSV(db,  defJSON,"allLF-UTF8.csv");
-    res.end("File IMported Probably");
+    importDir = path.resolve(__dirname, "import")
+    listOfCSV=fs.readdirSync(importDir);
+    text = "";
+    for (i=0;i<listOfCSV.length;i++)
+    {
+    	filename=listOfCSV[i];
+    	year = filename.substring(0,4);
+    	month = filename.substring(5,5+2);
+    	day = filename.substring(8,8+2);
+    	date = new Date(year,month-1,day);
+    	debug("Datum"+date+"("+year+")("+month+")("+day+")");
+    	date.setTime( date.getTime() - date.getTimezoneOffset()*60*1000 );
+    	defJSON = { measure: "AddrWOStreet",  count: 0,timestamp:date,execdate:date};
+    	filename=path.resolve(importDir,filename);
+    	importCSV.readCSV(filename,db,  defJSON);
+    	text += "Import: "+filename+"->"+date+"\n"
+    }
+    text += "Files imported";
+   
+   
+    
+    res.end(text);
 	}
 	
 	
@@ -81,6 +100,7 @@ exports.table = function(req,res){
     lengthOfKey=2;
     if(typeof(req.param("lok")!='undefined')) {
     	lengthOfKey=parseInt(req.param("lok"));
+    	if (lengthOfKey=='NaN') lengthOfKey=2;
     }
     
     // length of Timestamp
@@ -121,12 +141,14 @@ exports.table = function(req,res){
     
     beforeText= "<h1>"+"Tabelle für Messung "+displayMeasure+"</h1>";
     if (startWith!="") {
-    	beforeText+="<h2>"+location+"("+startWith+","+locationType+")</h2>"
-    	beforeText+= generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure);
-    	beforeText+= "<br>";
+    	beforeText+="<h2>"+location+" ("+startWith+","+locationType+")</h2>"
+    	
     } else {
     	beforeText +="<h2>kein Filter</h2>";
     }
+    beforeText+= generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure);
+    beforeText+= "<br>";
+
     beforeText+= "Dargestellte Periode "+periode+" (";
     beforeText+= generateLink("[Year]",basisLink,paramLength,"period=year",paramMeasure,paramLocation);
     beforeText+= generateLink("[month]",basisLink,paramLength,"period=month",paramMeasure,paramLocation);

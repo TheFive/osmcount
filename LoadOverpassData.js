@@ -15,15 +15,15 @@ rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \
  \
 way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \
 way(r.associatedStreet:"house")->.asHouseWay; \
-((.allHousesWay; - .asHouseWay); >; );out ids; \
+(.allHousesWay; - .asHouseWay); ;out ids; \
  \
 node(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesNode; \
 node(r.associatedStreet:"house")->.asHouseNode; \
-((.allHousesNode; - .asHouseNode););out ids; \
+(.allHousesNode; - .asHouseNode);out ids; \
  \
 rel(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesRel; \
 rel(r.associatedStreet:"house")->.asHouseRel; \
-((.allHousesRel; - .asHouseRel); >>; );out ids;' 
+(.allHousesRel; - .asHouseRel);out ids;' 
 
 queryBoundaries='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out; \
 ' 

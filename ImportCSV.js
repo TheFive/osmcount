@@ -2,6 +2,7 @@ fs=require("fs");
 var util    = require('./util.js');
 var path    = require('path');
 var debug   = require('debug')('importCSV');
+ debug.entry = require('debug')('importCSV:entry');
 
 
 
@@ -12,7 +13,9 @@ var debug   = require('debug')('importCSV');
 // Input: string containing CSV Data
 // Output: Array of JSON Objects
 
-function parseCSV(str) {
+function parseCSV(str,delimiter) {
+	debug.entry("parseCSV(...,"+delimiter+")");
+	
     var arr = [];
     var quote = false;  // true means we're inside a quoted field
 
@@ -31,15 +34,17 @@ function parseCSV(str) {
         if (cc == '"') { quote = !quote; continue; }
 
         // If it's a comma and we're not in a quoted field, move on to the next column
-        if (cc == ',' && !quote) { col += 1; continue; }
+        if (cc == delimiter && !quote) { col += 1; continue; }
 
         // If it's a newline and we're not in a quoted field, move on to the next
         // row and move to column 0 of that new row
         if (cc == '\n' && !quote) { row +=1; col = 0; continue; }
+        if (cc == '\r' && !quote) continue; //just ignore this character
 
         // Otherwise, append the current character to the current column
         arr[row][col] += cc;
     }
+    debug.entry("leave: parseCSV(...,"+delimiter+")"+"read "+arr.length+" Elements");
     return arr;
 }
 
@@ -49,14 +54,16 @@ function parseCSV(str) {
 
 // readCSV Function to import CSV to the Measure Database
 // Input: a MongoDB, a template JSON, CSV Filename, encoding 
-exports.readCSV = function (db,defJson,filename,encoding) {
+exports.readCSV = function(filename,db,defJson,encoding) {
+	debug.entry("readCSV("+filename+"..)");
 
 
-	filename = path.resolve(__dirname, filename);
+	//filename = path.resolve(__dirname, filename);
 	
 	// Open the file and copy it to a string
 	// encoding is ignored yet
 	fs.readFile(filename, 'UTF8', function (err,data) {
+		debug.entry("readCSV readFileCB" + filename);
 		if (typeof(db)=='undefined') {
 			debug("Internal Error db undefined");
 			return;
@@ -68,7 +75,7 @@ exports.readCSV = function (db,defJson,filename,encoding) {
 		}
 		
 		// convert the content of the file to an JSON array
-		array = parseCSV(data);
+		array = parseCSV(data,";");
 		
 		if(array.length<2) {
 			// CSV File is empty, log an error
@@ -98,11 +105,19 @@ exports.readCSV = function (db,defJson,filename,encoding) {
 				key = array[0][z];
 				value = array[i][z];
 				debug(key+typeof(defJSON[key]));
-				if (typeof(defJSON[key])!='number') {
-					newData[i-1][key]=value;
-				} else {
-					newData [i-1][key]=parseInt(value);
-				}
+				switch(typeof(defJSON[key])) {
+					case 'number':
+						newData [i-1][key]=parseInt(value);
+						break;
+					case 'date':
+						y=value.slice(0,4);
+						m=value.slice(6,6+2);
+						d=value.slice(9,9+2);
+						newData[i-1][key]=new date(y,m-1,d);
+						break;
+					default:
+						newData[i-1][key]=value;
+				}		
 			}
 		}
 		collection.insert(newData,{w:1},function (){});
