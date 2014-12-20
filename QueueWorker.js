@@ -2,7 +2,7 @@ var config = require('./configuration.js');
 var lod = require('./LoadOverpassData.js');
 var util = require('./util.js')
 var async=require('async');
-var debug         = require('debug')('QueueWorker');
+var debug        = require('debug')('QueueWorker');
  debug.entry   = require('debug')('QueueWorker:entry');
  debug.data    = require('debug')('QueueWorker:data');
 
@@ -16,12 +16,13 @@ function getNextJob(cb,job) {
 	var dateJSON = date.toJSON();
 	mongodb = config.getDB();
 	debug.data("Current Time %s",dateJSON);
+	debug.entry("getNextJob->call CB");
 	mongodb.collection("WorkerQueue").findOne( 
 							{ status : "open" , 
 							 exectime: {$lte: date}
 							}, function(err, obj) 
 	{
-		debug.entry("getNextJob callback("+err+","+obj+")");
+		debug.entry("getNextJob->CB("+err+","+obj+")");
 		if (err) debug(err);
 
 		debug.data("found job %s",obj.type);		
@@ -37,8 +38,9 @@ function saveMeasure(result,cb) {
 		cb();
 		return;
 	}
+	debug.entry("saveMeasure->call CB");
 	mongodb.collection("DataCollection").save(result,{w:1}, function (err, num){
-		debug.entry("saveMeasure callback("+err+","+num+")");
+		debug.entry("saveMeasure->CB("+err+","+num+")");
 	    if (err) {
 	     	debug(err);
 	     	cb()
@@ -52,8 +54,9 @@ function saveMeasure(result,cb) {
 function saveJobState(newState,oldState) {
 	debug.entry("Generate: saveJobState(%s,%s)",newState, oldState);
 	return function (cb,job) {
-			debug.entry("Execute:saveJobState Function(%s,%s)("+cb+","+job+")",newState, oldState);
+			debug.entry("saveJobState Function(%s,%s)("+cb+","+job+")",newState, oldState);
 			job = job.readjob;
+			debug.data("job.status=%s",job.status);
 			if (job==null || job.status == 'undefined' || job.status != oldState) {
 				debug.data("Nothing to execute");
 				cb(null,job);
@@ -63,8 +66,9 @@ function saveJobState(newState,oldState) {
 			job.timestamp = date;
 			job.status = newState;
 			debug("Setting Jobsstatus to %s",newState);
+			debug.entry("saveJobState(%s,%s)->call CB",newState,oldState);
 			mongodb.collection("WorkerQueue").save(job,{w:1}, function (err, num){
-				debug.entry("Execute CB:saveJobState Function(%s,%s)("+cb+","+job+")",err, num);
+				debug.entry("saveJobState(%s,%s)->CB("+err+","+num+")",newState, oldState);
 				if (err) {
 					debug(err);
 				} else {
@@ -82,8 +86,9 @@ var q= async.queue(function (task,cb) {
 	task(cb);
 },1);
 
-function doConsole(cb,job) {
-	debug.entry("doConsole("+cb+","+job+")");
+function doConsole(cb,results) {
+	debug.entry("doConsole("+cb+","+results+")");
+	job=results.readjob;
 	if (typeof(job.status)!='undefined' && job.status =="working" && job.type == "console") {
 		debug(job.text);
 		console.log(job.text),
@@ -93,8 +98,9 @@ function doConsole(cb,job) {
 }
 
 
-function doOverpass(cb,job) {
-	debug.entry("doOverpass("+cb+","+job+")");
+function doOverpass(cb,results) {
+	debug.entry("doOverpass("+cb+","+results+")");
+	job=results.readjob;
 	if (typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpass") {
 			measure=job.measure;
 			query=job.query;
@@ -119,8 +125,9 @@ function doOverpass(cb,job) {
 
 
 
-function doInsertJobs(cb,job) {
-	debug.entry("doInsertJobs("+cb+","+job+")");
+function doInsertJobs(cb,results) {
+	debug.entry("doInsertJobs("+cb+","+results+")");
+	job=results.readjob;
 	if (typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
 		debug("Start Insert");
 		mongodb = config.getDB();
@@ -132,24 +139,25 @@ function doInsertJobs(cb,job) {
 				cb(err,job);
 			})
 	}
+	else if (cb) cb(null,job);
 }
 
 
 
 
 function doNextJob(callback) {
-	debug.entry("doInsertJobs("+callback+")");
-	job = {};
+	debug.entry("doNextJob("+callback+")");
 	async.auto( {readjob:     getNextJob,
 		    saveWorking: ["readjob",saveJobState("working","open")],
 		    doConsole:   ["saveWorking", doConsole],
 		    doOverpass:  ["saveWorking", doOverpass],
 		    doInsertJobs:["saveWorking", doInsertJobs],
-		    saveDone:    ["doConsole","doOverpass", saveJobState("done","working")],
+		    saveDone:    ["doConsole","doOverpass","doInsertJobs", saveJobState("done","working")],
 		    saveError:   ["saveDone", saveJobState("error","working")],
 		},
-		function () {
-			debug("finished %s" ,job.status);
+		function (err,results) {
+			debug("finished %s" ,results);
+			job = results.readjob;
 			if (typeof(job.status)== 'undefined') {
 				q.push(util.waitOneMin);
 			}
