@@ -3,6 +3,8 @@ var importCSV=require('./ImportCSV');
 var debug   = require('debug')('display');
 var path    = require('path');
 var fs      = require("fs");
+var numeral = require('numeral');
+var de = require('numeral/languages/de');
 
 
 exports.count = function(req,res){
@@ -46,11 +48,8 @@ exports.importCSV = function(req,res){
     	text += "Import: "+filename+"->"+date+"\n"
     }
     text += "Files imported";
-   
-   
-    
     res.end(text);
-	}
+}
 	
 	
 function generateLink(text, basis, param1,param2,param3,param4)
@@ -84,7 +83,16 @@ var tableCSSStyle = '<head>\
 table, th, td {\
     border: 1px solid black;\
     border-collapse: collapse;\
+    font-family: Verdana;\
+	font-size: 0.9em;\
+	text-align: center;\
+	padding: 3px;\
 }\
+th { \
+background-color: #999; \
+color: #fff; \
+border: 1px solid #fff; \
+} \
 </style>\
 </head>'
 
@@ -97,6 +105,10 @@ exports.table = function(req,res){
     
 
 	kreisnamen = loadDataFromDB.schluesselMap;
+	numeral.language('de',de);
+	numeral.language('de');
+
+
  
     // Parse html parameters
     displayMeasure="AddrWOStreet";    
@@ -106,8 +118,8 @@ exports.table = function(req,res){
     
     // length for the Regioschluessel
     lengthOfKey=2;
-    if(typeof(req.param("lok")) in [2,3,4,5,6,7,8,9,10,11,12]) {
-    	lengthOfKey=parseInt(req.param("lok"));
+    if (req.param("lok").parseInt != 'NaN') {
+     	lengthOfKey=parseInt(req.param("lok"));
     }
     
     // length of Timestamp
@@ -178,7 +190,7 @@ exports.table = function(req,res){
     
    
     	
-    query = [{$match: { measure: displayMeasure}},
+    var query = [{$match: { measure: displayMeasure}},
     						 {$project: { schluessel: "$schluessel",
     						 			  timestamp: {$substr: ["$timestamp",0,lengthOfTime]},
     						 			  count: "$count",
@@ -200,7 +212,8 @@ exports.table = function(req,res){
     						 
     						
     						];
-    // Bitte Checken, Parameter geht noch nicht
+
+
     var aggFunc=query;   						
  	
     
@@ -213,6 +226,7 @@ exports.table = function(req,res){
     	// may be here is some performance potential :-)
     	if (err) {
     		res.end("error"+err);
+    		console.log("Table Function, Error occured:");
     		console.log(err);
     		return;
     	}
@@ -271,7 +285,7 @@ exports.table = function(req,res){
 				}
 				schluesselLink = generateLink(schluessel,basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,"location="+schluessel);
  
-				var row = "<td>"+schluesselLink+"</td>"+"<td>"+schluesselText+"</td>"+"<td>"+schluesselTyp+"</td>";
+				var row = "<th>"+schluesselLink+"</th>"+"<td>"+schluesselText+"</td>"+"<td>"+schluesselTyp+"</td>";
 				for (z=0;z<header.length;z++) {
 					timestamp=header[z];
 					
@@ -280,7 +294,7 @@ exports.table = function(req,res){
 					if (typeof(content) == "undefined") {
 						cell ="-";
 					} else {
-						cell = content;
+						cell = numeral(content).format();
 					}
 					row += "<td>"+cell+"</td>";
 				}

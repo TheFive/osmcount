@@ -72,6 +72,18 @@ exports.getConfiguration = function() {
     }
 	return configuration;
 }
+exports.getValue = function(key,defValue) {
+    if (typeof(configuration)=='undefined')
+    {
+    	exports.initialise();
+    }
+    result = defValue;
+    if (typeof(configuration[key]) != 'undefined') {
+    	result = configuration[key];
+    }
+    return result;
+}
+	
 
 exports.getDB = function() {
 	return mongodb;

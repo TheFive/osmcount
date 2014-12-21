@@ -48,7 +48,10 @@ exports.initialise = function (cb) {
 							  admin_level: {$in: ['1','2','3','4','5','6','7','8','9']}
 							}, 
 								function(err, result) {
-					if (err) console.log(err);
+					if (err) {
+						console.log("Error occured in function: LoadDataFromDB.initialise");
+						console.log(err);
+					}
 					result.each(function(err, doc) {
 						if (doc == null) {
 							//schleife beendet

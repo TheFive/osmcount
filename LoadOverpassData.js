@@ -1,5 +1,6 @@
 var loadDataFromDB =   require('./LoadDataFromDB.js');
-var debug   = require('debug')('LoadOverpassData');
+var debug   =  require('debug')('LoadOverpassData');
+ debug.entry = require('debug')('LoadOverpassData:entry')
 
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
@@ -15,7 +16,7 @@ rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \
  \
 way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \
 way(r.associatedStreet:"house")->.asHouseWay; \
-(.allHousesWay; - .asHouseWay); ;out ids; \
+(.allHousesWay; - .asHouseWay); out ids; \
  \
 node(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesNode; \
 node(r.associatedStreet:"house")->.asHouseNode; \
@@ -33,12 +34,17 @@ queryBoundaries='[out:json][timeout:900];area[type=boundary]["int_name"="Deutsch
 var request = require('request');
 
 function overpassQuery(query, cb, options) {
+	debug.entry("overpassQuery");
     options = options || {};
     request.post(options.overpassUrl || 'http://overpass-api.de/api/interpreter', function (error, response, body) {
+    	debug.entry("overpassQuery->CB");
 
         if (!error && response.statusCode === 200) {
             cb(undefined, body);
         } else if (error) {
+        	console.log("Error occured in function: LoadOverpassData.overpassQuery");
+        	console.log(error);
+        	console.log(body);
             cb(error);
         } else if (response) {
             cb({
@@ -76,16 +82,18 @@ var boundariesJSON = JSON.parse(
 
 
 exports.runOverpass= function(query, measure,result, cb) {
+	debug.entry("runOverpass(query,"+measure+",result,cb)");
 	overpassQuery(query,function(error, data) {
-		
-		
+		debug.entry("runOverpass->CB(");	
 		if (error) {
-			throw (error)
+			console.log("Error occured in function: LoadOverpassData.runOverpass");
+			console.log(error);
+			cb(error);
 		} else {
 			date = new Date();
 			result.timestamp=date;
 			result.count=0;
-			result.data="";
+			result.data=data;
 			result.measure=measure;
 			length= data.length;
 			for (i=0;i<length;i++) {

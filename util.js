@@ -1,4 +1,4 @@
-
+var configuration = require('./configuration.js');
 
 // internal Function to duplicate an object
 exports.clone = function (obj) {
@@ -26,5 +26,5 @@ exports.createWaiter = function(seconds) {
 	}
 }
 
-exports.waitOneMin = exports.createWaiter(120);
+exports.waitOneMin = exports.createWaiter(configuration.getValue("waitTime",120));
 
