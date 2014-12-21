@@ -26,5 +26,5 @@ exports.createWaiter = function(seconds) {
 	}
 }
 
-exports.waitOneMin = exports.createWaiter(5);
+exports.waitOneMin = exports.createWaiter(120);
 

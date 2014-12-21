@@ -106,14 +106,13 @@ exports.table = function(req,res){
     
     // length for the Regioschluessel
     lengthOfKey=2;
-    if(typeof(req.param("lok")!='undefined')) {
+    if(typeof(req.param("lok")) in [2,3,4,5,6,7,8,9,10,11,12]) {
     	lengthOfKey=parseInt(req.param("lok"));
-    	if (lengthOfKey=='NaN') lengthOfKey=2;
     }
     
     // length of Timestamp
-    lengthOfTime=10;
-    periode="day";
+    lengthOfTime=7;
+    periode="month";
     if(req.param("period")=="year") {
     	lengthOfTime=4;
     	periode="year";
