@@ -118,7 +118,7 @@ exports.table = function(req,res){
     
     // length for the Regioschluessel
     lengthOfKey=2;
-    if (req.param("lok").parseInt != 'NaN') {
+    if (typeof(req.param("lok")) != 'undefine' && req.param("lok").parseInt != 'NaN') {
      	lengthOfKey=parseInt(req.param("lok"));
     }
     
