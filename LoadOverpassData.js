@@ -62,7 +62,7 @@ var fs;
 
 
 
-
+/*
 boundariesFile = 'Boundaries OSM Nov 14.json';
 fs = require('fs');
 
@@ -70,7 +70,7 @@ var boundariesJSON = JSON.parse(
   fs.readFileSync(boundariesFile)
 );
 
-
+*/
 
 
 
