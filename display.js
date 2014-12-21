@@ -79,6 +79,14 @@ function generateLink(text, basis, param1,param2,param3,param4)
   return result;
 }
 
+var tableCSSStyle = '<head>\
+<style>\
+table, th, td {\
+    border: 1px solid black;\
+    border-collapse: collapse;\
+}\
+</style>\
+</head>'
 
 exports.table = function(req,res){
 	db = res.db;
@@ -139,28 +147,32 @@ exports.table = function(req,res){
     paramLength = "lok="+lengthOfKey;
     paramLocation = "location="+startWith;
     
-    beforeText= "<h1>"+"Tabelle für Messung "+displayMeasure+"</h1>";
+    beforeText= "<h1> Messergebnisse </h1>";
+    filterText = "";
     if (startWith!="") {
-    	beforeText+="<h2>"+location+" ("+startWith+","+locationType+")</h2>"
+    	filterText+= location+" ("+startWith+","+locationType+")";
     	
     } else {
-    	beforeText +="<h2>kein Filter</h2>";
+    	filterText +="kein Filter";
     }
-    beforeText+= generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure);
-    beforeText+= "<br>";
+    periodenSwitch = generateLink("[Year]",basisLink,paramLength,"period=year",paramMeasure,paramLocation);
+    periodenSwitch+= generateLink("[month]",basisLink,paramLength,"period=month",paramMeasure,paramLocation);
+    periodenSwitch+= generateLink("[day]",basisLink,paramLength,"period=day",paramMeasure,paramLocation); 
+    lokSwitch ="";   
+    
+    if (lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
+    if (lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
-    beforeText+= "Dargestellte Periode "+periode+" (";
-    beforeText+= generateLink("[Year]",basisLink,paramLength,"period=year",paramMeasure,paramLocation);
-    beforeText+= generateLink("[month]",basisLink,paramLength,"period=month",paramMeasure,paramLocation);
-    beforeText+= generateLink("[day]",basisLink,paramLength,"period=day",paramMeasure,paramLocation); 
-    beforeText+=")<br>";  
+    filterTable = "<tr><td>Messung</td><td><b>"+displayMeasure+"</b></td><td></td></tr>"
+    filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure)+"</td></tr>"
+    filterTable += "<tr><td>Periode</td><td><b>"+periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
+    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lengthOfKey+"</b></td><td>"+lokSwitch+"</td></tr>"
     
-    beforeText+= "Schlüssellänge = "+lengthOfKey+" (";
+	filterTable = "<table>"+filterTable+"</table><br><br>";
+	beforeText += filterTable;
+   
+ 
     
-    
-    if (lengthOfKey >2) beforeText+= generateLink("weniger",basisLink,"lok="+(lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
-    if (lengthOfKey <12) beforeText+= generateLink("mehr",basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,paramLocation);
-    beforeText += ")<br>";
     
     
     
@@ -280,7 +292,7 @@ exports.table = function(req,res){
 			tablebody +="</tr>"	;
 			tablebody += "";
 			pagefooter = JSON.stringify(query);
-			text = "<html><body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table>"+pagefooter+"</body></html>";
+			text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table>"+pagefooter+"</body></html>";
 			res.set('Content-Type', 'text/html');
 			res.end(text);
 		};
