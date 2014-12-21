@@ -125,18 +125,18 @@ exports.table = function(req,res){
     
     // length of Timestamp
     lengthOfTime=7;
-    periode="month";
+    periode="Monat";
     if(req.param("period")=="year") {
     	lengthOfTime=4;
-    	periode="year";
+    	periode="Jahr";
     }
     if(req.param("period")=="month") {
     	lengthOfTime=7;
-    	periode="month";
+    	periode="Monat";
     }
     if(req.param("period")=="day") {
     	lengthOfTime=10;
-    	periode="day";
+    	periode="Tag";
     }
     startWith="";
     location=startWith;
@@ -167,9 +167,9 @@ exports.table = function(req,res){
     } else {
     	filterText +="kein Filter";
     }
-    periodenSwitch = generateLink("[Year]",basisLink,paramLength,"period=year",paramMeasure,paramLocation);
-    periodenSwitch+= generateLink("[month]",basisLink,paramLength,"period=month",paramMeasure,paramLocation);
-    periodenSwitch+= generateLink("[day]",basisLink,paramLength,"period=day",paramMeasure,paramLocation); 
+    periodenSwitch = generateLink("[Jahr]",basisLink,paramLength,"period=year",paramMeasure,paramLocation);
+    periodenSwitch+= generateLink("[Monat]",basisLink,paramLength,"period=month",paramMeasure,paramLocation);
+    periodenSwitch+= generateLink("[Tag]",basisLink,paramLength,"period=day",paramMeasure,paramLocation); 
     lokSwitch ="";   
     
     if (lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
@@ -322,8 +322,8 @@ exports.table = function(req,res){
 			tablebody +="</tr>"	;
 			
 			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
-			pagefooter += "<p><h2>MongoDB Aggregat Funktion:</h2>2";
-			pagefooter += JSON.stringify(query)+"</p>";
+			pagefooter += "<p><h2>MongoDB Aggregat Funktion:</h2>";
+			pagefooter += "<pre>"+JSON.stringify(query,null,' ')+"</pre></p>";
 			text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table>"+pagefooter+"</body></html>";
 			res.set('Content-Type', 'text/html');
 			res.end(text);
