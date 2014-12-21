@@ -5,6 +5,7 @@ var path    = require('path');
 var fs      = require("fs");
 var numeral = require('numeral');
 var de = require('numeral/languages/de');
+var async = require('async');
 
 
 exports.count = function(req,res){
@@ -215,21 +216,37 @@ exports.table = function(req,res){
 
 
     var aggFunc=query;   						
- 	
-    
-   
-    collection.aggregate(	query
-    
-    
-    						, (function(err, items) {
-    	// first copy hole table in a 2 dimensional JavaScript map
-    	// may be here is some performance potential :-)
-    	if (err) {
-    		res.end("error"+err);
-    		console.log("Table Function, Error occured:");
-    		console.log(err);
-    		return;
-    	}
+ 	var openQueries=0;
+    var items = [];
+    async.parallel( [ function(callback) {
+   				 collection.aggregate(	query
+										, (function(err, data) {
+						// first copy hole table in a 2 dimensional JavaScript map
+						// may be here is some performance potential :-)
+						if (err) {
+							res.end("error"+err);
+							console.log("Table Function, Error occured:");
+							console.log(err);
+							;
+						}
+						items = data;
+						callback();
+					}))},
+					function (callback) {
+					
+						db = res.db;
+						collectionName = 'WorkerQueue';
+						
+						// Fetch the collection test
+						var collection = db.collection(collectionName);
+						collection.count({status:"open"},function(err, count) {
+							openQueries=count;
+						});  
+						callback();
+
+					
+					}],
+					function (err, results ) {
     	// Initialising JavaScript Map
     	header = [];
 		firstColumn = [];
@@ -303,12 +320,14 @@ exports.table = function(req,res){
 			}
 			tableheader += "</tr>";
 			tablebody +="</tr>"	;
-			tablebody += "";
-			pagefooter = JSON.stringify(query);
+			
+			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+			pagefooter += "<p><h2>MongoDB Aggregat Funktion:</h2>2";
+			pagefooter += JSON.stringify(query)+"</p>";
 			text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table>"+pagefooter+"</body></html>";
 			res.set('Content-Type', 'text/html');
 			res.end(text);
 		};
 	})
-)
+
 }
