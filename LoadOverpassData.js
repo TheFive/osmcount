@@ -58,17 +58,9 @@ function overpassQuery(query, cb, options) {
 
 // Dubliziere die Verbindung mit der mongdb
 
-var fs, configurationFile;
+var fs;
 
-configurationFile = 'configuration.json';
-fs = require('fs');
 
-var configuration = JSON.parse(
-  fs.readFileSync(configurationFile)
-);
-
-// Log the information from the file
-debug(configuration);
 
 
 boundariesFile = 'Boundaries OSM Nov 14.json';
