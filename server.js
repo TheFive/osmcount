@@ -51,8 +51,8 @@ app.use(function(req, res, next){
 app.use('/', express.static(__dirname));
 app.use('/count.html', display.count)
 app.use('/import.html', display.importCSV)
-app.use('/table.html', display.table)
-
+app.use('/table.html', display.table);
+app.use('/object/:collection/:id', display.object);
 
 app.use('/list.html', function(req,res) {
 	jobs = loadOverpassData.createQuery("AddrWOStreet");

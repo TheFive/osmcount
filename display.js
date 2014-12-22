@@ -6,78 +6,8 @@ var fs      = require("fs");
 var numeral = require('numeral');
 var de = require('numeral/languages/de');
 var async = require('async');
+var ObjectID = require('mongodb').ObjectID;
 
-
-exports.count = function(req,res){
-    db = res.db;
-    collectionName = 'DataCollection';
-     if(typeof(req.param("collection"))!='undefined') {
-     	collectionName = req.param("collection");
-     }
-  
-    // Fetch the collection test
-    var collection = db.collection(collectionName);
-    collection.count(function(err, count) {
-    	res.set('Content-Type', 'text/html');
-    	if(err) {
-    		res.end(err);
-    	} else {
-    		res.end("There are " + count + " records in Collection "+ collectionName);
-    	}
-    });  
-}
-
-exports.importCSV = function(req,res){
-    db = res.db;
-  
-    // Fetch the collection test
-    importDir = path.resolve(__dirname, "import")
-    listOfCSV=fs.readdirSync(importDir);
-    text = "";
-    for (i=0;i<listOfCSV.length;i++)
-    {
-    	filename=listOfCSV[i];
-    	year = filename.substring(0,4);
-    	month = filename.substring(5,5+2);
-    	day = filename.substring(8,8+2);
-    	date = new Date(year,month-1,day);
-    	debug("Datum"+date+"("+year+")("+month+")("+day+")");
-    	date.setTime( date.getTime() - date.getTimezoneOffset()*60*1000 );
-    	defJSON = { measure: "AddrWOStreet",  count: 0,timestamp:date,execdate:date};
-    	filename=path.resolve(importDir,filename);
-    	importCSV.readCSV(filename,db,  defJSON);
-    	text += "Import: "+filename+"->"+date+"\n"
-    }
-    text += "Files imported";
-    res.end(text);
-}
-	
-	
-function generateLink(text, basis, param1,param2,param3,param4)
-{
-  result ="";
-  result += text;
-  link = basis;
-  sep="?";
-  if (param1){
-  	link+= sep+param1;
-  	sep="&";
-  }
-  if (param2) {
-  	link+= sep+param2;
-  	sep="&";
-  }
-  if (param3) {
-  	link+= sep+param3;
-  	sep="&";
-  }
-  if (param4) {
-  	link+= sep+param4;
-  	sep="&";
-  }
-  result = "<a href="+link+">"+result + "</a>";
-  return result;
-}
 
 var tableCSSStyle = '<head>\
 <style>\
@@ -97,35 +27,132 @@ border: 1px solid #fff; \
 </style>\
 </head>'
 
+
+exports.count = function(req,res){
+    var db = res.db;
+    collectionName = 'DataCollection';
+     if(typeof(req.param("collection"))!='undefined') {
+     	collectionName = req.param("collection");
+     }
+  
+    // Fetch the collection test
+    var collection = db.collection(collectionName);
+    collection.count(function(err, count) {
+    	res.set('Content-Type', 'text/html');
+    	if(err) {
+    		res.end(err);
+    	} else {
+    		res.end("There are " + count + " records in Collection "+ collectionName);
+    	}
+    });  
+}
+
+exports.object = function(req,res) {
+	var db = res.db;
+   
+	var collectionName = req.param("collection");
+	var objid = req.param("id");
+	var object=ObjectID(objid);
+   
+    db.collection(collectionName).findOne ({_id:object},function (err, obj) {
+    	if (err) {
+    		var text = "Display Object "+ objid + " in Collection "+collectionName;
+    		res.end(err);
+    	} else {
+    		text = "";
+    		for (key in obj) {
+    			if (key != "_id") {
+    				text += "<tr><td>"+key+"</td><td>"+obj[key]+"</td></tr>";
+    			}
+    		}	
+    		text = tableCSSStyle+"<body><h1>Data Inspector</h1><table>"+text+"</table></body>";
+    		
+    		res.end(text );
+    	}
+    })
+}
+
+exports.importCSV = function(req,res){
+    var db = res.db;
+  
+    // Fetch the collection test
+    var importDir = path.resolve(__dirname, "import")
+    var listOfCSV=fs.readdirSync(importDir);
+    var text = "";
+    for (i=0;i<listOfCSV.length;i++)
+    {
+    	var filename=listOfCSV[i];
+    	var year = filename.substring(0,4);
+    	var month = filename.substring(5,5+2);
+    	var day = filename.substring(8,8+2);
+    	var date = new Date(year,month-1,day);
+    	debug("Datum"+date+"("+year+")("+month+")("+day+")");
+    	date.setTime( date.getTime() - date.getTimezoneOffset()*60*1000 );
+    	var defJSON = { measure: "AddrWOStreet",  count: 0,timestamp:date,execdate:date};
+    	filename=path.resolve(importDir,filename);
+    	importCSV.readCSV(filename,db,  defJSON);
+    	text += "Import: "+filename+"->"+date+"\n"
+    }
+    text += "Files imported";
+    res.end(text);
+}
+	
+	
+function generateLink(text, basis, param1,param2,param3,param4)
+{
+  var result = text;
+  var link = basis;
+  var sep="?";
+  if (param1){
+  	link+= sep+param1;
+  	sep="&";
+  }
+  if (param2) {
+  	link+= sep+param2;
+  	sep="&";
+  }
+  if (param3) {
+  	link+= sep+param3;
+  	sep="&";
+  }
+  if (param4) {
+  	link+= sep+param4;
+  	sep="&";
+  }
+  return "<a href="+link+">"+result + "</a>";
+}
+
+
+
 exports.table = function(req,res){
-	db = res.db;
+	var db = res.db;
   
     // Fetch the collection DataCollection
     // To be Improved with Query or Aggregation Statments
     var collection = db.collection('DataCollection');
     
 
-	kreisnamen = loadDataFromDB.schluesselMap;
+	var kreisnamen = loadDataFromDB.schluesselMap;
 	numeral.language('de',de);
 	numeral.language('de');
 
 
  
     // Parse html parameters
-    displayMeasure="AddrWOStreet";    
+    var displayMeasure="AddrWOStreet";    
     if(typeof(req.param("measure"))!='undefined') {
     	displayMeasure=req.param("measure");
     }
     
     // length for the Regioschluessel
-    lengthOfKey=2;
+    var lengthOfKey=2;
     if (typeof(req.param("lok")) != 'undefined' && req.param("lok").parseInt != 'NaN') {
      	lengthOfKey=parseInt(req.param("lok"));
     }
     
     // length of Timestamp
-    lengthOfTime=7;
-    periode="Monat";
+    var lengthOfTime=7;
+    var periode="Monat";
     if(req.param("period")=="year") {
     	lengthOfTime=4;
     	periode="Jahr";
@@ -138,9 +165,9 @@ exports.table = function(req,res){
     	lengthOfTime=10;
     	periode="Tag";
     }
-    startWith="";
-    location=startWith;
-    locationType="-";
+    var startWith="";
+    var location=startWith;
+    var locationType="-";
     if(typeof(req.param("location"))!='undefined') {
     	startWith=req.param("location");
     	location=startWith;
@@ -153,14 +180,14 @@ exports.table = function(req,res){
     }
     
     
-    basisLink = "./table.html";
-    paramTime = "period="+periode;
-    paramMeasure = "measure="+displayMeasure;
-    paramLength = "lok="+lengthOfKey;
-    paramLocation = "location="+startWith;
+    var basisLink = "./table.html";
+    var paramTime = "period="+periode;
+    var paramMeasure = "measure="+displayMeasure;
+    var paramLength = "lok="+lengthOfKey;
+    var paramLocation = "location="+startWith;
     
     beforeText= "<h1> Messergebnisse </h1>";
-    filterText = "";
+    var filterText = "";
     if (startWith!="") {
     	filterText+= location+" ("+startWith+","+locationType+")";
     	
@@ -175,7 +202,7 @@ exports.table = function(req,res){
     if (lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
     if (lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
-    filterTable = "<tr><td>Messung</td><td><b>"+displayMeasure+"</b></td><td></td></tr>"
+    var filterTable = "<tr><td>Messung</td><td><b>"+displayMeasure+"</b></td><td></td></tr>"
     filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure)+"</td></tr>"
     filterTable += "<tr><td>Periode</td><td><b>"+periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
     filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lengthOfKey+"</b></td><td>"+lokSwitch+"</td></tr>"
@@ -248,9 +275,9 @@ exports.table = function(req,res){
 					}],
 					function (err, results ) {
     	// Initialising JavaScript Map
-    	header = [];
-		firstColumn = [];
-		table =[]; 
+    	var header = [];
+		var firstColumn = [];
+		var table =[]; 
 		
 		//iterate total result array
 		for (i=0;i < items.length;i++) {
