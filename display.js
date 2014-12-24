@@ -1,11 +1,11 @@
 var loadDataFromDB = require('./LoadDataFromDB')
 var importCSV=require('./ImportCSV');
-var debug   = require('debug')('display');
-var path    = require('path');
-var fs      = require("fs");
-var numeral = require('numeral');
-var de = require('numeral/languages/de');
-var async = require('async');
+var debug    = require('debug')('display');
+var path     = require('path');
+var fs       = require("fs");
+var numeral  = require('numeral');
+var de       = require('numeral/languages/de');
+var async    = require('async');
 var ObjectID = require('mongodb').ObjectID;
 
 
@@ -88,9 +88,13 @@ exports.importCSV = function(req,res){
     	var date = new Date(year,month-1,day);
     	debug("Datum"+date+"("+year+")("+month+")("+day+")");
     	date.setTime( date.getTime() - date.getTimezoneOffset()*60*1000 );
-    	var defJSON = { measure: "AddrWOStreet",  count: 0,timestamp:date,execdate:date};
-    	filename=path.resolve(importDir,filename);
-    	importCSV.readCSV(filename,db,  defJSON);
+    	defJSON = { measure: "AddrWOStreet",  
+    					count: 0,
+    					timestamp:date,
+    					execdate:date,
+    					source:filename};
+    	var filenameLong=path.resolve(importDir,filename);
+    	importCSV.readCSV(filenameLong,db,  defJSON);
     	text += "Import: "+filename+"->"+date+"\n"
     }
     text += "Files imported";
@@ -153,15 +157,15 @@ exports.table = function(req,res){
     // length of Timestamp
     var lengthOfTime=7;
     var periode="Monat";
-    if(req.param("period")=="year") {
+    if(req.param("period")=="Jahr") {
     	lengthOfTime=4;
     	periode="Jahr";
     }
-    if(req.param("period")=="month") {
+    if(req.param("period")==" Monat") {
     	lengthOfTime=7;
     	periode="Monat";
     }
-    if(req.param("period")=="day") {
+    if(req.param("period")=="Tag") {
     	lengthOfTime=10;
     	periode="Tag";
     }
@@ -194,9 +198,9 @@ exports.table = function(req,res){
     } else {
     	filterText +="kein Filter";
     }
-    periodenSwitch = generateLink("[Jahr]",basisLink,paramLength,"period=year",paramMeasure,paramLocation);
-    periodenSwitch+= generateLink("[Monat]",basisLink,paramLength,"period=month",paramMeasure,paramLocation);
-    periodenSwitch+= generateLink("[Tag]",basisLink,paramLength,"period=day",paramMeasure,paramLocation); 
+    periodenSwitch = generateLink("[Jahr]",basisLink,paramLength,"period=Jahr",paramMeasure,paramLocation);
+    periodenSwitch+= generateLink("[Monat]",basisLink,paramLength,"period=Monat",paramMeasure,paramLocation);
+    periodenSwitch+= generateLink("[Tag]",basisLink,paramLength,"period=Tag",paramMeasure,paramLocation); 
     lokSwitch ="";   
     
     if (lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
@@ -213,33 +217,36 @@ exports.table = function(req,res){
  
     
     
-    
-    
-    
-   
-    	
-    var query = [{$match: { measure: displayMeasure}},
-    						 {$project: { schluessel: "$schluessel",
+    var filterOneMeasure = {$match: { measure: displayMeasure}};
+    var aggregateTimeAxis = {$project: { schluessel: "$schluessel",
     						 			  timestamp: {$substr: ["$timestamp",0,lengthOfTime]},
     						 			  count: "$count",
     						 			  schluessel2: "$schluessel",
     						 			  timestamp2: "$timestamp",
-    						 			  }},
-    						 {$match: {schluessel: {$regex: "^"+startWith}}},
-    						 {$group: { _id: { row: "$schluessel",col:"$timestamp"},
+    						 			  }};	
+    var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+startWith}}};
+    var aggregateTimeAxisStep2 = {$group: { _id: { row: "$schluessel",col:"$timestamp"},
     						 		    count	: {$last: "$count" },
     						 		    schluessel:{$last: "$schluessel2"},
-    						 		    timestamp:{$last:"$timestamp2"}}},
-    						 {$project: { schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
+    						 		    timestamp:{$last:"$timestamp2"}}};
+	var projection2 ={$project: { schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
     						 			  time: {$substr: ["$timestamp",0,lengthOfTime]},
     						 			  count: "$count"
-    						 			  }},
-    						 {$group: { _id: { row: "$schluessel",col:"$time"},
-    						 		    cell: {$sum: "$count" }}},
-    						 {$sort: { _id:1}},
-    						 
-    						
-    						];
+    						 			  }};
+    var secondAggregation = {$group: { _id: { col:"$time",row: "$schluessel"},
+    						 		    cell: {$sum: "$count" }}}
+    var sort = {$sort: { _id:1}};
+    
+    
+   
+    	
+    var query = [filterOneMeasure,
+    			 aggregateTimeAxis,
+    			 filterRegionalschluessel,
+    			 aggregateTimeAxisStep2,
+    			 projection2,
+    			 secondAggregation,
+    			 sort];
 
 
     var aggFunc=query;   						
@@ -358,3 +365,5 @@ exports.table = function(req,res){
 	})
 
 }
+
+

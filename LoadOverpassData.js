@@ -1,6 +1,7 @@
 var loadDataFromDB =   require('./LoadDataFromDB.js');
 var debug   =  require('debug')('LoadOverpassData');
  debug.entry = require('debug')('LoadOverpassData:entry')
+ debug.data = require('debug')('LoadOverpassData:data')
 
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
@@ -11,7 +12,7 @@ queryApotheke='area["de:regionalschluessel"="03157"];(node(area)[amenity=pharmac
 
 
 
-queryAddrWOStreet='area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea; \
+queryAddrWOStreet='[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea; \
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \
  \
 way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \
@@ -93,22 +94,25 @@ exports.runOverpass= function(query, measure,result, cb) {
 			date = new Date();
 			result.timestamp=date;
 			result.count=0;
-			result.data=data;
+			result.data=JSON.parse(data).elements;
 			result.measure=measure;
 			length= data.length;
 			for (i=0;i<length;i++) {
-				if (data.charAt(i) != 'i')  {continue}
-				if (data.charAt(i+1) != 'd')  {continue}
-				if (data.charAt(i+2) != '=')  {continue}
+				if (data.charAt(i) != '"')  {continue}
+				if (data.charAt(i+1) != 'i')  {continue}
+				if (data.charAt(i+2) != 'd')  {continue}
 				if (data.charAt(i+3) != '"')  {continue}
+				if (data.charAt(i+3) != '"')  {continue}
+				if (data.charAt(i+4) != ':')  {continue}
 				result.count++;
 			}
+			debug.data("Result"+JSON.stringify(result));
 			cb();
 		}
 	}
 )}
 
-exports.createQuery = function(aufgabe,exectime)
+exports.createQuery = function(aufgabe,exectime,referenceJob)
 {
 	jobs = [];
 	if (aufgabe == "AddrWOStreet") {
@@ -122,7 +126,9 @@ exports.createQuery = function(aufgabe,exectime)
 			job.exectime = exectime;
 			job.type = "overpass";
 			job.query = queryAddrWOStreet.replace('######',job.schluessel);
+			job.source = referenceJob._id;
 			jobs.push(job);
+			
 		}
 		return jobs;
 	}

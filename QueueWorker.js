@@ -1,10 +1,10 @@
-var config = require('./configuration.js');
-var lod = require('./LoadOverpassData.js');
-var util = require('./util.js')
-var async=require('async');
-var debug        = require('debug')('QueueWorker');
- debug.entry   = require('debug')('QueueWorker:entry');
- debug.data    = require('debug')('QueueWorker:data');
+var config  = require('./configuration.js');
+var lod     = require('./LoadOverpassData.js');
+var util    = require('./util.js')
+var async   = require('async');
+var debug   = require('debug')('QueueWorker');
+ debug.entry= require('debug')('QueueWorker:entry');
+ debug.data = require('debug')('QueueWorker:data');
 
 
 
@@ -116,6 +116,7 @@ function doOverpass(cb,results) {
 			query=job.query;
 			var result= {};
 			result.schluessel = job.schluessel;
+			result.source = job.source;
 			async.series( [
 				function (cb) {
 					lod.runOverpass(query,measure,result,cb);
@@ -151,7 +152,7 @@ function doInsertJobs(cb,results) {
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
 		debug.entry("Start: doInsertJobs(cb,"+results+")");
 		mongodb = config.getDB();
-		jobs = lod.createQuery("AddrWOStreet",job.timestamp);
+		jobs = lod.createQuery("AddrWOStreet",job.timestamp,job);
 		console.log("Trigger to load AddrWOStreet at "+job.timestamp);
 		mongodb.collection("WorkerQueue").insert(jobs,
 			function (err, records) {

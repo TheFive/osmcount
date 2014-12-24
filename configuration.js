@@ -1,17 +1,17 @@
-var fs, configurationFile;
+
 var path    = require('path');
 var fs      = require('fs');
 var debug   = require('debug')('configuration');
+var MongoClient = require('mongodb').MongoClient;
 
 
 
 
 // the configurationfile should be in the "running" directory
-configurationFile = path.resolve(__dirname, 'configuration.json');
+var configurationFile = path.resolve(__dirname, 'configuration.json');
 
 var configuration;
 
-var MongoClient = require('mongodb').MongoClient;
 var mongodb ;
 
 
@@ -77,7 +77,7 @@ exports.getValue = function(key,defValue) {
     {
     	exports.initialise();
     }
-    result = defValue;
+    var result = defValue;
     if (typeof(configuration[key]) != 'undefined') {
     	result = configuration[key];
     }
