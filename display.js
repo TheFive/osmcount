@@ -1,6 +1,9 @@
 var loadDataFromDB = require('./LoadDataFromDB')
 var importCSV=require('./ImportCSV');
 var debug    = require('debug')('display');
+  debug.data = require('debug')('display:data');
+  debug.entry = require('debug')('display:entry');
+  
 var path     = require('path');
 var fs       = require("fs");
 var numeral  = require('numeral');
@@ -29,6 +32,7 @@ border: 1px solid #fff; \
 
 
 exports.count = function(req,res){
+	debug.entry("exports.count");
     var db = res.db;
     collectionName = 'DataCollection';
      if(typeof(req.param("collection"))!='undefined') {
@@ -48,6 +52,7 @@ exports.count = function(req,res){
 }
 
 exports.object = function(req,res) {
+	debug.entry("exports.object");
 	var db = res.db;
    
 	var collectionName = req.param("collection");
@@ -73,6 +78,7 @@ exports.object = function(req,res) {
 }
 
 exports.importCSV = function(req,res){
+	debug.entry("exports.importCSV");
     var db = res.db;
   
     // Fetch the collection test
@@ -104,6 +110,7 @@ exports.importCSV = function(req,res){
 	
 function generateLink(text, basis, param1,param2,param3,param4)
 {
+	debug.entry("generateLink");
   var result = text;
   var link = basis;
   var sep="?";
@@ -129,6 +136,7 @@ function generateLink(text, basis, param1,param2,param3,param4)
 
 
 exports.table = function(req,res){
+	debug.entry("exports.table");
 	var db = res.db;
   
     // Fetch the collection DataCollection
@@ -218,34 +226,36 @@ exports.table = function(req,res){
     
     
     var filterOneMeasure = {$match: { measure: displayMeasure}};
-    var aggregateTimeAxis = {$project: { schluessel: "$schluessel",
-    						 			  timestamp: {$substr: ["$timestamp",0,lengthOfTime]},
-    						 			  count: "$count",
-    						 			  schluessel2: "$schluessel",
-    						 			  timestamp2: "$timestamp",
-    						 			  }};	
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+startWith}}};
-    var aggregateTimeAxisStep2 = {$group: { _id: { row: "$schluessel",col:"$timestamp"},
-    						 		    count	: {$last: "$count" },
-    						 		    schluessel:{$last: "$schluessel2"},
-    						 		    timestamp:{$last:"$timestamp2"}}};
-	var projection2 ={$project: { schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
-    						 			  time: {$substr: ["$timestamp",0,lengthOfTime]},
-    						 			  count: "$count"
-    						 			  }};
-    var secondAggregation = {$group: { _id: { col:"$time",row: "$schluessel"},
-    						 		    cell: {$sum: "$count" }}}
+ 
+    var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
+    						 			  timestamp: "$timestamp",
+    						 			  timestampShort: {$substr: ["$timestamp",0,lengthOfTime]},
+    						 			  count: "$count",
+    						 			  source: "$source"
+    						 			  }};	
+     var aggregateMeasuresGroup = {$group: { _id: { row: "$schluessel",source:"$source"},
+    						 		    count	: {$sum: "$count" },
+    						 		    timestamp:{$last:"$timestamp"},
+    						 		    schluessel: {$last:"$schluessel"},
+    						 		    timestampShort: {$last:"$timestampShort"}}};
+      
+    var presort = {$sort: { timestamp:1}};
+ 
+    var aggregateTimeAxisStep2 = {$group: { _id: { row: "$schluessel",col:"$timestampShort"},
+    						 		    count	: {$last: "$count" }}};
+
     var sort = {$sort: { _id:1}};
     
     
    
     	
     var query = [filterOneMeasure,
-    			 aggregateTimeAxis,
     			 filterRegionalschluessel,
+    			 aggregateMeasuresProj,
+    			 aggregateMeasuresGroup,
+    			 presort,
     			 aggregateTimeAxisStep2,
-    			 projection2,
-    			 secondAggregation,
     			 sort];
 
 
@@ -289,9 +299,9 @@ exports.table = function(req,res){
 		//iterate total result array
 		for (i=0;i < items.length;i++) {
 			
-		
+			
 			measure = items[i];
-		
+			debug.data("Measure i"+i+JSON.stringify(measure));
 			row=measure._id.row;
 			col=measure._id.col;
 			
@@ -310,10 +320,10 @@ exports.table = function(req,res){
 				table[row]=[];
 			}
 			
-			table[row][col]=parseInt(measure.cell);
+			table[row][col]=parseInt(measure.count);
 			
 		}
-		
+		header.sort();
 		
 		
 		tableheader = "<th>Regioschlüssel</th><th>Name</th><th>Admin Level</th>";
