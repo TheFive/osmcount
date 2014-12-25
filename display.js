@@ -243,7 +243,7 @@ exports.table = function(req,res){
     var presort = {$sort: { timestamp:1}};
  
     var aggregateTimeAxisStep2 = {$group: { _id: { row: "$schluessel",col:"$timestampShort"},
-    						 		    count	: {$last: "$count" }}};
+    						 		    cell	: {$last: "$count" }}};
 
     var sort = {$sort: { _id:1}};
     
@@ -320,7 +320,7 @@ exports.table = function(req,res){
 				table[row]=[];
 			}
 			
-			table[row][col]=parseInt(measure.count);
+			table[row][col]=parseInt(measure.cell);
 			
 		}
 		header.sort();
