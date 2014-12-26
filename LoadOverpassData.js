@@ -9,7 +9,7 @@ var debug   =  require('debug')('LoadOverpassData');
 // To be changed to a more readable import routine
 
 query = {
-   Apotheke:'[out:json];area["de:regionalschluessel"="#####"];(node(area)[amenity=pharmacy];way(area)[amenity=pharmacy];rel(area)[amenity=pharmacy]);out ids;',
+   Apotheke:'[out:json];area["de:regionalschluessel"="######"];(node(area)[amenity=pharmacy];way(area)[amenity=pharmacy];rel(area)[amenity=pharmacy]);out ids;',
    AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea; \
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \
  \

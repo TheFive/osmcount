@@ -234,7 +234,7 @@ exports.table = function(req,res){
     var paramLength = "lok="+lengthOfKey;
     var paramLocation = "location="+startWith;
     
-    beforeText= "<h1> Messergebnisse </h1>";
+    beforeText= "<h1> OSM Count </h1>";
     var filterText = "";
     if (startWith!="") {
     	filterText+= location+" ("+startWith+","+locationType+")";
