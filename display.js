@@ -12,6 +12,25 @@ var async    = require('async');
 var ObjectID = require('mongodb').ObjectID;
 
 
+var apothekenSoll2013 = {
+"08": 2639 ,
+"09": 3304 ,
+"11": 858 ,
+"12": 576 ,
+"04": 152 ,
+"02": 432 ,
+"06": 1546, 
+"13": 410 ,
+"03": 2014, 
+"05": 2393 + 2077, 
+"07": 1065 ,
+"10": 316 ,
+"14": 996 ,
+"15": 615 ,
+"01": 706 ,
+"16": 563 };
+
+
 var tableCSSStyle = '<head>\
 <style>\
 table, th, td {\
@@ -226,12 +245,15 @@ exports.table = function(req,res){
     periodenSwitch = generateLink("[Jahr]",basisLink,paramLength,"period=Jahr",paramMeasure,paramLocation);
     periodenSwitch+= generateLink("[Monat]",basisLink,paramLength,"period=Monat",paramMeasure,paramLocation);
     periodenSwitch+= generateLink("[Tag]",basisLink,paramLength,"period=Tag",paramMeasure,paramLocation); 
+    filterSwitch = generateLink("[AddrWOStreet]",basisLink,"lok=2","period=month","measure=AddrWOStreet");
+    filterSwitch += generateLink("[Apotheke]",basisLink,"lok=2","period=month","measure=Apotheke");
+    
     lokSwitch ="";   
     
     if (lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
     if (lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
-    var filterTable = "<tr><td>Messung</td><td><b>"+displayMeasure+"</b></td><td></td></tr>"
+    var filterTable = "<tr><td>Messung</td><td><b>"+displayMeasure+"</b></td><td>"+filterSwitch+"</td></tr>"
     filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure)+"</td></tr>"
     filterTable += "<tr><td>Periode</td><td><b>"+periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
     filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lengthOfKey+"</b></td><td>"+lokSwitch+"</td></tr>"
@@ -300,10 +322,11 @@ exports.table = function(req,res){
 						
 						// Fetch the collection test
 						var collection = db.collection(collectionName);
-						collection.count({status:"open"},function(err, count) {
+						collection.count({status:"open",measure:displayMeasure},function(err, count) {
 							openQueries=count;
+							callback();
 						});  
-						callback();
+						
 
 					
 					}],
@@ -341,11 +364,18 @@ exports.table = function(req,res){
 			
 		}
 		header.sort();
+		displayVorgabe = ((lengthOfKey == 2)&&(displayMeasure=="Apotheke"));
 		
 		
 		tableheader = "<th>Regioschlüssel</th><th>Name</th><th>Admin Level</th>";
+		if (displayVorgabe) {
+			tableheader += "<th> Werte 2013 ABDA </th>";
+		}
 		for (i=0;i<header.length;i++) {
 			tableheader +="<th>"+header[i]+"</th>";
+		}
+		if (displayVorgabe) {
+			tableheader += "<th> diff </th>";
 		}
 		tableheader = "<tr>"+tableheader + "</tr>";
 		tablebody="";
@@ -364,17 +394,25 @@ exports.table = function(req,res){
 				schluesselLink = generateLink(schluessel,basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,"location="+schluessel);
  
 				var row = "<th>"+schluesselLink+"</th>"+"<td>"+schluesselText+"</td>"+"<td>"+schluesselTyp+"</td>";
+				if (displayVorgabe) {
+					row += "<td>"+numeral(apothekenSoll2013[schluessel]).format()+"</td>"
+				}
+				var lastValue = 0;
 				for (z=0;z<header.length;z++) {
 					timestamp=header[z];
 					
 					var cell;
 					var content=table[schluessel][timestamp];
+					lastValue = content;
 					if (typeof(content) == "undefined") {
 						cell ="-";
 					} else {
 						cell = numeral(content).format();
 					}
 					row += "<td>"+cell+"</td>";
+				}
+				if (displayVorgabe) {
+					row += "<td>"+numeral(apothekenSoll2013[schluessel]-lastValue).format()+"</td>"
 				}
 				row = "<tr>"+row+"</tr>";
 				tablebody += row;
@@ -383,8 +421,7 @@ exports.table = function(req,res){
 			tablebody +="</tr>"	;
 			
 			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
-			pagefooter += "<p><h2>MongoDB Aggregat Funktion:</h2>";
-			pagefooter += "<pre>"+JSON.stringify(query,null,' ')+"</pre></p>";
+			debug.data(JSON.stringify(query,null,' '));
 			text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table>"+pagefooter+"</body></html>";
 			res.set('Content-Type', 'text/html');
 			res.end(text);

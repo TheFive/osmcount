@@ -8,7 +8,7 @@ var debug   =  require('debug')('LoadOverpassData');
 
 // To be changed to a more readable import routine
 
-queryApotheke='area["de:regionalschluessel"="03157"];(node(area)[amenity=pharmacy];way(area)[amenity=pharmacy];rel(area)[amenity=pharmacy]);out ids;'
+queryApotheke='[out:json];area["de:regionalschluessel"="#####"];(node(area)[amenity=pharmacy];way(area)[amenity=pharmacy];rel(area)[amenity=pharmacy]);out ids;'
 
 
 
