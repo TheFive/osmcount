@@ -1,13 +1,34 @@
-var config  = require('./configuration.js');
-var lod     = require('./LoadOverpassData.js');
-var util    = require('./util.js')
-var async   = require('async');
-var debug   = require('debug')('QueueWorker');
- debug.entry= require('debug')('QueueWorker:entry');
- debug.data = require('debug')('QueueWorker:data');
+var config    = require('./configuration.js');
+var lod       = require('./LoadOverpassData.js');
+var util      = require('./util.js')
+var async     = require('async');
+var debug     = require('debug')('QueueWorker');
+ debug.entry  = require('debug')('QueueWorker:entry');
+ debug.data   = require('debug')('QueueWorker:data');
+var ObjectID  = require('mongodb').ObjectID;
 
 
+function getWorkingJob(cb) {	
+	debug.entry("getWorkingJob(cb)");
+	mongodb = config.getDB();
+	mongodb.collection("WorkerQueue").findOne( 
+							{ status : "working" 
+							}, function(err, obj) 
+	{
+		debug.entry("getWorkingJob->CB("+err+","+obj+")");
+		if (err) {
+			console.log("Error occured in function: QueueWorker.getNextJob");
+			console.log(err);
+		}
 
+		if (obj) {
+			debug.data("found job %s",obj.type);		
+			// return obj as job object
+			obj.status="open";
+		}
+		cb(err,obj);
+	}
+)}
 
 
 function getNextJob(cb) {	
@@ -143,8 +164,6 @@ function doOverpass(cb,results) {
 	} else cb(null,job);
 }
 
-
-
 function doInsertJobs(cb,results) {
 	debug.entry("doInsertJobs(cb,"+results+")");
 	job=results.readjob;
@@ -170,6 +189,33 @@ function doInsertJobs(cb,results) {
 			})
 	}
 	else if (cb) cb(null,job);
+}
+
+function checkState(cb,results) {
+	debug.entry("checkState(cb,"+results+")");
+	job=results.readjob;
+	if (!job) {
+		cb(null,null);
+		return;
+	}
+	mongodb = config.getDB();
+	mongodb.collection("DataCollection").findOne( 
+							{ source : job.source,schluessel:job.schluessel}
+							 
+							, function(err, obj) 
+	{
+		debug.entry("checkState->CB");
+		if (obj) {
+			job.status = "done";
+			debug.data("Close Job");
+		}
+		else {
+			job.status = "open";
+			debug.data("Job Still open");
+		}
+		if (cb) cb(null,obj);
+
+	})
 }
 
 
@@ -200,16 +246,37 @@ function doNextJob(callback) {
 	)
 }
 
+
+
+
+function correctData(callback) {
+	debug.entry("correctData(cb)");
+	async.auto( {readjob:     getWorkingJob,
+		         correctData: ["readjob",checkState],
+		   		 saveDone:    ["correctData", saveJobState]
+		},
+		function (err,results) {
+			if (err) {
+				console.log("Error occured in function: QueueWorker.doNextJob");
+				console.log(err);
+			}
+			if (results) debug("finished %s" ,results);
+			job = results.readjob;
+			if (job ) {
+				q.push(correctData);
+			}
+			callback();
+		}
+	)
+}
+
 exports.startQueue =function(cb) {
 	debug.entry("startQueue(cb)");
 	q.push(config.initialiseDB);
+	q.push(correctData);
 	q.push(doNextJob);
 	if (cb) cb();
 }
-
-
-
-
 
 
 
