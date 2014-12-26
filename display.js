@@ -145,7 +145,24 @@ exports.table = function(req,res){
     
 
 	var kreisnamen = loadDataFromDB.schluesselMap;
-	numeral.language('de',de);
+	numeral.language('de', {
+        delimiters: {
+            thousands: '.',
+            decimal: ','
+        },
+        abbreviations: {
+            thousand: 'k',
+            million: 'm',
+            billion: 'b',
+            trillion: 't'
+        },
+        ordinal: function (number) {
+            return '.';
+        },
+        currency: {
+            symbol: '€'
+        }
+    });
 	numeral.language('de');
 
 
