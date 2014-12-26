@@ -8,11 +8,9 @@ var debug   =  require('debug')('LoadOverpassData');
 
 // To be changed to a more readable import routine
 
-queryApotheke='[out:json];area["de:regionalschluessel"="#####"];(node(area)[amenity=pharmacy];way(area)[amenity=pharmacy];rel(area)[amenity=pharmacy]);out ids;'
-
-
-
-queryAddrWOStreet='[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea; \
+query = {
+   Apotheke:'[out:json];area["de:regionalschluessel"="#####"];(node(area)[amenity=pharmacy];way(area)[amenity=pharmacy];rel(area)[amenity=pharmacy]);out ids;',
+   AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea; \
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \
  \
 way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \
@@ -25,10 +23,10 @@ node(r.associatedStreet:"house")->.asHouseNode; \
  \
 rel(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesRel; \
 rel(r.associatedStreet:"house")->.asHouseRel; \
-(.allHousesRel; - .asHouseRel);out ids;' 
+(.allHousesRel; - .asHouseRel);out ids;'
+}
 
-queryBoundaries='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out; \
-' 
+queryBoundaries='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out;' 
 
 
 
@@ -115,7 +113,7 @@ exports.runOverpass= function(query, measure,result, cb) {
 exports.createQuery = function(aufgabe,exectime,referenceJob)
 {
 	jobs = [];
-	if (aufgabe == "AddrWOStreet") {
+	if ((aufgabe == "AddrWOStreet") || (aufgabe == "Apotheke")) {
 		keys = loadDataFromDB.blaetter;
 		for (i =0;i<keys.length;i++) {	
 			debug(keys[i]);	
@@ -125,7 +123,7 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 			job.status='open';
 			job.exectime = exectime;
 			job.type = "overpass";
-			job.query = queryAddrWOStreet.replace('######',job.schluessel);
+			job.query = query[aufgabe].replace('######',job.schluessel);
 			job.source = referenceJob._id;
 			jobs.push(job);
 			

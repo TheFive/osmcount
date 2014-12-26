@@ -171,8 +171,8 @@ function doInsertJobs(cb,results) {
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
 		debug.entry("Start: doInsertJobs(cb,"+results+")");
 		mongodb = config.getDB();
-		jobs = lod.createQuery("AddrWOStreet",job.timestamp,job);
-		console.log("Trigger to load AddrWOStreet at "+job.timestamp);
+		jobs = lod.createQuery(job.measure,job.timestamp,job);
+		console.log("Trigger to load "+job.measure+" at "+job.timestamp);
 		mongodb.collection("WorkerQueue").insert(jobs,
 			function (err, records) {
 				if (err) {
