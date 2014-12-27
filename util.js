@@ -1,4 +1,7 @@
 var configuration = require('./configuration.js');
+var num  = require('numeral');
+var de       = require('numeral/languages/de');
+
 
 // internal Function to duplicate an object
 exports.clone = function (obj) {
@@ -28,3 +31,26 @@ exports.createWaiter = function(seconds) {
 
 exports.waitOneMin = exports.createWaiter(configuration.getValue("waitTime",120));
 
+exports.numeral = num;
+
+exports.initialise = function() {
+    num.language('de', {
+        delimiters: {
+            thousands: '.',
+            decimal: ','
+        },
+        abbreviations: {
+            thousand: 'k',
+            million: 'm',
+            billion: 'b',
+            trillion: 't'
+        },
+        ordinal: function (number) {
+            return '.';
+        },
+        currency: {
+            symbol: '€'
+        }
+    });
+	num.language('de');
+}

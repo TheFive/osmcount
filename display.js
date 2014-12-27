@@ -6,10 +6,9 @@ var debug    = require('debug')('display');
   
 var path     = require('path');
 var fs       = require("fs");
-var numeral  = require('numeral');
-var de       = require('numeral/languages/de');
 var async    = require('async');
 var ObjectID = require('mongodb').ObjectID;
+var util     = require('./util.js');
 
 
 var apothekenSoll2013 = {
@@ -129,8 +128,7 @@ exports.importCSV = function(req,res){
 	
 function generateLink(text, basis, param1,param2,param3,param4)
 {
-	debug.entry("generateLink");
-  var result = text;
+  debug.entry("generateLink");
   var link = basis;
   var sep="?";
   if (param1){
@@ -149,9 +147,53 @@ function generateLink(text, basis, param1,param2,param3,param4)
   	link+= sep+param4;
   	sep="&";
   }
-  return "<a href="+link+">"+result + "</a>";
+  if (text == "") {
+  	return link;
+  } else {
+  	return "<a href="+link+">"+text + "</a>";
+  }
 }
 
+function setParams(req,param) {
+    // Parse html parameters
+    param.measure="AddrWOStreet";    
+    if(typeof(req.param("measure"))!='undefined') {
+    	param.measure=req.param("measure");
+    }
+    param.sort ="";
+    if(typeof(req.param("sort"))!='undefined') {
+    	param.sort=req.param("sort");
+    }
+    param.lengthOfKey = 2;
+    if(typeof(req.param("lok"))!="undefined") {
+    	param.lengthOfKey=parseInt(req.param("lok"));
+    }
+    
+    param.lengthOfTime=7;
+    param.periode="Monat";
+    if(req.param("period")=="Jahr") {
+    	param.lengthOfTime=4;
+    	param.periode="Jahr";
+    }   
+    if(req.param("period")==" Monat") {
+    	param.lengthOfTime=7;
+    	param.periode="Monat";
+    }
+    if(req.param("period")=="Tag") {
+    	param.lengthOfTime=10;
+    	param.periode="Tag";
+    }
+   	param.locationStartWith ="";
+    param.location="";
+    param.locationType="-";
+    if(typeof(req.param("location"))!='undefined') {
+    	param.location=req.param("location");
+    	param.locationStartWith = param.location;
+    	param.locationType="-";
+    }
+    
+
+}
 
 
 exports.table = function(req,res){
@@ -164,80 +206,27 @@ exports.table = function(req,res){
     
 
 	var kreisnamen = loadDataFromDB.schluesselMap;
-	numeral.language('de', {
-        delimiters: {
-            thousands: '.',
-            decimal: ','
-        },
-        abbreviations: {
-            thousand: 'k',
-            million: 'm',
-            billion: 'b',
-            trillion: 't'
-        },
-        ordinal: function (number) {
-            return '.';
-        },
-        currency: {
-            symbol: '€'
-        }
-    });
-	numeral.language('de');
+	numeral = util.numeral;
 
-
- 
-    // Parse html parameters
-    var displayMeasure="AddrWOStreet";    
-    if(typeof(req.param("measure"))!='undefined') {
-    	displayMeasure=req.param("measure");
-    }
-    
-    // length for the Regioschluessel
-    var lengthOfKey=2;
-    if (typeof(req.param("lok")) != 'undefined' && req.param("lok").parseInt != 'NaN') {
-     	lengthOfKey=parseInt(req.param("lok"));
-    }
-    
-    // length of Timestamp
-    var lengthOfTime=7;
-    var periode="Monat";
-    if(req.param("period")=="Jahr") {
-    	lengthOfTime=4;
-    	periode="Jahr";
-    }
-    if(req.param("period")==" Monat") {
-    	lengthOfTime=7;
-    	periode="Monat";
-    }
-    if(req.param("period")=="Tag") {
-    	lengthOfTime=10;
-    	periode="Tag";
-    }
-    var startWith="";
-    var location=startWith;
-    var locationType="-";
-    if(typeof(req.param("location"))!='undefined') {
-    	startWith=req.param("location");
-    	location=startWith;
-    	locationType="-";
-    	v = kreisnamen[startWith];
-    	if (typeof(v)!='undefined') {
-    		location=v.name;
-    		locationType=v.typ;
-    	}
-    }
+	param = {};
+    setParams(req,param);
+	v = kreisnamen[param.locationStartWith];
+	if (typeof(v)!='undefined') {
+		param.location=v.name;
+		param.locationType=v.typ;
+	}
     
     
     var basisLink = "./table.html";
-    var paramTime = "period="+periode;
-    var paramMeasure = "measure="+displayMeasure;
-    var paramLength = "lok="+lengthOfKey;
-    var paramLocation = "location="+startWith;
+    var paramTime = "period="+param.periode;
+    var paramMeasure = "measure="+param.measure;
+    var paramLength = "lok="+param.lengthOfKey;
+    var paramLocation = "location="+param.locationStartWith;
     
     beforeText= "<h1> OSM Count </h1>";
     var filterText = "";
-    if (startWith!="") {
-    	filterText+= location+" ("+startWith+","+locationType+")";
+    if (param.locationStartWith!="") {
+    	filterText+= param.location+" ("+param.locationStartWith+","+param.locationType+")";
     	
     } else {
     	filterText +="kein Filter";
@@ -250,13 +239,13 @@ exports.table = function(req,res){
     
     lokSwitch ="";   
     
-    if (lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
-    if (lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,paramLocation);
+    if (param.lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(param.lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
+    if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
-    var filterTable = "<tr><td>Messung</td><td><b>"+displayMeasure+"</b></td><td>"+filterSwitch+"</td></tr>"
+    var filterTable = "<tr><td>Messung</td><td><b>"+param.measure+"</b></td><td>"+filterSwitch+"</td></tr>"
     filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure)+"</td></tr>"
-    filterTable += "<tr><td>Periode</td><td><b>"+periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
-    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lengthOfKey+"</b></td><td>"+lokSwitch+"</td></tr>"
+    filterTable += "<tr><td>Periode</td><td><b>"+param.periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
+    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+param.lengthOfKey+"</b></td><td>"+lokSwitch+"</td></tr>"
     
 	filterTable = "<table>"+filterTable+"</table><br><br>";
 	beforeText += filterTable;
@@ -264,12 +253,12 @@ exports.table = function(req,res){
  
     
     
-    var filterOneMeasure = {$match: { measure: displayMeasure}};
-    var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+startWith}}};
+    var filterOneMeasure = {$match: { measure: param.measure}};
+    var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+param.locationStartWith}}};
  
-    var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
+    var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
     						 			  timestamp: "$timestamp",
-    						 			  timestampShort: {$substr: ["$timestamp",0,lengthOfTime]},
+    						 			  timestampShort: {$substr: ["$timestamp",0,param.lengthOfTime]},
     						 			  count: "$count",
     						 			  source: "$source"
     						 			  }};	
@@ -297,6 +286,7 @@ exports.table = function(req,res){
     			 aggregateTimeAxisStep2,
     			 sort];
 
+	debug.data("query:"+JSON.stringify(query));
 
     var aggFunc=query;   						
  	var openQueries=0;
@@ -322,7 +312,7 @@ exports.table = function(req,res){
 						
 						// Fetch the collection test
 						var collection = db.collection(collectionName);
-						collection.count({status:"open",measure:displayMeasure},function(err, count) {
+						collection.count({status:"open",measure:param.measure},function(err, count) {
 							openQueries=count;
 							callback();
 						});  
@@ -335,8 +325,10 @@ exports.table = function(req,res){
     	var header = [];
 		var firstColumn = [];
 		var table =[]; 
+		var format=[];
 		
 		//iterate total result array
+		// and generate 2 Dimensional Table
 		for (i=0;i < items.length;i++) {
 			
 			
@@ -364,61 +356,93 @@ exports.table = function(req,res){
 			
 		}
 		header.sort();
-		displayVorgabe = ((lengthOfKey == 2)&&(displayMeasure=="Apotheke"));
+
 		
+		// Extend two dimensional Table
+		displayVorgabe = ((param.lengthOfKey == 2)&&(param.measure=="Apotheke"));
 		
-		tableheader = "<th>Regioschlüssel</th><th>Name</th><th>Admin Level</th>";
+
 		if (displayVorgabe) {
-			tableheader += "<th> Werte 2013 ABDA </th>";
+			header.unshift("Vorgabe");
 		}
+		
+		header.unshift("Admin Level");
+		header.unshift("Name");
+		header.unshift("Regioschlüssel");
+		format["Regioschlüssel"]= {};
+		format["Regioschlüssel"].generateLink = function(value) {
+			return generateLink("",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,"location="+value);
+		};
+		
+		if (displayVorgabe) {
+			header.push("Diff");
+			format["Diff"]={};
+			format["Diff"].format='0%';
+			
+		}
+		for (i=0;i<firstColumn.length;i++)
+		{
+			schluessel = firstColumn[i];
+			schluesselText=schluessel;
+			schluesselTyp="-";
+			value = kreisnamen[schluessel];
+				
+			if (typeof(value)!= 'undefined') {
+				schluesselText = value.name;
+				schluesselTyp = value.typ;
+			}
+			table[schluessel]["Regioschlüssel"]=schluessel;
+			table[schluessel]["Name"]=schluesselText;
+			table[schluessel]["Admin Level"]=schluesselTyp;
+			if (displayVorgabe){ 
+				expectation = apothekenSoll2013[schluessel];
+				table[schluessel]["Vorgabe"]=expectation;
+				lastValue = table[schluessel][header[header.length-2]];
+				table[schluessel]["Diff"]=lastValue/expectation;
+			}
+		}
+		tableheader = "";
 		for (i=0;i<header.length;i++) {
 			tableheader +="<th>"+header[i]+"</th>";
 		}
-		if (displayVorgabe) {
-			tableheader += "<th> diff </th>";
+		if (header.indexOf(param.sort>=0)) {
+			firstColumn.sort( function(a,b) {return table[b][param.sort]-table[a][param.sort]});
 		}
 		tableheader = "<tr>"+tableheader + "</tr>";
 		tablebody="";
 		{
 			for (i=0;i<firstColumn.length;i++)
 			{
-				schluessel = firstColumn[i];	
-				schluesselText=schluessel;
-				schluesselTyp="-";
-				value = kreisnamen[schluessel];
+				row = firstColumn[i];
+				tablerow = "";
 				
-				if (typeof(value)!= 'undefined') {
-					schluesselText = value.name;
-					schluesselTyp = value.typ;
-				}
-				schluesselLink = generateLink(schluessel,basisLink,"lok="+(lengthOfKey+1),paramTime,paramMeasure,"location="+schluessel);
- 
-				var row = "<th>"+schluesselLink+"</th>"+"<td>"+schluesselText+"</td>"+"<td>"+schluesselTyp+"</td>";
-				if (displayVorgabe) {
-					row += "<td>"+numeral(apothekenSoll2013[schluessel]).format()+"</td>"
-				}
-				var lastValue = 0;
 				for (z=0;z<header.length;z++) {
-					timestamp=header[z];
+					col=header[z];
 					
 					var cell;
-					var content=table[schluessel][timestamp];
-					lastValue = content;
+					var content=table[row][col];
+					var f = (format[col]) ? format[col].format: null;
+					glink = (format[col]) ? format[col].generateLink:null;
+					
 					if (typeof(content) == "undefined") {
 						cell ="-";
 					} else {
-						cell = numeral(content).format();
+						if (f) {
+							cell = numeral(content).format(f);
+						} else if (typeof(content)=='number') {
+							cell = numeral(content).format();
+						} else {
+						    cell = content; // numeral(content).format();
+						}
 					}
-					row += "<td>"+cell+"</td>";
+					if (glink) {
+						cell = '<a href="'+glink(cell)+'">'+cell+'</a>';
+					}
+					tablerow += "<td>"+cell+"</td>";
 				}
-				if (displayVorgabe) {
-					row += "<td>"+numeral(apothekenSoll2013[schluessel]-lastValue).format()+"</td>"
-				}
-				row = "<tr>"+row+"</tr>";
-				tablebody += row;
+				tablerow = "<tr>"+tablerow+"</tr>";
+				tablebody += tablerow;
 			}
-			tableheader += "</tr>";
-			tablebody +="</tr>"	;
 			
 			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
 			debug.data(JSON.stringify(query,null,' '));
