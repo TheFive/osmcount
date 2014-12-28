@@ -17,9 +17,13 @@ var mongodb ;
 
 getDBString = function() {
 	configuration=exports.getConfiguration();
+	var userString = "";
+	if (configuration.username != "") {
+		userString = configuration.username + ':'
+                   + configuration.password +'@';
+	}
 	var mongodbConnectStr ='mongodb://'
-                   + configuration.username + ':'
-                   + configuration.password + '@'
+                   + userString 
                    + configuration.database;
 	return mongodbConnectStr;        
 }
