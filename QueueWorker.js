@@ -11,7 +11,7 @@ var ObjectID  = require('mongodb').ObjectID;
 function getWorkingJob(cb) {	
 	debug.entry("getWorkingJob(cb)");
 	mongodb = config.getDB();
-	mongodb.collection("WorkerQueue").findOne( 
+	mongodb.collection(" 	").findOne( 
 							{ status : "working" 
 							}, function(err, obj) 
 	{
@@ -172,11 +172,19 @@ function doInsertJobs(cb,results) {
 		debug.entry("Start: doInsertJobs(cb,"+results+")");
 		mongodb = config.getDB();
 		jobs = lod.createQuery(job.measure,job.timestamp,job);
-		console.log("Trigger to load "+job.measure+" at "+job.timestamp);
+		console.log("Trigger to load "+job.measure+" at "+job.timestamp + " Number Jobs "+ jobs.length);
+		if (jobs.length == 0) {
+			// No Jobs created
+			console.log("Nothing loaded");
+			job.status = "error";
+			job.error = "createQuery results in 0 Jobs";
+			if (cb) cb(null,job);
+			return;
+		}
 		mongodb.collection("WorkerQueue").insert(jobs,
 			function (err, records) {
 				if (err) {
-					console.log("Error occured in function: QueueWorker.doInserJobs");
+					console.log("Error occured in function: QueueWorker.doInsertJobs");
 					console.log(err);
 					job.status="error";
 					job.error = err;
