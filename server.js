@@ -11,11 +11,12 @@ var queue            = require('./QueueWorker.js');
 var loadDataFromDB   = require('./LoadDataFromDB.js');
 var loadOverpassData = require('./LoadOverpassData.js')
 var display          = require('./display.js');
+var util             = require('./util.js');
 
 
 var app = express();
 
-
+util.initialise();
 
 // Initialise all Modules in the right sequence
 
