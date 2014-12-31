@@ -125,6 +125,15 @@ exports.importCSV = function(req,res){
     res.end(text);
 }
 	
+exports.importApotheken = function(req,res) {
+	debug.entry("importApotheken");
+    var db = res.db;
+  
+    importCSV.importApothekenVorgabe(db);
+    text = "Importiert Apotheken";
+    text += "Files imported";
+    res.end(text);
+}
 	
 function generateLink(text, basis, param1,param2,param3,param4)
 {
@@ -203,6 +212,7 @@ exports.table = function(req,res){
     // Fetch the collection DataCollection
     // To be Improved with Query or Aggregation Statments
     var collection = db.collection('DataCollection');
+    var collectionTarget = db.collection('DataTarget');
     
 
 	var kreisnamen = loadDataFromDB.schluesselMap;
@@ -286,11 +296,24 @@ exports.table = function(req,res){
     			 aggregateTimeAxisStep2,
     			 sort];
 
+	var queryVorgabe = [
+				filterOneMeasure,
+				filterRegionalschluessel,
+				{$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
+    						 			  vorgabe: "$apothekenVorgabe"
+    						 			  }},
+    			{$group: { _id:  "$schluessel",
+    						 vorgabe	: {$sum: "$vorgabe" },
+    						 		  }}];
+    						 		  
+    						 		  
 	debug.data("query:"+JSON.stringify(query));
+	debug.data("queryVorgabe:"+JSON.stringify(queryVorgabe));
 
     var aggFunc=query;   						
  	var openQueries=0;
     var items = [];
+    var vorgabe = {};
     async.parallel( [ function(callback) {
    				 collection.aggregate(	query
 										, (function(err, data) {
@@ -303,6 +326,28 @@ exports.table = function(req,res){
 							;
 						}
 						items = data;
+						callback();
+					}))},
+					function(callback) {
+   					 collectionTarget.aggregate(	queryVorgabe
+										, (function(err, data) {
+						if (err) {
+							res.end("error"+err);
+							console.log("Table Function, Error occured:");
+							console.log(err);
+							;
+						}
+						console.log("Data Lengh "+data.length);
+						for (i = 0;i<data.length;i++)
+						{
+							console.dir(data[i]);
+							schluessel = data[i]._id;
+							value = data[i].vorgabe;
+							console.log(schluessel + ","+value);
+							vorgabe [schluessel]=value;
+						}
+						console.dir("konverted");
+						console.dir(vorgabe);
 						callback();
 					}))},
 					function (callback) {
@@ -359,7 +404,7 @@ exports.table = function(req,res){
 
 		
 		// Extend two dimensional Table
-		displayVorgabe = ((param.lengthOfKey == 2)&&(param.measure=="Apotheke"));
+		displayVorgabe = ((param.lengthOfKey > 1)&&(param.measure=="Apotheke"));
 		
 
 		if (displayVorgabe) {
@@ -395,7 +440,7 @@ exports.table = function(req,res){
 			table[schluessel]["Name"]=schluesselText;
 			table[schluessel]["Admin Level"]=schluesselTyp;
 			if (displayVorgabe){ 
-				expectation = apothekenSoll2013[schluessel];
+				expectation = vorgabe[schluessel];
 				table[schluessel]["Vorgabe"]=expectation;
 				lastValue = table[schluessel][header[header.length-2]];
 				table[schluessel]["Diff"]=lastValue/expectation;

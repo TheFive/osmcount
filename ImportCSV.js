@@ -3,6 +3,7 @@ var util    = require('./util.js');
 var path    = require('path');
 var debug   = require('debug')('importCSV');
  debug.entry = require('debug')('importCSV:entry');
+ debug.data = require('debug')('importCSV:data');
 
 
 
@@ -49,28 +50,53 @@ function parseCSV(str,delimiter) {
 }
 
 
+exports.parseCSV = parseCSV;
 
+exports.convertArrToJSON = function(array,defJson) {
+	debug.entry("convertArrToJSON");
+	numeral = util.numeral;
+	var newData = [];
+	debug.data("Structure "+JSON.stringify(array[0]));
+	for (i=1;i<array.length;i++) {
+		debug.data("Convert Line "+i);
+		newData[i-1] = util.clone(defJson);
+		
+		for (z=0;z<array[0].length;z++) {
+			debug.data("Convert Column "+z);
+			key = array[0][z];
+			value = array[i][z];
+			debug.data(key+typeof(defJson[key]));
+			switch(typeof(defJson[key])) {
+				case 'number':
+					newData [i-1][key]=numeral().unformat(value);
+					break;
+				case 'date':
+					y=value.slice(0,4);
+					m=value.slice(6,6+2);
+					d=value.slice(9,9+2);
+					newData[i-1][key]=new date(y,m-1,d);
+					break;
+				default:
+					newData[i-1][key]=value;
+			}		
+		}
+	}
+	return newData;
+}
 
+function importCSVToCollection(filename,collection,defJson,cb) {
+	debug.entry("importCSVToCollection("+filename+"..)");
 
-// readCSV Function to import CSV to the Measure Database
-// Input: a MongoDB, a template JSON, CSV Filename, encoding 
-exports.readCSV = function(filename,db,defJson,encoding) {
-	debug.entry("readCSV("+filename+"..)");
-
-
-	//filename = path.resolve(__dirname, filename);
 	
 	// Open the file and copy it to a string
 	// encoding is ignored yet
 	fs.readFile(filename, 'UTF8', function (err,data) {
-		debug.entry("readCSV readFileCB" + filename);
-		if (typeof(db)=='undefined') {
-			debug("Internal Error db undefined");
-			return;
-		}
+		debug.entry("importCSVToCollection readFileCB" + filename);
+
 		
 		if (err) {
-			debug(err);
+			console.log(err);
+			if (cb) cb(err,null);
 			return;
 		}
 		
@@ -79,7 +105,8 @@ exports.readCSV = function(filename,db,defJson,encoding) {
 		
 		if(array.length<2) {
 			// CSV File is empty, log an error
-			debug("Empty File %s",filename);
+			console.log("Empty File %s",filename);
+			if (cb) cb("empty file",null);
 			return;
 		}
 		else {
@@ -92,34 +119,41 @@ exports.readCSV = function(filename,db,defJson,encoding) {
 		for (i=1;i<array.length;i++) {
 			if (array[0].length!=array[i].length) {
 				debug("Invalid CSV File, Number of Columns differs "+filename +" Zeile "+i);
+				if (cb) cb("Invalid CSV File",null);
 				return
 			}
 		}
 		
 		// Copy measures into the DataCollection MongoDB
+		var newData = exports.convertArrToJSON(array,defJson);
+
+		collection.insert(newData,{w:1},function (){if (cb) cb(null,null);});
+   	});}
+
+
+// readCSV Function to import CSV to the Measure Database
+// Input: a MongoDB, a template JSON, CSV Filename, encoding 
+exports.readCSV = function(filename,db,defJson,cb) {
+	debug.entry("readCSV("+filename+"..)");
+
+
 		var collection = db.collection('DataCollection');
-		newData = [];
-		for (i=1;i<array.length;i++) {
-			newData[i-1] = util.clone(defJson);
-			for (z=0;z<array[0].length;z++) {
-				key = array[0][z];
-				value = array[i][z];
-				debug(key+typeof(defJSON[key]));
-				switch(typeof(defJSON[key])) {
-					case 'number':
-						newData [i-1][key]=parseInt(value);
-						break;
-					case 'date':
-						y=value.slice(0,4);
-						m=value.slice(6,6+2);
-						d=value.slice(9,9+2);
-						newData[i-1][key]=new date(y,m-1,d);
-						break;
-					default:
-						newData[i-1][key]=value;
-				}		
-			}
-		}
-		collection.insert(newData,{w:1},function (){});
-   	});
+		importCSVToCollection(filename,collection,defJson,cb);
+		var newData = this.convertArrToJSON(arr,defJson);
+
+		
+}
+
+exports.importApothekenVorgabe = function(db,cb) {
+	debug.entry("importApothekenVorgabe("+"..)");
+	var  defJson = {
+		source: "ABDA2011+Schätzung",
+		measure: "Apotheke",
+		apothekenVorgabe: 0.0
+	}; 
+	var filename = "Anzahl Apotheken.csv";
+	filename = path.resolve(__dirname, filename);
+	var collection = db.collection('DataTarget');
+	importCSVToCollection(filename,collection,defJson,cb);
+		
 }
