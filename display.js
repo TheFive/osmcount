@@ -215,7 +215,8 @@ exports.table = function(req,res){
     var collectionTarget = db.collection('DataTarget');
     
 
-	var kreisnamen = loadDataFromDB.schluesselMap;
+	var kreisnamen; 
+	
 	numeral = util.numeral;
 
 	param = {};
@@ -226,6 +227,12 @@ exports.table = function(req,res){
 		param.locationType=v.typ;
 	}
     
+    if (param.measure) = "Apotheke" {
+    		kreisnamen = loadDataFromDB.schluesselMapAGS;
+    }
+    if (param.measure) = "AddrWOStreet" {
+    		kreisnamen = loadDataFromDB.schluesselMapRegio;
+    }
     
     var basisLink = "./table.html";
     var paramTime = "period="+param.periode;

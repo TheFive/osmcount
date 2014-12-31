@@ -112,9 +112,17 @@ exports.runOverpass= function(query, measure,result, cb) {
 
 exports.createQuery = function(aufgabe,exectime,referenceJob)
 {
+	debug.entry("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
 	jobs = [];
+ 	var blaetter;
+ 	if (aufgabe == "AddrWOstreet") {
+ 		blaetter = loadDataFromDB.blaetterRegio;
+ 	}
+ 	if (aufgabe == "Apotheke") {
+ 		blaetter = loadDataFromDB.blaetterAGS;
+ 	}
 	if ((aufgabe == "AddrWOStreet") || (aufgabe == "Apotheke")) {
-		keys = loadDataFromDB.blaetter;
+		keys = blaetter;
 		for (i =0;i<keys.length;i++) {	
 			debug(keys[i]);	
 			job = {};
@@ -133,4 +141,23 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 	return [];
 }
 
+function readOverpassBoundaries(cb, results) {
+
+}
+
+exports.getBoundariesDumpFromOverpass = function(callback) {
+
+	async.auto ({
+		readOverpass: readOverpassBoundaries,
+		removeBoundaries : ["readOverpass",removeBoundaries],
+		insertBoundaries : ["removeBoundaries",insertBoundaries]
+		}, function (err, result) {
+			if (err) {
+				console.log(err);
+				if (callback) callback();
+			}
+			
+		})
+
+}
    
