@@ -17,9 +17,13 @@ var debug   = require('debug')('LoadDataFromDB');
 
 
 
-exports.schluesselMap = Object();
-exports.blaetter = [];
-blaetterList = exports.blaetter;
+exports.schluesselMapRegio = Object();
+exports.blaetterRegio = [];
+exports.schluesselMapAGS = Object();
+exports.blaetterAGS = Object();
+
+blaetterRegioList = schluesselMapAGS.blaetter;
+blaetterAGSList = blaetterAGS.blaetter;
 
 
 var dataLoaded = false;
@@ -60,21 +64,32 @@ exports.initialise = function (cb) {
 						} else {
 							key=value="";
 							if (doc) {
-								key = doc["de:regionalschluessel"];
+								keyRegio = doc["de:regionalschluessel"];
+								keyAGS = doc["de.amtlicher_gemeindeschluessel"]
 								value = {};
 								value.name = doc.name ;
 								if (typeof(doc.admin_level)!= 'undefined') {
 									value.typ = adminLevel[doc.admin_level];
 								}
 								else value.typ = "-";
-								if (typeof(key)!='undefined' && typeof(value.name) != 'undefined') {
-									exports.schluesselMap[key]=value;
-									blaetterList.push(key);
+								if (typeof(keyRegio)!='undefined' && typeof(value.name) != 'undefined') {
+									exports.schluesselMapRegio[keyRegio]=value;
+									blaetterRegioList.push(key);
 							
-									while (key.charAt(key.length-1)=='0') {
-										key = key.slice(0,key.length-1);
+									while (keyRegio.charAt(keyRegio.length-1)=='0') {
+										keyRegio = keyRegio.slice(0,key.length-1);
 										
-										exports.schluesselMap[key]=value;
+										exports.schluesselMapRegio[keyRegio]=value;
+									}
+								}
+								if (typeof(keyAGS)!='undefined' && typeof(value.name) != 'undefined') {
+									exports.schluesselMapAGS[keyAGS]=value;
+									blaetterAGSList.push(keyAGS);
+							
+									while (keyAGS.charAt(keyAGS.length-1)=='0') {
+										keyAGS = key.slice(0,keyAGS.length-1);
+										
+										exports.schluesselMapAGS[keyAGS]=value;
 									}
 								}
 							}
@@ -85,13 +100,23 @@ exports.initialise = function (cb) {
 			function (callback) {
 				if (!dataLoaded) {callback(null); return;}
 				if (blaetterDefined) {callback(null);return;}
-				blaetterList.sort();
+				blaetterRegioList.sort();
 				
 				
-				for (i=blaetterList.length-2;i>=0;i--)
+				for (i=blaetterRegioList.length-2;i>=0;i--)
 				{
-					if (blaetterList[i]==blaetterList[i+1].substring(0,blaetterList[i].length)) {
-						blaetterList.splice(i,1);
+					if (blaetterRegioList[i]==blaetterRegioList[i+1].substring(0,blaetterRegioList[i].length)) {
+						blaetterRegioList.splice(i,1);
+					}
+				}
+				
+				blaetterAGSList.sort();
+				
+				
+				for (i=blaetterAGSList.length-2;i>=0;i--)
+				{
+					if (blaetterAGSList[i]==blaetterAGSList[i+1].substring(0,blaetterAGSList[i].length)) {
+						blaetterAGSList.splice(i,1);
 					}
 				}
 				
