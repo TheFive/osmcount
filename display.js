@@ -234,16 +234,6 @@ exports.table = function(req,res){
 		param.locationType=v.typ;
 	}
     
-<<<<<<< HEAD
-
-=======
-    if (param.measure) = "Apotheke" {
-    		kreisnamen = loadDataFromDB.schluesselMapAGS;
-    }
-    if (param.measure) = "AddrWOStreet" {
-    		kreisnamen = loadDataFromDB.schluesselMapRegio;
-    }
->>>>>>> 00c1acaa87d57944e4da35964d1443779788754e
     
     var basisLink = "./table.html";
     var paramTime = "period="+param.periode;
