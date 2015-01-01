@@ -1,0 +1,33 @@
+<body>
+
+<table>
+<tr>
+<td><img src="http://www.gravatar.com/avatar/f80ec2d630322974a27ea3c27c3ecbdc?s=40" alt="logo"></td>
+<td><h1>OSM Count</h1></td>
+</tr>
+</table>
+
+<h1>Apotheke</h1>
+
+<p> Apotheke ist eine Wochenaufgabe "in Planung". Christoph (TheFive) nutzt diese Aufgabe, um OSM Count
+daran zu testen.</p>
+
+<h2>Vorgaben</h2>
+<p>
+Die Anzahlen der Apotheken (Vorgabe) werden aus den ABDA Werten 
+(<a href= http://www.abda.de/fileadmin/assets/ZDF/ZDF_2013/ZDF_2013_06-Bundeslaender.pdf>Daten</a>) 
+ermittelt.
+Dafür hat Christoph (TheFive) die ABDA Werte mit den Bevölkerungszahlen Werten gewichtet (pro Bundesland), und ist so auf eine 
+hoffentlich plausible Vorgabe gekommen.</p>
+<p>Die Kooperation des ABDA in diesem Thema war leider "zurückhaltend"</p>
+<h2>Istwerte</h2>
+Die Istwerte werden mit der folgenden Overpass Query (pro amtlichen Gemeindeschlüssel) ermittelt:
+<pre>
+[out:json];area["de:amtlicher_gemeindeschluessel"="######"];
+(node(area)[amenity=pharmacy];
+way(area)[amenity=pharmacy];
+rel(area)[amenity=pharmacy]);out ids;</pre>
+<p>Dabei werden die IDs aus dem Ergebnis gezählt</p>
+<p>Bei der Zählung werden nur die Gemeindeschlüssel genutzt, die nicht Teilstring (Beginn) eines anderen amtlichen
+Gemeindeschlüssels in OpenStreetMap sind.</p> 
+</body> 
