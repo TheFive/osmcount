@@ -11,24 +11,6 @@ var ObjectID = require('mongodb').ObjectID;
 var util     = require('./util.js');
 
 
-var apothekenSoll2013 = {
-"08": 2639 ,
-"09": 3304 ,
-"11": 858 ,
-"12": 576 ,
-"04": 152 ,
-"02": 432 ,
-"06": 1546, 
-"13": 410 ,
-"03": 2014, 
-"05": 2393 + 2077, 
-"07": 1065 ,
-"10": 316 ,
-"14": 996 ,
-"15": 615 ,
-"01": 706 ,
-"16": 563 };
-
 
 var tableCSSStyle = '<head>\
 <style>\
@@ -328,11 +310,18 @@ function generateTable(param,header,firstColumn,table,format,rank) {
 				cell = '<a href="'+glink(cell)+'">'+cell+'</a>';
 			}
 			var cl ="";
-			if (rank&&(col==rank)) {
+			if (rank&&(col==rank) && (param.measure=="Apotheke")) {
 				if (content == lastButOne) cl = 'class = "lastButOne"';
 				if (content == last) cl = 'class = "last"';
 				if (content == second) cl = 'class = "second"';
 				if (content == first) cl = 'class = "first"';
+			
+			}
+			if (rank&&(col==rank) && (param.measure=="AddrWOStreet")) {
+				if (content == lastButOne) cl = 'class = "second"';
+				if (content == last) cl = 'class = "first"';
+				if (content == second) cl = 'class = "lastButOne"';
+				if (content == first) cl = 'class = "last"';
 			
 			}
 			tablerow += "<td "+cl+">"+cell+"</td>";
