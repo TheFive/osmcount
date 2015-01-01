@@ -204,6 +204,51 @@ function setParams(req,param) {
 
 }
 
+function generateTable(param,header,firstColumn,table,format) {
+	var tableheader = "";
+	var tablebody="";
+	for (i=0;i<header.length;i++) {
+		tableheader +="<th>"+header[i]+"</th>";
+	}
+	if (header.indexOf(param.sort>=0)) {
+		firstColumn.sort( function(a,b) {return table[b][param.sort]-table[a][param.sort]});
+	}
+	tableheader = "<tr>"+tableheader + "</tr>";
+	for (i=0;i<firstColumn.length;i++)
+	{
+		row = firstColumn[i];
+		tablerow = "";
+		
+		for (z=0;z<header.length;z++) {
+			col=header[z];
+			
+			var cell;
+			var content=table[row][col];
+			var f = (format[col]) ? format[col].format: null;
+			glink = (format[col]) ? format[col].generateLink:null;
+			
+			if (typeof(content) == "undefined") {
+				cell ="-";
+			} else {
+				if (f) {
+					cell = numeral(content).format(f);
+				} else if (typeof(content)=='number') {
+					cell = numeral(content).format();
+				} else {
+					cell = content; // numeral(content).format();
+				}
+			}
+			if (glink) {
+				cell = '<a href="'+glink(cell)+'">'+cell+'</a>';
+			}
+			tablerow += "<td>"+cell+"</td>";
+		}
+		tablerow = "<tr>"+tablerow+"</tr>";
+		tablebody += tablerow;
+	}
+	return tableheader + tablebody;
+}
+
 
 exports.table = function(req,res){
 	debug.entry("exports.table");
@@ -392,6 +437,8 @@ exports.table = function(req,res){
 			//generate new Header or Rows and Cell if necessary	
 			if (header.indexOf(col)<0) {
 				header.push(col);
+				format[col] = {};
+				format[col].sum = true;
 			}
 			if (firstColumn.indexOf(row)<0) {
 				firstColumn.push(row);
@@ -412,6 +459,9 @@ exports.table = function(req,res){
 
 		if (displayVorgabe) {
 			header.unshift("Vorgabe");
+			format["Vorgabe"] = {};
+			format["Vorgabe"].sum = true;
+			
 		}
 		
 		header.unshift("Admin Level");
@@ -426,6 +476,7 @@ exports.table = function(req,res){
 			header.push("Diff");
 			format["Diff"]={};
 			format["Diff"].format='0%';
+			format["Diff"].sum = false;
 			
 		}
 		for (i=0;i<firstColumn.length;i++)
@@ -449,55 +500,13 @@ exports.table = function(req,res){
 				table[schluessel]["Diff"]=lastValue/expectation;
 			}
 		}
-		tableheader = "";
-		for (i=0;i<header.length;i++) {
-			tableheader +="<th>"+header[i]+"</th>";
-		}
-		if (header.indexOf(param.sort>=0)) {
-			firstColumn.sort( function(a,b) {return table[b][param.sort]-table[a][param.sort]});
-		}
-		tableheader = "<tr>"+tableheader + "</tr>";
-		tablebody="";
-		{
-			for (i=0;i<firstColumn.length;i++)
-			{
-				row = firstColumn[i];
-				tablerow = "";
-				
-				for (z=0;z<header.length;z++) {
-					col=header[z];
-					
-					var cell;
-					var content=table[row][col];
-					var f = (format[col]) ? format[col].format: null;
-					glink = (format[col]) ? format[col].generateLink:null;
-					
-					if (typeof(content) == "undefined") {
-						cell ="-";
-					} else {
-						if (f) {
-							cell = numeral(content).format(f);
-						} else if (typeof(content)=='number') {
-							cell = numeral(content).format();
-						} else {
-						    cell = content; // numeral(content).format();
-						}
-					}
-					if (glink) {
-						cell = '<a href="'+glink(cell)+'">'+cell+'</a>';
-					}
-					tablerow += "<td>"+cell+"</td>";
-				}
-				tablerow = "<tr>"+tablerow+"</tr>";
-				tablebody += tablerow;
-			}
-			
-			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
-			debug.data(JSON.stringify(query,null,' '));
-			text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + tableheader + tablebody + "</table>"+pagefooter+"</body></html>";
-			res.set('Content-Type', 'text/html');
-			res.end(text);
-		};
+		var table = generateTable(param,header,firstColumn,table,format);
+		
+		pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+		debug.data(JSON.stringify(query,null,' '));
+		text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
+		res.set('Content-Type', 'text/html');
+		res.end(text);
 	})
 
 }
