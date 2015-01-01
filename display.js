@@ -172,6 +172,11 @@ function setParams(req,param) {
     param.sort ="";
     if(typeof(req.param("sort"))!='undefined') {
     	param.sort=req.param("sort");
+    	param.sortAscending = 1;
+    }
+    if(typeof(req.param("sortdown"))!='undefined') {
+    	param.sort=req.param("sortdown");
+    	param.sortAscending = -1;
     }
     param.lengthOfKey = 2;
     if(typeof(req.param("lok"))!="undefined") {
@@ -209,11 +214,42 @@ function generateTable(param,header,firstColumn,table,format) {
 	var tablebody="";
 	
 	var sumrow = [];
+	
+	
+	
 	for (i=0;i<header.length;i++) {
 		tableheader +="<th>"+header[i]+"</th>";
 	}
+	
+	for (i=0;i<firstColumn.length;i++) {
+		row = firstColumn[i];
+		
+		for (z=0;z<header.length;z++) {
+			col=header[z];
+			
+			var content=table[row][col];
+			
+			var func = (format[col]) ? format[col].func: null;
+		
+			if (func && typeof(func) != 'undefined') {
+				switch (func.op) {
+					case "%": content = table[row][func.numerator]/table[row][func.denominator];
+					   break;
+			 		case "-": content = table[row][func.op1]-table[row][func.op2];
+			  	   		break;
+				  default: content = "NaF";
+				}
+				table[row][col] = content;
+			}
+		}
+	}
+	
+	// Sort the table by the parameter
 	if (header.indexOf(param.sort>=0)) {
-		firstColumn.sort( function(a,b) {return table[b][param.sort]-table[a][param.sort]});
+		firstColumn.sort( function(a,b) {
+			va = table[a][param.sort];
+			vb = table[b][param.sort];
+			return (vb-va)*param.sortAscending});
 	}
 	tableheader = "<tr>"+tableheader + "</tr>";
 	for (i=0;i<firstColumn.length;i++)
@@ -230,17 +266,6 @@ function generateTable(param,header,firstColumn,table,format) {
 			var f = (format[col]) ? format[col].format: null;
 			glink = (format[col]) ? format[col].generateLink:null;
 			
-			var func = (format[col]) ? format[col].func: null;
-		
-			if (func && typeof(func) != 'undefined') {
-				switch (func.op) {
-					case "%": content = table[row][func.numerator]/table[row][func.denominator];
-					   break;
-			 		case "-": content = table[row][func.op1]-table[row][func.op2];
-			  	   		break;
-				  default: content = "NaF";
-				}
-			}
 			if (typeof(content) == "undefined") {
 				cell ="-";
 			} else {
@@ -366,6 +391,7 @@ exports.table = function(req,res){
     filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure)+"</td></tr>"
     filterTable += "<tr><td>Periode</td><td><b>"+param.periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
     filterTable += "<tr><td>Schlüssellänge</td><td><b>"+param.lengthOfKey+"</b></td><td>"+lokSwitch+"</td></tr>"
+    filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+"</td></tr>"
     
 	filterTable = "<table>"+filterTable+"</table><br><br>";
 	beforeText += filterTable;

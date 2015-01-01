@@ -139,8 +139,7 @@ exports.readCSV = function(filename,db,defJson,cb) {
 
 		var collection = db.collection('DataCollection');
 		importCSVToCollection(filename,collection,defJson,cb);
-		var newData = this.convertArrToJSON(arr,defJson);
-
+		
 		
 }
 
