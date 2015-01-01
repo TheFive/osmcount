@@ -11,7 +11,7 @@ var ObjectID  = require('mongodb').ObjectID;
 function getWorkingJob(cb) {	
 	debug.entry("getWorkingJob(cb)");
 	mongodb = config.getDB();
-	mongodb.collection(" 	").findOne( 
+	mongodb.collection("WorkerQueue").findOne( 
 							{ status : "working" 
 							}, function(err, obj) 
 	{
@@ -203,25 +203,29 @@ function checkState(cb,results) {
 	debug.entry("checkState(cb,"+results+")");
 	job=results.readjob;
 	if (!job) {
+		debug.data("No Job");
 		cb(null,null);
 		return;
 	}
 	mongodb = config.getDB();
-	mongodb.collection("DataCollection").findOne( 
+	mongodb.collection("DataCollection").count( 
 							{ source : job.source,schluessel:job.schluessel}
 							 
-							, function(err, obj) 
+							, function(err, count) 
 	{
 		debug.entry("checkState->CB");
-		if (obj) {
+		if (count==1) {
 			job.status = "done";
 			debug.data("Close Job");
 		}
-		else {
+		else if (count==0) {
 			job.status = "open";
 			debug.data("Job Still open");
+		} else {
+			job.status = "error";
+			job.error = "Found "+count+" matching this request " +job.source+ " " + job.schluessel;
 		}
-		if (cb) cb(null,obj);
+		if (cb) cb(null,count);
 
 	})
 }
