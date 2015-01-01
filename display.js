@@ -45,6 +45,18 @@ background-color: #999; \
 color: #fff; \
 border: 1px solid #fff; \
 } \
+td.first { \
+background-color: #00ff00; \
+} \
+td.second { \
+background-color: #88FF88; \
+} \
+td.last { \
+background-color: #ff0000; \
+} \
+td.lastButOne { \
+background-color: #ff8888; \
+} \
 </style>\
 </head>'
 
@@ -209,7 +221,7 @@ function setParams(req,param) {
 
 }
 
-function generateTable(param,header,firstColumn,table,format) {
+function generateTable(param,header,firstColumn,table,format,rank) {
 	var tableheader = "";
 	var tablebody="";
 	
@@ -243,7 +255,36 @@ function generateTable(param,header,firstColumn,table,format) {
 			}
 		}
 	}
+	var first;
+	var second;
+	var last;
+	var lastButOne;
 	
+	if (rank) {
+		value = table[firstColumn[0]][rank];
+		first = second = last = lastButOne = value;
+		for (i=1;i<firstColumn.length;i++)
+		{
+			value = table[firstColumn[i]][rank];
+			if (value>first) {
+				second=first;
+				first = value; 
+			}
+			if ((value > second) && (value < first))
+			{
+				second = value;
+			}
+			if (value<last) {
+				lastButOne=last;
+				last = value; 
+			}  
+			if ((value < lastButOne) && (value > last))
+			{
+				lastButOne = value;
+			}
+		}
+	}
+
 	// Sort the table by the parameter
 	if (header.indexOf(param.sort>=0)) {
 		firstColumn.sort( function(a,b) {
@@ -286,7 +327,15 @@ function generateTable(param,header,firstColumn,table,format) {
 			if (glink) {
 				cell = '<a href="'+glink(cell)+'">'+cell+'</a>';
 			}
-			tablerow += "<td>"+cell+"</td>";
+			var cl ="";
+			if (rank&&(col==rank)) {
+				if (content == lastButOne) cl = 'class = "lastButOne"';
+				if (content == last) cl = 'class = "last"';
+				if (content == second) cl = 'class = "second"';
+				if (content == first) cl = 'class = "first"';
+			
+			}
+			tablerow += "<td "+cl+">"+cell+"</td>";
 		}
 		tablerow = "<tr>"+tablerow+"</tr>";
 		tablebody += tablerow;
@@ -296,7 +345,8 @@ function generateTable(param,header,firstColumn,table,format) {
 	for (z=0;z<header.length;z++) {
 		col=header[z];
 	
-		var cell;
+		var cell = "";
+		if (z==0) cell = "Summe";
 		var content=sumrow[col];
 		var f = (format[col]) ? format[col].format: null;
 		glink = (format[col]) ? format[col].generateLink:null;
@@ -312,10 +362,7 @@ function generateTable(param,header,firstColumn,table,format) {
 			  default: content = "NaF";
 			}
 		}
-	
-		if (typeof(content) == "undefined") {
-			cell ="";
-		} else {
+		if (typeof(content) != "undefined" ) {
 			if (f) {
 				cell = numeral(content).format(f);
 			} else if (typeof(content)=='number') {
@@ -324,7 +371,8 @@ function generateTable(param,header,firstColumn,table,format) {
 				cell = content; // numeral(content).format();
 			}
 		}
-		tablerow += "<td>"+cell+"</td>";
+	
+		tablerow += "<td><b>"+cell+"</b></td>";
 	}	
 	tablerow = "<tr>"+tablerow+"</tr>";
 	tablebody += tablerow;
@@ -382,15 +430,28 @@ exports.table = function(req,res){
     filterSwitch = generateLink("[AddrWOStreet]",basisLink,"lok=2","period=month","measure=AddrWOStreet");
     filterSwitch += generateLink("[Apotheke]",basisLink,"lok=2","period=month","measure=Apotheke");
     
-    lokSwitch ="";   
+    lokSwitch ="1";   
+    lokShow = "X";
+    for (i =1;i<param.lengthOfKey;i++) {
+    	lokShow += "X";
+    	lokSwitch += generateLink("<b> "+(i+1)+"</b>",basisLink,"lok="+(i+1),paramTime,paramMeasure,paramLocation);
+    	
+    }
+    for (;i<10;i++) {
+    	lokShow += "-";
+    	lokSwitch += generateLink(" "+(i+1)+"",basisLink,"lok="+(i+1),paramTime,paramMeasure,paramLocation);
+    }
+    for (;i<12;i++) {
+    	lokSwitch += generateLink(" "+(i+1)+"",basisLink,"lok="+(i+1),paramTime,paramMeasure,paramLocation);
+    }
     
-    if (param.lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(param.lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
-    if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
+    //if (param.lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(param.lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
+    //if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
     var filterTable = "<tr><td>Messung</td><td><b><a href=./"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>"
     filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure)+"</td></tr>"
     filterTable += "<tr><td>Periode</td><td><b>"+param.periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
-    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+param.lengthOfKey+"</b></td><td>"+lokSwitch+"</td></tr>"
+    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td></tr>"
     filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+"</td></tr>"
     
 	filterTable = "<table>"+filterTable+"</table><br><br>";
@@ -593,7 +654,7 @@ exports.table = function(req,res){
 				table[schluessel]["Vorgabe"]=expectation;
 			}
 		}
-		var table = generateTable(param,header,firstColumn,table,format);
+		var table = generateTable(param,header,firstColumn,table,format,"Diff");
 		
 		pagefooter = "<p> Offene Queries "+openQueries+"</p>";
 		debug.data(JSON.stringify(query,null,' '));
