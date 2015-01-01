@@ -20,10 +20,10 @@ var debug   = require('debug')('LoadDataFromDB');
 exports.schluesselMapRegio = Object();
 exports.blaetterRegio = [];
 exports.schluesselMapAGS = Object();
-exports.blaetterAGS = Object();
+exports.blaetterAGS = [];
 
-blaetterRegioList = schluesselMapAGS.blaetter;
-blaetterAGSList = blaetterAGS.blaetter;
+blaetterRegioList = exports.blaetterRegio;
+blaetterAGSList = exports.blaetterAGS;
 
 
 var dataLoaded = false;
@@ -65,7 +65,7 @@ exports.initialise = function (cb) {
 							key=value="";
 							if (doc) {
 								keyRegio = doc["de:regionalschluessel"];
-								keyAGS = doc["de.amtlicher_gemeindeschluessel"]
+								keyAGS = doc["de:amtlicher_gemeindeschluessel"]
 								value = {};
 								value.name = doc.name ;
 								if (typeof(doc.admin_level)!= 'undefined') {
@@ -74,7 +74,7 @@ exports.initialise = function (cb) {
 								else value.typ = "-";
 								if (typeof(keyRegio)!='undefined' && typeof(value.name) != 'undefined') {
 									exports.schluesselMapRegio[keyRegio]=value;
-									blaetterRegioList.push(key);
+									blaetterRegioList.push(keyRegio);
 							
 									while (keyRegio.charAt(keyRegio.length-1)=='0') {
 										keyRegio = keyRegio.slice(0,key.length-1);
@@ -87,8 +87,7 @@ exports.initialise = function (cb) {
 									blaetterAGSList.push(keyAGS);
 							
 									while (keyAGS.charAt(keyAGS.length-1)=='0') {
-										keyAGS = key.slice(0,keyAGS.length-1);
-										
+										keyAGS = keyAGS.slice(0,keyAGS.length-1);
 										exports.schluesselMapAGS[keyAGS]=value;
 									}
 								}
@@ -97,9 +96,10 @@ exports.initialise = function (cb) {
 					})
 				})
 			},
-			function (callback) {
-				if (!dataLoaded) {callback(null); return;}
-				if (blaetterDefined) {callback(null);return;}
+			function (err,result) {
+				if (!dataLoaded) {cb(null); return;}
+				if (blaetterDefined) {cb(null);return;}
+
 				blaetterRegioList.sort();
 				
 				
@@ -121,13 +121,13 @@ exports.initialise = function (cb) {
 				}
 				
 				blaetterDefined=true;
-				callback(null);
+				if (cb) cb(null);
 			}
 			
 			],
 			function(err) {
 				debug("Initialising All Done");
-				cb();
+				if (cb) cb(null);
 			}
 		)
 	}

@@ -221,18 +221,20 @@ exports.table = function(req,res){
 
 	param = {};
     setParams(req,param);
-	v = kreisnamen[param.locationStartWith];
+    if (param.measure == "Apotheke") {
+    		kreisnamen = loadDataFromDB.schluesselMapAGS;
+    }
+    if (param.measure == "AddrWOStreet") {
+    		kreisnamen = loadDataFromDB.schluesselMapRegio;
+    }
+    
+    v = kreisnamen[param.locationStartWith];
 	if (typeof(v)!='undefined') {
 		param.location=v.name;
 		param.locationType=v.typ;
 	}
     
-    if (param.measure) = "Apotheke" {
-    		kreisnamen = loadDataFromDB.schluesselMapAGS;
-    }
-    if (param.measure) = "AddrWOStreet" {
-    		kreisnamen = loadDataFromDB.schluesselMapRegio;
-    }
+
     
     var basisLink = "./table.html";
     var paramTime = "period="+param.periode;
@@ -344,17 +346,12 @@ exports.table = function(req,res){
 							console.log(err);
 							;
 						}
-						console.log("Data Lengh "+data.length);
 						for (i = 0;i<data.length;i++)
 						{
-							console.dir(data[i]);
 							schluessel = data[i]._id;
 							value = data[i].vorgabe;
-							console.log(schluessel + ","+value);
 							vorgabe [schluessel]=value;
 						}
-						console.dir("konverted");
-						console.dir(vorgabe);
 						callback();
 					}))},
 					function (callback) {
@@ -420,9 +417,9 @@ exports.table = function(req,res){
 		
 		header.unshift("Admin Level");
 		header.unshift("Name");
-		header.unshift("Regioschlüssel");
-		format["Regioschlüssel"]= {};
-		format["Regioschlüssel"].generateLink = function(value) {
+		header.unshift("Schlüssel");
+		format["Schlüssel"]= {};
+		format["Schlüssel"].generateLink = function(value) {
 			return generateLink("",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,"location="+value);
 		};
 		
@@ -443,7 +440,7 @@ exports.table = function(req,res){
 				schluesselText = value.name;
 				schluesselTyp = value.typ;
 			}
-			table[schluessel]["Regioschlüssel"]=schluessel;
+			table[schluessel]["Schlüssel"]=schluessel;
 			table[schluessel]["Name"]=schluesselText;
 			table[schluessel]["Admin Level"]=schluesselTyp;
 			if (displayVorgabe){ 
