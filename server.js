@@ -1,6 +1,7 @@
 //require node modules
 var express = require('express');
 var async   = require('async');
+var path    = require('path');
 var debug   = require('debug')('server');
  debug.entry   = require('debug')('server:entry');
  debug.data    = require('debug')('QueueWorker:data');
@@ -49,20 +50,16 @@ app.use(function(req, res, next){
 });
 
 
-app.use('/', express.static(__dirname));
+app.use('/', express.static(path.resolve(__dirname, "html")));
 app.use('/count.html', display.count);
 app.use('/import.html', display.importCSV);
 app.use('/importApotheken.html', display.importApotheken);
 app.use('/table.html', display.table);
 app.use('/object/:collection/:id', display.object);
 
-app.use('/list.html', function(req,res) {
-	jobs = loadOverpassData.createQuery("AddrWOStreet");
-	res.end(JSON.stringify(jobs))
-})
 
 app.get('/*', function(req, res) {
-    res.status(404).sendFile(__dirname + '/error.html');
+    res.status(404).sendFile(path.resolve(__dirname, "html",  'error.html'));
 });
 
 
