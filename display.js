@@ -207,6 +207,8 @@ function setParams(req,param) {
 function generateTable(param,header,firstColumn,table,format) {
 	var tableheader = "";
 	var tablebody="";
+	
+	var sumrow = [];
 	for (i=0;i<header.length;i++) {
 		tableheader +="<th>"+header[i]+"</th>";
 	}
@@ -218,6 +220,7 @@ function generateTable(param,header,firstColumn,table,format) {
 	{
 		row = firstColumn[i];
 		tablerow = "";
+		line = table[row];
 		
 		for (z=0;z<header.length;z++) {
 			col=header[z];
@@ -227,6 +230,17 @@ function generateTable(param,header,firstColumn,table,format) {
 			var f = (format[col]) ? format[col].format: null;
 			glink = (format[col]) ? format[col].generateLink:null;
 			
+			var func = (format[col]) ? format[col].func: null;
+		
+			if (func && typeof(func) != 'undefined') {
+				switch (func.op) {
+					case "%": content = table[row][func.numerator]/table[row][func.denominator];
+					   break;
+			 		case "-": content = table[row][func.op1]-table[row][func.op2];
+			  	   		break;
+				  default: content = "NaF";
+				}
+			}
 			if (typeof(content) == "undefined") {
 				cell ="-";
 			} else {
@@ -237,6 +251,12 @@ function generateTable(param,header,firstColumn,table,format) {
 				} else {
 					cell = content; // numeral(content).format();
 				}
+				if (format[col] && format[col].sum) {
+					if (typeof (sumrow[col]) == 'undefined') {
+						sumrow[col]=0;
+					}
+					sumrow[col]+=content;
+				}
 			}
 			if (glink) {
 				cell = '<a href="'+glink(cell)+'">'+cell+'</a>';
@@ -246,6 +266,43 @@ function generateTable(param,header,firstColumn,table,format) {
 		tablerow = "<tr>"+tablerow+"</tr>";
 		tablebody += tablerow;
 	}
+	tablerow = "";
+	line = sumrow;
+	for (z=0;z<header.length;z++) {
+		col=header[z];
+	
+		var cell;
+		var content=sumrow[col];
+		var f = (format[col]) ? format[col].format: null;
+		glink = (format[col]) ? format[col].generateLink:null;
+		
+		var func = (format[col]) ? format[col].func: null;
+		
+		if (func && typeof(func) != 'undefined') {
+			switch (func.op) {
+			  case "%": content = sumrow[func.numerator]/sumrow[func.denominator];
+			  	   break;
+			  case "-": content = sumrow[func.op1]-sumrow[func.op2];
+			  	   break;
+			  default: content = "NaF";
+			}
+		}
+	
+		if (typeof(content) == "undefined") {
+			cell ="";
+		} else {
+			if (f) {
+				cell = numeral(content).format(f);
+			} else if (typeof(content)=='number') {
+				cell = numeral(content).format();
+			} else {
+				cell = content; // numeral(content).format();
+			}
+		}
+		tablerow += "<td>"+cell+"</td>";
+	}	
+	tablerow = "<tr>"+tablerow+"</tr>";
+	tablebody += tablerow;
 	return tableheader + tablebody;
 }
 
@@ -477,7 +534,19 @@ exports.table = function(req,res){
 			format["Diff"]={};
 			format["Diff"].format='0%';
 			format["Diff"].sum = false;
+			format["Diff"].func = {};
+			format["Diff"].func.op = "%";
+			format["Diff"].func.denominator  = "Vorgabe";
+			format["Diff"].func.numerator = header[header.length-2];
 			
+		} else {
+			header.push("Diff");
+			format["Diff"]={};
+			format["Diff"].sum = false;
+			format["Diff"].func = {};
+			format["Diff"].func.op = "-";
+			format["Diff"].func.op1  = header[header.length-2];
+			format["Diff"].func.op2 = header[header.length-3];
 		}
 		for (i=0;i<firstColumn.length;i++)
 		{
@@ -496,8 +565,6 @@ exports.table = function(req,res){
 			if (displayVorgabe){ 
 				expectation = vorgabe[schluessel];
 				table[schluessel]["Vorgabe"]=expectation;
-				lastValue = table[schluessel][header[header.length-2]];
-				table[schluessel]["Diff"]=lastValue/expectation;
 			}
 		}
 		var table = generateTable(param,header,firstColumn,table,format);
