@@ -98,7 +98,12 @@ exports.overpass = function(req,res) {
 	var measure = req.param("measure");
 	var schluessel = req.param("schluessel");
 	
-	var query = loadOverpassData.query[measure].replace('"="######"','"~"^'+schluessel+'"');
+	var query = loadOverpassData.query[measure];
+
+	if (!query) query = "Für die Aufgabe "+measure+" ist keine Query definiert";
+
+	query = query.replace('"="######"','"~"^'+schluessel+'"');
+	
 	query = query.replace("out ids;","out;");
 	var text = "<h1>Overpass Abfrage</h1>"
 	text += "<table><tr><td>Aufgabe</td><td>"+measure+"</td></tr> \
@@ -106,14 +111,14 @@ exports.overpass = function(req,res) {
 	
 	text += "<pre>"+query+"</pre>"
 	
-	text += '<p>Bitte die Query in die Zwischenablage Kopieren und in <a href=http://overpass-turbo.eu>Overpass Turbo</a> einf&uuml;gen</p>';
+	text += '<p>Bitte die Query in die Zwischenablage kopieren und in <a href=http://overpass-turbo.eu>Overpass Turbo</a> einf&uuml;gen</p>';
 	
 	if (measure=="AddrWOStreet") {
 		text += '<p>Achtung, die Overpass Abfrage und die Abfrage von User:Gehrke unterschieden sich etwas. Siehe <a href="http://wiki.openstreetmap.org/wiki/DE:Overpass_API/Beispielsammlung#Hausnummern_ohne_Stra.C3.9Fe_finden">wiki</a>.</p>';
 	}
 	text = "<html>"+tableCSSStyle+"<body>"+text+"</body></html>";
     res.set('Content-Type', 'text/html');		
-    res.end(text );
+    res.end(text);
 }
 
 exports.importCSV = function(req,res){
@@ -681,6 +686,9 @@ exports.table = function(req,res){
 		var table = generateTable(param,header,firstColumn,table,format,"Diff");
 		
 		pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+		pagefooter += "<p> Die Service Link(s) bedeuten \
+						<li>O Zeige die Overpass Query</li> \
+						</p>"
 		debug.data(JSON.stringify(query,null,' '));
 		text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
 		res.set('Content-Type', 'text/html');
