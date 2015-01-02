@@ -355,7 +355,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 			}
 			tablerow += "<td "+cl+">"+cell+"</td>";
 		}
-		if (serviceLink) tablerow += "<td> <a href=./overpass/"+param.measure+"/"+row+">O</a></td>";
+		if (serviceLink) tablerow += "<td> <a href=./overpass/"+param.measure+"/"+row+".html>O</a></td>";
 		tablerow = "<tr>"+tablerow+"</tr>";
 		tablebody += tablerow;
 	}

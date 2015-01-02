@@ -56,7 +56,7 @@ app.use('/import.html', display.importCSV);
 app.use('/importApotheken.html', display.importApotheken);
 app.use('/table.html', display.table);
 app.use('/object/:collection/:id', display.object);
-app.use('/overpass/:measure/:schluessel', display.overpass);
+app.use('/overpass/:measure/:schluessel.html', display.overpass);
 
 
 app.get('/*', function(req, res) {
