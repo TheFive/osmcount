@@ -209,6 +209,8 @@ function setParams(req,param) {
     param.lengthOfKey = 2;
     if(typeof(req.param("lok"))!="undefined") {
     	param.lengthOfKey=parseInt(req.param("lok"));
+    	if (param.lengthOfKey<0) param.lengthOfKey = 0;
+    	if (param.lengthOfKey > 12) param.lengthOfKey = 12;
     }
     
     param.lengthOfTime=7;
@@ -417,12 +419,20 @@ exports.table = function(req,res){
     var collectionTarget = db.collection('DataTarget');
     
 
-	var kreisnamen; 
+	var kreisnamen = {}; 
 	
 	numeral = util.numeral;
 
 	param = {};
     setParams(req,param);
+    
+    if (param.measure != "Apotheke" && param.measure != "AddrWOStreet") 
+    {
+    	res.set('Content-Type', 'text/html');
+		res.end("Die Wochenaufgabe "+param.measure+ " ist nicht definiert.");
+    	return;
+    }
+    
     if (param.measure == "Apotheke") {
     		kreisnamen = loadDataFromDB.schluesselMapAGS;
     }
