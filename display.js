@@ -272,7 +272,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	var last;
 	var lastButOne;
 	
-	if (rank) {
+	if (rank && table[firstColumn[0]]) {
 		value = table[firstColumn[0]][rank];
 		first = second = last = lastButOne = value;
 		for (i=1;i<firstColumn.length;i++)
