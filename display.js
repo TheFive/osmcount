@@ -1,4 +1,5 @@
 var loadDataFromDB = require('./LoadDataFromDB')
+var loadOverpassData = require('./LoadOverpassData')
 var importCSV=require('./ImportCSV');
 var debug    = require('debug')('display');
   debug.data = require('debug')('display:data');
@@ -87,6 +88,31 @@ exports.object = function(req,res) {
     		res.end(text );
     	}
     })
+}
+
+exports.overpass = function(req,res) {
+	debug.entry("exports.overpass");
+	var db = res.db;
+   
+	var measure = req.param("measure");
+	var schluessel = req.param("schluessel");
+	
+	var query = loadOverpassData.query[measure].replace('"="######"','"~"^'+schluessel+'"');
+	query = query.replace("out ids;","out;");
+	var text = "<h1>Overpass Abfrage</h1>"
+	text += "<table><tr><td>Aufgabe</td><td>"+measure+"</td></tr> \
+						<tr><td>Schl&uuml;ssel</td><td>"+schluessel+"</td></tr></table>";
+	
+	text += "<pre>"+query+"</pre>"
+	
+	text += '<p>Bitte die Query in die Zwischenablage Kopieren und in <a href=http://overpass-turbo.eu>Overpass Turbo</a> einf&uuml;gen</p>';
+	
+	if (measure=="AddrWOStreet") {
+		text += '<p>Achtung, die Overpass Abfrage und die Abfrage von User:Gehrke unterschieden sich etwas. Siehe <a href="http://wiki.openstreetmap.org/wiki/DE:Overpass_API/Beispielsammlung#Hausnummern_ohne_Stra.C3.9Fe_finden">wiki</a>.</p>';
+	}
+	text = tableCSSStyle+"<body>"+text+"</body>";
+    		
+    res.end(text );
 }
 
 exports.importCSV = function(req,res){
@@ -203,9 +229,11 @@ function setParams(req,param) {
 
 }
 
-function generateTable(param,header,firstColumn,table,format,rank) {
+function generateTable(param,header,firstColumn,table,format,rank, serviceLink) {
 	var tableheader = "";
 	var tablebody="";
+	
+	if (!serviceLink) serviceLink = true;
 	
 	var sumrow = [];
 	
@@ -214,6 +242,8 @@ function generateTable(param,header,firstColumn,table,format,rank) {
 	for (i=0;i<header.length;i++) {
 		tableheader +="<th>"+header[i]+"</th>";
 	}
+	if (serviceLink) tableheader += "<th> Service </th>";
+	tableheader = "<tr>"+tableheader + "</tr>";
 	
 	for (i=0;i<firstColumn.length;i++) {
 		row = firstColumn[i];
@@ -274,7 +304,6 @@ function generateTable(param,header,firstColumn,table,format,rank) {
 			vb = table[b][param.sort];
 			return (vb-va)*param.sortAscending});
 	}
-	tableheader = "<tr>"+tableheader + "</tr>";
 	for (i=0;i<firstColumn.length;i++)
 	{
 		row = firstColumn[i];
@@ -326,6 +355,7 @@ function generateTable(param,header,firstColumn,table,format,rank) {
 			}
 			tablerow += "<td "+cl+">"+cell+"</td>";
 		}
+		if (serviceLink) tablerow += "<td> <a href=./overpass/"+param.measure+"/"+row+">O</a></td>";
 		tablerow = "<tr>"+tablerow+"</tr>";
 		tablebody += tablerow;
 	}

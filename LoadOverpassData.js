@@ -8,21 +8,21 @@ var debug   =  require('debug')('LoadOverpassData');
 
 // To be changed to a more readable import routine
 
-query = {
-   Apotheke:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"];(node(area)[amenity=pharmacy];way(area)[amenity=pharmacy];rel(area)[amenity=pharmacy]);out ids;',
-   AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea; \
-rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \
- \
-way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \
-way(r.associatedStreet:"house")->.asHouseWay; \
-(.allHousesWay; - .asHouseWay); out ids; \
- \
-node(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesNode; \
-node(r.associatedStreet:"house")->.asHouseNode; \
-(.allHousesNode; - .asHouseNode);out ids; \
- \
-rel(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesRel; \
-rel(r.associatedStreet:"house")->.asHouseRel; \
+exports.query = {
+   Apotheke:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"];\n(node(area)[amenity=pharmacy];\nway(area)[amenity=pharmacy];\nrel(area)[amenity=pharmacy]);\nout ids;',
+   AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea;\n\
+rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \n\
+\n\
+way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \n\
+way(r.associatedStreet:"house")->.asHouseWay; \n\
+(.allHousesWay; - .asHouseWay); out ids; \n\
+ \n\
+node(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesNode; \n\
+node(r.associatedStreet:"house")->.asHouseNode; \n\
+(.allHousesNode; - .asHouseNode);out ids; \n\
+ \n\
+rel(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesRel; \n\
+rel(r.associatedStreet:"house")->.asHouseRel; \n\
 (.allHousesRel; - .asHouseRel);out ids;'
 }
 
