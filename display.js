@@ -75,6 +75,7 @@ exports.object = function(req,res) {
     db.collection(collectionName).findOne ({_id:object},function (err, obj) {
     	if (err) {
     		var text = "Display Object "+ objid + " in Collection "+collectionName;
+    		res.set('Content-Type', 'text/html');
     		res.end(err);
     	} else {
     		text = "";
@@ -84,7 +85,7 @@ exports.object = function(req,res) {
     			}
     		}	
     		text = tableCSSStyle+"<body><h1>Data Inspector</h1><table>"+text+"</table></body>";
-    		
+    		res.set('Content-Type', 'text/html');
     		res.end(text );
     	}
     })
@@ -111,7 +112,7 @@ exports.overpass = function(req,res) {
 		text += '<p>Achtung, die Overpass Abfrage und die Abfrage von User:Gehrke unterschieden sich etwas. Siehe <a href="http://wiki.openstreetmap.org/wiki/DE:Overpass_API/Beispielsammlung#Hausnummern_ohne_Stra.C3.9Fe_finden">wiki</a>.</p>';
 	}
 	text = "<html>"+tableCSSStyle+"<body>"+text+"</body></html>";
-    		
+    res.set('Content-Type', 'text/html');		
     res.end(text );
 }
 
@@ -142,6 +143,7 @@ exports.importCSV = function(req,res){
     	text += "Import: "+filename+"->"+date+"\n"
     }
     text += "Files imported";
+    res.set('Content-Type', 'text/html');
     res.end(text);
 }
 	
@@ -152,6 +154,7 @@ exports.importApotheken = function(req,res) {
     importCSV.importApothekenVorgabe(db);
     text = "Importiert Apotheken";
     text += "Files imported";
+    res.set('Content-Type', 'text/html');
     res.end(text);
 }
 	
@@ -536,6 +539,7 @@ exports.table = function(req,res){
 						// first copy hole table in a 2 dimensional JavaScript map
 						// may be here is some performance potential :-)
 						if (err) {
+							res.set('Content-Type', 'text/html');
 							res.end("error"+err);
 							console.log("Table Function, Error occured:");
 							console.log(err);
@@ -548,6 +552,7 @@ exports.table = function(req,res){
    					 collectionTarget.aggregate(	queryVorgabe
 										, (function(err, data) {
 						if (err) {
+							res.set('Content-Type', 'text/html');
 							res.end("error"+err);
 							console.log("Table Function, Error occured:");
 							console.log(err);
