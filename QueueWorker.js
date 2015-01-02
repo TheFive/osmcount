@@ -199,6 +199,16 @@ function doInsertJobs(cb,results) {
 	else if (cb) cb(null,job);
 }
 
+function doLoadBoundaries(cb,results) {
+	debug.entry("doLoadBoundaries(cb,"+results+")");
+	job=results.readjob;
+	
+	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="loadBoundaries") {
+		debug.entry("Start: doLoadBoudnaries(cb,"+results+")");
+		lod.importBoundaries(cb);
+	}
+	else if (cb) cb(null,job);
+}
 function checkState(cb,results) {
 	debug.entry("checkState(cb,"+results+")");
 	job=results.readjob;
@@ -236,11 +246,12 @@ function checkState(cb,results) {
 function doNextJob(callback) {
 	debug.entry("doNextJob(cb)");
 	async.auto( {readjob:     getNextJob,
-		    saveWorking: ["readjob",saveJobState],
-		    doConsole:   ["saveWorking", doConsole],
-		    doOverpass:  ["saveWorking", doOverpass],
-		    doInsertJobs:["saveWorking", doInsertJobs],
-		    saveDone:    ["doConsole","doOverpass","doInsertJobs", saveJobState]
+		    saveWorking:     ["readjob",saveJobState],
+		    doConsole:       ["saveWorking", doConsole],
+		    doOverpass:      ["saveWorking", doOverpass],
+		    doInsertJobs:    ["saveWorking", doInsertJobs],
+		    doLoadBoudnaries:["saveWorking", doLoadBoundaries],
+		    saveDone:        ["doConsole","doOverpass","doInsertJobs", saveJobState]
 		},
 		function (err,results) {
 			if (err) {

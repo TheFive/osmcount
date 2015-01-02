@@ -1,4 +1,6 @@
 var loadDataFromDB =   require('./LoadDataFromDB.js');
+var configuration =   require('./configuration.js');
+var async = require('async');
 var debug   =  require('debug')('LoadOverpassData');
  debug.entry = require('debug')('LoadOverpassData:entry')
  debug.data = require('debug')('LoadOverpassData:data')
@@ -60,23 +62,47 @@ function overpassQuery(query, cb, options) {
     });
 };
 
+function loadBoundaries(cb,result) {
+	debug.entry("loadBoundaries");
+	overpassQuery(queryBoundaries,cb);
+}
+function removeBoundariesData (cb,result) {
+	debug.entry("removeBoudnariesData");
+	db = configuration.getDB();
+	db.collection("OSMBoundaries").remove({},{w:1}, function (err,count) {
+		cb(err,count);
+	})
+}
+function insertBoudnariesData (cb,result) {
+	debug.entry("insertBoudnariesData");
+	db = configuration.getDB();
+	console.dir(result);
+	boundariesOverpass = result.overpass;
+	boundaries = [];
+	for (i=0;i<boundariesOverpass.length;i++) {
+		boundaries[i]=boundariesOverpass[i].tags;
+		boundaries[i].osm_id = boundariesOverpass[i].id;
+		boundaries[i].osm_type = boundariesOverpass[i].type;
+	}	
+	
+	db.getCollection("OSMBoundaries").insert(boundaries,{w:1},function(err,result){
+		cb(err,null);
+	});
+}
 
-// Dubliziere die Verbindung mit der mongdb
 
-var fs;
-
-
-
-/*
-boundariesFile = 'Boundaries OSM Nov 14.json';
-fs = require('fs');
-
-var boundariesJSON = JSON.parse(
-  fs.readFileSync(boundariesFile)
-);
-
-*/
-
+exports.importBoundaries = function(cb)  {
+	debug.entry("importBoundaries(cb)");
+	
+	// Start Overpass Query to load data
+	async.auto ({ overpass:    loadBoundaries,
+				  removeData:  ["overpass",removeBoundariesData],
+				  insertData:  ["removeData", insertBoudnariesData ] },
+				  function(err,result) {
+				  	if (cb) cb();
+				  });
+				   
+}
 
 
 
