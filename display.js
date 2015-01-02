@@ -110,7 +110,7 @@ exports.overpass = function(req,res) {
 	if (measure=="AddrWOStreet") {
 		text += '<p>Achtung, die Overpass Abfrage und die Abfrage von User:Gehrke unterschieden sich etwas. Siehe <a href="http://wiki.openstreetmap.org/wiki/DE:Overpass_API/Beispielsammlung#Hausnummern_ohne_Stra.C3.9Fe_finden">wiki</a>.</p>';
 	}
-	text = tableCSSStyle+"<body>"+text+"</body>";
+	text = "<html>"+tableCSSStyle+"<body>"+text+"</body></html>";
     		
     res.end(text );
 }
