@@ -52,8 +52,8 @@ app.use(function(req, res, next){
 
 app.use('/', express.static(path.resolve(__dirname, "html")));
 app.use('/count.html', display.count);
-app.use('/import.html', display.importCSV);
-app.use('/importApotheken.html', display.importApotheken);
+app.use('/import/csvimport.html', display.importCSV);
+app.use('/import/apotheken.html', display.importApotheken);
 app.use('/table.html', display.table);
 app.use('/object/:collection/:id', display.object);
 app.use('/overpass/:measure/:schluessel.html', display.overpass);
