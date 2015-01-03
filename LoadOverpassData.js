@@ -11,7 +11,7 @@ var debug   =  require('debug')('LoadOverpassData');
 // To be changed to a more readable import routine
 
 exports.query = {
-   Apotheke:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"];\n(node(area)[amenity=pharmacy];\nway(area)[amenity=pharmacy];\nrel(area)[amenity=pharmacy]);\nout ids;',
+   Apotheke:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"];\n(node(area)[amenity=pharmacy];\nway(area)[amenity=pharmacy];\nrel(area)[amenity=pharmacy]);\nout;',
    AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea;\n\
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \n\
 \n\
@@ -67,17 +67,18 @@ function loadBoundaries(cb,result) {
 	overpassQuery(queryBoundaries,cb);
 }
 function removeBoundariesData (cb,result) {
-	debug.entry("removeBoudnariesData");
+	debug.entry("removeBoundariesData");
 	db = configuration.getDB();
 	db.collection("OSMBoundaries").remove({},{w:1}, function (err,count) {
+		debug.entry("removeBoundariesData->CB count = "+count);
 		cb(err,count);
 	})
 }
-function insertBoudnariesData (cb,result) {
-	debug.entry("insertBoudnariesData");
+function insertBoundariesData (cb,result) {
+	debug.entry("insertBoundariesData");
 	db = configuration.getDB();
-	console.dir(result);
-	boundariesOverpass = result.overpass;
+	
+	boundariesOverpass = JSON.parse(result.overpass).elements;
 	boundaries = [];
 	for (i=0;i<boundariesOverpass.length;i++) {
 		boundaries[i]=boundariesOverpass[i].tags;
@@ -85,20 +86,29 @@ function insertBoudnariesData (cb,result) {
 		boundaries[i].osm_type = boundariesOverpass[i].type;
 	}	
 	
-	db.getCollection("OSMBoundaries").insert(boundaries,{w:1},function(err,result){
+	db.collection("OSMBoundaries").insert(boundaries,{w:1},function(err,result){
+		debug.entry("insertBoundariesData->CB");
 		cb(err,null);
 	});
 }
 
 
-exports.importBoundaries = function(cb)  {
+exports.importBoundaries = function(job,cb)  {
 	debug.entry("importBoundaries(cb)");
 	
 	// Start Overpass Query to load data
 	async.auto ({ overpass:    loadBoundaries,
 				  removeData:  ["overpass",removeBoundariesData],
-				  insertData:  ["removeData", insertBoudnariesData ] },
+				  insertData:  ["removeData", insertBoundariesData ] },
 				  function(err,result) {
+				  	if (err) {
+				  		job.error = err;
+				  		job.status="error";
+				  		
+				  	}
+				  	else {
+				  		job.status="done";
+				  	}
 				  	if (cb) cb();
 				  });
 				   
@@ -120,15 +130,26 @@ exports.runOverpass= function(query, measure,result, cb) {
 			result.count=0;
 			result.data=JSON.parse(data).elements;
 			result.measure=measure;
-			length= data.length;
-			for (i=0;i<length;i++) {
-				if (data.charAt(i) != '"')  {continue}
-				if (data.charAt(i+1) != 'i')  {continue}
-				if (data.charAt(i+2) != 'd')  {continue}
-				if (data.charAt(i+3) != '"')  {continue}
-				if (data.charAt(i+3) != '"')  {continue}
-				if (data.charAt(i+4) != ':')  {continue}
-				result.count++;
+			result.count = result.data.length;
+			if (measure == "Apotheke") {
+				result.missing = {};
+				result.existing = {}
+				result.existing.fixme = 0;
+				result.missing.opening_hours = 0;
+				result.missing.name = 0;
+				for (i = 0 ; i< result.data.length;i++ ) {
+					p = result.data[i].tags;
+					console.log(result.data[i]);
+					if (!p.hasOwnProperty("opening_hours")) {
+						result.missing.opening_hours += 1;
+					}
+					if (!p.hasOwnProperty("name")) {
+						result.missing.name += 1;
+					}
+					if (p.hasOwnProperty("fixme")) {
+						result.existing.fixme += 1;
+					}
+				}
 			}
 			debug.data("Result"+JSON.stringify(result));
 			cb();
@@ -157,7 +178,7 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 			job.status='open';
 			job.exectime = exectime;
 			job.type = "overpass";
-			job.query = query[aufgabe].replace('######',job.schluessel);
+			job.query = exports.query[aufgabe].replace('######',job.schluessel);
 			job.source = referenceJob._id;
 			jobs.push(job);
 			

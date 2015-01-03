@@ -163,32 +163,52 @@ exports.importApotheken = function(req,res) {
     res.end(text);
 }
 	
-function generateLink(text, basis, param1,param2,param3,param4)
+function gl(text, newLink, param)
 {
-  debug.entry("generateLink");
-  var link = basis;
-  var sep="?";
-  if (param1){
-  	link+= sep+param1;
-  	sep="&";
-  }
-  if (param2) {
-  	link+= sep+param2;
-  	sep="&";
-  }
-  if (param3) {
-  	link+= sep+param3;
-  	sep="&";
-  }
-  if (param4) {
-  	link+= sep+param4;
-  	sep="&";
-  }
-  if (text == "") {
-  	return link;
-  } else {
-  	return "<a href="+link+">"+text + "</a>";
-  }
+	debug.entry("generateLink");
+	var link = "./table.html";
+    
+	// measure
+	var measure = param.measure;
+	if (newLink.hasOwnProperty("measure" )) measure = newLink.measure;
+	
+	// Reset Params when switching measure
+	if (measure != param.measure) {
+		newLink.sub = "";
+	}
+	link += "?measure="+measure;
+	// Missing Tags
+	var sub = param.sub;
+	if (newLink.hasOwnProperty("sub" )) sub = newLink.sub;
+	link += "&sub="+sub;	
+	
+	// location
+	
+	var location = param.location;
+	if (newLink.hasOwnProperty("location")) location = newLink.location;
+	link += "&location="+location;
+
+	// lengthOfKey
+	var lok = param.lengthOfKey;
+	if (newLink.hasOwnProperty("lok" )) lok = newLink.lok;
+	link += "&lok="+lok;
+
+	// period
+	var period = param.period;
+	if (newLink.hasOwnProperty("period" )) period = newLink.period;
+	link += "&period="+period;
+
+	
+	// sortierung
+	var sort = param.sort;
+	if ("sort" in newLink) sort = newLink.sort;
+	link += "&sort="+sort;
+	
+	if (text == "") {
+		return link;
+	} else {
+		return "<a href="+link+">"+text + "</a>";
+	}
 }
 
 function setParams(req,param) {
@@ -227,13 +247,17 @@ function setParams(req,param) {
     	param.lengthOfTime=10;
     	param.periode="Tag";
     }
-   	param.locationStartWith ="";
-    param.location="";
+   	param.location ="";
+    param.locationName="";
     param.locationType="-";
     if(typeof(req.param("location"))!='undefined') {
     	param.location=req.param("location");
-    	param.locationStartWith = param.location;
+    	param.locationName = param.location;
     	param.locationType="-";
+    }
+    param.sub = "";
+    if (typeof(req.param("sub")) != 'undefined') {
+    	param.sub = req.param("sub");
     }
     
 
@@ -440,53 +464,63 @@ exports.table = function(req,res){
     		kreisnamen = loadDataFromDB.schluesselMapRegio;
     }
     
-    v = kreisnamen[param.locationStartWith];
+    v = kreisnamen[param.location];
 	if (typeof(v)!='undefined') {
-		param.location=v.name;
+		param.locationName=v.name;
 		param.locationType=v.typ;
 	}
     
     
-    var basisLink = "./table.html";
+   
     var paramTime = "period="+param.periode;
     var paramMeasure = "measure="+param.measure;
     var paramLength = "lok="+param.lengthOfKey;
-    var paramLocation = "location="+param.locationStartWith;
+    var paramLocation = "location="+param.location;
     
     beforeText= "<h1> OSM Count </h1>";
     var filterText = "";
-    if (param.locationStartWith!="") {
-    	filterText+= param.location+" ("+param.locationStartWith+","+param.locationType+")";
+    if (param.location!="") {
+    	filterText+= param.locationName+" ("+param.location+","+param.locationType+")";
     	
     } else {
     	filterText +="kein Filter";
     }
-    periodenSwitch = generateLink("[Jahr]",basisLink,paramLength,"period=Jahr",paramMeasure,paramLocation);
-    periodenSwitch+= generateLink("[Monat]",basisLink,paramLength,"period=Monat",paramMeasure,paramLocation);
-    periodenSwitch+= generateLink("[Tag]",basisLink,paramLength,"period=Tag",paramMeasure,paramLocation); 
-    filterSwitch = generateLink("[AddrWOStreet]",basisLink,"lok=2","period=month","measure=AddrWOStreet");
-    filterSwitch += generateLink("[Apotheke]",basisLink,"lok=2","period=month","measure=Apotheke");
+    periodenSwitch = gl("[Jahr]",{period:"Jahr"},param);
+    periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
+    periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
+    
+    filterSub = "-"
+    if (param.measure == "Apotheke") { 
+    	filterSub =  gl("[Name]", {sub:"missing.name"},param);
+    	filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
+    	filterSub += gl("[fixme]", {sub:"existing.fixme"},param);
+    	filterSub += gl("[phone]", {sub:"missing.phone"},param);
+    	filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
+    }
+    filterSwitch =   gl("[AddrWOStreet]",{lok:2,period:"Monat",measure:"AddrWOStreet",sub:""},param);
+    filterSwitch +=  gl("[Apotheke]",{lok:2,period:"Monat",measure:"Apotheke",sub:""},param);
     
     lokSwitch ="1";   
     lokShow = "X";
     for (i =1;i<param.lengthOfKey;i++) {
     	lokShow += "X";
-    	lokSwitch += generateLink("<b> "+(i+1)+"</b>",basisLink,"lok="+(i+1),paramTime,paramMeasure,paramLocation);
+    	lokSwitch += gl("<b> "+(i+1)+"</b>",{lok:(i+1)},param);
     	
     }
     for (;i<10;i++) {
     	lokShow += "-";
-    	lokSwitch += generateLink(" "+(i+1)+"",basisLink,"lok="+(i+1),paramTime,paramMeasure,paramLocation);
+    	lokSwitch += gl(" "+(i+1)+"",{lok:(i+1)},param);
     }
     for (;i<12;i++) {
-    	lokSwitch += generateLink(" "+(i+1)+"",basisLink,"lok="+(i+1),paramTime,paramMeasure,paramLocation);
+    	lokSwitch += gl(" "+(i+1)+" ",{lok:(i+1)},param);
     }
     
     //if (param.lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(param.lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
     //if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
-    var filterTable = "<tr><td>Messung</td><td><b><a href=./"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>"
-    filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+generateLink("[Bundesländer]",basisLink,"lok=2",paramTime,paramMeasure)+"</td></tr>"
+    var filterTable = "<tr><td>Messung</td><td><b><a href=./"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
+  	filterTable += "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td></tr>"  	   
+    filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+gl("[Bundesländer]",{lok:2,location:""},param)+"</td></tr>"
     filterTable += "<tr><td>Periode</td><td><b>"+param.periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
     filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td></tr>"
     filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+"</td></tr>"
@@ -495,15 +529,16 @@ exports.table = function(req,res){
 	beforeText += filterTable;
    
  
-    
+    valueToCount = "$count";
+    if (param.sub != "") valueToCount = "$"+param.sub;
     
     var filterOneMeasure = {$match: { measure: param.measure}};
-    var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+param.locationStartWith}}};
+    var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+param.location}}};
  
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
     						 			  timestamp: "$timestamp",
     						 			  timestampShort: {$substr: ["$timestamp",0,param.lengthOfTime]},
-    						 			  count: "$count",
+    						 			  count: valueToCount,
     						 			  source: "$source"
     						 			  }};	
      var aggregateMeasuresGroup = {$group: { _id: { row: "$schluessel",source:"$source"},
@@ -564,23 +599,26 @@ exports.table = function(req,res){
 						callback();
 					}))},
 					function(callback) {
-   					 collectionTarget.aggregate(	queryVorgabe
-										, (function(err, data) {
-						if (err) {
-							res.set('Content-Type', 'text/html');
-							res.end("error"+err);
-							console.log("Table Function, Error occured:");
-							console.log(err);
-							;
-						}
-						for (i = 0;i<data.length;i++)
-						{
-							schluessel = data[i]._id;
-							value = data[i].vorgabe;
-							vorgabe [schluessel]=value;
-						}
-						callback();
-					}))},
+						if (param.measure=="Apotheke" && param.sub =="") {
+							collectionTarget.aggregate(	queryVorgabe
+											, (function(err, data) {
+							if (err) {
+								res.set('Content-Type', 'text/html');
+								res.end("error"+err);
+								console.log("Table Function, Error occured:");
+								console.log(err);
+								;
+							}
+							for (i = 0;i<data.length;i++)
+							{
+								schluessel = data[i]._id;
+								value = data[i].vorgabe;
+								vorgabe [schluessel]=value;
+							}
+							callback();
+						}))
+					} else callback();
+					},
 					function (callback) {
 					
 						db = res.db;
@@ -637,7 +675,7 @@ exports.table = function(req,res){
 
 		
 		// Extend two dimensional Table
-		displayVorgabe = ((param.lengthOfKey > 1)&&(param.measure=="Apotheke"));
+		displayVorgabe = ((param.lengthOfKey > 1)&&(param.measure=="Apotheke") && (param.sub == ""));
 		
 
 		if (displayVorgabe) {
@@ -652,7 +690,7 @@ exports.table = function(req,res){
 		header.unshift("Schlüssel");
 		format["Schlüssel"]= {};
 		format["Schlüssel"].generateLink = function(value) {
-			return generateLink("",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,"location="+value);
+			return gl("",{lok:(param.lengthOfKey+1),location:value},param);
 		};
 		
 		if (displayVorgabe) {
