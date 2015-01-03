@@ -234,18 +234,18 @@ function setParams(req,param) {
     }
     
     param.lengthOfTime=7;
-    param.periode="Monat";
+    param.period="Monat";
     if(req.param("period")=="Jahr") {
     	param.lengthOfTime=4;
-    	param.periode="Jahr";
+    	param.period="Jahr";
     }   
     if(req.param("period")==" Monat") {
     	param.lengthOfTime=7;
-    	param.periode="Monat";
+    	param.period="Monat";
     }
     if(req.param("period")=="Tag") {
     	param.lengthOfTime=10;
-    	param.periode="Tag";
+    	param.period="Tag";
     }
    	param.location ="";
     param.locationName="";
@@ -472,7 +472,7 @@ exports.table = function(req,res){
     
     
    
-    var paramTime = "period="+param.periode;
+    var paramTime = "period="+param.period;
     var paramMeasure = "measure="+param.measure;
     var paramLength = "lok="+param.lengthOfKey;
     var paramLocation = "location="+param.location;
@@ -496,6 +496,7 @@ exports.table = function(req,res){
     	filterSub += gl("[fixme]", {sub:"existing.fixme"},param);
     	filterSub += gl("[phone]", {sub:"missing.phone"},param);
     	filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
+    	filterSub += gl("[ALLES]", {sub:""},param);
     }
     filterSwitch =   gl("[AddrWOStreet]",{lok:2,period:"Monat",measure:"AddrWOStreet",sub:""},param);
     filterSwitch +=  gl("[Apotheke]",{lok:2,period:"Monat",measure:"Apotheke",sub:""},param);
@@ -521,7 +522,7 @@ exports.table = function(req,res){
     var filterTable = "<tr><td>Messung</td><td><b><a href=./"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
   	filterTable += "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td></tr>"  	   
     filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+gl("[Bundesländer]",{lok:2,location:""},param)+"</td></tr>"
-    filterTable += "<tr><td>Periode</td><td><b>"+param.periode+"</B></td><td>"+periodenSwitch+"</td></tr>"
+    filterTable += "<tr><td>Periode</td><td><b>"+param.period+"</B></td><td>"+periodenSwitch+"</td></tr>"
     filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td></tr>"
     filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+"</td></tr>"
     

@@ -136,6 +136,8 @@ exports.runOverpass= function(query, measure,result, cb) {
 				result.existing = {}
 				result.existing.fixme = 0;
 				result.missing.opening_hours = 0;
+				result.missing.phone=0;
+				result.missing.wheelchair = 0;
 				result.missing.name = 0;
 				for (i = 0 ; i< result.data.length;i++ ) {
 					p = result.data[i].tags;
@@ -146,8 +148,14 @@ exports.runOverpass= function(query, measure,result, cb) {
 					if (!p.hasOwnProperty("name")) {
 						result.missing.name += 1;
 					}
+					if (!p.hasOwnProperty("wheelchair")) {
+						result.missing.wheelchair += 1;
+					}
 					if (p.hasOwnProperty("fixme")) {
 						result.existing.fixme += 1;
+					}
+					if (!p.hasOwnProperty("phone") && ! p.hasOwnProperty("contact:phone")) {
+						result.missing.phone += 1;
 					}
 				}
 			}
