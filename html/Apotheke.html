@@ -17,8 +17,8 @@ daran zu testen.</p>
 Die Anzahlen der Apotheken (Vorgabe) werden aus den ABDA (Bundesverband der Apothekenverbände) Werten 
 (<a href= http://www.abda.de/fileadmin/assets/ZDF/ZDF_2013/ZDF_2013_06-Bundeslaender.pdf>Daten</a>) 
 ermittelt.
-Dafür hat Christoph (TheFive) die ABDA Werte mit den Bevölkerungszahlen Werten gewichtet (pro Bundesland), und ist so auf eine 
-hoffentlich plausible Vorgabe (die theoretische Apothekenzahl) gekommen.</p>
+Dafür werden die ABDA Werte mit den Bevölkerungszahlen Werten gewichtet runtergebrochen (pro Bundesland). 
+So gibt es hoffentlich eine plausible Vorgabe für die Wochenaufgabe (die theoretische Apothekenzahl).</p>
 <p>Die Kooperation des ABDA in diesem Thema war leider "zurückhaltend."</p>
 <h2>Istwerte</h2>
 Die Istwerte werden mit der folgenden Overpass Query (pro amtlichen Gemeindeschlüssel) ermittelt:
@@ -27,9 +27,10 @@ Die Istwerte werden mit der folgenden Overpass Query (pro amtlichen Gemeindeschl
 (node(area)[amenity=pharmacy];
 way(area)[amenity=pharmacy];
 rel(area)[amenity=pharmacy]);out;</pre>
-<p>Die Anzahl der Ergebnisse ist die Anzahl der Apotheken, darüberhinaus wird das Fehlen oder Vorhandensein spezieller Tags geprüft.</p>
+<p>Die Anzahl der Ergebnisse ist die Anzahl der Apotheken, darüber hinaus wird das Fehlen oder 
+Vorhandensein spezieller Tags (s.u.) geprüft.</p>
 <p>Bei der Zählung werden nur die Gemeindeschlüssel genutzt, die nicht Teilstring (Beginn) eines anderen amtlichen
-Gemeindeschlüssels in OpenStreetMap sind, die Zusammenfassungen über verschiedene Gemeindeschlüssel geschieht dann auf den ermittelten Daten.</p> 
+Gemeindeschlüssels in OpenStreetMap sind. Die Zusammenfassung über verschiedene Gemeindeschlüssel geschieht dann auf den ermittelten Daten.</p> 
 
 <h2> Tag Auswertungen </h2>
 <p>Um die Datenqualität zu messen, werden die Apotheken noch auf die folgenden Tags untersucht:</p>
