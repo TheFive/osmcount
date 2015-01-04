@@ -201,8 +201,14 @@ function gl(text, newLink, param)
 	
 	// sortierung
 	var sort = param.sort;
-	if ("sort" in newLink) sort = newLink.sort;
+	if (newLink.hasOwnProperty("sort")) sort = newLink.sort;
 	link += "&sort="+sort;
+
+	// subPercent
+	var subPercent = param.subPercent;
+	if (newLink.hasOwnProperty("subPercent")) subPercent = newLink.subPercent;
+	
+	link += "&subPercent="+subPercent;
 	
 	if (text == "") {
 		return link;
@@ -258,6 +264,10 @@ function setParams(req,param) {
     param.sub = "";
     if (typeof(req.param("sub")) != 'undefined') {
     	param.sub = req.param("sub");
+    }
+    param.subPercent = "";
+    if (typeof(req.param("subPercent")) != 'undefined') {
+    	param.subPercent = req.param("subPercent");
     }
     
 
@@ -490,6 +500,7 @@ exports.table = function(req,res){
     periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
     
     filterSub = "-"
+    filterSubPercent = "-";
     if (param.measure == "Apotheke") { 
     	filterSub =  gl("[Name]", {sub:"missing.name"},param);
     	filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
@@ -497,7 +508,11 @@ exports.table = function(req,res){
     	filterSub += gl("[phone]", {sub:"missing.phone"},param);
     	filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
     	filterSub += gl("[ALLES]", {sub:""},param);
+    	filterSubPercent =  gl("[Prozentanzeige]", {subPercent:"Yes"},param);
+    	filterSubPercent += gl("[Anzahl]", {subPercent:"No"},param);
     }
+    
+    
     filterSwitch =   gl("[AddrWOStreet]",{lok:2,period:"Monat",measure:"AddrWOStreet",sub:""},param);
     filterSwitch +=  gl("[Apotheke]",{lok:2,period:"Monat",measure:"Apotheke",sub:""},param);
     
@@ -520,7 +535,9 @@ exports.table = function(req,res){
     //if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
     var filterTable = "<tr><td>Messung</td><td><b><a href=./"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
-  	filterTable += "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td></tr>"  	   
+  	filterTable += "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td></tr>"  
+  	filterTable += "<tr><td>Anzeige %</td><td><b>"+param.subPercent+"</b></td><td>"+filterSubPercent+"</td></tr>"  
+	   
     filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+gl("[Bundesländer]",{lok:2,location:""},param)+"</td></tr>"
     filterTable += "<tr><td>Periode</td><td><b>"+param.period+"</B></td><td>"+periodenSwitch+"</td></tr>"
     filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td></tr>"
@@ -531,7 +548,13 @@ exports.table = function(req,res){
    
  
     valueToCount = "$count";
-    if (param.sub != "") valueToCount = "$"+param.sub;
+   	if (param.sub != "") valueToCount = "$"+param.sub;
+   	
+   	valueToDisplay = "$count";
+    
+    if (param.subPercent == "Yes") {
+    	valueToDisplay = { $cond : [ {$eq : ["$count",0]},0,{$divide: [ "$count","$total"]}]};
+    } 
     
     var filterOneMeasure = {$match: { measure: param.measure}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+param.location}}};
@@ -540,10 +563,12 @@ exports.table = function(req,res){
     						 			  timestamp: "$timestamp",
     						 			  timestampShort: {$substr: ["$timestamp",0,param.lengthOfTime]},
     						 			  count: valueToCount,
+    						 			  total: "$count",
     						 			  source: "$source"
     						 			  }};	
      var aggregateMeasuresGroup = {$group: { _id: { row: "$schluessel",source:"$source"},
     						 		    count	: {$sum: "$count" },
+    						 		    total	: {$sum: "$total" },
     						 		    timestamp:{$last:"$timestamp"},
     						 		    schluessel: {$last:"$schluessel"},
     						 		    timestampShort: {$last:"$timestampShort"}}};
@@ -551,7 +576,7 @@ exports.table = function(req,res){
     var presort = {$sort: { timestamp:1}};
  
     var aggregateTimeAxisStep2 = {$group: { _id: { row: "$schluessel",col:"$timestampShort"},
-    						 		    cell	: {$last: "$count" }}};
+    						 		    cell	: {$last: valueToDisplay }}};
 
     var sort = {$sort: { _id:1}};
     
@@ -661,6 +686,11 @@ exports.table = function(req,res){
 				header.push(col);
 				format[col] = {};
 				format[col].sum = true;
+				if (param.subPercent == "Yes") {
+					format[col] = {};
+					format[col].sum = false; 
+					format[col].format = '0%'
+				}
 			}
 			if (firstColumn.indexOf(row)<0) {
 				firstColumn.push(row);
@@ -669,7 +699,7 @@ exports.table = function(req,res){
 				table[row]=[];
 			}
 			
-			table[row][col]=parseInt(measure.cell);
+			table[row][col]=parseFloat(measure.cell);
 			
 		}
 		header.sort();
@@ -708,6 +738,7 @@ exports.table = function(req,res){
 			header.push("Diff");
 			format["Diff"]={};
 			format["Diff"].sum = false;
+			format["Diff"].format = format[header[header.length-2]].format;
 			format["Diff"].func = {};
 			format["Diff"].func.op = "-";
 			format["Diff"].func.op1  = header[header.length-2];
