@@ -14,22 +14,38 @@ daran zu testen.</p>
 
 <h2>Vorgaben</h2>
 <p>
-Die Anzahlen der Apotheken (Vorgabe) werden aus den ABDA Werten 
+Die Anzahlen der Apotheken (Vorgabe) werden aus den ABDA (Bundesverband der Apothekenverbände) Werten 
 (<a href= http://www.abda.de/fileadmin/assets/ZDF/ZDF_2013/ZDF_2013_06-Bundeslaender.pdf>Daten</a>) 
 ermittelt.
 Dafür hat Christoph (TheFive) die ABDA Werte mit den Bevölkerungszahlen Werten gewichtet (pro Bundesland), und ist so auf eine 
-hoffentlich plausible Vorgabe gekommen.</p>
-<p>Die Kooperation des ABDA in diesem Thema war leider "zurückhaltend"</p>
+hoffentlich plausible Vorgabe (die theoretische Apothekenzahl) gekommen.</p>
+<p>Die Kooperation des ABDA in diesem Thema war leider "zurückhaltend."</p>
 <h2>Istwerte</h2>
 Die Istwerte werden mit der folgenden Overpass Query (pro amtlichen Gemeindeschlüssel) ermittelt:
 <pre>
 [out:json];area["de:amtlicher_gemeindeschluessel"="######"];
 (node(area)[amenity=pharmacy];
 way(area)[amenity=pharmacy];
-rel(area)[amenity=pharmacy]);out ids;</pre>
-<p>Dabei werden die IDs aus dem Ergebnis gezählt</p>
+rel(area)[amenity=pharmacy]);out;</pre>
+<p>Die Anzahl der Ergebnisse ist die Anzahl der Apotheken, darüberhinaus wird das Fehlen oder Vorhandensein spezieller Tags geprüft.</p>
 <p>Bei der Zählung werden nur die Gemeindeschlüssel genutzt, die nicht Teilstring (Beginn) eines anderen amtlichen
-Gemeindeschlüssels in OpenStreetMap sind.</p> 
+Gemeindeschlüssels in OpenStreetMap sind, die Zusammenfassungen über verschiedene Gemeindeschlüssel geschieht dann auf den ermittelten Daten.</p> 
 
-<a href="./table.html?lok=2&period=month&measure=Apotheke">Hier gehts zurAuswertung</a>
+<h2> Tag Auswertungen </h2>
+<p>Um die Datenqualität zu messen, werden die Apotheken noch auf die folgenden Tags untersucht:</p>
+<li>fehlendes Name Tag </li>
+<li>fehlendes Öffnungszeiten Tag </li>
+<li>fehlendes Phone (inklusive contact:phone) Tag </li>
+<li>fehlendes Wheelchair Tag </li>
+<li>vorhandenes Fixme Fag </li>
+
+<p>Diese Zahlen können als feste Anzahl oder als Prozentangabe in Abhängigkeit der Apothekenanzahl ausgegeben werden.</p>
+
+<h2>Die Diff Spalte </h2>
+
+<p>In der Diff Spalte werden entweder die Prozentanzahl der Apotheken im Vergleich zur theoretischen Apothekenzahl angegeben, oder aber
+die Differenz der letzten beiden dargestellten Spalten.</p>
+
+
+<p><a href="./table.html?lok=2&period=month&measure=Apotheke">Hier gehts zurAuswertung</a></p>
 </body> 
