@@ -91,14 +91,10 @@ exports.object = function(req,res) {
     })
 }
 
-exports.overpass = function(req,res) {
-	debug.entry("exports.overpass");
-	var db = res.db;
+function generateQuery(measure,schluessel,sub) {
+	debug.entry("generateQuery");
    
-	var measure = req.param("measure");
-	var schluessel = req.param("schluessel");
 	
-	var sub = req.param("sub");
 	var subQuery ="";
 	if (sub == "missing.name") subQuery = "name!~'.'";
 	if (sub == "missing.wheelchair") subQuery = "wheelchair!~'.'";
@@ -108,14 +104,11 @@ exports.overpass = function(req,res) {
 	
 	
 	
-	if (typeof(sub) != 'undefined' && measure == "Apotheke") {
+	if ( sub != '' && measure == "Apotheke") {
 		measure = "ApothekeDetail";
 	}
 	
 	var query = loadOverpassData.query[measure];
-
-	if (!query) query = "Für die Aufgabe "+measure+" ist keine Query definiert";
-
 	query = query.replace('"="######"','"~"^'+schluessel+'"');
 	
 	query = query.replace("out ids;","out;");
@@ -126,6 +119,24 @@ exports.overpass = function(req,res) {
 		query = query.replace('$$$$',subQuery);
 		query = query.replace('$$$$',subQuery);
 	}
+	return query;
+}
+
+
+exports.overpass = function(req,res) {
+	debug.entry("exports.overpass");
+	var db = res.db;
+   
+	var measure = req.param("measure");
+	var schluessel = req.param("schluessel");
+	
+	
+	var sub = req.param("sub");
+	if (typeof(sub) == 'undefined') sub = "";
+    query = generateQuery(measure,schluessel,sub);
+    
+	if (!query) query = "Für die Aufgabe "+measure+" ist keine Query definiert";
+
 	var text = "<h1>Overpass Abfrage</h1>"
 	text += "<table><tr><td>Aufgabe</td><td>"+measure+"</td></tr> \
 						<tr><td>Schl&uuml;ssel</td><td>"+schluessel+"</td></tr></table>";
@@ -424,7 +435,9 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 		if (serviceLink) {
 			var sub = "";
 			if (param.sub != "") sub = "?sub="+param.sub;
-			tablerow += "<td> <a href=./overpass/"+param.measure+"/"+row+".html"+sub+">O</a></td>";
+			tablerow += "<td><a href=./overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
+			query= generateQuery(param.measure,row,param.sub);
+			tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+"&R>R</a></td>"
 		}
 		tablerow = "<tr>"+tablerow+"</tr>";
 		tablebody += tablerow;
@@ -796,6 +809,7 @@ exports.table = function(req,res){
 		pagefooter = "<p> Offene Queries "+openQueries+"</p>";
 		pagefooter += "<p> Die Service Link(s) bedeuten \
 						<li>O Zeige die Overpass Query</li> \
+						<li>R Starte die Overpass Query</li> \
 						</p>"
 		debug.data(JSON.stringify(query,null,' '));
 		text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
