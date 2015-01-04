@@ -98,6 +98,20 @@ exports.overpass = function(req,res) {
 	var measure = req.param("measure");
 	var schluessel = req.param("schluessel");
 	
+	var sub = req.param("sub");
+	var subQuery ="";
+	if (sub == "missing.name") subQuery = "name!~'.'";
+	if (sub == "missing.wheelchair") subQuery = "wheelchair!~'.'";
+	if (sub == "missing.phone") subQuery = "phone!~'.']['contact:phone'!~'.'";
+	if (sub == "missing.opening_hours") subQuery = "opening_hours!~'.'";
+	if (sub == "existing.fixme") subQuery = "fixme";
+	
+	
+	
+	if (typeof(sub) != 'undefined' && measure == "Apotheke") {
+		measure = "ApothekeDetail";
+	}
+	
 	var query = loadOverpassData.query[measure];
 
 	if (!query) query = "Für die Aufgabe "+measure+" ist keine Query definiert";
@@ -105,6 +119,13 @@ exports.overpass = function(req,res) {
 	query = query.replace('"="######"','"~"^'+schluessel+'"');
 	
 	query = query.replace("out ids;","out;");
+	
+	if (typeof(sub) != 'undefined') {
+	
+		query = query.replace('$$$$',subQuery);
+		query = query.replace('$$$$',subQuery);
+		query = query.replace('$$$$',subQuery);
+	}
 	var text = "<h1>Overpass Abfrage</h1>"
 	text += "<table><tr><td>Aufgabe</td><td>"+measure+"</td></tr> \
 						<tr><td>Schl&uuml;ssel</td><td>"+schluessel+"</td></tr></table>";
@@ -399,7 +420,11 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 			}
 			tablerow += "<td "+cl+">"+cell+"</td>";
 		}
-		if (serviceLink) tablerow += "<td> <a href=./overpass/"+param.measure+"/"+row+".html>O</a></td>";
+		if (serviceLink) {
+			var sub = "";
+			if (param.sub != "") sub = "?sub="+param.sub;
+			tablerow += "<td> <a href=./overpass/"+param.measure+"/"+row+".html"+sub+">O</a></td>";
+		}
 		tablerow = "<tr>"+tablerow+"</tr>";
 		tablebody += tablerow;
 	}

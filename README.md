@@ -13,8 +13,11 @@ comparing the results numbers with a target number.
 On Top - of course - the vision is that the developers will learn about
 
 a) a nosql store (choosen: mongodb)
+
 b) a server implemented with node.js
+
 c) list can be extended...
+
 
 
 2. Status

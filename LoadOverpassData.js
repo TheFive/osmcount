@@ -12,6 +12,7 @@ var debug   =  require('debug')('LoadOverpassData');
 
 exports.query = {
    Apotheke:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"];\n(node(area)[amenity=pharmacy];\nway(area)[amenity=pharmacy];\nrel(area)[amenity=pharmacy]);\nout;',
+   ApothekeDetail:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"];\n(node(area)[amenity=pharmacy][$$$$];\nway(area)[amenity=pharmacy][$$$$];\nrel(area)[amenity=pharmacy][$$$$]);\nout;',
    AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea;\n\
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \n\
 \n\
