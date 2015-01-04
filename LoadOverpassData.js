@@ -141,7 +141,6 @@ exports.runOverpass= function(query, measure,result, cb) {
 				result.missing.name = 0;
 				for (i = 0 ; i< result.data.length;i++ ) {
 					p = result.data[i].tags;
-					console.log(result.data[i]);
 					if (!p.hasOwnProperty("opening_hours")) {
 						result.missing.opening_hours += 1;
 					}

@@ -163,6 +163,56 @@ function doOverpass(cb,results) {
 			)		
 	} else cb(null,job);
 }
+/*
+function doCountSpecial(cb,results) {
+	debug.entry("doCountSpecial(cb,"+results+")");
+	job=results.readjob;
+	debug(JSON.stringify(job));
+	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="countBoundarieTag") {
+		debug.entry("Start: doCountSpecial(cb,"+results+")");
+			measure=job.measure;
+			result.source = job._id;
+			keys = {};
+			async.series([
+				function(callback) {
+				mongodb.collection("OSMBoundaries").find( 
+							{ boundary : "administrative" , 
+							  admin_level: {$in: ['1','2','3','4','5','6','7','8','9']}
+							}, 
+								function(err, result) {
+					if (err) {
+						console.log("Error occured in function: doCountSpecial");
+						console.log(err);
+						cb (err,null);
+					}
+					result.each(function(err, doc) {
+						if (doc == null) {
+							//schleife beendet
+							dataLoaded=true;
+							callback(null); 
+						} else {
+							for (k in doc) {
+								if (keys[k]=='undefined') {
+									keys[k] = 0;
+								}
+								keys[k] += 1;
+							}
+						}
+					})
+				})
+			},
+			function(cb) {
+				console.dir(keys);
+			
+			}
+			],
+			function(err) {
+				debug("Initialising All Done");
+				if (cb) cb(null);
+			})
+		}
+	} else cb(null,job);
+}*/
 
 function doInsertJobs(cb,results) {
 	debug.entry("doInsertJobs(cb,"+results+")");
@@ -205,7 +255,7 @@ function doLoadBoundaries(cb,results) {
 	
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="loadBoundaries") {
 		debug.entry("Start: doLoadBoudnaries(cb,"+results+")");
-		lod.importBoundaries(cb);
+		lod.importBoundaries(job,cb);
 	}
 	else if (cb) cb(null,job);
 }
