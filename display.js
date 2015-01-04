@@ -198,8 +198,8 @@ exports.importApotheken = function(req,res) {
 	
 function gl(text, newLink, param)
 {
-	debug.entry("generateLink");
-	var link = "./table.html";
+	debug.entry("gl");
+	var link = "/table";
     
 	// measure
 	var measure = param.measure;
@@ -209,11 +209,11 @@ function gl(text, newLink, param)
 	if (measure != param.measure) {
 		newLink.sub = "";
 	}
-	link += "?measure="+measure;
+	link += "/"+measure+".html";
 	// Missing Tags
 	var sub = param.sub;
 	if (newLink.hasOwnProperty("sub" )) sub = newLink.sub;
-	link += "&sub="+sub;	
+	link += "?sub="+sub;	
 	
 	// location
 	
