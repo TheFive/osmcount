@@ -1,7 +1,7 @@
 osmcount
 ========
 
-Project to count several OpenStreetMap objects based on Overpass to motivate quality assurance.
+Project to count several OpenStreetMap objects with the Overpass API to motivate quality assurance.
 
 1. Vision
 
@@ -19,4 +19,5 @@ c) list can be extended...
 
 2. Status
 
-The tool is far away from its vision.
+In Jan 2015 the display of the "Wochenaufgabe" Adresses Without Streets is implemented,
+and a check for the "amenity=pharmacy" objects.
