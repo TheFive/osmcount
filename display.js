@@ -573,7 +573,7 @@ exports.table = function(req,res){
     //if (param.lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(param.lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
     //if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
-    var filterTable = "<tr><td>Messung</td><td><b><a href=./"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
+    var filterTable = "<tr><td>Messung</td><td><b><a href=/"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
   	filterTable += "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td></tr>"  
   	filterTable += "<tr><td>Anzeige %</td><td><b>"+param.subPercent+"</b></td><td>"+filterSubPercent+"</td></tr>"  
 	   
