@@ -738,7 +738,9 @@ exports.table = function(req,res){
 			header.push("Diff");
 			format["Diff"]={};
 			format["Diff"].sum = false;
-			format["Diff"].format = format[header[header.length-2]].format;
+			if (param.subPercent == "Yes") {
+				format["Diff"].format ='0%';
+			}
 			format["Diff"].func = {};
 			format["Diff"].func.op = "-";
 			format["Diff"].func.op1  = header[header.length-2];
