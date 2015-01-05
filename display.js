@@ -111,10 +111,14 @@ function generateQuery(measure,schluessel,sub) {
 	var query = loadOverpassData.query[measure];
 	query = query.replace('"="######"','"~"^'+schluessel+'"');
 	
+	// This should be better done in a while loop
+	query = query.replace("out ids;","out;");
+	query = query.replace("out ids;","out;");
 	query = query.replace("out ids;","out;");
 	
 	if (typeof(sub) != 'undefined') {
 	
+		// This should be better done in a while loop
 		query = query.replace('$$$$',subQuery);
 		query = query.replace('$$$$',subQuery);
 		query = query.replace('$$$$',subQuery);
@@ -317,7 +321,11 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	
 	
 	for (i=0;i<header.length;i++) {
-		tableheader +="<th>"+header[i]+"</th>";
+		var cell = header[i];
+		if (format[cell] && typeof(format[cell].toolTip) != "undefined") {
+			cell = '<p title="'+ format[header[i]].toolTip+ '">'+cell+'</p>';
+		}
+		tableheader +="<th>"+cell+"</th>";
 	}
 	if (serviceLink) tableheader += "<th> Service </th>";
 	tableheader = "<tr>"+tableheader + "</tr>";
@@ -751,31 +759,43 @@ exports.table = function(req,res){
 		if (displayVorgabe) {
 			header.unshift("Vorgabe");
 			format["Vorgabe"] = {};
+			format["Vorgabe"].toolTip = "theoretische Apothekenzahl";
 			format["Vorgabe"].sum = true;
 			
 		}
 		
 		header.unshift("Admin Level");
 		header.unshift("Name");
+		format["Name"] = {};
+		format["Name"].toolTip = "Name aus OSM, Alternativ Teilschlüssel";
 		header.unshift("Schlüssel");
 		format["Schlüssel"]= {};
+		if (param.measure= "Apotheke") {
+			format["Schlüssel"].toolTip = "de:amtlicher_gemeindeschluessel";
+		}
+		if (param.measure= "AddrWOStreet") {
+			format["Schlüssel"].toolTip = "de:regionalschluessel";
+		}
 		format["Schlüssel"].generateLink = function(value) {
 			return gl("",{lok:(param.lengthOfKey+1),location:value},param);
 		};
 		
 		if (displayVorgabe) {
-			header.push("Diff");
-			format["Diff"]={};
-			format["Diff"].format='0%';
-			format["Diff"].sum = false;
-			format["Diff"].func = {};
-			format["Diff"].func.op = "%";
-			format["Diff"].func.denominator  = "Vorgabe";
-			format["Diff"].func.numerator = header[header.length-2];
+			var colName = "% in OSM"
+			header.push(colName);
+			format[colName]={};
+			format[colName].toolTip = "Anzahl Apotheken in OSM / theoretische Apothekenzahl";
+			format[colName].format='0%';
+			format[colName].sum = false;
+			format[colName].func = {};
+			format[colName].func.op = "%";
+			format[colName].func.denominator  = "Vorgabe";
+			format[colName].func.numerator = header[header.length-2];
 			
 		} else {
 			header.push("Diff");
 			format["Diff"]={};
+			format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und " + header[header.length-3];
 			format["Diff"].sum = false;
 			if (param.subPercent == "Yes") {
 				format["Diff"].format ='0%';
