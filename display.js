@@ -826,8 +826,10 @@ exports.table = function(req,res){
 			}
 		}
 		var table = generateTable(param,header,firstColumn,table,format,"Diff");
-		
-		pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+		pagefooter = "";
+		if (openQueries > 0) {
+			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+		}
 		pagefooter += "<p> Die Service Link(s) bedeuten \
 						<li>O Zeige die Overpass Query</li> \
 						<li>R Starte die Overpass Query</li> \
