@@ -699,7 +699,8 @@ exports.table = function(req,res){
 						
 						// Fetch the collection test
 						var collection = db.collection(collectionName);
-						collection.count({status:"open",measure:param.measure},function(err, count) {
+						date = new Date();
+						collection.count({status:"open",exectime: {$lte: date},measure:param.measure},function(err, count) {
 							openQueries=count;
 							callback();
 						});  
