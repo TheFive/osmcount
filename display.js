@@ -825,7 +825,7 @@ exports.table = function(req,res){
 				table[schluessel]["Vorgabe"]=expectation;
 			}
 		}
-		var table = generateTable(param,header,firstColumn,table,format,"Diff");
+		var table = generateTable(param,header,firstColumn,table,format, header[header.length-1]);
 		pagefooter = "";
 		if (openQueries > 0) {
 			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
