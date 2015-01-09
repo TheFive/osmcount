@@ -311,6 +311,8 @@ function setParams(req,param) {
 }
 
 function generateTable(param,header,firstColumn,table,format,rank, serviceLink) {
+
+	console.dir(rank);
 	var tableheader = "";
 	var tablebody="";
 	
@@ -352,32 +354,34 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 			}
 		}
 	}
-	var first;
-	var second;
-	var last;
-	var lastButOne;
-	
-	if (rank && table[firstColumn[0]]) {
-		value = table[firstColumn[0]][rank];
-		first = second = last = lastButOne = value;
-		for (i=1;i<firstColumn.length;i++)
-		{
-			value = table[firstColumn[i]][rank];
-			if (value>first) {
-				second=first;
-				first = value; 
-			}
-			if ((value > second) && (value < first))
+	var first = [];
+	var second = [] ;
+	var last=[]  ;
+	var lastButOne = [];
+	for (c=0;c<header.length;c++) {
+		col = header[c];
+		if (typeof(rank[col])!='undefined' && table[firstColumn[0]]) {
+			value = table[firstColumn[0]][col];
+			first[col] = second[col] = last[col] = lastButOne[col] = value;
+			for (i=1;i<firstColumn.length;i++)
 			{
-				second = value;
-			}
-			if (value<last) {
-				lastButOne=last;
-				last = value; 
-			}  
-			if ((value < lastButOne) && (value > last))
-			{
-				lastButOne = value;
+				value = table[firstColumn[i]][col];
+				if (value>first[col]) {
+					second[col]=first[col];
+					first[col] = value; 
+				}
+				if ((value > second[col]) && (value < first[col]))
+				{
+					second[col] = value;
+				}
+				if (value<last[col]) {
+					lastButOne[col]=last[col];
+					last[col] = value; 
+				}  
+				if ((value < lastButOne[col]) && (value > last[col]))
+				{
+					lastButOne[col] = value;
+				}
 			}
 		}
 	}
@@ -424,18 +428,20 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 				cell = '<a href="'+glink(cell)+'">'+cell+'</a>';
 			}
 			var cl ="";
-			if (rank&&(col==rank) && (param.measure=="Apotheke")) {
-				if (content == lastButOne) cl = 'class = "lastButOne"';
-				if (content == last) cl = 'class = "last"';
-				if (content == second) cl = 'class = "second"';
-				if (content == first) cl = 'class = "first"';
+			if ((typeof(rank[col])!="undefined")  && (rank[col]=="up") ){
+			
+				if (content == lastButOne[col]) cl = 'class = "lastButOne"';
+				if (content == last[col]) cl = 'class = "last"';
+				if (content == second[col]) cl = 'class = "second"';
+				if (content == first[col]) cl = 'class = "first"';
 			
 			}
-			if (rank&&(col==rank) && (param.measure=="AddrWOStreet")) {
-				if (content == lastButOne) cl = 'class = "second"';
-				if (content == last) cl = 'class = "first"';
-				if (content == second) cl = 'class = "lastButOne"';
-				if (content == first) cl = 'class = "last"';
+			if ((typeof(rank[col])!="undefined")  && (rank[col]=="down") ) {
+			
+				if (content == lastButOne[col]) cl = 'class = "second"';
+				if (content == last[col]) cl = 'class = "first"';
+				if (content == second[col]) cl = 'class = "lastButOne"';
+				if (content == first[col]) cl = 'class = "last"';
 			
 			}
 			tablerow += "<td "+cl+">"+cell+"</td>";
@@ -546,6 +552,13 @@ exports.table = function(req,res){
     periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
     periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
     
+    ranktype = "";
+    if (param.measure == "Apotheke") {
+    	ranktype = "UP";
+    }
+    if (param.measure == "AddrWOStreet") {
+    	ranktype = "down";
+    }
     filterSub = "-"
     filterSubPercent = "-";
     if (param.measure == "Apotheke") { 
@@ -601,6 +614,7 @@ exports.table = function(req,res){
     
     if (param.subPercent == "Yes") {
     	valueToDisplay = { $cond : [ {$eq : ["$count",0]},0,{$divide: [ "$count","$total"]}]};
+    	ranktype = "up";
     } 
     
     var filterOneMeasure = {$match: { measure: param.measure}};
@@ -714,6 +728,7 @@ exports.table = function(req,res){
 		var firstColumn = [];
 		var table =[]; 
 		var format=[];
+		var rank = [];
 		
 		//iterate total result array
 		// and generate 2 Dimensional Table
@@ -734,6 +749,7 @@ exports.table = function(req,res){
 				header.push(col);
 				format[col] = {};
 				format[col].sum = true;
+				rank[col]=ranktype;
 				if (param.subPercent == "Yes") {
 					format[col] = {};
 					format[col].sum = false; 
@@ -783,6 +799,7 @@ exports.table = function(req,res){
 		
 		if (displayVorgabe) {
 			var colName = "% in OSM"
+			rank[colName]="up";
 			header.push(colName);
 			format[colName]={};
 			format[colName].toolTip = "Anzahl Apotheken in OSM / theoretische Apothekenzahl";
@@ -795,6 +812,12 @@ exports.table = function(req,res){
 			
 		} else {
 			header.push("Diff");
+			if (ranktype == "UP" || ranktype == "up") {
+				rank["Diff"]="up";
+			}
+			if (ranktype == "down") {
+				rank["Diff"]="down";
+			}
 			format["Diff"]={};
 			format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und " + header[header.length-3];
 			format["Diff"].sum = false;
@@ -825,7 +848,7 @@ exports.table = function(req,res){
 				table[schluessel]["Vorgabe"]=expectation;
 			}
 		}
-		var table = generateTable(param,header,firstColumn,table,format, header[header.length-1]);
+		var table = generateTable(param,header,firstColumn,table,format, rank);
 		pagefooter = "";
 		if (openQueries > 0) {
 			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
