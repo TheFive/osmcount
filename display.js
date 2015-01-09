@@ -311,8 +311,9 @@ function setParams(req,param) {
 }
 
 function generateTable(param,header,firstColumn,table,format,rank, serviceLink) {
-
-	console.dir(rank);
+	debug.entry("generateTable");
+	debug.data(JSON.stringify(rank));
+	
 	var tableheader = "";
 	var tablebody="";
 	
