@@ -120,7 +120,6 @@ function doConsole(cb,results) {
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type == "console") {
 		debug.entry("Start: doConsole(cb,"+results+")");
 		debug(job.text);
-		console.log(job.text),
 		job.status = "done";
 	}  
 	cb(null,job);	

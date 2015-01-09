@@ -608,7 +608,10 @@ exports.table = function(req,res){
    
  
     valueToCount = "$count";
-   	if (param.sub != "") valueToCount = "$"+param.sub;
+   	if (param.sub != "") {
+   		valueToCount = "$"+param.sub;
+   		ranktype = "down";
+   	}
    	
    	valueToDisplay = "$count";
     
