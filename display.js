@@ -548,8 +548,10 @@ function generateCSVTable(param,header,firstColumn,table,delimiter) {
 			
 			if (typeof(content) == "undefined") {
 				cell ="-";
+			} else if (typeof(content) == 'number') {
+				cell = numeral(content).format('0,0'); 
 			} else {
-				cell = content; 
+				cell = content;
 			}
 			if (z>0) tablerow += delimiter;
 			tablerow += cell;
