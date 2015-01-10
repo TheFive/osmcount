@@ -206,7 +206,8 @@ function gl(text, newLink, param)
 {
 	debug.entry("gl");
 	var link = "/table";
-	
+	var type = "html";
+	if (newLink.csv == true) type = "csv";
 
 	// measure
 	var measure = param.measure;
@@ -216,7 +217,7 @@ function gl(text, newLink, param)
 	if (measure != param.measure) {
 		newLink.sub = "";
 	}
-	link += "/"+measure+".html";
+	link += "/"+measure+"."+type;
 	// Missing Tags
 	var sub = param.sub;
 	if (newLink.hasOwnProperty("sub" )) sub = newLink.sub;
@@ -249,7 +250,7 @@ function gl(text, newLink, param)
 	}
 	
 	
-	link += ((ascending==1) ? "&sort=": "&sortdown=")+sort;
+	link += ((ascending==1) ? "&sort=": "&sortdown=")+encodeURIComponent(sort);
 
 
 	// subPercent
@@ -272,6 +273,13 @@ function setParams(req,param) {
     if(typeof(req.param("measure"))!='undefined') {
     	param.measure=req.param("measure");
     }
+    param.csv = false;
+    param.html = false;
+    if(typeof(req.param("type"))!='undefined') {
+    	if (req.param("type") == "csv") param.csv = true;
+    	if (req.param("type") == "html") param.html = true;
+    }
+    
     param.sort ="";
     if(typeof(req.param("sort"))!='undefined') {
     	param.sort=req.param("sort");
@@ -338,7 +346,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	for (i=0;i<header.length;i++) {
 		var cell = header[i];
 		if (cell == param.sort) {
-			cell = "<i>"+cell+"</i>";
+			cell = "&#8691 <i>"+cell+"</i> &#8691";
 		}
 		if (format[cell] && typeof(format[cell].toolTip) != "undefined") {
 			cell = '<p title="'+ format[header[i]].toolTip+ '">'+cell+'</p>';
@@ -508,6 +516,47 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	}	
 	tablerow = "<tr>"+tablerow+"</tr>";
 	tablebody += tablerow;
+	return tableheader + tablebody;
+}
+
+function generateCSVTable(param,header,firstColumn,table,delimiter) {
+	debug.entry("generateCSVTable");
+	
+	var tableheader = "";
+	var tablebody="";
+	
+	
+	for (i=0;i<header.length;i++) {
+		var cell = header[i];
+		if (i>0) tableheader += delimiter;
+		tableheader += cell;
+	}
+	tableheader += "\n";
+	
+
+	for (i=0;i<firstColumn.length;i++)
+	{
+		row = firstColumn[i];
+		tablerow = "";
+		line = table[row];
+		
+		for (z=0;z<header.length;z++) {
+			col=header[z];
+			
+			var cell;
+			var content=table[row][col];
+			
+			if (typeof(content) == "undefined") {
+				cell ="-";
+			} else {
+				cell = content; 
+			}
+			if (z>0) tablerow += delimiter;
+			tablerow += cell;
+		}
+		tablerow = tablerow+"\n";
+		tablebody += tablerow;
+	}
 	return tableheader + tablebody;
 }
 
@@ -723,11 +772,11 @@ exports.table = function(req,res){
 					res.set('Content-Type', 'text/html');
 					res.end("error"+err);
 					console.log("Table Function, Error occured:");
-					console.log(err);
+					console.log(err);x
 					;
 				}
 				items = data;
-				callback();
+				callback(err);
 			}))},
 			function getVorgabe(callback) {
 				debug.entry("getVorgabe");
@@ -843,38 +892,39 @@ exports.table = function(req,res){
 				format["Schlüssel"].generateLink = function(value) {
 					return gl("",{lok:(param.lengthOfKey+1),location:value},param);
 				};
-		
-				if (displayVorgabe) {
-					var colName = "% in OSM"
-					rank[colName]="up";
-					header.push(colName);
-					format[colName]={};
-					format[colName].toolTip = "Anzahl Apotheken in OSM / theoretische Apothekenzahl";
-					format[colName].format='0%';
-					format[colName].sum = false;
-					format[colName].func = {};
-					format[colName].func.op = "%";
-					format[colName].func.denominator  = "Vorgabe";
-					format[colName].func.numerator = header[header.length-2];
+				if (!param.csv) {
+					if (displayVorgabe) {
+						var colName = "% in OSM"
+						rank[colName]="up";
+						header.push(colName);
+						format[colName]={};
+						format[colName].toolTip = "Anzahl Apotheken in OSM / theoretische Apothekenzahl";
+						format[colName].format='0%';
+						format[colName].sum = false;
+						format[colName].func = {};
+						format[colName].func.op = "%";
+						format[colName].func.denominator  = "Vorgabe";
+						format[colName].func.numerator = header[header.length-2];
 			
-				} else {
-					header.push("Diff");
-					if (ranktype == "UP" || ranktype == "up") {
-						rank["Diff"]="up";
+					} else {
+						header.push("Diff");
+						if (ranktype == "UP" || ranktype == "up") {
+							rank["Diff"]="up";
+						}
+						if (ranktype == "down") {
+							rank["Diff"]="down";
+						}
+						format["Diff"]={};
+						format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und " + header[header.length-3];
+						format["Diff"].sum = false;
+						if (param.subPercent == "Yes") {
+							format["Diff"].format ='0%';
+						}
+						format["Diff"].func = {};
+						format["Diff"].func.op = "-";
+						format["Diff"].func.op1  = header[header.length-2];
+						format["Diff"].func.op2 = header[header.length-3];
 					}
-					if (ranktype == "down") {
-						rank["Diff"]="down";
-					}
-					format["Diff"]={};
-					format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und " + header[header.length-3];
-					format["Diff"].sum = false;
-					if (param.subPercent == "Yes") {
-						format["Diff"].format ='0%';
-					}
-					format["Diff"].func = {};
-					format["Diff"].func.op = "-";
-					format["Diff"].func.op1  = header[header.length-2];
-					format["Diff"].func.op2 = header[header.length-3];
 				}
 				for (i=0;i<firstColumn.length;i++)
 				{
@@ -890,26 +940,40 @@ exports.table = function(req,res){
 					table[schluessel]["Schlüssel"]=schluessel;
 					table[schluessel]["Name"]=schluesselText;
 					table[schluessel]["Admin Level"]=schluesselTyp;
-					if (displayVorgabe){ 
+					if (displayVorgabe ){ 
 						expectation = vorgabe[schluessel];
 						table[schluessel]["Vorgabe"]=expectation;
 					}
 				}
-				beforeText += generateFilterTable(param,header);
+				
+				if (param.html) {
+					beforeText += generateFilterTable(param,header);
 
-				var table = generateTable(param,header,firstColumn,table,format, rank);
-				pagefooter = "";
-				if (openQueries > 0) {
-					pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+					var table = generateTable(param,header,firstColumn,table,format, rank);
+					pagefooter = "";
+					if (openQueries > 0) {
+						pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+					}
+					pagefooter += "<p>"+gl("Als CSV Downloaden",{csv:true},param)+"</p>"
+					pagefooter += "<p> Die Service Link(s) bedeuten \
+									<li>O Zeige die Overpass Query</li> \
+									<li>R Starte die Overpass Query</li> \
+									</p>"
+					debug.data(JSON.stringify(query,null,' '));
+					text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
+					res.set('Content-Type', 'text/html');
+					res.end(text);
+					return;
+				} 
+				if (param.csv) {
+					var table = generateCSVTable(param,header,firstColumn,table,";");
+					res.set('Content-Type', 'application/octet-stream');
+					res.end(table);
+					return;
 				}
-				pagefooter += "<p> Die Service Link(s) bedeuten \
-								<li>O Zeige die Overpass Query</li> \
-								<li>R Starte die Overpass Query</li> \
-								</p>"
-				debug.data(JSON.stringify(query,null,' '));
-				text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
 				res.set('Content-Type', 'text/html');
-				res.end(text);
+				res.end("<body> Unbekannter Typ <body>");
+				
 			}
 		)
 
