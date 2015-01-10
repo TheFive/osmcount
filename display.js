@@ -206,11 +206,12 @@ function gl(text, newLink, param)
 {
 	debug.entry("gl");
 	var link = "/table";
-    
+	
+
 	// measure
 	var measure = param.measure;
 	if (newLink.hasOwnProperty("measure" )) measure = newLink.measure;
-	
+
 	// Reset Params when switching measure
 	if (measure != param.measure) {
 		newLink.sub = "";
@@ -267,7 +268,7 @@ function gl(text, newLink, param)
 function setParams(req,param) {
 	debug.entry("setParams");
     // Parse html parameters
-    param.measure="AddrWOStreet";    
+    param.measure="Apotheke";    
     if(typeof(req.param("measure"))!='undefined') {
     	param.measure=req.param("measure");
     }
@@ -833,10 +834,10 @@ exports.table = function(req,res){
 				format["Name"].toolTip = "Name aus OSM, Alternativ Teilschlüssel";
 				header.unshift("Schlüssel");
 				format["Schlüssel"]= {};
-				if (param.measure= "Apotheke") {
+				if (param.measure== "Apotheke") {
 					format["Schlüssel"].toolTip = "de:amtlicher_gemeindeschluessel";
 				}
-				if (param.measure= "AddrWOStreet") {
+				if (param.measure== "AddrWOStreet") {
 					format["Schlüssel"].toolTip = "de:regionalschluessel";
 				}
 				format["Schlüssel"].generateLink = function(value) {
