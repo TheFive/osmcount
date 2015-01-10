@@ -54,7 +54,8 @@ exports.count = function(req,res){
   
     // Fetch the collection test
     var collection = db.collection(collectionName);
-    collection.count(function(err, count) {
+    collection.count(function handleCollectionCount(err, count) {
+    	debug.entry("handleCollectionCount");
     	res.set('Content-Type', 'text/html');
     	if(err) {
     		res.end(err);
@@ -72,7 +73,8 @@ exports.object = function(req,res) {
 	var objid = req.param("id");
 	var object=ObjectID(objid);
    
-    db.collection(collectionName).findOne ({_id:object},function (err, obj) {
+    db.collection(collectionName).findOne ({_id:object},function handleFindOneObject(err, obj) {
+    	debug.entry("handleFindOneObject");
     	if (err) {
     		var text = "Display Object "+ objid + " in Collection "+collectionName;
     		res.set('Content-Type', 'text/html');
@@ -238,8 +240,16 @@ function gl(text, newLink, param)
 	
 	// sortierung
 	var sort = param.sort;
+	var ascending = 1;
 	if (newLink.hasOwnProperty("sort")) sort = newLink.sort;
-	link += "&sort="+sort;
+	if (newLink.hasOwnProperty("sortdown")) {
+		sort = newLink.sortdown;
+		ascending = -1;
+	}
+	
+	
+	link += ((ascending==1) ? "&sort=": "&sortdown=")+sort;
+
 
 	// subPercent
 	var subPercent = param.subPercent;
@@ -255,6 +265,7 @@ function gl(text, newLink, param)
 }
 
 function setParams(req,param) {
+	debug.entry("setParams");
     // Parse html parameters
     param.measure="AddrWOStreet";    
     if(typeof(req.param("measure"))!='undefined') {
@@ -325,6 +336,9 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	
 	for (i=0;i<header.length;i++) {
 		var cell = header[i];
+		if (cell == param.sort) {
+			cell = "<i>"+cell+"</i>";
+		}
 		if (format[cell] && typeof(format[cell].toolTip) != "undefined") {
 			cell = '<p title="'+ format[header[i]].toolTip+ '">'+cell+'</p>';
 		}
@@ -496,6 +510,83 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	return tableheader + tablebody;
 }
 
+function generateFilterTable(param,header) {
+	debug.entry("generateFilterTable");
+
+    filterSub = "-"
+    filterSubPercent = "-";
+    if (param.measure == "Apotheke") { 
+    	filterSub =  gl("[Name]", {sub:"missing.name"},param);
+    	filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
+    	filterSub += gl("[fixme]", {sub:"existing.fixme"},param);
+    	filterSub += gl("[phone]", {sub:"missing.phone"},param);
+    	filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
+    	filterSub += gl("[ALLES]", {sub:""},param);
+    	filterSubPercent =  gl("[Prozentanzeige]", {subPercent:"Yes"},param);
+    	filterSubPercent += gl("[Anzahl]", {subPercent:"No"},param);
+    }
+    
+    
+    filterSwitch =   gl("[AddrWOStreet]",{lok:2,period:"Monat",measure:"AddrWOStreet",sub:""},param);
+    filterSwitch +=  gl("[Apotheke]",{lok:2,period:"Monat",measure:"Apotheke",sub:""},param);
+    
+    lokSwitch ="1";   
+    lokShow = "X";
+    for (i =1;i<param.lengthOfKey;i++) {
+    	lokShow += "X";
+    	lokSwitch += gl("<b> "+(i+1)+"</b>",{lok:(i+1)},param);
+    	
+    }
+    for (;i<10;i++) {
+    	lokShow += "-";
+    	lokSwitch += gl(" "+(i+1)+"",{lok:(i+1)},param);
+    }
+    for (;i<12;i++) {
+    	lokSwitch += gl(" "+(i+1)+" ",{lok:(i+1)},param);
+    }
+    
+    //if (param.lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(param.lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
+    //if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
+
+    var filterText = "";
+    if (param.location!="") {
+    	filterText+= param.locationName+" ("+param.location+","+param.locationType+")";
+    	
+    } else {
+    	filterText +="kein Filter";
+    }
+
+    var periodenSwitch = gl("[Jahr]",{period:"Jahr"},param);
+    periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
+    periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
+    
+    var sortSwitch = "";
+    for (i=0;i<header.length;i++) {
+    	if (header[i]=="Admin Level") continue;
+    	if (header[i]=="Name") continue;
+    	sortSwitch += gl("["+header[i]+"-]", {sortdown:header[i]},param);
+    }
+    sortSwitch+="<br>";
+    for (i=0;i<header.length;i++) {
+    	if (header[i]=="Admin Level") continue;
+    	if (header[i]=="Name") continue;
+    	sortSwitch += gl("["+header[i]+"+]", {sort:header[i]},param);
+    }
+
+    var filterTable = "<tr><td>Messung</td><td><b><a href=/"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
+  	filterTable += "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td></tr>"  
+  	filterTable += "<tr><td>Anzeige %</td><td><b>"+param.subPercent+"</b></td><td>"+filterSubPercent+"</td></tr>"  
+	   
+    filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+gl("[Bundesländer]",{lok:2,location:""},param)+"</td></tr>"
+    filterTable += "<tr><td>Periode</td><td><b>"+param.period+"</B></td><td>"+periodenSwitch+"</td></tr>"
+    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td></tr>"
+    filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+sortSwitch+"</td></tr>"
+    
+	filterTable = "<table>"+filterTable+"</table><br><br>";
+	return filterTable;
+
+}
+
 
 exports.table = function(req,res){
 	debug.entry("exports.table");
@@ -542,16 +633,6 @@ exports.table = function(req,res){
     var paramLocation = "location="+param.location;
     
     beforeText= "<h1> OSM Count </h1>";
-    var filterText = "";
-    if (param.location!="") {
-    	filterText+= param.locationName+" ("+param.location+","+param.locationType+")";
-    	
-    } else {
-    	filterText +="kein Filter";
-    }
-    periodenSwitch = gl("[Jahr]",{period:"Jahr"},param);
-    periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
-    periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
     
     ranktype = "";
     if (param.measure == "Apotheke") {
@@ -560,52 +641,7 @@ exports.table = function(req,res){
     if (param.measure == "AddrWOStreet") {
     	ranktype = "down";
     }
-    filterSub = "-"
-    filterSubPercent = "-";
-    if (param.measure == "Apotheke") { 
-    	filterSub =  gl("[Name]", {sub:"missing.name"},param);
-    	filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
-    	filterSub += gl("[fixme]", {sub:"existing.fixme"},param);
-    	filterSub += gl("[phone]", {sub:"missing.phone"},param);
-    	filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
-    	filterSub += gl("[ALLES]", {sub:""},param);
-    	filterSubPercent =  gl("[Prozentanzeige]", {subPercent:"Yes"},param);
-    	filterSubPercent += gl("[Anzahl]", {subPercent:"No"},param);
-    }
-    
-    
-    filterSwitch =   gl("[AddrWOStreet]",{lok:2,period:"Monat",measure:"AddrWOStreet",sub:""},param);
-    filterSwitch +=  gl("[Apotheke]",{lok:2,period:"Monat",measure:"Apotheke",sub:""},param);
-    
-    lokSwitch ="1";   
-    lokShow = "X";
-    for (i =1;i<param.lengthOfKey;i++) {
-    	lokShow += "X";
-    	lokSwitch += gl("<b> "+(i+1)+"</b>",{lok:(i+1)},param);
-    	
-    }
-    for (;i<10;i++) {
-    	lokShow += "-";
-    	lokSwitch += gl(" "+(i+1)+"",{lok:(i+1)},param);
-    }
-    for (;i<12;i++) {
-    	lokSwitch += gl(" "+(i+1)+" ",{lok:(i+1)},param);
-    }
-    
-    //if (param.lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(param.lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
-    //if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
-    var filterTable = "<tr><td>Messung</td><td><b><a href=/"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
-  	filterTable += "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td></tr>"  
-  	filterTable += "<tr><td>Anzeige %</td><td><b>"+param.subPercent+"</b></td><td>"+filterSubPercent+"</td></tr>"  
-	   
-    filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+gl("[Bundesländer]",{lok:2,location:""},param)+"</td></tr>"
-    filterTable += "<tr><td>Periode</td><td><b>"+param.period+"</B></td><td>"+periodenSwitch+"</td></tr>"
-    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td></tr>"
-    filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+"</td></tr>"
-    
-	filterTable = "<table>"+filterTable+"</table><br><br>";
-	beforeText += filterTable;
    
  
     valueToCount = "$count";
@@ -674,198 +710,207 @@ exports.table = function(req,res){
  	var openQueries=0;
     var items = [];
     var vorgabe = {};
-    async.parallel( [ function(callback) {
-   				 collection.aggregate(	query
-										, (function(err, data) {
-						// first copy hole table in a 2 dimensional JavaScript map
-						// may be here is some performance potential :-)
-						if (err) {
-							res.set('Content-Type', 'text/html');
-							res.end("error"+err);
-							console.log("Table Function, Error occured:");
-							console.log(err);
-							;
-						}
-						items = data;
-						callback();
-					}))},
-					function(callback) {
-						if (param.measure=="Apotheke" && param.sub =="") {
-							collectionTarget.aggregate(	queryVorgabe
-											, (function(err, data) {
-							if (err) {
-								res.set('Content-Type', 'text/html');
-								res.end("error"+err);
-								console.log("Table Function, Error occured:");
-								console.log(err);
-								;
-							}
-							for (i = 0;i<data.length;i++)
-							{
-								schluessel = data[i]._id;
-								value = data[i].vorgabe;
-								vorgabe [schluessel]=value;
-							}
-							callback();
-						}))
-					} else callback();
-					},
-					function (callback) {
-					
-						db = res.db;
-						collectionName = 'WorkerQueue';
-						
-						// Fetch the collection test
-						var collection = db.collection(collectionName);
-						date = new Date();
-						collection.count({status:"open",exectime: {$lte: date},measure:param.measure},function(err, count) {
-							openQueries=count;
-							callback();
-						});  
-						
-
-					
-					}],
-					function (err, results ) {
-    	// Initialising JavaScript Map
-    	var header = [];
-		var firstColumn = [];
-		var table =[]; 
-		var format=[];
-		var rank = [];
-		
-		//iterate total result array
-		// and generate 2 Dimensional Table
-		for (i=0;i < items.length;i++) {
-			
-			
-			measure = items[i];
-			debug.data("Measure i"+i+JSON.stringify(measure));
-			row=measure._id.row;
-			col=measure._id.col;
-			
-			if (typeof(row)=='undefined' || typeof(col) == 'undefined') {
-				debug("row or col undefined"+row+col);
-			}
-			
-			//generate new Header or Rows and Cell if necessary	
-			if (header.indexOf(col)<0) {
-				header.push(col);
-				format[col] = {};
-				format[col].sum = true;
-				rank[col]=ranktype;
-				if (param.subPercent == "Yes") {
-					format[col] = {};
-					format[col].sum = false; 
-					format[col].format = '0%'
+    async.parallel( [ 
+    	function aggregateCollection(callback) {
+    		debug.entry("aggregateCollection");
+			collection.aggregate(	query
+								, (function aggregateCollectionCB(err, data) {
+				debug.entry("aggregateCollectionCB");
+				// first copy hole table in a 2 dimensional JavaScript map
+				// may be here is some performance potential :-)
+				if (err) {
+					res.set('Content-Type', 'text/html');
+					res.end("error"+err);
+					console.log("Table Function, Error occured:");
+					console.log(err);
+					;
 				}
-			}
-			if (firstColumn.indexOf(row)<0) {
-				firstColumn.push(row);
-			}
-			if (!Array.isArray(table[row])) {
-				table[row]=[];
-			}
-			
-			table[row][col]=parseFloat(measure.cell);
-			
-		}
-		header.sort();
-
-		
-		// Extend two dimensional Table
-		displayVorgabe = ((param.lengthOfKey > 1)&&(param.measure=="Apotheke") && (param.sub == ""));
-		
-
-		if (displayVorgabe) {
-			header.unshift("Vorgabe");
-			format["Vorgabe"] = {};
-			format["Vorgabe"].toolTip = "theoretische Apothekenzahl";
-			format["Vorgabe"].sum = true;
-			
-		}
-		
-		header.unshift("Admin Level");
-		header.unshift("Name");
-		format["Name"] = {};
-		format["Name"].toolTip = "Name aus OSM, Alternativ Teilschlüssel";
-		header.unshift("Schlüssel");
-		format["Schlüssel"]= {};
-		if (param.measure= "Apotheke") {
-			format["Schlüssel"].toolTip = "de:amtlicher_gemeindeschluessel";
-		}
-		if (param.measure= "AddrWOStreet") {
-			format["Schlüssel"].toolTip = "de:regionalschluessel";
-		}
-		format["Schlüssel"].generateLink = function(value) {
-			return gl("",{lok:(param.lengthOfKey+1),location:value},param);
-		};
-		
-		if (displayVorgabe) {
-			var colName = "% in OSM"
-			rank[colName]="up";
-			header.push(colName);
-			format[colName]={};
-			format[colName].toolTip = "Anzahl Apotheken in OSM / theoretische Apothekenzahl";
-			format[colName].format='0%';
-			format[colName].sum = false;
-			format[colName].func = {};
-			format[colName].func.op = "%";
-			format[colName].func.denominator  = "Vorgabe";
-			format[colName].func.numerator = header[header.length-2];
-			
-		} else {
-			header.push("Diff");
-			if (ranktype == "UP" || ranktype == "up") {
-				rank["Diff"]="up";
-			}
-			if (ranktype == "down") {
-				rank["Diff"]="down";
-			}
-			format["Diff"]={};
-			format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und " + header[header.length-3];
-			format["Diff"].sum = false;
-			if (param.subPercent == "Yes") {
-				format["Diff"].format ='0%';
-			}
-			format["Diff"].func = {};
-			format["Diff"].func.op = "-";
-			format["Diff"].func.op1  = header[header.length-2];
-			format["Diff"].func.op2 = header[header.length-3];
-		}
-		for (i=0;i<firstColumn.length;i++)
-		{
-			schluessel = firstColumn[i];
-			schluesselText=schluessel;
-			schluesselTyp="-";
-			value = kreisnamen[schluessel];
+				items = data;
+				callback();
+			}))},
+			function getVorgabe(callback) {
+				debug.entry("getVorgabe");
+				if (param.measure=="Apotheke" && param.sub =="") {
+					collectionTarget.aggregate(	queryVorgabe
+									, (function getVorgabeCB(err, data) {
+					debug.entry("getVorgabeCB");
+					if (err) {
+						res.set('Content-Type', 'text/html');
+						res.end("error"+err);
+						console.log("Table Function, Error occured:");
+						console.log(err);
+						;
+					}
+					for (i = 0;i<data.length;i++)
+					{
+						schluessel = data[i]._id;
+						value = data[i].vorgabe;
+						vorgabe [schluessel]=value;
+					}
+					callback();
+				}))
+			} else callback();
+			},
+			function getWorkerQueueCount(callback) {
+				debug.entry("getWorkerQueueCount");
+				db = res.db;
+				collectionName = 'WorkerQueue';
 				
-			if (typeof(value)!= 'undefined') {
-				schluesselText = value.name;
-				schluesselTyp = value.typ;
+				// Fetch the collection test
+				var collection = db.collection(collectionName);
+				date = new Date();
+				collection.count({status:"open",exectime: 
+								 {$lte: date},measure:param.measure},
+								 function getWorkerQueueCountCB(err, count) {
+					debug.entry("getWorkerQueueCount");
+					openQueries=count;
+					callback();
+				});  
+			}],
+			function displayFinalCB (err, results ) {
+				debug.entry("displayFinalCB");
+				// Initialising JavaScript Map
+				var header = [];
+				var firstColumn = [];
+				var table =[]; 
+				var format=[];
+				var rank = [];
+		
+				//iterate total result array
+				// and generate 2 Dimensional Table
+				for (i=0;i < items.length;i++) {
+			
+			
+					measure = items[i];
+					debug.data("Measure i"+i+JSON.stringify(measure));
+					row=measure._id.row;
+					col=measure._id.col;
+			
+					if (typeof(row)=='undefined' || typeof(col) == 'undefined') {
+						debug("row or col undefined"+row+col);
+					}
+			
+					//generate new Header or Rows and Cell if necessary	
+					if (header.indexOf(col)<0) {
+						header.push(col);
+						format[col] = {};
+						format[col].sum = true;
+						rank[col]=ranktype;
+						if (param.subPercent == "Yes") {
+							format[col] = {};
+							format[col].sum = false; 
+							format[col].format = '0%'
+						}
+					}
+					if (firstColumn.indexOf(row)<0) {
+						firstColumn.push(row);
+					}
+					if (!Array.isArray(table[row])) {
+						table[row]=[];
+					}
+			
+					table[row][col]=parseFloat(measure.cell);
+			
+				}
+				header.sort();
+
+		
+				// Extend two dimensional Table
+				displayVorgabe = ((param.lengthOfKey > 1)&&(param.measure=="Apotheke") && (param.sub == ""));
+		
+
+				if (displayVorgabe) {
+					header.unshift("Vorgabe");
+					format["Vorgabe"] = {};
+					format["Vorgabe"].toolTip = "theoretische Apothekenzahl";
+					format["Vorgabe"].sum = true;
+			
+				}
+		
+				header.unshift("Admin Level");
+				header.unshift("Name");
+				format["Name"] = {};
+				format["Name"].toolTip = "Name aus OSM, Alternativ Teilschlüssel";
+				header.unshift("Schlüssel");
+				format["Schlüssel"]= {};
+				if (param.measure= "Apotheke") {
+					format["Schlüssel"].toolTip = "de:amtlicher_gemeindeschluessel";
+				}
+				if (param.measure= "AddrWOStreet") {
+					format["Schlüssel"].toolTip = "de:regionalschluessel";
+				}
+				format["Schlüssel"].generateLink = function(value) {
+					return gl("",{lok:(param.lengthOfKey+1),location:value},param);
+				};
+		
+				if (displayVorgabe) {
+					var colName = "% in OSM"
+					rank[colName]="up";
+					header.push(colName);
+					format[colName]={};
+					format[colName].toolTip = "Anzahl Apotheken in OSM / theoretische Apothekenzahl";
+					format[colName].format='0%';
+					format[colName].sum = false;
+					format[colName].func = {};
+					format[colName].func.op = "%";
+					format[colName].func.denominator  = "Vorgabe";
+					format[colName].func.numerator = header[header.length-2];
+			
+				} else {
+					header.push("Diff");
+					if (ranktype == "UP" || ranktype == "up") {
+						rank["Diff"]="up";
+					}
+					if (ranktype == "down") {
+						rank["Diff"]="down";
+					}
+					format["Diff"]={};
+					format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und " + header[header.length-3];
+					format["Diff"].sum = false;
+					if (param.subPercent == "Yes") {
+						format["Diff"].format ='0%';
+					}
+					format["Diff"].func = {};
+					format["Diff"].func.op = "-";
+					format["Diff"].func.op1  = header[header.length-2];
+					format["Diff"].func.op2 = header[header.length-3];
+				}
+				for (i=0;i<firstColumn.length;i++)
+				{
+					schluessel = firstColumn[i];
+					schluesselText=schluessel;
+					schluesselTyp="-";
+					value = kreisnamen[schluessel];
+				
+					if (typeof(value)!= 'undefined') {
+						schluesselText = value.name;
+						schluesselTyp = value.typ;
+					}
+					table[schluessel]["Schlüssel"]=schluessel;
+					table[schluessel]["Name"]=schluesselText;
+					table[schluessel]["Admin Level"]=schluesselTyp;
+					if (displayVorgabe){ 
+						expectation = vorgabe[schluessel];
+						table[schluessel]["Vorgabe"]=expectation;
+					}
+				}
+				beforeText += generateFilterTable(param,header);
+
+				var table = generateTable(param,header,firstColumn,table,format, rank);
+				pagefooter = "";
+				if (openQueries > 0) {
+					pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+				}
+				pagefooter += "<p> Die Service Link(s) bedeuten \
+								<li>O Zeige die Overpass Query</li> \
+								<li>R Starte die Overpass Query</li> \
+								</p>"
+				debug.data(JSON.stringify(query,null,' '));
+				text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
+				res.set('Content-Type', 'text/html');
+				res.end(text);
 			}
-			table[schluessel]["Schlüssel"]=schluessel;
-			table[schluessel]["Name"]=schluesselText;
-			table[schluessel]["Admin Level"]=schluesselTyp;
-			if (displayVorgabe){ 
-				expectation = vorgabe[schluessel];
-				table[schluessel]["Vorgabe"]=expectation;
-			}
-		}
-		var table = generateTable(param,header,firstColumn,table,format, rank);
-		pagefooter = "";
-		if (openQueries > 0) {
-			pagefooter = "<p> Offene Queries "+openQueries+"</p>";
-		}
-		pagefooter += "<p> Die Service Link(s) bedeuten \
-						<li>O Zeige die Overpass Query</li> \
-						<li>R Starte die Overpass Query</li> \
-						</p>"
-		debug.data(JSON.stringify(query,null,' '));
-		text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
-		res.set('Content-Type', 'text/html');
-		res.end(text);
-	})
+		)
 
 }
 
