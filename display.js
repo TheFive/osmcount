@@ -747,7 +747,7 @@ function generateFilterTable(param,header) {
 	filterTableL1 += "<td>"+param.lengthOfKey+"</td>";
 	filterTableL2 += "<td>"+lokSelector+"</td>";
 	// Aktion
-	filterTableL1 += "<td>"+"</td>";
+	filterTableL1 += "<td>"+'<a href="/Apotheke.html">Hilfe / Informationen</a>'+"</td>";
 	filterTableL2 += "<td>"+'<input type="submit" value="Parameter Umstellen">'+"</td>";
 	
 	filterTable = '<table><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr><table>';
@@ -819,7 +819,7 @@ exports.table = function(req,res){
 	}
     
     
-   beforeText = '<table><tr><td><img src="/logo.png" alt="logo"></td> \
+   beforeText = '<table><tr><td><a href="/index.html"><img src="/logo.png" alt="logo"></a></td> \
    							<td><h1> Wochenaufgabe '+param.measure+' </h1></td<</tr></table>';
     
 

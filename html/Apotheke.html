@@ -7,10 +7,14 @@
 </tr>
 </table>
 
-<h1>Apotheke</h1>
+<h1>Wochenaufgabe Apotheke</h1>
 
 <p> Apotheke ist eine Wochenaufgabe "in Planung". Christoph (TheFive) nutzt diese Aufgabe, um OSM Count
 daran zu testen.</p>
+
+<p> In diesem Tool werden für die Wochenaufgabe die Anzahl der Apotheken in OSM einer (hoffentlich plausiblen) 
+Vorgabe gegenüber gestellt. Um die Entwicklung während der Wochenaufgabe im Detail zu verfolgen,
+werden die Apotheken täglich gezählt.</p>
 
 <h2>Vorgaben</h2>
 <p>
@@ -46,6 +50,23 @@ Gemeindeschlüssels in OpenStreetMap sind. Die Zusammenfassung über verschieden
 
 <p>In der Diff Spalte werden entweder die Prozentanzahl der Apotheken im Vergleich zur theoretischen Apothekenzahl angegeben, oder aber
 die Differenz der letzten beiden dargestellten Spalten.</p>
+
+<h1> Benutzung der Tabelle </h1>
+
+<h2> Die Filtereinstellungen </h2>
+<p>Öffnet man die Tabelle erstmalig, so wird die Anzahl der Apotheken für jedes Bundesland im Monatsverlauf dargestellt.</p>
+<p> Den gewünschten Ort wählt man über die Link in der Schlüsselspalte der Tabelle. Gegebenenfalls muss man hier mehrfach klicken.
+In den Filtereinstellungen kann dann zügig auf "Bundesländer" zurückgestellt werden.
+In der zweiten Spalte der Filtereinstellungen kann man angeben, ob alle Apotheken gezählt werden sollen, oder ob 
+nur Apotheken mit fehlenden Tags gezeigt werden sollen (Bei fixme existierendes Tag).</p>
+<p>In der dritten Spalte wird zwischen Prozentanzeige und Anzahl gewählt. Die Prozentanzeige macht im Zusammenhang mit
+den fehlenden Tags Sinn, sie gibt an, wie viel Prozent der in OSM vorhandenen Apotheken ein Tag (nicht) haben.</p>
+<p> Die Zeiteinstellung gibt den "Detailgrad" der Zeitachse an. OSM Count nimmt in einer Periode immer die aktuellste Messung</p>
+<p> Der einfache "Zahl" Parameter gibt die Länge des in der Datenbank abgefragten Gemeindeschlüssels an. 2 bedeutet "Zeige die Bundesländer"
+und entsprechend grössere Werte zeigen eine höhere Detaillierung. Wählt man die Maximalstufe ohne den Ort eingeschränkt zu haben,
+so werden 11.000 Gemeindeschlüssel angezeigt, das kann dann schon mal ein wenig länger dauern.</p>
+
+
 
 
 <p><a href="./table/Apotheke.html?lok=2&period=month">Hier gehts zurAuswertung</a></p>
