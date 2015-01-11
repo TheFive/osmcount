@@ -128,6 +128,34 @@ function generateQuery(measure,schluessel,sub) {
 	return query;
 }
 
+function generateQueryCSV(measure,schluessel,sub) {
+	debug.entry("generateQueryCSV");
+   
+	
+	
+	
+	fieldlist = "[out:json]";
+	if ( measure == "Apotheke") {
+		fieldlist = '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]';
+	}
+	if ( measure == "AddrWOStreet") {
+		fieldlist = '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user;true;";")]';
+	}
+	
+	var query = loadOverpassData.query[measure];
+	query = query.replace('"="######"','"~"^'+schluessel+'"');
+	query = query.replace('[out:json]',fieldlist);
+
+	query = query.replace("out;","out meta;");
+	
+	// This should be better done in a while loop
+	query = query.replace("out ids;","out meta;");
+	query = query.replace("out ids;","out meta;");
+	query = query.replace("out ids;","out meta;");
+	
+	return query;
+}
+
 
 exports.overpass = function(req,res) {
 	debug.entry("exports.overpass");
@@ -337,7 +365,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	var tableheader = "";
 	var tablebody="";
 	
-	if (!serviceLink) serviceLink = true;
+	if (typeof(serviceLink)=='undefined') serviceLink = true;
 	
 	var sumrow = [];
 	
@@ -475,7 +503,9 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 			if (param.sub != "") sub = "?sub="+param.sub;
 			tablerow += "<td><a href=./overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
 			query= generateQuery(param.measure,row,param.sub);
-			tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+"&R>R</a></td>"
+			tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+"&R>R</a>"
+			query= generateQueryCSV(param.measure,row,param.sub);
+			tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+">#</a></td>"
 		}
 		tablerow = "<tr>"+tablerow+"</tr>";
 		tablebody += tablerow;
@@ -549,7 +579,7 @@ function generateCSVTable(param,header,firstColumn,table,delimiter) {
 			if (typeof(content) == "undefined") {
 				cell ="-";
 			} else if (typeof(content) == 'number') {
-				cell = numeral(content).format('0,0'); 
+				cell = numeral(content).format('0,0.0'); 
 			} else {
 				cell = content;
 			}
@@ -597,8 +627,6 @@ function generateFilterTable(param,header) {
     	lokSwitch += gl(" "+(i+1)+" ",{lok:(i+1)},param);
     }
     
-    //if (param.lengthOfKey >2) lokSwitch += generateLink("weniger",basisLink,"lok="+(param.lengthOfKey-1),paramTime,paramMeasure,paramLocation)+" ";
-    //if (param.lengthOfKey <12) lokSwitch+= generateLink("mehr",basisLink,"lok="+(param.lengthOfKey+1),paramTime,paramMeasure,paramLocation);
 
     var filterText = "";
     if (param.location!="") {
@@ -679,10 +707,6 @@ exports.table = function(req,res){
     
     
    
-    var paramTime = "period="+param.period;
-    var paramMeasure = "measure="+param.measure;
-    var paramLength = "lok="+param.lengthOfKey;
-    var paramLocation = "location="+param.location;
     
     beforeText= "<h1> OSM Count </h1>";
     
@@ -960,6 +984,7 @@ exports.table = function(req,res){
 					pagefooter += "<p> Die Service Link(s) bedeuten \
 									<li>O Zeige die Overpass Query</li> \
 									<li>R Starte die Overpass Query</li> \
+									<li># Öffne Overpass Turbo mit CSV Abfrage</li> \
 									</p>"
 					debug.data(JSON.stringify(query,null,' '));
 					text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
@@ -969,6 +994,9 @@ exports.table = function(req,res){
 				} 
 				if (param.csv) {
 					var table = generateCSVTable(param,header,firstColumn,table,";");
+					if (openQueries > 0 ) {
+						table = "Achtung: Es laufen noch "+count+" Overpass Abfragen, das Ergebnis ist eventuell unvollständig\n"+table;
+					}
 					res.set('Content-Type', 'application/octet-stream');
 					res.end(table);
 					return;
