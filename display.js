@@ -28,6 +28,14 @@ background-color: #999; \
 color: #fff; \
 border: 1px solid #fff; \
 } \
+a.header:link, { \
+background-color: #999; \
+color: #999; \
+} \
+a.header:visited, { \
+background-color: #999; \
+color: #999; \
+} \
 td.first { \
 background-color: #00ff00; \
 } \
@@ -373,13 +381,17 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	
 	for (i=0;i<header.length;i++) {
 		var cell = header[i];
+		var celltext = cell;
 		if (cell == param.sort) {
-			cell = "&#8691 <i>"+cell+"</i> &#8691";
+			celltext = "#"+cell+"#";
+		}
+		if (format[cell] && typeof(format[cell].headerLink) != 'undefined') {
+			celltext = '<a href="'+format[cell].headerLink+'">' + celltext + '</a>';
 		}
 		if (format[cell] && typeof(format[cell].toolTip) != "undefined") {
-			cell = '<p title="'+ format[header[i]].toolTip+ '">'+cell+'</p>';
+			celltext = '<p title="'+ format[header[i]].toolTip+ '">'+celltext+'</p>';
 		}
-		tableheader +="<th>"+cell+"</th>";
+		tableheader +="<th class=header>"+celltext+"</th>";
 	}
 	if (serviceLink) tableheader += "<th> Service </th>";
 	tableheader = "<tr>"+tableheader + "</tr>";
@@ -667,6 +679,26 @@ function generateFilterTable(param,header) {
 
 }
 
+function generateSortHeader(param,header,format) {
+	debug.entry("generateSortHeader");
+
+
+    
+    for (i=0;i<header.length;i++) {
+    	if (header[i]=="Admin Level") continue;
+    	if (header[i]=="Name") continue;
+    	link = "";
+    	if ((param.sortAscending == 1) && (header[i] == param.sort)) {
+    		link = gl("", {sortdown:header[i]},param)
+    	} else {
+    		link = gl("", {sort:header[i]},param)
+    	}
+    	if (!format[header[i]]) format[header[i]] = {};
+    	format[header[i]].headerLink = link;
+    	console.dir(format);
+    	
+    }
+}
 
 exports.table = function(req,res){
 	debug.entry("exports.table");
@@ -974,6 +1006,8 @@ exports.table = function(req,res){
 				
 				if (param.html) {
 					beforeText += generateFilterTable(param,header);
+					
+					generateSortHeader(param,header,format);
 
 					var table = generateTable(param,header,firstColumn,table,format, rank);
 					pagefooter = "";
