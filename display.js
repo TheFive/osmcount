@@ -604,11 +604,20 @@ function generateCSVTable(param,header,firstColumn,table,delimiter) {
 	return tableheader + tablebody;
 }
 
+function optionValue(value,displayValue,selected) {
+	if (selected == value) {
+		return '<option value ="'+value+'" selected><b>'+displayValue+'</b></option>';
+	} else  {
+		return '<option value ="'+value+'">'+displayValue+'</option>';
+	}
+}
+
 function generateFilterTable(param,header) {
 	debug.entry("generateFilterTable");
 
     filterSub = "-"
     filterSubPercent = "-";
+    subSelector = '';
     if (param.measure == "Apotheke") { 
     	filterSub =  gl("[Name]", {sub:"missing.name"},param);
     	filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
@@ -616,8 +625,27 @@ function generateFilterTable(param,header) {
     	filterSub += gl("[phone]", {sub:"missing.phone"},param);
     	filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
     	filterSub += gl("[ALLES]", {sub:""},param);
+    	
+    	subSelector += optionValue("missing.name","Name",param.sub);
+    	subSelector += optionValue("missing.opening_hours","Öffnungszeiten",param.sub);
+    	subSelector += optionValue("existing.fixme","fixme",param.sub);
+    	subSelector += optionValue("missing.phone","Telefon",param.sub);
+    	subSelector += optionValue("missing.wheelchair","wheelchair",param.sub);
+    	subSelector += optionValue("","Alle Apotheken",param.sub);
+    	
+    	subSelector = '<select name ="sub">'+subSelector+'</select>';
+    	
     	filterSubPercent =  gl("[Prozentanzeige]", {subPercent:"Yes"},param);
     	filterSubPercent += gl("[Anzahl]", {subPercent:"No"},param);
+    	if (param.subPercent == "Yes") {
+    		subPercentSelector = '<select name="subPercent"> \
+				<option value="Yes" selected>Prozentanzeige</option> \
+				<option value="No">Anzahl</option> </select>'
+		} else {
+    		subPercentSelector = '<select name="subPercent"> \
+				<option value="Yes">Prozentanzeige</option> \
+				<option value="No" selected>Anzahl</option> </select>'
+		} 
     }
     
     
@@ -631,6 +659,8 @@ function generateFilterTable(param,header) {
     	lokSwitch += gl("<b> "+(i+1)+"</b>",{lok:(i+1)},param);
     	
     }
+    lokSelector = '<select name="lok"> ';
+    
     for (;i<10;i++) {
     	lokShow += "-";
     	lokSwitch += gl(" "+(i+1)+"",{lok:(i+1)},param);
@@ -638,20 +668,39 @@ function generateFilterTable(param,header) {
     for (;i<12;i++) {
     	lokSwitch += gl(" "+(i+1)+" ",{lok:(i+1)},param);
     }
-    
+    for (i=2;i<12;i++) {
+   		if (i == param.lengthOfKey) {
+    		lokSelector += '<option value="'+i+'" selected>'+i+'</option>';
+    	} else {
+    		lokSelector += '<option value="'+i+'">'+i+'</option>';
+    	}
+    }
 
+    
+	filterSelector = "";
     var filterText = "";
     if (param.location!="") {
     	filterText+= param.locationName+" ("+param.location+","+param.locationType+")";
+    	filterSelector += optionValue(param.location,filterText,param.location);
     	
     } else {
     	filterText +="kein Filter";
     }
+    filterSelector += optionValue("","Alle Orte",param.location);
+    filterSelector = '<select name ="location">'+filterSelector+'</select>';
+
 
     var periodenSwitch = gl("[Jahr]",{period:"Jahr"},param);
     periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
     periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
     
+    periodenSelector = '<select name="periode"> \
+			<option value="Jahr"' +((param.period == "Jahr") ? " selected":"")+ '>Jahr</option> \
+			<option value="Monat"' +((param.period == "Monat") ? " selected":"")+ '>Monat</option> \
+			<option value="Tag"' +((param.period == "Tag") ? " selected":"")+ '>Tag</option> \
+			</select>';
+    
+/*
     var sortSwitch = "";
     for (i=0;i<header.length;i++) {
     	if (header[i]=="Admin Level") continue;
@@ -664,17 +713,50 @@ function generateFilterTable(param,header) {
     	if (header[i]=="Name") continue;
     	sortSwitch += gl("["+header[i]+"+]", {sort:header[i]},param);
     }
-
-    var filterTable = "<tr><td>Messung</td><td><b><a href=/"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
-  	filterTable += "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td></tr>"  
-  	filterTable += "<tr><td>Anzeige %</td><td><b>"+param.subPercent+"</b></td><td>"+filterSubPercent+"</td></tr>"  
+*/
+/*
+    var filterTable ; //= "<tr><td>Messung</td><td><b><a href=/"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
+  	filterTable = "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td><td>"+subSelector+"</td></tr>"  
+  	filterTable += "<tr><td>Anzeige %</td><td><b>"+param.subPercent+"</b></td><td>"+filterSubPercent+"</td>"+"<td>"+subPercentSelector+"</td>"+"</tr>"  
 	   
     filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+gl("[Bundesländer]",{lok:2,location:""},param)+"</td></tr>"
-    filterTable += "<tr><td>Periode</td><td><b>"+param.period+"</B></td><td>"+periodenSwitch+"</td></tr>"
-    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td></tr>"
-    filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+sortSwitch+"</td></tr>"
+    filterTable += "<tr><td>Periode</td><td><b>"+param.period+"</B></td><td>"+periodenSwitch+"</td>" + "<td>"+periodenSelector+"</td>" + "</tr>"; 
+    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td>"+"<td>"+lokSelector+"</td>"+"</tr>"
+ //   filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+sortSwitch+"</td></tr>"
     
 	filterTable = "<table>"+filterTable+"</table><br><br>";
+	filterTable += '<input type="submit" value="Parameter Umstellen">';
+	filterTable = "<form>"+filterTable+"</form>";
+	*/
+	
+	var filterTableL1, filterTableL2;
+	
+	// Filter on Location
+	filterTableL1 = "<td>"+filterText+"</td>";
+	filterTableL2 = "<td>"+filterSelector+"</td>";
+	// Filter on Key
+	filterTableL1 += "<td>"+param.sub+"</td>";
+	filterTableL2 += "<td>"+subSelector+"</td>";
+	// Filter on Percent
+	filterTableL1 += "<td>"+param.subPercent+"</td>";
+	filterTableL2 += "<td>"+subPercentSelector+"</td>";
+	// Filter on Period
+	filterTableL1 += "<td>"+param.period+"</td>";
+	filterTableL2 += "<td>"+periodenSelector+"</td>";
+	// Filter on length Of Key
+	filterTableL1 += "<td>"+param.lengthOfKey+"</td>";
+	filterTableL2 += "<td>"+lokSelector+"</td>";
+	// Aktion
+	filterTableL1 += "<td>"+"</td>";
+	filterTableL2 += "<td>"+'<input type="submit" value="Parameter Umstellen">'+"</td>";
+	
+	filterTable = '<table><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr><table>';
+	
+	
+	//filterTable = "<tr><td>"+filterText+
+	//filterTable = "<b>Gefiltert Auf:"+filterText + "</b> "+ filterSelector+ subSelector + subPercentSelector + periodenSelector + lokSelector + '<input type="submit" value="Parameter Umstellen">';
+	filterTable = "<form><br>"+filterTable+"</br></form>";
+	
 	return filterTable;
 
 }
@@ -695,7 +777,6 @@ function generateSortHeader(param,header,format) {
     	}
     	if (!format[header[i]]) format[header[i]] = {};
     	format[header[i]].headerLink = link;
-    	console.dir(format);
     	
     }
 }
@@ -738,9 +819,10 @@ exports.table = function(req,res){
 	}
     
     
-   
+   beforeText = '<table><tr><td><img src="/logo.png" alt="logo"></td> \
+   							<td><h1> Wochenaufgabe '+param.measure+' </h1></td<</tr></table>';
     
-    beforeText= "<h1> OSM Count </h1>";
+
     
     ranktype = "";
     if (param.measure == "Apotheke") {
