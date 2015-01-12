@@ -11,8 +11,8 @@ var debug   =  require('debug')('LoadOverpassData');
 // To be changed to a more readable import routine
 
 exports.query = {
-   Apotheke:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"];\n(node(area)[amenity=pharmacy];\nway(area)[amenity=pharmacy];\nrel(area)[amenity=pharmacy]);\nout;',
-   ApothekeDetail:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"];\n(node(area)[amenity=pharmacy][$$$$];\nway(area)[amenity=pharmacy][$$$$];\nrel(area)[amenity=pharmacy][$$$$]);\nout;',
+   Apotheke:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+   ApothekeDetail:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"]->.a;\n(node(area.a)[amenity=pharmacy][$$$$];\nway(area.a)[amenity=pharmacy][$$$$];\nrel(area.a)[amenity=pharmacy][$$$$]);\nout;',
    AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea;\n\
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \n\
 \n\
