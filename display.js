@@ -338,7 +338,7 @@ function setParams(req,param) {
     	param.lengthOfTime=4;
     	param.period="Jahr";
     }   
-    if(req.param("period")==" Monat") {
+    if(req.param("period")=="Monat") {
     	param.lengthOfTime=7;
     	param.period="Monat";
     }
@@ -694,7 +694,7 @@ function generateFilterTable(param,header) {
     periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
     periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
     
-    periodenSelector = '<select name="periode"> \
+    periodenSelector = '<select name="period"> \
 			<option value="Jahr"' +((param.period == "Jahr") ? " selected":"")+ '>Jahr</option> \
 			<option value="Monat"' +((param.period == "Monat") ? " selected":"")+ '>Monat</option> \
 			<option value="Tag"' +((param.period == "Tag") ? " selected":"")+ '>Tag</option> \
