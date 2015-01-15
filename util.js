@@ -24,7 +24,7 @@ exports.copyObject = function(dest,source) {
 exports.createWaiter = function(seconds) {
 	ms = seconds*1000;
 	return function (callback) {
-		console.log("Wait for "+seconds+" seconds");
+		debug.data("Wait for "+seconds+" seconds");
 		setTimeout(callback,ms);
 	}
 }
