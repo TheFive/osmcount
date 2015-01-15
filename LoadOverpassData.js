@@ -31,6 +31,9 @@ rel(r.associatedStreet:"house")->.asHouseRel; \n\
 
 queryBoundaries='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out;' 
 
+var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
+var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
+
 
 
 var request = require('request');
@@ -38,7 +41,7 @@ var request = require('request');
 function overpassQuery(query, cb, options) {
 	debug.entry("overpassQuery");
     options = options || {};
-    request.post(options.overpassUrl || 'http://overpass-api.de/api/interpreter', function (error, response, body) {
+    request.post(options.overpassUrl || overpassApiLinkDE, function (error, response, body) {
     	debug.entry("overpassQuery->CB");
 
         if (!error && response.statusCode === 200) {

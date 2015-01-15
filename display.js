@@ -14,6 +14,7 @@ var util     = require('./util.js');
 
 
 var tableCSSStyle = '<head>\
+<link rel="stylesheet" type="text/css" href="/design2.css" /> \
 <style>\
 table, th, td {\
     border: 1px solid black;\
@@ -750,12 +751,12 @@ function generateFilterTable(param,header) {
 	filterTableL1 += "<td>"+'<a href="/Apotheke.html">Hilfe / Informationen</a>'+"</td>";
 	filterTableL2 += "<td>"+'<input type="submit" value="Parameter Umstellen">'+"</td>";
 	
-	filterTable = '<table><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr><table>';
+	filterTable = '<table><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr></table>';
 	
 	
 	//filterTable = "<tr><td>"+filterText+
 	//filterTable = "<b>Gefiltert Auf:"+filterText + "</b> "+ filterSelector+ subSelector + subPercentSelector + periodenSelector + lokSelector + '<input type="submit" value="Parameter Umstellen">';
-	filterTable = "<form><br>"+filterTable+"</br></form>";
+	filterTable = "<form>"+filterTable+"</form>";
 	
 	return filterTable;
 
@@ -819,8 +820,8 @@ exports.table = function(req,res){
 	}
     
     
-   beforeText = '<table><tr><td><a href="/index.html"><img src="/logo.png" alt="logo"></a></td> \
-   							<td><h1> Wochenaufgabe '+param.measure+' </h1></td<</tr></table>';
+   pageTitle = '<h1><a href="/index.html"><img src="/logo80x80.png" alt="logo"></a> Wochenaufgabe '+param.measure+' </h1><br>';
+   
     
 
     
@@ -1087,23 +1088,35 @@ exports.table = function(req,res){
 				}
 				
 				if (param.html) {
-					beforeText += generateFilterTable(param,header);
-					
+					pageMenu = generateFilterTable(param,header);
 					generateSortHeader(param,header,format);
-
+				
+					pageTitle = '<div id="kopfbereich">'+pageTitle+'</div>';
+					pageMenu = '<div id="steuerung">'+pageMenu+'</div>';
+	
 					var table = generateTable(param,header,firstColumn,table,format, rank);
-					pagefooter = "";
+					
+					table = '<p><br><table>'+table+'</table></p>';
+					table = '<div id="inhalt">'+table+'</div>';
+					
+					pageFooter = "";
 					if (openQueries > 0) {
-						pagefooter = "<p> Offene Queries "+openQueries+"</p>";
+						pageFooter = "<p> Offene Queries "+openQueries+"</p>";
 					}
-					pagefooter += "<p>"+gl("Als CSV Downloaden",{csv:true},param)+"</p>"
-					pagefooter += "<p> Die Service Link(s) bedeuten \
+					pageFooter += "<p>"+gl("Als CSV Downloaden",{csv:true},param)+"</p>"
+					pageFooter += "<p> Die Service Link(s) bedeuten \
 									<li>O Zeige die Overpass Query</li> \
 									<li>R Starte die Overpass Query</li> \
 									<li># Öffne Overpass Turbo mit CSV Abfrage</li> \
 									</p>"
+					pageFooter = '<div id="fussbereich">'+pageFooter+'</div>';
+								
 					debug.data(JSON.stringify(query,null,' '));
-					text = "<html>"+tableCSSStyle+"<body>"+beforeText+"<table border=\"1\">\n" + table + "</table>"+pagefooter+"</body></html>";
+					text = "<html>"+tableCSSStyle+"<body>"
+							+pageTitle
+							+pageMenu
+							+table
+							+pageFooter+"</body></html>";
 					res.set('Content-Type', 'text/html');
 					res.end(text);
 					return;
@@ -1111,7 +1124,7 @@ exports.table = function(req,res){
 				if (param.csv) {
 					var table = generateCSVTable(param,header,firstColumn,table,";");
 					if (openQueries > 0 ) {
-						table = "Achtung: Es laufen noch "+count+" Overpass Abfragen, das Ergebnis ist eventuell unvollständig\n"+table;
+						table = "Achtung: Es laufen noch "+openQueries+" Overpass Abfragen, das Ergebnis ist eventuell unvollständig\n"+table;
 					}
 					res.set('Content-Type', 'application/octet-stream');
 					res.end(table);

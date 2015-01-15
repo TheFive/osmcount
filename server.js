@@ -13,6 +13,7 @@ var loadDataFromDB   = require('./LoadDataFromDB.js');
 var loadOverpassData = require('./LoadOverpassData.js')
 var display          = require('./display.js');
 var util             = require('./util.js');
+var plotlyexport        = require('./plotlyexport.js');
 
 
 var app = express();
@@ -49,9 +50,10 @@ app.use(function(req, res, next){
     next();
 });
 
-
+test = require('./test.js');
 app.use('/', express.static(path.resolve(__dirname, "html")));
 app.use('/count.html', display.count);
+app.use('/plotlyexport.html', plotlyexport.plot);
 app.use('/import/csvimport.html', display.importCSV);
 app.use('/import/apotheken.html', display.importApotheken);
 app.use('/table.html', display.table);
@@ -74,3 +76,4 @@ app.listen(config.getServerPort());
 
 console.log("Server has started and is listening to localhost:"+config.getServerPort());
 	
+
