@@ -1,6 +1,9 @@
 var configuration = require('./configuration.js');
 var num  = require('numeral');
 var de       = require('numeral/languages/de');
+var debug       = require('debug')('util');
+  debug.entry       = require('debug')('util:entry');
+  debug.data       = require('debug')('util:data');
 
 
 // internal Function to duplicate an object
