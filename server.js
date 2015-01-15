@@ -50,7 +50,6 @@ app.use(function(req, res, next){
     next();
 });
 
-test = require('./test.js');
 app.use('/', express.static(path.resolve(__dirname, "html")));
 app.use('/count.html', display.count);
 app.use('/plotlyexport.html', plotlyexport.plot);
