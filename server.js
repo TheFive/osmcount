@@ -59,6 +59,7 @@ app.use('/table.html', display.table);
 app.use('/table/:measure.:type', display.table);
 app.use('/object/:collection/:id', display.object);
 app.use('/overpass/:measure/:schluessel.html', display.overpass);
+app.use('/wa/:aufgabe.html',display.wochenaufgabe);
 
 
 app.get('/*', function(req, res) {

@@ -10,47 +10,11 @@ var fs       = require("fs");
 var async    = require('async');
 var ObjectID = require('mongodb').ObjectID;
 var util     = require('./util.js');
+var htmlPage     = require('./htmlPage.js');
 
 
 
-var tableCSSStyle = '<head>\
-<link rel="stylesheet" type="text/css" href="/design2.css" /> \
-<style>\
-table, th, td {\
-    border: 1px solid black;\
-    border-collapse: collapse;\
-    font-family: Verdana;\
-	font-size: 0.9em;\
-	text-align: center;\
-	padding: 3px;\
-}\
-th { \
-background-color: #999; \
-color: #fff; \
-border: 1px solid #fff; \
-} \
-a.header:link, { \
-background-color: #999; \
-color: #999; \
-} \
-a.header:visited, { \
-background-color: #999; \
-color: #999; \
-} \
-td.first { \
-background-color: #00ff00; \
-} \
-td.second { \
-background-color: #88FF88; \
-} \
-td.last { \
-background-color: #ff0000; \
-} \
-td.lastButOne { \
-background-color: #ff8888; \
-} \
-</style>\
-</head>'
+
 
 
 exports.count = function(req,res){
@@ -73,6 +37,18 @@ exports.count = function(req,res){
     	}
     });  
 }
+
+
+exports.wochenaufgabe = function(req,res) {
+	var aufgabe = req.param("aufgabe");
+	page = htmlPage.create();
+	page.content = fs.readFileSync(path.resolve(__dirname, "html",aufgabe+".html"));
+	page.menu = fs.readFileSync(path.resolve(__dirname, "html","menu.html"));	
+ 	res.set('Content-Type', 'text/html');
+	res.end(page.generatePage());
+}
+
+
 
 exports.object = function(req,res) {
 	debug.entry("exports.object");
@@ -748,7 +724,7 @@ function generateFilterTable(param,header) {
 	filterTableL1 += "<td>"+param.lengthOfKey+"</td>";
 	filterTableL2 += "<td>"+lokSelector+"</td>";
 	// Aktion
-	filterTableL1 += "<td>"+'<a href="/Apotheke.html">Hilfe / Informationen</a>'+"</td>";
+	filterTableL1 += "<td>"+'<a href="/wa/Apotheke.html">Hilfe / Informationen</a>'+"</td>";
 	filterTableL2 += "<td>"+'<input type="submit" value="Parameter Umstellen">'+"</td>";
 	
 	filterTable = '<table><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr></table>';
@@ -820,7 +796,7 @@ exports.table = function(req,res){
 	}
     
     
-   pageTitle = '<h1><a href="/index.html"><img src="/logo80x80.png" alt="logo"></a> Wochenaufgabe '+param.measure+' </h1><br>';
+   pageTitle = '<p><h1><a href="/index.html"><img src="/logo80x80.png" alt="logo"></a> Wochenaufgabe '+param.measure+' </h1><br></p>';
    
     
 
@@ -1088,37 +1064,30 @@ exports.table = function(req,res){
 				}
 				
 				if (param.html) {
-					pageMenu = generateFilterTable(param,header);
+					page =new htmlPage.create("table");
+					page.menu = generateFilterTable(param,header);
+					
 					generateSortHeader(param,header,format);
-				
-					pageTitle = '<div id="kopfbereich">'+pageTitle+'</div>';
-					pageMenu = '<div id="steuerung">'+pageMenu+'</div>';
-	
 					var table = generateTable(param,header,firstColumn,table,format, rank);
 					
-					table = '<p><br><table>'+table+'</table></p>';
-					table = '<div id="inhalt">'+table+'</div>';
+					page.content = '<p><br><table>'+table+'</table></p>';
 					
 					pageFooter = "";
 					if (openQueries > 0) {
 						pageFooter = "<p> Offene Queries "+openQueries+"</p>";
 					}
 					pageFooter += "<p>"+gl("Als CSV Downloaden",{csv:true},param)+"</p>"
-					pageFooter += "<p> Die Service Link(s) bedeuten \
+					page.footer = "<p> Die Service Link(s) bedeuten \
 									<li>O Zeige die Overpass Query</li> \
 									<li>R Starte die Overpass Query</li> \
 									<li># Öffne Overpass Turbo mit CSV Abfrage</li> \
 									</p>"
-					pageFooter = '<div id="fussbereich">'+pageFooter+'</div>';
-								
+				
+						
 					debug.data(JSON.stringify(query,null,' '));
-					text = "<html>"+tableCSSStyle+"<body>"
-							+pageTitle
-							+pageMenu
-							+table
-							+pageFooter+"</body></html>";
+					
 					res.set('Content-Type', 'text/html');
-					res.end(text);
+					res.end(page.generatePage());
 					return;
 				} 
 				if (param.csv) {
