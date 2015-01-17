@@ -1077,7 +1077,7 @@ exports.table = function(req,res){
 				
 				if (param.html) {
 					page =new htmlPage.create("table");
-					page.title = param.measure;
+					page.title = "Wochenaufgabe "+param.measure;
 					page.menu = generateFilterTable(param,header);
 					
 					generateSortHeader(param,header,format);
@@ -1090,12 +1090,12 @@ exports.table = function(req,res){
 						pageFooter = "<p> Offene Queries "+openQueries+"</p>";
 					}
 					pageFooter += "<p>"+gl("Als CSV Downloaden",{csv:true},param)+"</p>"
-					page.footer = "<p> Die Service Link(s) bedeuten \
+					pageFooter += "<p> Die Service Link(s) bedeuten \
 									<li>O Zeige die Overpass Query</li> \
 									<li>R Starte die Overpass Query</li> \
 									<li># Öffne Overpass Turbo mit CSV Abfrage</li> \
 									</p>"
-				
+					page.footer = pageFooter;
 						
 					debug.data(JSON.stringify(query,null,' '));
 					
