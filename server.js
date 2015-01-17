@@ -50,8 +50,8 @@ app.use(function(req, res, next){
     next();
 });
 
-app.use('/', express.static(path.resolve(__dirname, "html")));
 app.use('/count.html', display.count);
+app.use('/index.html', display.main);
 app.use('/waplot/:measure.html', plotlyexport.plot);
 app.use('/import/csvimport.html', display.importCSV);
 app.use('/import/apotheken.html', display.importApotheken);
@@ -60,6 +60,7 @@ app.use('/table/:measure.:type', display.table);
 app.use('/object/:collection/:id', display.object);
 app.use('/overpass/:measure/:schluessel.html', display.overpass);
 app.use('/wa/:aufgabe.html',display.wochenaufgabe);
+app.use('/', express.static(path.resolve(__dirname, "html")));
 
 
 app.get('/*', function(req, res) {

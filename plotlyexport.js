@@ -137,7 +137,16 @@ exports.plot = function(req,res){
 				graphLocation = getKreisname(location,kreisnamen);
 				
 				filenamePlotly = "OSMWA_"+wochenaufgabe+"_"+graphLocation+"_"+lengthOfKey;
-				var style = {title: "Anzahl Apotheken in OSM fuer "+graphLocation};
+				title = "--"
+				switch (wochenaufgabe) {
+					case "Apotheke": title =  "Anzahl Apotheken in OSM fuer "+graphLocation;
+					            break;
+					case "AddrWOStreet": title = "Adressen ohne Strasse fuer "+graphLocation;
+								break;
+					default: title = "--";
+				
+				}
+				var style = {title: title};
 				
 				var graphOptions = {filename: filenamePlotly, fileopt: "overwrite",layout:style};
 				plotly.plot(data, graphOptions, function (err, msg) {
@@ -146,7 +155,7 @@ exports.plot = function(req,res){
     			
     			page = htmlPage.create("tabelle");
     			page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
-    			page.footer = "Powered by plot.ly.... (plotly loves &uuml &auml &ouml ... welcome to the World :-)";
+    			page.footer = "Diese Grafik wird durch den Aufruf dieser Seite aktualisiert, der plot.ly Link kann aber auch unabh&aumlnig genutzt werden.";
     			res.set('Content-Type', 'text/html');
     			res.end(page.generatePage());
 				});
