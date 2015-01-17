@@ -726,6 +726,9 @@ function generateFilterTable(param,header) {
 	// Aktion
 	filterTableL1 += "<td>"+'<a href="/wa/Apotheke.html">Hilfe / Informationen</a>'+"</td>";
 	filterTableL2 += "<td>"+'<input type="submit" value="Parameter Umstellen">'+"</td>";
+	// Plotly Integration
+	filterTableL1 += "<td>"+'<a href="/waplot/Apotheke.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige als Grafik</a>'+"</td>";
+	filterTableL2 += "<td>"+''+"</td>";
 	
 	filterTable = '<table><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr></table>';
 	
@@ -796,7 +799,6 @@ exports.table = function(req,res){
 	}
     
     
-   pageTitle = '<p><h1><a href="/index.html"><img src="/logo80x80.png" alt="logo"></a> Wochenaufgabe '+param.measure+' </h1><br></p>';
    
     
 
@@ -1065,6 +1067,7 @@ exports.table = function(req,res){
 				
 				if (param.html) {
 					page =new htmlPage.create("table");
+					page.title = param.measure;
 					page.menu = generateFilterTable(param,header);
 					
 					generateSortHeader(param,header,format);

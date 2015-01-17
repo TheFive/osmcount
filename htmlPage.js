@@ -3,8 +3,8 @@ var path = require('path');
 
 function HtmlPage(type) {
 	this.type = type;
-	var titlePage = path.resolve(__dirname, 'html','PageTitle.html');
-	this.title = fs.readFileSync(titlePage);
+	
+	this.title = "OSM Count";
 	this.footer = "OSM Count ...";
 	this.menu = "";
 	this.content = "";
@@ -27,8 +27,12 @@ HtmlPage.prototype = {
   generatePage: function() {
   	
   	cssStyle = getCssStyle('table.css') + getCssStyle(this.design);
+  	titlePageFile = path.resolve(__dirname, 'html','PageTitle.html');
+  	var titlePage = "";
+  	titlePage += fs.readFileSync(titlePageFile);
+  	titlePage = titlePage.replace('##########',this.title);
   	head = '<head>'+cssStyle+'</head>';
-  	pageTitle = '<div id="kopfbereich">'+this.title+'</div>';
+  	pageTitle = '<div id="kopfbereich">'+titlePage+'</div>';
   	pageMenu = '<div id="steuerung">'+this.menu+'</div>';
 	pageContent = '<div id="inhalt">'+this.content+'</div>';
 	pageFooter = '<div id="fussbereich">'+this.footer+'</div>';

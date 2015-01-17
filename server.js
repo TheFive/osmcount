@@ -52,7 +52,7 @@ app.use(function(req, res, next){
 
 app.use('/', express.static(path.resolve(__dirname, "html")));
 app.use('/count.html', display.count);
-app.use('/plotlyexport.html', plotlyexport.plot);
+app.use('/waplot/:measure.html', plotlyexport.plot);
 app.use('/import/csvimport.html', display.importCSV);
 app.use('/import/apotheken.html', display.importApotheken);
 app.use('/table.html', display.table);

@@ -4,17 +4,34 @@ var debug    = require('debug')('test');
   debug.entry = require('debug')('test:entry');
 var configuration = require('./configuration.js');
 var loadDataFromDB = require('./LoadDataFromDB.js');
+var htmlPage = require('./htmlPage.js');
 
 var async    = require('async');
 
 
 
-
+function getKreisname(schluessel,kreisnamen) {
+	if (schluessel =="") return "Deuschland";
+  	if (typeof(kreisnamen[schluessel])=='undefined') return schluessel;
+	n = kreisnamen[schluessel].name;
+	n = n.replace("ü","ue");
+	n = n.replace("ö","ae");
+	n = n.replace("ä","ae");
+	n = n.replace("ß","ss");
+    return n;
+}
 
 exports.plot = function(req,res){
 	debug.entry("exports.plot");
 	var db = configuration.getDB();
-  
+	
+	var wochenaufgabe = req.param("measure");
+    var location = req.param("location");
+    if (typeof(location) =='undefined') location="";
+    var lok = req.param("lok");
+    var lengthOfKey = 2;
+    if (typeof(parseInt(lok))=='number') lengthOfKey = parseInt(lok);
+    
     var collection = db.collection('DataCollection');
    
 
@@ -24,9 +41,10 @@ exports.plot = function(req,res){
     valueToCount = "$count";
    	valueToDisplay = "$count";
     
-    var filterOneMeasure = {$match: { measure: "Apotheke"}};
+    var filterOneMeasure = {$match: { measure: wochenaufgabe}};
+    var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+location}}};
  
-    var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,2]},
+    var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
     						 			  timestamp: "$timestamp",
     						 			  timestampShort: {$substr: ["$timestamp",0,10]},
     						 			  count: valueToCount,
@@ -51,7 +69,7 @@ exports.plot = function(req,res){
    
     	
     var query = [filterOneMeasure,
-
+				 filterRegionalschluessel,
     			 aggregateMeasuresProj,
     			 aggregateMeasuresGroup,
     			 presort,
@@ -102,14 +120,11 @@ exports.plot = function(req,res){
 					
 					//generate new Header or Rows and Cell if necessary	
 					if (typeof(bundeslandRow[schluessel])=='undefined') {
-						n = kreisnamen[schluessel].name;
-						n = n.replace("ü","ue");
-						n = n.replace("ö","ae");
-						n = n.replace("ä","ae");
+						
 						bundeslandRow[schluessel]={};
 						bundeslandRow[schluessel].x = [];
 						bundeslandRow[schluessel].y = [];
-						bundeslandRow[schluessel].name = n;
+						bundeslandRow[schluessel].name = getKreisname(schluessel,kreisnamen);
 						bundeslandRow[schluessel].type = "scatter";
 					}
 					bundeslandRow[schluessel].x.push(datum);
@@ -119,13 +134,21 @@ exports.plot = function(req,res){
 				for (key in bundeslandRow) {
 					data.push(bundeslandRow[key]);
 				}
+				graphLocation = getKreisname(location,kreisnamen);
 				
-				console.dir(data);
-				var graphOptions = {filename: "Apotheke", fileopt: "overwrite"};
+				filenamePlotly = "OSMWA_"+wochenaufgabe+"_"+graphLocation+"_"+lengthOfKey;
+				var style = {title: "Anzahl Apotheken in OSM fuer "+graphLocation};
+				
+				var graphOptions = {filename: filenamePlotly, fileopt: "overwrite",layout:style};
 				plotly.plot(data, graphOptions, function (err, msg) {
 				console.log("Error "+err);
     			console.log("msg" + msg);
-    			res.end(JSON.stringify(msg));
+    			
+    			page = htmlPage.create("tabelle");
+    			page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
+    			page.footer = "Powered by plot.ly.... (plotly loves &uuml &auml &ouml ... welcome to the World :-)";
+    			
+    			res.end(page.generatePage());
 				});
 				
 			}
