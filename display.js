@@ -737,8 +737,8 @@ function generateFilterTable(param,header) {
 	filterTableL1 += "<td>"+'<a href="/wa/Apotheke.html">Hilfe / Informationen</a>'+"</td>";
 	filterTableL2 += "<td>"+'<input type="submit" value="Parameter Umstellen">'+"</td>";
 	// Plotly Integration
-	filterTableL1 += "<td>"+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige als Grafik</a>'+"</td>";
-	filterTableL2 += "<td>"+''+"</td>";
+	filterTableL1 += "<td>"+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige Anzahl als Grafik</a>'+"</td>";
+	filterTableL2 += "<td>"+'<a href="/wavplot/'+param.measure+'.html?location='+param.location+'">Zeige Tags als Grafik</a>'+"</td>";
 	
 	filterTable = '<table><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr></table>';
 	
