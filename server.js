@@ -53,6 +53,7 @@ app.use(function(req, res, next){
 app.use('/count.html', display.count);
 app.use('/index.html', display.main);
 app.use('/waplot/:measure.html', plotlyexport.plot);
+app.use('/wavplot/:measure.html', plotlyexport.plotValues);
 app.use('/import/csvimport.html', display.importCSV);
 app.use('/import/apotheken.html', display.importApotheken);
 app.use('/table.html', display.table);
