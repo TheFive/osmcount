@@ -147,7 +147,7 @@ exports.plot = function(req,res){
     			page = htmlPage.create("tabelle");
     			page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
     			page.footer = "Powered by plot.ly.... (plotly loves &uuml &auml &ouml ... welcome to the World :-)";
-    			
+    			res.set('Content-Type', 'text/html');
     			res.end(page.generatePage());
 				});
 				
