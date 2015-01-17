@@ -17,7 +17,7 @@ body {
 }
 
 #kopfbereich {
-  background-color:#F0FFF8;
+  background-color:#F0F0F0;
 
 }
 
@@ -33,12 +33,12 @@ body {
 #steuerung {
   float: right;
   width:200px;
-  background-color: #CDD6CD;
+  background-color: #E0E0E0;
 }
 
 #fussbereich {
   clear: both;
-  background-color:#F0FFF8;
+  background-color:#F0F0F0;
 }
 -->
 </style>
