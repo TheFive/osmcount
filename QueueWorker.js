@@ -220,8 +220,8 @@ function doInsertJobs(cb,results) {
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
 		debug.entry("Start: doInsertJobs(cb,"+results+")");
 		mongodb = config.getDB();
-		jobs = lod.createQuery(job.measure,job.timestamp,job);
-		console.log("Trigger to load "+job.measure+" at "+job.timestamp + " Number Jobs "+ jobs.length);
+		jobs = lod.createQuery(job.measure,job.exectime,job);
+		console.log("Trigger to load "+job.measure+" at "+job.exectime + " Number Jobs "+ jobs.length);
 		if (jobs.length == 0) {
 			// No Jobs created
 			console.log("Nothing loaded");

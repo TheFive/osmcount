@@ -141,7 +141,8 @@ function generateQueryCSV(measure,schluessel,sub) {
 	var query = loadOverpassData.query[measure];
 	query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
 	query = query.replace('[out:json]',fieldlist);
-
+	query = query.replace('[date:":timestamp:"]','');
+	
 	query = query.replace("out;","out meta;");
 	
 	// This should be better done in a while loop
