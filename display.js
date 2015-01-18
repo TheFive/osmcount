@@ -1143,7 +1143,7 @@ exports.table = function(req,res){
 					// bom += String.fromCharCode( 187); 
 					// bom += String.fromCharCode( 191); 
 					// var bom = '\xEF\xBB\xBF'
-					res.end(bom+table);
+					res.end(table);
 					return;
 				}
 				res.set('Content-Type', 'text/html');
