@@ -151,14 +151,14 @@ exports.plot = function(req,res){
 				var graphOptions = {filename: filenamePlotly, fileopt: "overwrite",layout:style};
 				plotly.plot(data, graphOptions, function (err, msg) {
 			
-    			page = htmlPage.create("tabelle");
-    			page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
-    			page.footer = "Diese Grafik wird durch den Aufruf dieser Seite aktualisiert, der plot.ly Link kann aber auch unabh&aumlnig genutzt werden.";
     			res.set('Content-Type', 'text/html');
     			if (!err) {
+    				page = htmlPage.create("tabelle");
+    				page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
+    				page.footer = "Diese Grafik wird durch den Aufruf dieser Seite aktualisiert, der plot.ly Link kann aber auch unabh&aumlnig genutzt werden.";
     				res.end(page.generatePage());
     			} else {
-    				res.end(err);
+    				res.end("Fehler von Plotly: "+ JSON.stringify(err));
     			}		
 				});
 				
@@ -340,16 +340,15 @@ exports.plotValues = function(req,res){
 				
 				var graphOptions = {filename: filenamePlotly, fileopt: "overwrite",layout:style};
 				plotly.plot(data, graphOptions, function (err, msg) {
-			
-    			page = htmlPage.create("tabelle");
-    			page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
-    			page.footer = "Diese Grafik wird durch den Aufruf dieser Seite aktualisiert, der plot.ly Link kann aber auch unabh&aumlnig genutzt werden.";
-    			res.set('Content-Type', 'text/html');
-    			if (!err) {
-    				res.end(page.generatePage());
-    			} else {
-    				res.end(err);
-    			}		
+    				res.set('Content-Type', 'text/html');
+    				if (!err) {
+    					page = htmlPage.create("tabelle");
+    					page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
+    					page.footer = "Diese Grafik wird durch den Aufruf dieser Seite aktualisiert, der plot.ly Link kann aber auch unabh&aumlnig genutzt werden.";
+    					res.end(page.generatePage());
+    				} else {
+    					res.end("Fehler von Plotly: "+ JSON.stringify(err));
+    				}		
 				});
 				
 			}
