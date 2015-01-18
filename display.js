@@ -745,6 +745,11 @@ function generateFilterTable(param,header) {
 	// Plotly Integration
 	filterTableL1 += '<td class = "menu">'+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige Anzahl als Grafik</a>'+'</td>';
 	filterTableL2 += '<td class = "menu">'+'<a href="/wavplot/'+param.measure+'.html?location='+param.location+'">Zeige Tags als Grafik</a>'+'</td>';
+	// CSV Export	
+	filterTableL1 += '<td class = "menu">'+gl("Als CSV Downloaden",{csv:true},param)+'</td>';
+	filterTableL2 += '<td class = "menu">'+''+'</td>';
+	
+	
 	
 	filterTable = '<table class="menu"><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr></table>';
 	
@@ -893,6 +898,7 @@ exports.table = function(req,res){
 
     var aggFunc=query;   						
  	var openQueries=0;
+ 	var errorQueries=0;
     var items = [];
     var vorgabe = {};
     async.parallel( [ 
@@ -951,7 +957,24 @@ exports.table = function(req,res){
 					openQueries=count;
 					callback();
 				});  
-			}],
+			},
+			function getErrorQueueCount(callback) {
+				debug.entry("getErrorQueueCount");
+				db = res.db;
+				collectionName = 'WorkerQueue';
+				
+				// Fetch the collection test
+				var collection = db.collection(collectionName);
+				date = new Date();
+				collection.count({status:"error",exectime: 
+								 {$lte: date},measure:param.measure},
+								 function getWorkerQueueCountCB(err, count) {
+					debug.entry("getWorkerQueueCount");
+					errorQueries=count;
+					callback();
+				});  
+			}
+			],
 			function displayFinalCB (err, results ) {
 				debug.entry("displayFinalCB");
 				// Initialising JavaScript Map
@@ -1093,14 +1116,15 @@ exports.table = function(req,res){
 					
 					pageFooter = "";
 					if (openQueries > 0) {
-						pageFooter = "<p> Offene Queries "+openQueries+"</p>";
+						pageFooter += "Offene Queries "+openQueries+". ";
 					}
-					pageFooter += "<p>"+gl("Als CSV Downloaden",{csv:true},param)+"</p>"
-					pageFooter += "<p> Die Service Link(s) bedeuten \
-									<li>O Zeige die Overpass Query</li> \
-									<li>R Starte die Overpass Query</li> \
-									<li># Öffne Overpass Turbo mit CSV Abfrage</li> \
-									</p>"
+					if (errorQueries > 0) {
+						pageFooter += "Fehlerhafte Queries "+errorQueries+". ";
+					}
+					pageFooter += "Die Service Links bedeuten: \
+									<b>O</b> Zeige die Overpass Query \
+									<b>R</b> Starte die Overpass Query \
+									<b>#</b> Öffne Overpass Turbo mit CSV Abfrage"
 					page.footer = pageFooter;
 						
 					debug.data(JSON.stringify(query,null,' '));
