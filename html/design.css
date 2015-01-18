@@ -1,5 +1,5 @@
 <style type="text/css">
-<!--
+
 body {
 
   font: 100.01% Verdana, Arial, Helvetica, sans-serif;
@@ -8,7 +8,8 @@ body {
 
 * {
   margin:0;
-  padding:0;
+  padding:3;
+  line-height: 130%;
 }
 
 #seite {
@@ -34,11 +35,13 @@ body {
   float: right;
   width:200px;
   background-color: #E0E0E0;
+   border: 2px solid black;
+   min-height: 400px;
 }
 
 #fussbereich {
   clear: both;
   background-color:#F0F0F0;
 }
--->
+
 </style>

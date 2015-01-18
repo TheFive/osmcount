@@ -1,5 +1,5 @@
 <style type="text/css">
-<!--
+
 body {
 
   font: 100.01% Verdana, Arial, Helvetica, sans-serif;
@@ -8,7 +8,8 @@ body {
 
 * {
   margin:0;
-  padding:0;
+  padding:3;
+  line-height: 130%;
 }
 
 #seite {
@@ -23,6 +24,7 @@ body {
 
 #steuerung {
   background-color: #E0E0E0;
+  border: 2px solid black;
 }
 
 #inhalt {
@@ -35,5 +37,48 @@ body {
 #fussbereich {
   background-color:#F0F0F0;
 }
--->
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    font-family: Verdana;
+	font-size: 0.9em;
+	text-align: center;
+	padding: 3px;
+	margin: 0px;
+}
+
+table.menu, th.menue, td.menu {
+    border: 0px;
+    border-collapse: collapse;
+    font-family: Verdana;
+	font-size: 0.9em;
+	text-align: center;
+	padding: 3px;
+	margin: 0px;
+}
+th { 
+background-color: #999; 
+color: #fff; 
+border: 1px solid #fff; 
+} 
+th:link, { 
+background-color: #999; 
+color: #999; 
+} 
+th:visited, { 
+background-color: #999; 
+color: #999; 
+} 
+td.first { 
+background-color: #00ff00; 
+} 
+td.second { 
+background-color: #88FF88; 
+} 
+td.last { 
+background-color: #ff0000; 
+} 
+td.lastButOne { 
+background-color: #ff8888; 
+} 
 </style>
