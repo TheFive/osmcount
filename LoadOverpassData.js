@@ -191,7 +191,7 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 			job.exectime = exectime;
 			job.type = "overpass";
 			job.query = exports.query[aufgabe].replace(':schluessel:',job.schluessel);
-			job.query = job.query.replace(':timestamp:',exectime);
+			job.query = job.query.replace(':timestamp:',exectime.toISOString());
 			job.source = referenceJob._id;
 			jobs.push(job);
 			

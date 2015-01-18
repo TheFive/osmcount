@@ -105,6 +105,9 @@ function generateQuery(measure,schluessel,sub) {
 	
 	var query = loadOverpassData.query[measure];
 	query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
+	query = query.replace('[date:":timestamp:"]','');
+	
+	
 	
 	// This should be better done in a while loop
 	query = query.replace("out ids;","out;");
@@ -176,9 +179,11 @@ exports.overpass = function(req,res) {
 	if (measure=="AddrWOStreet") {
 		text += '<p>Achtung, die Overpass Abfrage und die Abfrage von User:Gehrke unterschieden sich etwas. Siehe <a href="http://wiki.openstreetmap.org/wiki/DE:Overpass_API/Beispielsammlung#Hausnummern_ohne_Stra.C3.9Fe_finden">wiki</a>.</p>';
 	}
-	text = "<html>"+tableCSSStyle+"<body>"+text+"</body></html>";
-    res.set('Content-Type', 'text/html');		
-    res.end(text);
+	page = htmlPage.create();
+	page.content = text;
+	
+	res.set('Content-Type', 'text/html');		
+    res.end(page.generatePage());
 }
 
 exports.importCSV = function(req,res){
@@ -498,7 +503,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 		if (serviceLink) {
 			var sub = "";
 			if (param.sub != "") sub = "?sub="+param.sub;
-			tablerow += "<td><a href=./overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
+			tablerow += "<td><a href=/overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
 			query= generateQuery(param.measure,row,param.sub);
 			tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+"&R>R</a>"
 			query= generateQueryCSV(param.measure,row,param.sub);
@@ -1109,7 +1114,11 @@ exports.table = function(req,res){
 						table = "Achtung: Es laufen noch "+openQueries+" Overpass Abfragen, das Ergebnis ist eventuell unvollständig\n"+table;
 					}
 					res.set('Content-Type', 'application/octet-stream');
-					res.end(table);
+					// var bom = String.fromCharCode(239 ); // Hex:EF BB BF, Dec: 239 187 191
+					// bom += String.fromCharCode( 187); 
+					// bom += String.fromCharCode( 191); 
+					// var bom = '\xEF\xBB\xBF'
+					res.end(bom+table);
 					return;
 				}
 				res.set('Content-Type', 'text/html');
