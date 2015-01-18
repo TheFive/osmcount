@@ -50,6 +50,8 @@ exports.main = function(req,res){
 exports.wochenaufgabe = function(req,res) {
 	var aufgabe = req.param("aufgabe");
 	page = htmlPage.create();
+	if (aufgabe=="Apotheke") page.title = "Wochenaufgabe Apotheken (in Planung)";
+	if (aufgabe=="AddrWOStreet") page.title = "Wochenaufgabe Adressen ohne Straße";
 	page.content = fs.readFileSync(path.resolve(__dirname, "html",aufgabe+".html"));
 	page.menu = fs.readFileSync(path.resolve(__dirname, "html","menu.html"));	
  	res.set('Content-Type', 'text/html');
@@ -740,7 +742,7 @@ function generateFilterTable(param,header) {
 	filterTableL1 += '<td class = "menu">'+param.lengthOfKey+'</td>';
 	filterTableL2 += '<td class = "menu">'+lokSelector+'</td>';
 	// Aktion
-	filterTableL1 += '<td class = "menu">'+'<a href="/wa/Apotheke.html">Hilfe / Informationen</a>'+'</td>';
+	filterTableL1 += '<td class = "menu">'+'<a href="/wa/'+param.measure+'.html">Hilfe / Informationen</a>'+'</td>';
 	filterTableL2 += '<td class = "menu">'+'<input type="submit" value="Parameter Umstellen">'+'</td>';
 	// Plotly Integration
 	filterTableL1 += '<td class = "menu">'+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige Anzahl als Grafik</a>'+'</td>';
