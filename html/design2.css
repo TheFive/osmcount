@@ -12,14 +12,18 @@ body {
   line-height: 130%;
 }
 
+
+
 #seite {
   width:100%;
-  margin: 0 auto;
+  margin: 0px;
 }
 
 #kopfbereich {
   background-color:#F0F0F0;
-
+   padding:0px;
+   margin:0px;
+   line-height: 100%;
 }
 
 #steuerung {
