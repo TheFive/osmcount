@@ -19,7 +19,7 @@ So gibt es hoffentlich eine plausible Vorgabe für die Wochenaufgabe (die theore
 <h2>Istwerte</h2>
 Die Istwerte werden mit der folgenden Overpass Query (pro amtlichen Gemeindeschlüssel) ermittelt:
 <pre>
-[out:json];area["de:amtlicher_gemeindeschluessel"="######"];
+[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"];
 (node(area)[amenity=pharmacy];
 way(area)[amenity=pharmacy];
 rel(area)[amenity=pharmacy]);out;</pre>
