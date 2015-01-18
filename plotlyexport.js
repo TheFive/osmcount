@@ -153,7 +153,7 @@ exports.plot = function(req,res){
 			
     			res.set('Content-Type', 'text/html');
     			if (!err) {
-    				page = htmlPage.create("tabelle");
+    				page = htmlPage.create("table");
     				page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
     				page.footer = "Diese Grafik wird durch den Aufruf dieser Seite aktualisiert, der plot.ly Link kann aber auch unabh&aumlnig genutzt werden.";
     				res.end(page.generatePage());
@@ -342,7 +342,7 @@ exports.plotValues = function(req,res){
 				plotly.plot(data, graphOptions, function (err, msg) {
     				res.set('Content-Type', 'text/html');
     				if (!err) {
-    					page = htmlPage.create("tabelle");
+    					page = htmlPage.create("table");
     					page.content='<iframe width="1200" height="600" frameborder="0" seamless="seamless" scrolling="no" src='+msg.url+'.embed?width=1200&height=600"></iframe>';
     					page.footer = "Diese Grafik wird durch den Aufruf dieser Seite aktualisiert, der plot.ly Link kann aber auch unabh&aumlnig genutzt werden.";
     					res.end(page.generatePage());
