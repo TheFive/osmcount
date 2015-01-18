@@ -139,7 +139,7 @@ function doOverpass(cb,results) {
 			result.source = job.source;
 			async.series( [
 				function (cb) {
-					lod.runOverpass(query,measure,result,cb);
+					lod.runOverpass(query,job,result,cb);
 				},
 				function (cb) {
 					saveMeasure(result,cb);

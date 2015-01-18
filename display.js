@@ -104,7 +104,7 @@ function generateQuery(measure,schluessel,sub) {
 	}
 	
 	var query = loadOverpassData.query[measure];
-	query = query.replace('"="######"','"~"^'+schluessel+'"');
+	query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
 	
 	// This should be better done in a while loop
 	query = query.replace("out ids;","out;");
@@ -114,9 +114,9 @@ function generateQuery(measure,schluessel,sub) {
 	if (typeof(sub) != 'undefined') {
 	
 		// This should be better done in a while loop
-		query = query.replace('$$$$',subQuery);
-		query = query.replace('$$$$',subQuery);
-		query = query.replace('$$$$',subQuery);
+		query = query.replace(':key:',subQuery);
+		query = query.replace(':key:',subQuery);
+		query = query.replace(':key:',subQuery);
 	}
 	return query;
 }
@@ -136,7 +136,7 @@ function generateQueryCSV(measure,schluessel,sub) {
 	}
 	
 	var query = loadOverpassData.query[measure];
-	query = query.replace('"="######"','"~"^'+schluessel+'"');
+	query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
 	query = query.replace('[out:json]',fieldlist);
 
 	query = query.replace("out;","out meta;");
@@ -719,28 +719,28 @@ function generateFilterTable(param,header) {
 	var filterTableL1, filterTableL2;
 	
 	// Filter on Location
-	filterTableL1 = "<td>"+filterText+"</td>";
-	filterTableL2 = "<td>"+filterSelector+"</td>";
+	filterTableL1 = '<td class = "menu" >'+filterText+'</td>';
+	filterTableL2 = '<td class = "menu">'+filterSelector+'</td>';
 	// Filter on Key
-	filterTableL1 += "<td>"+param.sub+"</td>";
-	filterTableL2 += "<td>"+subSelector+"</td>";
+	filterTableL1 += '<td class = "menu">'+param.sub+'</td>';
+	filterTableL2 += '<td class = "menu">'+subSelector+'</td>';
 	// Filter on Percent
-	filterTableL1 += "<td>"+param.subPercent+"</td>";
-	filterTableL2 += "<td>"+subPercentSelector+"</td>";
+	filterTableL1 += '<td class = "menu">'+param.subPercent+'</td>';
+	filterTableL2 += '<td class = "menu">'+subPercentSelector+'</td>';
 	// Filter on Period
-	filterTableL1 += "<td>"+param.period+"</td>";
-	filterTableL2 += "<td>"+periodenSelector+"</td>";
+	filterTableL1 += '<td class = "menu">'+param.period+'</td>';
+	filterTableL2 += '<td class = "menu">'+periodenSelector+'</td>';
 	// Filter on length Of Key
-	filterTableL1 += "<td>"+param.lengthOfKey+"</td>";
-	filterTableL2 += "<td>"+lokSelector+"</td>";
+	filterTableL1 += '<td class = "menu">'+param.lengthOfKey+'</td>';
+	filterTableL2 += '<td class = "menu">'+lokSelector+'</td>';
 	// Aktion
-	filterTableL1 += "<td>"+'<a href="/wa/Apotheke.html">Hilfe / Informationen</a>'+"</td>";
-	filterTableL2 += "<td>"+'<input type="submit" value="Parameter Umstellen">'+"</td>";
+	filterTableL1 += '<td class = "menu">'+'<a href="/wa/Apotheke.html">Hilfe / Informationen</a>'+'</td>';
+	filterTableL2 += '<td class = "menu">'+'<input type="submit" value="Parameter Umstellen">'+'</td>';
 	// Plotly Integration
-	filterTableL1 += "<td>"+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige Anzahl als Grafik</a>'+"</td>";
-	filterTableL2 += "<td>"+'<a href="/wavplot/'+param.measure+'.html?location='+param.location+'">Zeige Tags als Grafik</a>'+"</td>";
+	filterTableL1 += '<td class = "menu">'+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige Anzahl als Grafik</a>'+'</td>';
+	filterTableL2 += '<td class = "menu">'+'<a href="/wavplot/'+param.measure+'.html?location='+param.location+'">Zeige Tags als Grafik</a>'+'</td>';
 	
-	filterTable = '<table><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr></table>';
+	filterTable = '<table class="menu"><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr></table>';
 	
 	
 	//filterTable = "<tr><td>"+filterText+
@@ -1083,7 +1083,7 @@ exports.table = function(req,res){
 					generateSortHeader(param,header,format);
 					var table = generateTable(param,header,firstColumn,table,format, rank);
 					
-					page.content = '<p><br><table>'+table+'</table></p>';
+					page.content = '<p><table>'+table+'</table></p>';
 					
 					pageFooter = "";
 					if (openQueries > 0) {

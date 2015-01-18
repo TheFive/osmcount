@@ -11,9 +11,9 @@ var debug   =  require('debug')('LoadOverpassData');
 // To be changed to a more readable import routine
 
 exports.query = {
-   Apotheke:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-   ApothekeDetail:'[out:json];area["de:amtlicher_gemeindeschluessel"="######"]->.a;\n(node(area.a)[amenity=pharmacy][$$$$];\nway(area.a)[amenity=pharmacy][$$$$];\nrel(area.a)[amenity=pharmacy][$$$$]);\nout;',
-   AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"="######"]->.boundaryarea;\n\
+   Apotheke:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+   ApothekeDetail:'[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+   AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"=":schluessel:"]->.boundaryarea;\n\
 rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \n\
 \n\
 way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \n\
@@ -120,8 +120,9 @@ exports.importBoundaries = function(job,cb)  {
 
 
 
-exports.runOverpass= function(query, measure,result, cb) {
+exports.runOverpass= function(query, job,result, cb) {
 	debug.entry("runOverpass(query,"+measure+",result,cb)");
+	measure=job.measure;
 	overpassQuery(query,function(error, data) {
 		debug.entry("runOverpass->CB(");	
 		if (error) {
@@ -130,7 +131,7 @@ exports.runOverpass= function(query, measure,result, cb) {
 			cb(error);
 		} else {
 			date = new Date();
-			result.timestamp=date;
+			result.timestamp=job.exectime;
 			result.count=0;
 			result.data=JSON.parse(data).elements;
 			result.measure=measure;
@@ -189,7 +190,8 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 			job.status='open';
 			job.exectime = exectime;
 			job.type = "overpass";
-			job.query = exports.query[aufgabe].replace('######',job.schluessel);
+			job.query = exports.query[aufgabe].replace(':schluessel:',job.schluessel);
+			job.query = job.query.replace(':timestamp:',exectime);
 			job.source = referenceJob._id;
 			jobs.push(job);
 			
