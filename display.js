@@ -736,7 +736,7 @@ function generateFilterTable(param,header) {
 	filterTableL2 += '<td class = "menu">'+subSelector+'</td>';
 	// Filter on Percent
 	filterTableLH += '<th class = "menu"> Anzahl / % Angabe</th>';
-	filterTableL1 += '<td class = "menu">'+param.subPercent+'</td>';
+	filterTableL1 += '<td class = "menu">'+((param.subPercent!="Yes")?'Anzahl':'%')+'</td>';
 	filterTableL2 += '<td class = "menu">'+subPercentSelector+'</td>';
 	// Filter on Period
 	filterTableLH += '<th class = "menu">Zeitachse</th>';
