@@ -727,33 +727,43 @@ function generateFilterTable(param,header) {
 	var filterTableL1, filterTableL2;
 	
 	// Filter on Location
+	filterTableLH = '<th class = "menu" > Ort </th>';
 	filterTableL1 = '<td class = "menu" >'+filterText+'</td>';
 	filterTableL2 = '<td class = "menu">'+filterSelector+'</td>';
 	// Filter on Key
+	filterTableLH += '<th class = "menu"> Anzahl / Tags</th>';
 	filterTableL1 += '<td class = "menu">'+param.sub+'</td>';
 	filterTableL2 += '<td class = "menu">'+subSelector+'</td>';
 	// Filter on Percent
+	filterTableLH += '<th class = "menu"> Anzahl / % Angabe</th>';
 	filterTableL1 += '<td class = "menu">'+param.subPercent+'</td>';
 	filterTableL2 += '<td class = "menu">'+subPercentSelector+'</td>';
 	// Filter on Period
+	filterTableLH += '<th class = "menu">Zeitachse</th>';
 	filterTableL1 += '<td class = "menu">'+param.period+'</td>';
 	filterTableL2 += '<td class = "menu">'+periodenSelector+'</td>';
 	// Filter on length Of Key
+	filterTableLH += '<th class = "menu"> Schlüssellänge</th>';
 	filterTableL1 += '<td class = "menu">'+param.lengthOfKey+'</td>';
 	filterTableL2 += '<td class = "menu">'+lokSelector+'</td>';
 	// Aktion
-	filterTableL1 += '<td class = "menu">'+'<a href="/wa/'+param.measure+'.html">Hilfe / Informationen</a>'+'</td>';
+	filterTableLH += '<th class = "menu"></th>';
+	filterTableL1 += '<td class = "menu">'+''+'</td>';
 	filterTableL2 += '<td class = "menu">'+'<input type="submit" value="Parameter Umstellen">'+'</td>';
 	// Plotly Integration
+	filterTableLH += '<th class = "menu">Graphen</th>';
 	filterTableL1 += '<td class = "menu">'+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige Anzahl als Grafik</a>'+'</td>';
 	filterTableL2 += '<td class = "menu">'+'<a href="/wavplot/'+param.measure+'.html?location='+param.location+'">Zeige Tags als Grafik</a>'+'</td>';
 	// CSV Export	
+	filterTableLH += '<th class = "menu">sonstiges</th>';
 	filterTableL1 += '<td class = "menu">'+gl("Als CSV Downloaden",{csv:true},param)+'</td>';
-	filterTableL2 += '<td class = "menu">'+''+'</td>';
+	filterTableL2 += '<td class = "menu">'+'<a href="/wa/'+param.measure+'.html">Hilfe / Informationen</a>'+'</td>';
 	
 	
 	
-	filterTable = '<table class="menu"><tr>'+filterTableL1+'</tr><tr>'+filterTableL2+'</tr></table>';
+	filterTable = '<table class="menu"><tr>'+filterTableLH+'</tr> \
+										<tr>'+filterTableL1+'</tr> \
+										<tr>'+filterTableL2+'</tr></table>';
 	
 	
 	//filterTable = "<tr><td>"+filterText+
@@ -1118,10 +1128,10 @@ exports.table = function(req,res){
 					
 					pageFooter = "";
 					if (openQueries > 0) {
-						pageFooter += "Offene Queries "+openQueries+". ";
+						pageFooter += "<b>Offene Queries "+openQueries+".</b> ";
 					}
 					if (errorQueries > 0) {
-						pageFooter += "Fehlerhafte Queries "+errorQueries+". ";
+						pageFooter += "<b>Fehlerhafte Queries "+errorQueries+".</b> ";
 					}
 					pageFooter += "Die Service Links bedeuten: \
 									<b>O</b> Zeige die Overpass Query \
