@@ -37,7 +37,8 @@ function overpassQuery(query, cb, options) {
         } else if (response) {
             cb({
                 message: 'Request failed: HTTP ' + response.statusCode,
-                statusCode: response.statusCode
+                statusCode: response.statusCode,
+                body: body
             });
         } else {
             cb({
