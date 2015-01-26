@@ -155,38 +155,7 @@ exports.runOverpass= function(query, job,result, cb) {
 )}
 
 
-exports.runOverpassPOI= function(query, job,result, cb) {
-	debug.entry("runOverpassPOI(%s,job,result,cb)",query);
-	overpassQuery(query,function(error, data) {
-		debug.entry("runOverpassPOI->CB(");	
-		if (error) {
-			console.log("Error occured in function: LoadOverpassData.runOverpass");
-			console.log(error);
-			cb(error);
-		} else {
-			data=JSON.parse(data).elements;
-			timestamp = data.osm3s.timestamp_osm_base;
-			
-			
-			mongodb.collection("xxxxx").insert(jobs,
-			function (err, records) {
-				if (err) {
-					console.log("Error occured in function: QueueWorker.doInsertJobs");
-					console.log(err);
-					job.status="error";
-					job.error = err;
-					err=null; //error wird gespeichert, kann daher hier auf NULL gesetzt werden.
-				} else {
-					debug("All Inserted %i" ,records.length);
-					job.status='done';
-				}					
-				cb(err,job);
-			})
-			
-			cb();
-		}
-	}
-)}
+
 exports.createQuery = function(aufgabe,exectime,referenceJob)
 {
 	debug.entry("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
