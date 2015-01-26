@@ -10,24 +10,6 @@ var debug   =  require('debug')('LoadOverpassData');
 
 // To be changed to a more readable import routine
 
-exports.query = {
-   Apotheke:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-   ApothekeDetail:'[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
-   AddrWOStreet: '[out:json][timeout:900];area[type=boundary]["de:regionalschluessel"=":schluessel:"]->.boundaryarea;\n\
-rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet; \n\
-\n\
-way(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesWay; \n\
-way(r.associatedStreet:"house")->.asHouseWay; \n\
-(.allHousesWay; - .asHouseWay); out ids; \n\
- \n\
-node(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesNode; \n\
-node(r.associatedStreet:"house")->.asHouseNode; \n\
-(.allHousesNode; - .asHouseNode);out ids; \n\
- \n\
-rel(area.boundaryarea)["addr:housenumber"]["addr:street"!~"."]["addr:place"!~"."]->.allHousesRel; \n\
-rel(r.associatedStreet:"house")->.asHouseRel; \n\
-(.allHousesRel; - .asHouseRel);out ids;'
-}
 
 queryBoundaries='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out;' 
 
@@ -40,6 +22,7 @@ var request = require('request');
 
 function overpassQuery(query, cb, options) {
 	debug.entry("overpassQuery");
+	
     options = options || {};
     request.post(options.overpassUrl || overpassApiLinkDE, function (error, response, body) {
     	debug.entry("overpassQuery->CB");
@@ -65,6 +48,8 @@ function overpassQuery(query, cb, options) {
         data: query
     });
 };
+
+exports.overpassQuery = overpassQuery;
 
 function loadBoundaries(cb,result) {
 	debug.entry("loadBoundaries");
@@ -169,6 +154,39 @@ exports.runOverpass= function(query, job,result, cb) {
 	}
 )}
 
+
+exports.runOverpassPOI= function(query, job,result, cb) {
+	debug.entry("runOverpassPOI(%s,job,result,cb)",query);
+	overpassQuery(query,function(error, data) {
+		debug.entry("runOverpassPOI->CB(");	
+		if (error) {
+			console.log("Error occured in function: LoadOverpassData.runOverpass");
+			console.log(error);
+			cb(error);
+		} else {
+			data=JSON.parse(data).elements;
+			timestamp = data.osm3s.timestamp_osm_base;
+			
+			
+			mongodb.collection("xxxxx").insert(jobs,
+			function (err, records) {
+				if (err) {
+					console.log("Error occured in function: QueueWorker.doInsertJobs");
+					console.log(err);
+					job.status="error";
+					job.error = err;
+					err=null; //error wird gespeichert, kann daher hier auf NULL gesetzt werden.
+				} else {
+					debug("All Inserted %i" ,records.length);
+					job.status='done';
+				}					
+				cb(err,job);
+			})
+			
+			cb();
+		}
+	}
+)}
 exports.createQuery = function(aufgabe,exectime,referenceJob)
 {
 	debug.entry("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
@@ -190,7 +208,7 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 			job.status='open';
 			job.exectime = exectime;
 			job.type = "overpass";
-			job.query = exports.query[aufgabe].replace(':schluessel:',job.schluessel);
+			job.query = wochenaufgabe.map[aufgabe].query.replace(':schluessel:',job.schluessel);
 			job.query = job.query.replace(':timestamp:',exectime.toISOString());
 			job.source = referenceJob._id;
 			jobs.push(job);

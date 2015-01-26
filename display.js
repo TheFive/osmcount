@@ -1,5 +1,3 @@
-var loadDataFromDB = require('./LoadDataFromDB')
-var loadOverpassData = require('./LoadOverpassData')
 var importCSV=require('./ImportCSV');
 var debug    = require('debug')('display');
   debug.data = require('debug')('display:data');
@@ -11,6 +9,8 @@ var async    = require('async');
 var ObjectID = require('mongodb').ObjectID;
 var util     = require('./util.js');
 var htmlPage     = require('./htmlPage.js');
+
+var wochenaufgabe = require('./wochenaufgabe.js');
 
 
 
@@ -37,6 +37,8 @@ exports.count = function(req,res){
     	}
     });  
 }
+
+
 exports.main = function(req,res){
 	page = htmlPage.create();
 	page.content = fs.readFileSync(path.resolve(__dirname, "html","index.html"));
@@ -50,8 +52,9 @@ exports.main = function(req,res){
 exports.wochenaufgabe = function(req,res) {
 	var aufgabe = req.param("aufgabe");
 	page = htmlPage.create();
-	if (aufgabe=="Apotheke") page.title = "Wochenaufgabe Apotheken (in Planung)";
-	if (aufgabe=="AddrWOStreet") page.title = "Wochenaufgabe Adressen ohne Straße";
+	
+	page.title = wochenaufgabe.map[aufgabe].title;
+
 	page.content = fs.readFileSync(path.resolve(__dirname, "html",aufgabe+".html"));
 	page.menu = fs.readFileSync(path.resolve(__dirname, "html","menu.html"));	
  	res.set('Content-Type', 'text/html');
@@ -59,13 +62,26 @@ exports.wochenaufgabe = function(req,res) {
 }
 
 
+function listValuesTable(keyname,key,object) {
+	if (key == '_id') return;
+	if (typeof(object) == 'object') {
+		result = "";
+		for (k in object) {
+			result += listValuesTable(key+"."+k,k,object[k]);
+		}
+		return result;
+    }
+    return "<tr><td>"+keyname+"</td><td>"+object+"</td></tr>";
+    
+}
 
 exports.object = function(req,res) {
 	debug.entry("exports.object");
 	var db = res.db;
    
-	var collectionName = req.param("collection");
-	var objid = req.param("id");
+	var collectionName = req.params["collection"];
+	var objid = req.params["id"];
+	console.log(objid);
 	var object=ObjectID(objid);
    
     db.collection(collectionName).findOne ({_id:object},function handleFindOneObject(err, obj) {
@@ -75,21 +91,21 @@ exports.object = function(req,res) {
     		res.set('Content-Type', 'text/html');
     		res.end(err);
     	} else {
-    		text = "";
-    		for (key in obj) {
-    			if (key != "_id") {
-    				text += "<tr><td>"+key+"</td><td>"+obj[key]+"</td></tr>";
-    			}
-    		}	
-    		text = tableCSSStyle+"<body><h1>Data Inspector</h1><table>"+text+"</table></body>";
-    		res.set('Content-Type', 'text/html');
-    		res.end(text );
+    		text = "<tr><th>Key</th><th>Value</th><tr>";
+    		text+= listValuesTable("","",obj);
+    		
+    		page =new htmlPage.create("table");
+			page.title = "Data Inspector";
+			page.menu ="";
+			page.content = '<p><table>'+text+'</table></p>';
+ 			res.set('Content-Type', 'text/html');
+ 			res.end(page.generatePage());
     	}
     })
 }
 
 function generateQuery(measure,schluessel,sub) {
-	debug.entry("generateQuery");
+	debug.entry("generateQuery(%s,%s,%s)",measure,schluessel,sub);
    
 	
 	var subQuery ="";
@@ -99,13 +115,10 @@ function generateQuery(measure,schluessel,sub) {
 	if (sub == "missing.opening_hours") subQuery = "opening_hours!~'.'";
 	if (sub == "existing.fixme") subQuery = "fixme";
 	
-	
-	
-	if ( sub != '' && measure == "Apotheke") {
-		measure = "ApothekeDetail";
+	var query = wochenaufgabe.map[measure].overpass.query;
+	if (sub !='') {
+		query = wochenaufgabe.map[measure].overpass.query
 	}
-	
-	var query = loadOverpassData.query[measure];
 	query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
 	query = query.replace('[date:":timestamp:"]','');
 	
@@ -126,33 +139,22 @@ function generateQuery(measure,schluessel,sub) {
 	return query;
 }
 
-function generateQueryCSV(measure,schluessel,sub) {
-	debug.entry("generateQueryCSV");
-   
+function generateQueryCSV(measure,schluessel) {
+  debug.entry("generateQueryCSV(%s,%s)",measure,schluessel);
+  var query = wochenaufgabe.map[measure].overpass.query;
+  query = wochenaufgabe.map[measure].overpass.query;
+  fieldList = wochenaufgabe.map[measure].overpass.csvFieldList;
+  query = query.replace('[out:json]',fieldList);
+  query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
+  query = query.replace('[date:":timestamp:"]','');	
+  query = query.replace("out;","out meta;");
 	
+  // This should be better done in a while loop
+  query = query.replace("out ids;","out meta;");
+  query = query.replace("out ids;","out meta;");
+  query = query.replace("out ids;","out meta;");
 	
-	
-	fieldlist = "[out:json]";
-	if ( measure == "Apotheke") {
-		fieldlist = '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]';
-	}
-	if ( measure == "AddrWOStreet") {
-		fieldlist = '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user;true;";")]';
-	}
-	
-	var query = loadOverpassData.query[measure];
-	query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
-	query = query.replace('[out:json]',fieldlist);
-	query = query.replace('[date:":timestamp:"]','');
-	
-	query = query.replace("out;","out meta;");
-	
-	// This should be better done in a while loop
-	query = query.replace("out ids;","out meta;");
-	query = query.replace("out ids;","out meta;");
-	query = query.replace("out ids;","out meta;");
-	
-	return query;
+  return query;
 }
 
 
@@ -160,11 +162,11 @@ exports.overpass = function(req,res) {
 	debug.entry("exports.overpass");
 	var db = res.db;
    
-	var measure = req.param("measure");
-	var schluessel = req.param("schluessel");
+	var measure = req.params["measure"];
+	var schluessel = req.params["schluessel"];
 	
 	
-	var sub = req.param("sub");
+	var sub = req.query.sub;
 	if (typeof(sub) == 'undefined') sub = "";
     query = generateQuery(measure,schluessel,sub);
     
@@ -298,62 +300,62 @@ function gl(text, newLink, param)
 function setParams(req,param) {
 	debug.entry("setParams");
     // Parse html parameters
-    param.measure="Apotheke";    
-    if(typeof(req.param("measure"))!='undefined') {
-    	param.measure=req.param("measure");
+    param.measure="";    
+    if(typeof(req.params["measure"])!='undefined') {
+    	param.measure=req.params["measure"];
     }
     param.csv = false;
     param.html = false;
-    if(typeof(req.param("type"))!='undefined') {
-    	if (req.param("type") == "csv") param.csv = true;
-    	if (req.param("type") == "html") param.html = true;
+    if(typeof(req.params["type"])!='undefined') {
+    	if (req.params["type"] == "csv") param.csv = true;
+    	if (req.params["type"] == "html") param.html = true;
     }
     
     param.sort ="";
-    if(typeof(req.param("sort"))!='undefined') {
-    	param.sort=req.param("sort");
+    if(typeof(req.query["sort"])!='undefined') {
+    	param.sort=req.query["sort"];
     	param.sortAscending = 1;
     }
-    if(typeof(req.param("sortdown"))!='undefined') {
-    	param.sort=req.param("sortdown");
+    if(typeof(req.query["sortdown"])!='undefined') {
+    	param.sort=req.query["sortdown"];
     	param.sortAscending = -1;
     }
     param.lengthOfKey = 2;
-    if(typeof(req.param("lok"))!="undefined") {
-    	param.lengthOfKey=parseInt(req.param("lok"));
+    if(typeof(req.query["lok"])!="undefined") {
+    	param.lengthOfKey=parseInt(req.query["lok"]);
     	if (param.lengthOfKey<0) param.lengthOfKey = 0;
     	if (param.lengthOfKey > 12) param.lengthOfKey = 12;
     }
     
     param.lengthOfTime=7;
     param.period="Monat";
-    if(req.param("period")=="Jahr") {
+    if(req.query["period"]=="Jahr") {
     	param.lengthOfTime=4;
     	param.period="Jahr";
     }   
-    if(req.param("period")=="Monat") {
+    if(req.query["period"]=="Monat") {
     	param.lengthOfTime=7;
     	param.period="Monat";
     }
-    if(req.param("period")=="Tag") {
+    if(req.query["period"]=="Tag") {
     	param.lengthOfTime=10;
     	param.period="Tag";
     }
    	param.location ="";
     param.locationName="";
     param.locationType="-";
-    if(typeof(req.param("location"))!='undefined') {
-    	param.location=req.param("location");
+    if(typeof(req.query["location"])!='undefined') {
+    	param.location=req.query["location"];
     	param.locationName = param.location;
     	param.locationType="-";
     }
     param.sub = "";
-    if (typeof(req.param("sub")) != 'undefined') {
-    	param.sub = req.param("sub");
+    if (typeof(req.query["sub"]) != 'undefined') {
+    	param.sub = req.query["sub"];
     }
     param.subPercent = "";
-    if (typeof(req.param("subPercent")) != 'undefined') {
-    	param.subPercent = req.param("subPercent");
+    if (typeof(req.query["subPercent"]) != 'undefined') {
+    	param.subPercent = req.query["subPercent"];
     }
     
 
@@ -509,7 +511,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 			tablerow += "<td><a href=/overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
 			query= generateQuery(param.measure,row,param.sub);
 			tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+"&R>R</a>"
-			query= generateQueryCSV(param.measure,row,param.sub);
+			query= generateQueryCSV(param.measure,row);
 			tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+">#</a></td>"
 		}
 		tablerow = "<tr>"+tablerow+"</tr>";
@@ -644,8 +646,6 @@ function generateFilterTable(param,header) {
     }
     
     
-    filterSwitch =   gl("[AddrWOStreet]",{lok:2,period:"Monat",measure:"AddrWOStreet",sub:""},param);
-    filterSwitch +=  gl("[Apotheke]",{lok:2,period:"Monat",measure:"Apotheke",sub:""},param);
     
     lokSwitch ="1";   
     lokShow = "X";
@@ -695,34 +695,6 @@ function generateFilterTable(param,header) {
 			<option value="Tag"' +((param.period == "Tag") ? " selected":"")+ '>Tag</option> \
 			</select>';
     
-/*
-    var sortSwitch = "";
-    for (i=0;i<header.length;i++) {
-    	if (header[i]=="Admin Level") continue;
-    	if (header[i]=="Name") continue;
-    	sortSwitch += gl("["+header[i]+"-]", {sortdown:header[i]},param);
-    }
-    sortSwitch+="<br>";
-    for (i=0;i<header.length;i++) {
-    	if (header[i]=="Admin Level") continue;
-    	if (header[i]=="Name") continue;
-    	sortSwitch += gl("["+header[i]+"+]", {sort:header[i]},param);
-    }
-*/
-/*
-    var filterTable ; //= "<tr><td>Messung</td><td><b><a href=/"+param.measure+".html>"+param.measure+"</a></b></td><td>"+filterSwitch+"</td></tr>";
-  	filterTable = "<tr><td>Tag</td><td><b>"+param.sub+"</b></td><td>"+filterSub+"</td><td>"+subSelector+"</td></tr>"  
-  	filterTable += "<tr><td>Anzeige %</td><td><b>"+param.subPercent+"</b></td><td>"+filterSubPercent+"</td>"+"<td>"+subPercentSelector+"</td>"+"</tr>"  
-	   
-    filterTable += "<tr><td>Filter</td><td><b>"+filterText+"</b></td><td>"+gl("[Bundesländer]",{lok:2,location:""},param)+"</td></tr>"
-    filterTable += "<tr><td>Periode</td><td><b>"+param.period+"</B></td><td>"+periodenSwitch+"</td>" + "<td>"+periodenSelector+"</td>" + "</tr>"; 
-    filterTable += "<tr><td>Schlüssellänge</td><td><b>"+lokShow+"</b></td><td>"+lokSwitch+"</td>"+"<td>"+lokSelector+"</td>"+"</tr>"
- //   filterTable += "<tr><td>Sortierung</td><td><b>"+param.sort+"("+param.sortAscending+")"+"</b></td><td>"+sortSwitch+"</td></tr>"
-    
-	filterTable = "<table>"+filterTable+"</table><br><br>";
-	filterTable += '<input type="submit" value="Parameter Umstellen">';
-	filterTable = "<form>"+filterTable+"</form>";
-	*/
 	
 	var filterTableL1, filterTableL2;
 	
@@ -804,26 +776,23 @@ exports.table = function(req,res){
     var collectionTarget = db.collection('DataTarget');
     
 
-	var kreisnamen = {}; 
 	
 	numeral = util.numeral;
 
 	param = {};
     setParams(req,param);
     
-    if (param.measure != "Apotheke" && param.measure != "AddrWOStreet") 
+    
+    if (typeof(wochenaufgabe.map[param.measure])=='undefined') 
     {
     	res.set('Content-Type', 'text/html');
 		res.end("Die Wochenaufgabe "+param.measure+ " ist nicht definiert.");
     	return;
     }
     
-    if (param.measure == "Apotheke") {
-    		kreisnamen = loadDataFromDB.schluesselMapAGS;
-    }
-    if (param.measure == "AddrWOStreet") {
-    		kreisnamen = loadDataFromDB.schluesselMapRegio;
-    }
+ 	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
+   
+
     
     v = kreisnamen[param.location];
 	if (typeof(v)!='undefined') {
@@ -836,13 +805,7 @@ exports.table = function(req,res){
     
 
     
-    ranktype = "";
-    if (param.measure == "Apotheke") {
-    	ranktype = "UP";
-    }
-    if (param.measure == "AddrWOStreet") {
-    	ranktype = "down";
-    }
+    ranktype =wochenaufgabe.map[param.measure].ranktype;
 
    
  
@@ -1053,12 +1016,7 @@ exports.table = function(req,res){
 				format["Name"].toolTip = "Name aus OSM, Alternativ Teilschlüssel";
 				header.unshift("Schlüssel");
 				format["Schlüssel"]= {};
-				if (param.measure== "Apotheke") {
-					format["Schlüssel"].toolTip = "de:amtlicher_gemeindeschluessel";
-				}
-				if (param.measure== "AddrWOStreet") {
-					format["Schlüssel"].toolTip = "de:regionalschluessel";
-				}
+				format["Schlüssel"].toolTip = wochenaufgabe.map[param.measure].key;
 				format["Schlüssel"].generateLink = function(value) {
 					return gl("",{lok:(param.lengthOfKey+1),location:value},param);
 				};
@@ -1166,4 +1124,94 @@ exports.table = function(req,res){
 
 }
 
+function getValue(columns,object,d) {
+   var result;
+   if (typeof(columns) == 'object') {
+   	if (typeof(object[columns[d]])=='object') {
+   		return getValue(columns,object[columns[d]],d+1);
+   	} else {
+   	
+   		result = object[columns[d]];
+   	}
+   } else {
+   	result = object[colums];
+   }
+   return (typeof(result)=='undefined')?"":result;
+}
+exports.query=function(req,res) {
+	debug.entry("exports.query");
+	var db = res.db;
+  
+    // Fetch the collection DataCollection
+    // To be Improved with Query or Aggregation Statments
+    var collection;
+    
+    switch (req.params.query) {
+    	case "WorkerQueue": collection = db.collection('WorkerQueue');
+    						collectionName = "WorkerQueue";
+    	               columns = ["_id","type","status","measure"];
+    	               query = {type : "insert"};
+    	               break;
+    	case "pharmacy": collection = db.collection('POI');
+    	                 collectionName = "POI";
+    	                  columns = ["_id",
+    	                            ["name","tags","name"],
+    	                            ["PLZ","nominatim","postcode"],
+    	                             ["Ort","nominatim","town"],
+    	                             ["Straße","nominatim","road"],
+    	                             ["Hausnummer","nominatim","house_number"],
+    	                             ["Telefon","tags","phone"]
+    	                             ];
+    	                  query = {};
+    	                  break;
+    	 default:collection = db.collection('WorkerQueue');
+    	               columns = ["_id","type","status","measure"];
+    }
+    
+    collection.find(query).toArray(function(err,data) {
+    	if (err) {
+    			res.set('Content-Type', 'text/html');
+				res.end(JSON.stringify(err));
+    	}
+    	console.log(err);
+    	table = "";
+    	tablerow = "";
+    	for (j=0;j<columns.length;j++) {
+    		header = columns[j];
+    		if (typeof(columns[j])=='object') {
+    			header = columns[j][0];
+    		}
+    		tablerow += "<th>"+header+"</th>";
+    	}
+    	tablerow = "<tr>"+tablerow+"</tr>";
+    	table += tablerow;
+    	console.log(data.length);
+    	for (i = 0;i<data.length;i++) {
+    	  tablerow = "";
+    	  d = data [i];
+    	  
+    	  tablerow = '<td> <a href="/object/'+collectionName+'/'+d._id+'.html">'+d._id+'</a></td>';
+    	  key = columns[j];
+    	  for (j=1;j<columns.length;j++) {
+      		tablerow += "<td>"+getValue(columns[j],d,1);+"</td>";
+    	  }
+    	  tablerow = "<tr>"+tablerow+"</tr>";
+    	  table += tablerow;
+    	}
+    	page =new htmlPage.create("table");
+		page.title = "Abfrage "+req.params.query;
+		page.menu ="";
+		page.content = '<p><table>'+table+'</table></p>';
+		pageFooter = "";
+ 		res.set('Content-Type', 'text/html');
+ 		res.end(page.generatePage());
+   
+    })
+    
+    
+}
+    
+    
+
+	
 

@@ -58,9 +58,10 @@ app.use('/import/csvimport.html', display.importCSV);
 app.use('/import/apotheken.html', display.importApotheken);
 app.use('/table.html', display.table);
 app.use('/table/:measure.:type', display.table);
-app.use('/object/:collection/:id', display.object);
+app.use('/object/:collection/:id.html', display.object);
 app.use('/overpass/:measure/:schluessel.html', display.overpass);
 app.use('/wa/:aufgabe.html',display.wochenaufgabe);
+app.use('/list/:query.html',display.query);
 app.use('/', express.static(path.resolve(__dirname, "html")));
 
 
