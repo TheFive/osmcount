@@ -13,7 +13,7 @@ var async    = require('async');
 
 
 
-query = '[out:json];area["de:amtlicher_gemeindeschluessel"]->.a;\
+query = '[out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
@@ -25,8 +25,10 @@ mongoQuery = { "overpass.plz":"48734", "tags.amenity": "pharmacy"}
 
 function getPOIByPLZOverpass(cb,result) {
 	debug.entry("getPOIByPLZOverpass");
+	console.log("Overpass Abfrage Starten");
 	loadOverpassData.overpassQuery(query, function(err,result) {
 		debug.entry("getPOIByPLZOverpass->CB");
+		console.log("Overpass Abfrage Beendet");
 		if (err) {
 			console.log(err);
 			cb(err,null);
@@ -75,7 +77,7 @@ function getPOIByPLZMongo(cb,result) {
 				}
 			}
 			for (k in list) {
-				console.log(k);
+				//console.log(k);
 				if (typeof(list[k]._id) == 'undefined') {
 					insert.push(list[k]);
 				}
@@ -214,7 +216,7 @@ function nominatim(cb,result) {
 			  if (response.statusCode==200) {
 		        elementData = JSON.parse(body);
 		        date = new Date();
-		        console.dir(elementData);
+		        //console.dir(elementData);
 		        obj.nominatim = elementData.address;
 		        obj.nominatim.timestamp = date;
 		        db.collection("POI").save(obj, function(err,result) {
