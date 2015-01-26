@@ -13,7 +13,7 @@ var async    = require('async');
 
 
 
-query = '[out:json];area["postal_code"="48734"]->.a;\
+query = '[out:json];area["de:amtlicher_gemeindeschluessel"="02000000"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
@@ -49,7 +49,7 @@ function getPOIByPLZMongo(cb,result) {
 		element = data.elements[i];
 		key = element.type + element.id;
 		element.overpass = {};
-		element.overpass.plz = "48734";
+		element.overpass["de:amtlicher_gemeindeschluessel"] = "02000000";
 		list[key] = element;
 	}
 	mongodb.collection("POI").find(mongoQuery).toArray( function(err,result) {
