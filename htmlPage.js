@@ -36,12 +36,14 @@ HtmlPage.prototype = {
   	pageMenu = '<div id="steuerung">'+this.menu+'</div>';
 	pageContent = '<div id="inhalt">'+this.content+'</div>';
 	pageFooter = '<div id="fussbereich">'+this.footer+'</div>';
+	odblLicense = 'Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
 
 	page = "<html>"+head+
 			"<body>" 	+pageTitle
 						+pageMenu
 						+pageContent
-						+pageFooter+"</body></html>";
+						+pageFooter+
+						odblLicense+"</body></html>";
 	return page;
   } 
   
