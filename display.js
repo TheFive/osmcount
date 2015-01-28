@@ -270,6 +270,11 @@ function gl(text, newLink, param)
 	if (newLink.hasOwnProperty("period" )) period = newLink.period;
 	link += "&period="+period;
 
+	// since
+	var since = param.since;
+	if (newLink.hasOwnProperty("since" )) since = newLink.since;
+	link += "&since="+since;
+
 	
 	// sortierung
 	var sort = param.sort;
@@ -319,6 +324,10 @@ function setParams(req,param) {
     if(typeof(req.query["sortdown"])!='undefined') {
     	param.sort=req.query["sortdown"];
     	param.sortAscending = -1;
+    }
+    param.since='';
+    if(typeof(req.query["since"])!='undefined') {
+    	param.since=req.query["since"];
     }
     param.lengthOfKey = 2;
     if(typeof(req.query["lok"])!="undefined") {
@@ -684,6 +693,7 @@ function generateFilterTable(param,header) {
     filterSelector += optionValue("","Alle Orte",param.location);
     filterSelector = '<select name ="location">'+filterSelector+'</select>';
 
+    
 
     var periodenSwitch = gl("[Jahr]",{period:"Jahr"},param);
     periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
@@ -693,6 +703,32 @@ function generateFilterTable(param,header) {
 			<option value="Jahr"' +((param.period == "Jahr") ? " selected":"")+ '>Jahr</option> \
 			<option value="Monat"' +((param.period == "Monat") ? " selected":"")+ '>Monat</option> \
 			<option value="Tag"' +((param.period == "Tag") ? " selected":"")+ '>Tag</option> \
+			</select>';
+	date = new Date();
+	date7 = new Date();
+	date10 = new Date();
+	date14 = new Date();
+	
+	date2 = date.getDate();
+	date7.setDate(date2-7);
+	date10.setDate(date2-10);
+	date14.setDate(date2-14);
+	
+	since = '';
+	since7 = date7.toISOString().substr(0,10);
+	since10 = date10.toISOString().substr(0,10);
+	sincex = date14.toISOString().substr(0,10);
+	
+	if ((param.since != since7) && (param.since != since) && (param.since!= since10)&& (param.since!= sincex)) {
+		sincex = param.since;
+	}
+	
+	
+    sinceSelector = '<select name="since"> \
+			<option value="'+since+'"' +((param.since == since) ? " selected":"")+ '>'+since+'</option> \
+			<option value="'+since7+'"' +((param.since == since7) ? " selected":"")+ '>'+since7+'</option> \
+			<option value="'+since10+'"' +((param.since == since10) ? " selected":"")+ '>'+since10+'</option> \
+			<option value="'+sincex+'"' +((param.since == sincex) ? " selected":"")+ '>'+sincex+'</option> \
 			</select>';
     
 	
@@ -714,6 +750,10 @@ function generateFilterTable(param,header) {
 	filterTableLH += '<th class = "menu">Zeitachse</th>';
 	filterTableL1 += '<td class = "menu">'+param.period+'</td>';
 	filterTableL2 += '<td class = "menu">'+periodenSelector+'</td>';
+	// Filter on since
+	filterTableLH += '<th class = "menu">Seit</th>';
+	filterTableL1 += '<td class = "menu">'+param.since+'</td>';
+	filterTableL2 += '<td class = "menu">'+sinceSelector+'</td>';
 	// Filter on length Of Key
 	filterTableLH += '<th class = "menu"> Schlüssellänge</th>';
 	filterTableL1 += '<td class = "menu">'+param.lengthOfKey+'</td>';
@@ -821,8 +861,11 @@ exports.table = function(req,res){
     	valueToDisplay = { $cond : [ {$eq : ["$count",0]},0,{$divide: [ "$count","$total"]}]};
     	ranktype = "up";
     } 
-    
+    date = new Date();
+    date.setDate(date.getDate()-10*365);
+    if (param.since != '') date = new Date(param.since);
     var filterOneMeasure = {$match: { measure: param.measure}};
+    var filterSince = {$match: { timestamp: {$gte: date}}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+param.location}}};
  
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
@@ -850,6 +893,7 @@ exports.table = function(req,res){
    
     	
     var query = [filterOneMeasure,
+    			 filterSince,
     			 filterRegionalschluessel,
     			 aggregateMeasuresProj,
     			 aggregateMeasuresGroup,
