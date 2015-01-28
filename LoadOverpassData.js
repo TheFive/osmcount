@@ -1,9 +1,12 @@
 var loadDataFromDB =   require('./LoadDataFromDB.js');
+var POIReader =   require('./POIReader.js');
 var configuration =   require('./configuration.js');
 var async = require('async');
 var debug   =  require('debug')('LoadOverpassData');
  debug.entry = require('debug')('LoadOverpassData:entry')
  debug.data = require('debug')('LoadOverpassData:data')
+var wochenaufgabe = require('./wochenaufgabe.js');
+
 
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
@@ -150,7 +153,7 @@ exports.runOverpass= function(query, job,result, cb) {
 				}
 			}
 			debug.data("Result"+JSON.stringify(result));
-			cb();
+			POIReader.storePOI(result.data,result.schluessel,cb);
 		}
 	}
 )}
@@ -178,7 +181,7 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 			job.status='open';
 			job.exectime = exectime;
 			job.type = "overpass";
-			job.query = wochenaufgabe.map[aufgabe].query.replace(':schluessel:',job.schluessel);
+			job.query = wochenaufgabe.map[aufgabe].overpass.query.replace(':schluessel:',job.schluessel);
 			job.query = job.query.replace(':timestamp:',exectime.toISOString());
 			job.source = referenceJob._id;
 			jobs.push(job);
