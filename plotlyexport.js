@@ -95,8 +95,7 @@ exports.plot = function(req,res){
 					res.set('Content-Type', 'text/html');
 					res.end("error"+err);
 					console.log("Table Function, Error occured:");
-					console.log(err);x
-					;
+					console.log("Error: "+err);
 				}
 				items = data;
 				callback(err);
@@ -258,7 +257,7 @@ exports.plotValues = function(req,res){
 					res.set('Content-Type', 'text/html');
 					res.end("error"+err);
 					console.log("Table Function, Error occured:");
-					console.log(err);x
+					console.log("Error:"+err);
 					;
 				}
 				items = data;

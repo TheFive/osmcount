@@ -95,7 +95,7 @@ function importCSVToCollection(filename,collection,defJson,cb) {
 
 		
 		if (err) {
-			console.log(err);
+			console.log("Error: "+err);
 			if (cb) cb(err,null);
 			return;
 		}

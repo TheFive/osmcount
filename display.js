@@ -882,14 +882,12 @@ exports.table = function(req,res){
 			collection.aggregate(	query
 								, (function aggregateCollectionCB(err, data) {
 				debug.entry("aggregateCollectionCB");
-				// first copy hole table in a 2 dimensional JavaScript map
-				// may be here is some performance potential :-)
+				
 				if (err) {
 					res.set('Content-Type', 'text/html');
-					res.end("error"+err);
+					res.end("Error: "+JSON.stringify(err));
 					console.log("Table Function, Error occured:");
-					console.log(err);x
-					;
+					console.log(err);
 				}
 				items = data;
 				callback(err);
@@ -901,11 +899,10 @@ exports.table = function(req,res){
 									, (function getVorgabeCB(err, data) {
 					debug.entry("getVorgabeCB");
 					if (err) {
-						res.set('Content-Type', 'text/html');
-						res.end("error"+err);
-						console.log("Table Function, Error occured:");
-						console.log(err);
-						;
+					  res.set('Content-Type', 'text/html');
+					  res.end("Error: "+JSON.stringify(err));
+					  console.log("Table Function, Error occured:");
+					  console.log(err);						;
 					}
 					for (i = 0;i<data.length;i++)
 					{
@@ -1154,7 +1151,7 @@ exports.query=function(req,res) {
     	               break;
     	case "pharmacy": collection = db.collection('POI');
     	                 collectionName = "POI";
-    	                  columns = ["_id",
+    	                  columns = ["Links",
     	                            ["name","tags","name"],
     	                            ["PLZ","nominatim","postcode"],
     	                             ["Ort","nominatim","town"],
@@ -1170,10 +1167,11 @@ exports.query=function(req,res) {
     
     collection.find(query).toArray(function(err,data) {
     	if (err) {
-    			res.set('Content-Type', 'text/html');
-				res.end(JSON.stringify(err));
+    		res.set('Content-Type', 'text/html');
+			res.end(JSON.stringify(err));
+ 	   		console.log("Error: "+err);
+ 	   		return;
     	}
-    	console.log(err);
     	table = "";
     	tablerow = "";
     	for (j=0;j<columns.length;j++) {
@@ -1185,12 +1183,15 @@ exports.query=function(req,res) {
     	}
     	tablerow = "<tr>"+tablerow+"</tr>";
     	table += tablerow;
-    	console.log(data.length);
     	for (i = 0;i<data.length;i++) {
     	  tablerow = "";
-    	  d = data [i];
-    	  
+    	  d = data [i];   
     	  tablerow = '<td> <a href="/object/'+collectionName+'/'+d._id+'.html">'+d._id+'</a></td>';
+    	  if (req.params.query == "pharmacy") {
+    	    link1 = '<a href="/object/'+collectionName+'/'+d._id+'.html">Data</a>';
+    	    link2 = '<a href="https://www.openstreetmap.org/'+d.type+'/'+d.id+'">OSM</a>';
+    	     tablerow = '<td>'+link1+"  "+ link2+'</td>';
+    	  }
     	  key = columns[j];
     	  for (j=1;j<columns.length;j++) {
       		tablerow += "<td>"+getValue(columns[j],d,1);+"</td>";
