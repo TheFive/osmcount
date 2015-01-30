@@ -229,9 +229,15 @@ function nominatim(cb,result) {
 		  if (response.statusCode==200) {
 			elementData = JSON.parse(body);
 			date = new Date();
-			//console.dir(elementData);
-			obj.nominatim = elementData.address;
+			
+			if (typeof(elementData.error)=='undefined') {
+				obj.nominatim = elementData.address;
+			} else {
+				obj.nominatim = elementData;
+			}
 			obj.nominatim.timestamp = date;
+
+			//console.dir(elementData);
 			db.collection("POI").save(obj, function(err,result) {
 			  debug.entry("nominatim->MongoCB");
 			  if (err) {
