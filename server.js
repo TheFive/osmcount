@@ -41,7 +41,7 @@ async.auto( {
 	}
 )
 
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
 
 debug("Initialising HTML Routes");
 // log every call and then call more detailled

@@ -231,12 +231,12 @@ function nominatim(cb,result) {
 			date = new Date();
 			
 			if (typeof(elementData.error)=='undefined') {
+				elementData.address.timestamp = date;
 				obj.nominatim = elementData.address;
 			} else {
+				elementData.timestamp = date;
 				obj.nominatim = elementData;
 			}
-			obj.nominatim.timestamp = date;
-
 			//console.dir(elementData);
 			db.collection("POI").save(obj, function(err,result) {
 			  debug.entry("nominatim->MongoCB");
