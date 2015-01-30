@@ -684,8 +684,19 @@ function generateFilterTable(param,header) {
 	filterSelector = "";
     var filterText = "";
     if (param.location!="") {
+    	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
     	filterText+= param.locationName+" ("+param.location+","+param.locationType+")";
     	filterSelector += optionValue(param.location,filterText,param.location);
+    	for (i=param.location.length-1;i>=1;i--) {
+    		location = param.location.substr(0,i);
+    		if (typeof(kreisnamen[location])=='undefined') {
+    			continue;
+    		}
+    		n = kreisnamen[location].name;
+    		t = kreisnamen[location].typ;
+    		ft = n+" ("+location+","+t+")";
+    		filterSelector += optionValue(location,ft,param.location);		 
+    	}
     	
     } else {
     	filterText +="kein Filter";
