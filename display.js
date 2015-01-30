@@ -1154,7 +1154,9 @@ exports.query=function(req,res) {
     	                  columns = ["Links",
     	                            ["name","tags","name"],
     	                            ["PLZ","nominatim","postcode"],
-    	                             ["Ort","nominatim","town"],
+    	                             ["Town","nominatim","town"],
+    	                             ["Village","nominatim","village"],
+    	                             ["City","nominatim","city"],
     	                             ["Straße","nominatim","road"],
     	                             ["Hausnummer","nominatim","house_number"],
     	                             ["Telefon","tags","phone"]

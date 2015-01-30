@@ -14,7 +14,7 @@ var loadOverpassData = require('./LoadOverpassData.js')
 var display          = require('./display.js');
 var util             = require('./util.js');
 var plotlyexport        = require('./plotlyexport.js');
-
+var morgan = require('morgan')
 
 var app = express();
 
@@ -33,13 +33,15 @@ async.auto( {
 		//	,insertJobs: ["startQueue",queue.insertJobs]
 	}, 
 	function (err) {
-		if (err) throw(err);
-		debug("Async Configuration Ready");
+		if (err) {
+			console.log("Initialisation Error");
+			console.log(err);
+		}
+		else debug("Async Configuration Ready");
 	}
 )
 
-
-
+app.use(morgan('combined'));
 
 debug("Initialising HTML Routes");
 // log every call and then call more detailled
