@@ -1157,7 +1157,7 @@ exports.table = function(req,res){
 						               +'measure='+ param.measure
 						               +'&type=overpass&status=open'+
 						               '"><b>Offene Queries: '+openQueries+'.</b></a> ';
-					}
+					} 
 					if (errorQueries > 0) {
 							pageFooter += '<a href="/list/WorkerQueue.html?'
 						               +'measure='+ param.measure
