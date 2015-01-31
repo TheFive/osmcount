@@ -4,6 +4,7 @@ var async = require('async');
 var debug   =  require('debug')('LoadOverpassData');
  debug.entry = require('debug')('LoadOverpassData:entry')
  debug.data = require('debug')('LoadOverpassData:data')
+var wochenaufgabe = require('./wochenaufgabe.js');
 
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
