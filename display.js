@@ -1073,6 +1073,7 @@ exports.table = function(req,res){
 					format["Vorgabe"] = {};
 					format["Vorgabe"].toolTip = "theoretische Apothekenzahl";
 					format["Vorgabe"].sum = true;
+					format["Vorgabe"].format = '0,0.0';
 			
 				}
 		
@@ -1155,13 +1156,13 @@ exports.table = function(req,res){
 						pageFooter += '<a href="/list/WorkerQueue.html?'
 						               +'measure='+ param.measure
 						               +'&type=overpass&status=open'+
-						               '"><b>Offene Queries '+openQueries+'.</b></a> ';
+						               '"><b>Offene Queries: '+openQueries+'.</b></a> ';
 					}
 					if (errorQueries > 0) {
 							pageFooter += '<a href="/list/WorkerQueue.html?'
 						               +'measure='+ param.measure
 						               +'&type=overpass&status=error'+
-						               '"><b>Offene Queries '+errorQueries+'.</b></a> ';
+						               '"><b>Fehler: '+errorQueries+'.</b></a> ';
 					}
 					pageFooter += "Die Service Links bedeuten: \
 									<b>O</b> Zeige die Overpass Query \
