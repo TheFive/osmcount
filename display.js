@@ -117,7 +117,7 @@ function generateQuery(measure,schluessel,sub) {
 	
 	var query = wochenaufgabe.map[measure].overpass.query;
 	if (sub !='') {
-		query = wochenaufgabe.map[measure].overpass.query
+		query = wochenaufgabe.map[measure].overpass.querySub;
 	}
 	query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
 	query = query.replace('[date:":timestamp:"]','');
