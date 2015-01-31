@@ -67,6 +67,9 @@ function listValuesTable(keyname,key,object) {
 	if (object instanceof Date) {
 		return "<tr><td>"+keyname+"</td><td>"+object.toString()+"</td></tr>";
 	}
+	if (object instanceof ObjectID) {
+		return "<tr><td>"+keyname+"</td><td>"+object+"</td></tr>";
+	}	
 	if (typeof(object) == 'object') {
 		result = "";
 		for (k in object) {
