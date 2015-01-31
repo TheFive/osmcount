@@ -26,7 +26,7 @@ exports.create = function(type) {
 HtmlPage.prototype = {
   generatePage: function() {
   	
-  	cssStyle =   getCssStyle(this.design)+getCssStyle('table.css');
+  	cssStyle =   getCssStyle(this.design);
   	titlePageFile = path.resolve(__dirname, 'html','PageTitle.html');
   	var titlePage = "";
   	titlePage += fs.readFileSync(titlePageFile);
