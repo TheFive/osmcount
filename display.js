@@ -940,9 +940,9 @@ exports.table = function(req,res){
 				// may be here is some performance potential :-)
 				if (err) {
 					res.set('Content-Type', 'text/html');
-					res.end("error"+err);
+					res.end("Error: "+JSON.stringify(err));
 					console.log("Table Function, Error occured:");
-					console.log(err);x
+					console.log(err);
 					;
 				}
 				items = data;
