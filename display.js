@@ -685,7 +685,7 @@ function generateFilterTable(param,header) {
     var filterText = "";
     if (param.location!="") {
     	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
-    	filterText+= param.locationName+" ("+param.location+","+param.locationType+")";
+    	filterText+= param.locationName+" ("+param.location+")";
     	filterSelector += optionValue(param.location,filterText,param.location);
     	for (i=param.location.length-1;i>=1;i--) {
     		location = param.location.substr(0,i);
@@ -693,8 +693,7 @@ function generateFilterTable(param,header) {
     			continue;
     		}
     		n = kreisnamen[location].name;
-    		t = kreisnamen[location].typ;
-    		ft = n+" ("+location+","+t+")";
+    		ft = n+" ("+location+")";
     		filterSelector += optionValue(location,ft,param.location);		 
     	}
     	
