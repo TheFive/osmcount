@@ -109,7 +109,7 @@ exports.importBoundaries = function(job,cb)  {
 
 exports.runOverpass= function(query, job,result, cb) {
 	debug.entry("runOverpass(query,"+measure+",result,cb)");
-	measure=job.measure;
+	var measure=job.measure;
 	overpassQuery(query,function(error, data) {
 		debug.entry("runOverpass->CB(");	
 		if (error) {

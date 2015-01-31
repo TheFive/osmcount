@@ -1030,7 +1030,7 @@ exports.table = function(req,res){
 				for (i=0;i < items.length;i++) {
 			
 			
-					measure = items[i];
+					var measure = items[i];
 					debug.data("Measure i"+i+JSON.stringify(measure));
 					row=measure._id.row;
 					col=measure._id.col;
