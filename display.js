@@ -398,8 +398,11 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	for (i=0;i<header.length;i++) {
 		var cell = header[i];
 		var celltext = cell;
+		if (format[cell] && typeof(format[cell].title) != 'undefined') {
+			celltext = format[cell].title;
+		}
 		if (cell == param.sort) {
-			celltext = "#"+cell+"#";
+			celltext = "#"+celltext+"#";
 		}
 		if (format[cell] && typeof(format[cell].headerLink) != 'undefined') {
 			celltext = '<a href="'+format[cell].headerLink+'">' + celltext + '</a>';
@@ -1074,6 +1077,7 @@ exports.table = function(req,res){
 					format["Vorgabe"].toolTip = "theoretische Apothekenzahl";
 					format["Vorgabe"].sum = true;
 					format["Vorgabe"].format = '0,0.0';
+					format["Vorgabe"].title = 'Schätzung';
 			
 				}
 		
