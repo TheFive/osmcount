@@ -13,10 +13,8 @@ var object=ObjectID("54bbda23a9fff29864d116b4");
 
 var async    = require('async');
 
-function readError(cb,result) {
-
-
-configuration.getDB().collection("DataCollection").find( 
+function correctMissingError(cb,result) {
+  configuration.getDB().collection("DataCollection").find( 
 							      {"missing.name":{$exists:0},measure:"Apotheke"}).each(
 								function(err,result) {
   if (err) {
@@ -77,8 +75,22 @@ configuration.getDB().collection("DataCollection").find(
 								
 });}
 
+
+function correctMissingError(cb,result) {
+  configuration.getDB().collection("DataCollection").find( 
+							      {"missing.name":{$exists:0},measure:"Apotheke"}).each(
+								function(err,result) {
+  if (err) {
+    console.log("Error: "+JSON.stringify(err));
+    return;
+  }
+  if (result== null) return;
+
+								
+});}
+
 async.auto( {db:configuration.initialiseDB,
-	         error:["db",readError]},
+	         error:["db",correctMissingError]},
 	         function (cb,result) {
 	         	console.dir(result.error);
 	         	cb();
