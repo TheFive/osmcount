@@ -699,7 +699,7 @@ function generateFilterTable(param,header) {
     	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
     	filterText+= param.locationName+" ("+param.location+")";
     	filterSelector += optionValue(param.location,filterText,param.location);
-    	for (i=param.location.length-1;i>=1;i--) {
+    	for (i=param.location.length-1;i>=2;i--) {
     		location = param.location.substr(0,i);
     		if (typeof(kreisnamen[location])=='undefined') {
     			continue;
