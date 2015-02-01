@@ -257,8 +257,7 @@ exports.plotValues = function(req,res){
 					res.set('Content-Type', 'text/html');
 					res.end("error"+err);
 					console.log("Table Function, Error occured:");
-					console.log("Error:"+err);
-					;
+					console.log("Error: "+err);
 				}
 				items = data;
 				callback(err);
@@ -268,22 +267,23 @@ exports.plotValues = function(req,res){
 				// Initialising JavaScript Map
 				//iterate total result array
 				// and generate 2 Dimensional Table
+				var typeOfGraph = "scatter";
 
 				m_name = {} ;
 				m_name.name = "name";
-				m_name.type = "bar";
+				m_name.type = typeOfGraph;
 				m_opening_hours = {};
 				m_opening_hours.name = "opening_hours";
-				m_opening_hours.type = "bar";
+				m_opening_hours.type = typeOfGraph;
 				m_phone = {};
 				m_phone.name = "phone";
-				m_phone.type = "bar";
+				m_phone.type = typeOfGraph;
 				m_wheelchair = {};
 				m_wheelchair.name = "wheelchair";
-				m_wheelchair.type = "bar";
+				m_wheelchair.type = typeOfGraph;
 				e_fixme = {};
 				e_fixme.name = "fixme";
-				e_fixme.type = "bar";
+				e_fixme.type = typeOfGraph;
 				m_name.x = [] ;
 				m_opening_hours.x = [];
 				m_phone.x = [];

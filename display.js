@@ -63,11 +63,22 @@ exports.wochenaufgabe = function(req,res) {
 
 
 function listValuesTable(keyname,key,object) {
-	if (key == '_id') return;
+	if (key == '_id') return "";
+	if (object instanceof Date) {
+		return "<tr><td>"+keyname+"</td><td>"+object.toString()+"</td></tr>";
+	}
+	if (object instanceof ObjectID) {
+		return "<tr><td>"+keyname+"</td><td>"+object+"</td></tr>";
+	}	
 	if (typeof(object) == 'object') {
 		result = "";
 		for (k in object) {
-			result += listValuesTable(key+"."+k,k,object[k]);
+			if (key) { 
+			  result += listValuesTable(key+"."+k,k,object[k]);
+			} else {
+			  result += listValuesTable(k,k,object[k]);
+			}
+			
 		}
 		return result;
     }
@@ -81,18 +92,19 @@ exports.object = function(req,res) {
    
 	var collectionName = req.params["collection"];
 	var objid = req.params["id"];
-	console.log(objid);
+	//console.log(objid);
 	var object=ObjectID(objid);
    
     db.collection(collectionName).findOne ({_id:object},function handleFindOneObject(err, obj) {
     	debug.entry("handleFindOneObject");
     	if (err) {
     		var text = "Display Object "+ objid + " in Collection "+collectionName;
+    		text += "Error: "+JSON.stringify(err);
     		res.set('Content-Type', 'text/html');
-    		res.end(err);
+    		res.end(text);
     	} else {
     		text = "<tr><th>Key</th><th>Value</th><tr>";
-    		text+= listValuesTable("","",obj);
+    		text+= listValuesTable("",null,obj);
     		
     		page =new htmlPage.create("table");
 			page.title = "Data Inspector";
@@ -386,8 +398,11 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	for (i=0;i<header.length;i++) {
 		var cell = header[i];
 		var celltext = cell;
+		if (format[cell] && typeof(format[cell].title) != 'undefined') {
+			celltext = format[cell].title;
+		}
 		if (cell == param.sort) {
-			celltext = "#"+cell+"#";
+			celltext = "#"+celltext+"#";
 		}
 		if (format[cell] && typeof(format[cell].headerLink) != 'undefined') {
 			celltext = '<a href="'+format[cell].headerLink+'">' + celltext + '</a>';
@@ -687,7 +702,7 @@ function generateFilterTable(param,header) {
     	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
     	filterText+= param.locationName+" ("+param.location+")";
     	filterSelector += optionValue(param.location,filterText,param.location);
-    	for (i=param.location.length-1;i>=1;i--) {
+    	for (i=param.location.length-1;i>=2;i--) {
     		location = param.location.substr(0,i);
     		if (typeof(kreisnamen[location])=='undefined') {
     			continue;
@@ -1015,7 +1030,7 @@ exports.table = function(req,res){
 				for (i=0;i < items.length;i++) {
 			
 			
-					measure = items[i];
+					var measure = items[i];
 					debug.data("Measure i"+i+JSON.stringify(measure));
 					row=measure._id.row;
 					col=measure._id.col;
@@ -1058,6 +1073,8 @@ exports.table = function(req,res){
 					format["Vorgabe"] = {};
 					format["Vorgabe"].toolTip = "theoretische Apothekenzahl";
 					format["Vorgabe"].sum = true;
+					format["Vorgabe"].format = '0,0.0';
+					format["Vorgabe"].title = 'Schätzung';
 			
 				}
 		
@@ -1137,10 +1154,16 @@ exports.table = function(req,res){
 					
 					pageFooter = "";
 					if (openQueries > 0) {
-						pageFooter += "<b>Offene Queries "+openQueries+".</b> ";
-					}
+						pageFooter += '<a href="/list/WorkerQueue.html?'
+						               +'measure='+ param.measure
+						               +'&type=overpass&status=open'+
+						               '"><b>Offene Queries: '+openQueries+'.</b></a> ';
+					} 
 					if (errorQueries > 0) {
-						pageFooter += "<b>Fehlerhafte Queries "+errorQueries+".</b> ";
+							pageFooter += '<a href="/list/WorkerQueue.html?'
+						               +'measure='+ param.measure
+						               +'&type=overpass&status=error'+
+						               '"><b>Fehler: '+errorQueries+'.</b></a> ';
 					}
 					pageFooter += "Die Service Links bedeuten: \
 									<b>O</b> Zeige die Overpass Query \
@@ -1185,10 +1208,12 @@ function getValue(columns,object,d) {
    		result = object[columns[d]];
    	}
    } else {
-   	result = object[colums];
+   	result = object[columns];
    }
    return (typeof(result)=='undefined')?"":result;
 }
+
+
 exports.query=function(req,res) {
 	debug.entry("exports.query");
 	var db = res.db;
@@ -1200,8 +1225,18 @@ exports.query=function(req,res) {
     switch (req.params.query) {
     	case "WorkerQueue": collection = db.collection('WorkerQueue');
     						collectionName = "WorkerQueue";
-    	               columns = ["_id","type","status","measure"];
-    	               query = {type : "insert"};
+    	               columns = ["_id","type","status","measure","schluessel","exectime","timestamp","error"];
+    	               query = {};
+    	               if (typeof(req.query.type) != 'undefined'){
+    	               	query.type = req.query.type;
+    	               } 
+    	               if (typeof(req.query.status) != 'undefined'){
+    	               	query.status = req.query.status;
+    	               } 
+    	               if (typeof(req.query.measure) != 'undefined'){
+    	               	query.measure = req.query.measure;
+    	               } 
+     	               console.dir(query);
     	               break;
     	case "pharmacy": collection = db.collection('POI');
     	                 collectionName = "POI";
@@ -1219,6 +1254,7 @@ exports.query=function(req,res) {
     	                  break;
     	 default:collection = db.collection('WorkerQueue');
     	               columns = ["_id","type","status","measure"];
+    	               query = {type:"insert"};
     }
     
     collection.find(query).toArray(function(err,data) {
