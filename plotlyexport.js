@@ -271,7 +271,7 @@ exports.plotValues = function(req,res){
 
 				m_name = {} ;
 				m_name.name = "name";
-				m_name.type = typeOfGraph";
+				m_name.type = typeOfGraph;
 				m_opening_hours = {};
 				m_opening_hours.name = "opening_hours";
 				m_opening_hours.type = typeOfGraph;
