@@ -241,6 +241,37 @@ function doInsertJobs(cb,results) {
 	else if (cb) cb(null,job);
 }
 
+function doUpdatePOI(cb,results) {
+	debug.entry("doUpdatePOI(cb,"+results+")");
+	job=results.readjob;
+	
+	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="updatePOI") {
+		debug.entry("Start: doInsertJobs(cb,"+results+")");
+		mongodb = config.getDB();
+		source = job.source;
+		
+        configuration.getDB().collection("DataCollection").find( 
+							      {source:source}).each(
+								function(err,result) {
+          if (err) {
+            console.log("Error: "+JSON.stringify(err));
+            cb(err,null);
+            return;
+          }
+          if (result == null) {
+        	cb();
+          }
+        
+  }
+
+
+								
+});}
+	
+	}
+	else if (cb) cb(null,job);
+}
+
 function doLoadBoundaries(cb,results) {
 	debug.entry("doLoadBoundaries(cb,"+results+")");
 	job=results.readjob;
