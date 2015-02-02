@@ -844,7 +844,7 @@ exports.table = function(req,res){
 	
 	numeral = util.numeral;
 
-	param = {};
+	var param = {};
     setParams(req,param);
     
     
