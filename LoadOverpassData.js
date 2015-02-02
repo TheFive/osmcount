@@ -153,7 +153,7 @@ exports.runOverpass= function(query, job,result, cb) {
 				}
 			}
 			debug.data("Result"+JSON.stringify(result));
-			POIReader.storePOI(result.data,result.schluessel,cb);
+			cb(null);
 		}
 	}
 )}

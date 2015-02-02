@@ -261,17 +261,12 @@ function doUpdatePOI(cb,results) {
           if (result == null) {
         	cb();
           }
+          POIReader.storePOI(result,job.schluessel,null);
+        })
         
   }
-
-
-								
-});}
-	
-	}
-	else if (cb) cb(null,job);
 }
-
+	
 function doLoadBoundaries(cb,results) {
 	debug.entry("doLoadBoundaries(cb,"+results+")");
 	job=results.readjob;
