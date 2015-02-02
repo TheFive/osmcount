@@ -943,6 +943,8 @@ exports.table = function(req,res){
     var aggFunc=query;   						
  	var openQueries=0;
  	var errorQueries=0;
+ 	var workingSchluessel="";
+ 	var workingName="";
     var items = [];
     var vorgabe = {};
     async.parallel( [ 
@@ -998,7 +1000,7 @@ exports.table = function(req,res){
 								 {$lte: date},measure:param.measure},
 								 function getWorkerQueueCountCB(err, count) {
 					debug.entry("getWorkerQueueCount");
-					openQueries=count;
+					openQueries = count;
 					callback();
 				});  
 			},
@@ -1015,6 +1017,24 @@ exports.table = function(req,res){
 								 function getWorkerQueueCountCB(err, count) {
 					debug.entry("getWorkerQueueCount");
 					errorQueries=count;
+					callback();
+				});  
+			},
+			function getWorkingName(callback) {
+				debug.entry("getWorkingName");
+				db = res.db;
+				collectionName = 'WorkerQueue';
+				
+				// Fetch the collection test
+				var collection = db.collection(collectionName);
+				date = new Date();
+				collection.findOne({status:"working",measure:param.measure},
+								 function getWorkingNameCB(err, data) {
+					debug.entry("getWorkingNameCB");
+					if( data) {
+					   workingSchluessel = data.schluessel;
+					   workingName = kreisnamen[workingSchluessel].name;
+					}   
 					callback();
 				});  
 			}
@@ -1155,19 +1175,27 @@ exports.table = function(req,res){
 					
 					page.content = '<p><table>'+table+'</table></p>';
 					
-					pageFooter = "";
+					var pageFooter = "";
+					var separator = "";
 					if (openQueries > 0) {
 						pageFooter += '<a href="/list/WorkerQueue.html?'
 						               +'measure='+ param.measure
 						               +'&type=overpass&status=open'+
 						               '"><b>Offene Queries: '+openQueries+'.</b></a> ';
+						separator = "<br>";
 					} 
 					if (errorQueries > 0) {
+							separator = "<br>";
 							pageFooter += '<a href="/list/WorkerQueue.html?'
 						               +'measure='+ param.measure
 						               +'&type=overpass&status=error'+
 						               '"><b>Fehler: '+errorQueries+'.</b></a> ';
 					}
+					if (workingSchluessel !="") {
+						separator = "<br>";
+						pageFooter += "Lade: "+ workingName + " ("+workingSchluessel+")";
+					}
+					pageFooter += separator;
 					pageFooter += "Die Service Links bedeuten: \
 									<b>O</b> Zeige die Overpass Query \
 									<b>R</b> Starte die Overpass Query \
