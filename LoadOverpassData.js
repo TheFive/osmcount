@@ -110,8 +110,12 @@ exports.importBoundaries = function(job,cb)  {
 exports.runOverpass= function(query, job,result, cb) {
 	debug.entry("runOverpass(query,"+measure+",result,cb)");
 	var measure=job.measure;
+	var overpassStartTime = new Date().getTime();
 	overpassQuery(query,function(error, data) {
 		debug.entry("runOverpass->CB(");	
+		var overpassEndTime = new Date().getTime();
+		var overpassTime = overpassEndTime - overpassStartTime;
+		job.overpassTime = overpassTime;
 		if (error) {
 			console.log("Error occured in function: LoadOverpassData.runOverpass");
 			console.log(error);
@@ -150,7 +154,7 @@ exports.runOverpass= function(query, job,result, cb) {
 					}
 				}
 			}
-			debug.data("Result"+JSON.stringify(result));
+			//debug.data("Result"+JSON.stringify(result));
 			cb();
 		}
 	}

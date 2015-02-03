@@ -128,8 +128,12 @@ function doConsole(cb,results) {
 
 function doOverpass(cb,results) {
 	debug.entry("doOverpass(cb,"+results+")");
-	job=results.readjob;
-	debug(JSON.stringify(job));
+	var job=results.readjob;
+	var startTime = new Date().getTime();
+	var startOverpass;
+	var startSave;
+	var endSave;
+	//debug(JSON.stringify(job));
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpass") {
 		debug.entry("Start: doOverpass(cb,"+results+")");
 			measure=job.measure;
@@ -139,13 +143,16 @@ function doOverpass(cb,results) {
 			result.source = job.source;
 			async.series( [
 				function (cb) {
+					startOverpass =new Date().getTime();
 					lod.runOverpass(query,job,result,cb);
 				},
 				function (cb) {
+					startSave = new Date().getTime();
 					saveMeasure(result,cb);
 					
 				}],
 				function (err,ergebnis) {
+					endSave = new Date().getTime();
 					debug.entry("doOverpass->finalCB	");
 					if (err) {
 						console.log("Error occured in function: QueueWorker.doOverpass");
@@ -156,6 +163,24 @@ function doOverpass(cb,results) {
 					} else {
 						job.status="done";
 					}
+					var time1 = startOverpass - startTime;
+					var time2 = startSave - startOverpass;
+					var time3 = endSave - startSave;
+					var cvsLine =   '"'+job.exectime+'",'
+					               +'"'+job.timestamp+'",'
+					               +'"'+job.schluessel+'",'
+					               + time1+  ',' 
+					               + time2 + ',' 
+					               + time3 + ',' 
+					               + job.overpassTime + '\n';
+					               
+					fs.appendFile('time.log', cvsLine, function (err) {
+					    if (err) {
+						   console.log("Error writing time log "+job.schluessel + " "+JSON.stringify(err));
+						}
+
+                    });
+
 					cb(null,job);
 				}
 				
@@ -166,7 +191,7 @@ function doOverpass(cb,results) {
 function doOverpassPOIPLZ(cb,results) {
 	debug.entry("doOverpassPOIPLZ(cb,"+results+")");
 	job=results.readjob;
-	debug.data(JSON.stringify(job));
+	//debug.data(JSON.stringify(job));
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpassPOIPLZ") {
 		debug.entry("Start: doOverpassPOIPLZ(cb,"+results+")");
 			plz=job.plz;
