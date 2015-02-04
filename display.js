@@ -416,10 +416,10 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	tableheader = "<tr>"+tableheader + "</tr>";
 	
 	for (i=0;i<firstColumn.length;i++) {
-		row = firstColumn[i];
+		var row = firstColumn[i];
 		
 		for (z=0;z<header.length;z++) {
-			col=header[z];
+			var col=header[z];
 			
 			var content=table[row][col];
 			
@@ -442,9 +442,9 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	var last=[]  ;
 	var lastButOne = [];
 	for (c=0;c<header.length;c++) {
-		col = header[c];
+		var col = header[c];
 		if (typeof(rank[col])!='undefined' && table[firstColumn[0]]) {
-			value = table[firstColumn[0]][col];
+			var value = table[firstColumn[0]][col];
 			first[col] = second[col] = last[col] = lastButOne[col] = value;
 			for (i=1;i<firstColumn.length;i++)
 			{
@@ -483,7 +483,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 		line = table[row];
 		
 		for (z=0;z<header.length;z++) {
-			col=header[z];
+			var col=header[z];
 			
 			var cell;
 			var content=table[row][col];
@@ -1144,7 +1144,8 @@ exports.table = function(req,res){
 						if (header.indexOf(waStart) >=0) {
 							format["Diff"].title = "WA Diff";
 							format["Diff"].func.op2=waStart;
-						}
+							format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und Wochenaufgabenstart (1.2.15)";
+					}
 					
 					if (displayVorgabe) {
 						var colName = "% in OSM"
