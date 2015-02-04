@@ -165,7 +165,7 @@ exports.runOverpass= function(query, job,result, cb) {
 exports.createQuery = function(aufgabe,exectime,referenceJob)
 {
 	debug.entry("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
-	jobs = [];
+	var jobs = [];
  	var blaetter;
  	if (aufgabe == "AddrWOstreet") {
  		blaetter = loadDataFromDB.blaetterRegio;
