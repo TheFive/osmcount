@@ -41,6 +41,9 @@ function getNextJob(cb) {
 	mongodb.collection("WorkerQueue").findOne( 
 							{ status : "open" , 
 							 exectime: {$lte: date}
+							},
+							{
+  							"sort": [['prio','desc']]
 							}, function(err, obj) 
 	{
 		debug.entry("getNextJob->CB("+err+","+obj+")");
@@ -238,7 +241,7 @@ function doInsertJobs(cb,results) {
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
 		debug.entry("Start: doInsertJobs(cb,"+results+")");
 		mongodb = config.getDB();
-		jobs = lod.createQuery(job.measure,job.exectime,job);
+		var jobs = lod.createQuery(job.measure,job.exectime,job);
 		console.log("Trigger to load "+job.measure+" at "+job.exectime + " Number Jobs "+ jobs.length);
 		if (jobs.length == 0) {
 			// No Jobs created
@@ -248,13 +251,23 @@ function doInsertJobs(cb,results) {
 			if (cb) cb(null,job);
 			return;
 		}
-		mongodb.collection("WorkerQueue").insert(jobs,
+		var q = async.queue(function (task,callback) {
+			mongodb.collection("DataTarget").findOne({schluessel:task.schluessel}, function (err, data)
+			{
+				if (data) {
+					task.prio = data.apothekenVorgabe;
+				}
+				callback();
+			})
+		})
+		q.drain = function() {
+		 mongodb.collection("WorkerQueue").insert(jobs,
 			function (err, records) {
 				if (err) {
 					console.log("Error occured in function: QueueWorker.doInsertJobs");
 					console.log(err);
 					job.status="error";
-					job.error = err;
+					job.error = JSON.stringify(err);
 					err=null; //error wird gespeichert, kann daher hier auf NULL gesetzt werden.
 				} else {
 					debug("All Inserted %i" ,records.length);
@@ -262,6 +275,8 @@ function doInsertJobs(cb,results) {
 				}					
 				cb(err,job);
 			})
+		}
+		q.push(jobs);
 	}
 	else if (cb) cb(null,job);
 }
