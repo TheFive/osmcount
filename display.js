@@ -1033,7 +1033,10 @@ exports.table = function(req,res){
 					debug.entry("getWorkingNameCB");
 					if( data) {
 					   workingSchluessel = data.schluessel;
-					   workingName = kreisnamen[workingSchluessel].name;
+					   var t =kreisnamen[workingSchluessel];
+					   if (typeof(t)=='object') {
+					    workingName = t.name;
+					  }
 					}   
 					callback();
 				});  
@@ -1112,20 +1115,8 @@ exports.table = function(req,res){
 					return gl("",{lok:(param.lengthOfKey+1),location:value},param);
 				};
 				if (!param.csv) {
-					if (displayVorgabe) {
-						var colName = "% in OSM"
-						rank[colName]="up";
-						header.push(colName);
-						format[colName]={};
-						format[colName].toolTip = "Anzahl Apotheken in OSM / theoretische Apothekenzahl";
-						format[colName].format='0%';
-						format[colName].sum = false;
-						format[colName].func = {};
-						format[colName].func.op = "%";
-						format[colName].func.denominator  = "Vorgabe";
-						format[colName].func.numerator = header[header.length-2];
-			
-					} else {
+					
+					
 						header.push("Diff");
 						if (ranktype == "UP" || ranktype == "up") {
 							rank["Diff"]="up";
@@ -1143,7 +1134,21 @@ exports.table = function(req,res){
 						format["Diff"].func.op = "-";
 						format["Diff"].func.op1  = header[header.length-2];
 						format["Diff"].func.op2 = header[header.length-3];
-					}
+					
+					if (displayVorgabe) {
+						var colName = "% in OSM"
+						rank[colName]="up";
+						header.push(colName);
+						format[colName]={};
+						format[colName].toolTip = "Anzahl Apotheken in OSM / theoretische Apothekenzahl";
+						format[colName].format='0%';
+						format[colName].sum = false;
+						format[colName].func = {};
+						format[colName].func.op = "%";
+						format[colName].func.denominator  = "Vorgabe";
+						format[colName].func.numerator = header[header.length-2];
+			
+					} 
 				}
 				for (i=0;i<firstColumn.length;i++)
 				{
