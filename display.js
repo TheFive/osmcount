@@ -1139,6 +1139,12 @@ exports.table = function(req,res){
 						format["Diff"].func.op = "-";
 						format["Diff"].func.op1  = header[header.length-2];
 						format["Diff"].func.op2 = header[header.length-3];
+						
+						var waStart = "2015-02-01"
+						if (header.indexOf(waStart) >=0) {
+							format["Diff"].title = "WA Diff";
+							format["Diff"].func.op2=waStart;
+						}
 					
 					if (displayVorgabe) {
 						var colName = "% in OSM"
