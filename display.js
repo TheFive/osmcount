@@ -513,18 +513,18 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 			var cl ="";
 			if ((typeof(rank[col])!="undefined")  && (rank[col]=="up") ){
 			
-				if (content == lastButOne[col]) cl = 'class = "lastButOne"';
 				if (content == last[col]) cl = 'class = "last"';
+				if (content == lastButOne[col]) cl = 'class = "lastButOne"';
 				if (content == second[col]) cl = 'class = "second"';
 				if (content == first[col]) cl = 'class = "first"';
 			
 			}
 			if ((typeof(rank[col])!="undefined")  && (rank[col]=="down") ) {
 			
+				if (content == first[col]) cl = 'class = "last"';
+				if (content == second[col]) cl = 'class = "lastButOne"';
 				if (content == lastButOne[col]) cl = 'class = "second"';
 				if (content == last[col]) cl = 'class = "first"';
-				if (content == second[col]) cl = 'class = "lastButOne"';
-				if (content == first[col]) cl = 'class = "last"';
 			
 			}
 			tablerow += "<td "+cl+">"+cell+"</td>";
