@@ -1146,7 +1146,7 @@ exports.table = function(req,res){
 						format[colName].func = {};
 						format[colName].func.op = "%";
 						format[colName].func.denominator  = "Vorgabe";
-						format[colName].func.numerator = header[header.length-2];
+						format[colName].func.numerator = header[header.length-3];
 			
 					} 
 				}
