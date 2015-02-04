@@ -1032,10 +1032,15 @@ exports.table = function(req,res){
 								 function getWorkingNameCB(err, data) {
 					debug.entry("getWorkingNameCB");
 					if( data) {
-					   workingSchluessel = data.schluessel;
-					   var t =kreisnamen[workingSchluessel];
-					   if (typeof(t)=='object') {
-					    workingName = t.name;
+					   if (data.type == "overpass") {
+					      workingSchluessel = data.schluessel;
+					      var t =kreisnamen[workingSchluessel];
+					      if (typeof(t)=='object') {
+					      workingName = t.name;
+					    }
+					    if (data.type == "insert") {
+					    	workingSchluessel = "Insert " + data.measure;
+					    }
 					  }
 					}   
 					callback();
