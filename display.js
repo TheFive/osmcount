@@ -1147,10 +1147,10 @@ exports.table = function(req,res){
 						format["Diff"].func.op2 = header[header.length-3];
 						
 						var waApothekeStart = "2015-01-31"
-						if (header.indexOf(waStart) >=0) {
+						if (header.indexOf(waApothekeStart) >=0) {
 							format["Diff"].title = "WA Diff";
-							format["Diff"].func.op2=waStart;
-							format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und Wochenaufgabenstart (1.2.15)";
+							format["Diff"].func.op2=waApothekeStart;
+							format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und Wochenaufgabenstart (31.1.15)";
 					}
 					
 					if (displayVorgabe) {
