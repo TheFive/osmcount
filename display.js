@@ -996,8 +996,10 @@ exports.table = function(req,res){
 				// Fetch the collection test
 				var collection = db.collection(collectionName);
 				date = new Date();
-				collection.count({status:"open",exectime: 
-								 {$lte: date},measure:param.measure},
+				collection.count({status:"open",
+				                  exectime: {$lte: date},
+				                  schluessel: {$regex: "^"+param.location},
+				                  measure:param.measure},
 								 function getWorkerQueueCountCB(err, count) {
 					debug.entry("getWorkerQueueCount");
 					openQueries = count;
@@ -1012,8 +1014,10 @@ exports.table = function(req,res){
 				// Fetch the collection test
 				var collection = db.collection(collectionName);
 				date = new Date();
-				collection.count({status:"error",exectime: 
-								 {$lte: date},measure:param.measure},
+				collection.count({status:"error",
+								 exectime: {$lte: date},
+								 schluessel: {$regex: "^"+param.location},
+								 measure:param.measure},
 								 function getWorkerQueueCountCB(err, count) {
 					debug.entry("getWorkerQueueCount");
 					errorQueries=count;
@@ -1028,7 +1032,9 @@ exports.table = function(req,res){
 				// Fetch the collection test
 				var collection = db.collection(collectionName);
 				date = new Date();
-				collection.findOne({status:"working",measure:param.measure},
+				collection.findOne({status:"working",
+				                    schluessel: {$regex: "^"+param.location},
+				                    measure:param.measure},
 								 function getWorkingNameCB(err, data) {
 					debug.entry("getWorkingNameCB");
 					if( data) {
@@ -1227,9 +1233,14 @@ exports.table = function(req,res){
 				} 
 				if (param.csv) {
 					var table = generateCSVTable(param,header,firstColumn,table,";");
+					
 					if (openQueries > 0 ) {
 						table = "Achtung: Es laufen noch "+openQueries+" Overpass Abfragen, das Ergebnis ist eventuell unvollständig\n"+table;
+					}					
+					if (errorQueries > 0 ) {
+						table = "Achtung: Es liegen "+errorQueries+" Overpass Fehler vor, das Ergebnis ist eventuell unvollständig\n"+table;
 					}
+
 					res.set('Content-Type', 'application/octet-stream');
 					// var bom = String.fromCharCode(239 ); // Hex:EF BB BF, Dec: 239 187 191
 					// bom += String.fromCharCode( 187); 
