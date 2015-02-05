@@ -671,23 +671,13 @@ function generateFilterTable(param,header) {
     
     
     
-    lokSwitch ="1";   
-    lokShow = "X";
-    for (i =1;i<param.lengthOfKey;i++) {
-    	lokShow += "X";
-    	lokSwitch += gl("<b> "+(i+1)+"</b>",{lok:(i+1)},param);
-    	
-    }
     lokSelector = '<select name="lok"> ';
-    
-    for (;i<10;i++) {
-    	lokShow += "-";
-    	lokSwitch += gl(" "+(i+1)+"",{lok:(i+1)},param);
-    }
-    for (;i<12;i++) {
-    	lokSwitch += gl(" "+(i+1)+" ",{lok:(i+1)},param);
-    }
-    for (i=2;i<12;i++) {
+  
+  	var lokMin = 2;
+  	var lokMax = 12;
+  	if (param.measure == "Apotheke_AT") lokMin = 1;
+  	
+    for (i=lokMin;i<lokMax;i++) {
    		if (i == param.lengthOfKey) {
     		lokSelector += '<option value="'+i+'" selected>'+i+'</option>';
     	} else {
