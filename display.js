@@ -638,7 +638,7 @@ function generateFilterTable(param,header) {
     filterSubPercent = "-";
     subSelector = '';
     subPercentSelector = "";
-    if (param.measure == "Apotheke") { 
+    if ((param.measure == "Apotheke")||(param.measure == "Apotheke_AT")) { 
     	filterSub =  gl("[Name]", {sub:"missing.name"},param);
     	filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
     	filterSub += gl("[fixme]", {sub:"existing.fixme"},param);

@@ -14,6 +14,19 @@ var WAApotheke = {
   ranktype:"UP"
 }
 
+var WAApotheke_AT = {
+  title : "Wochenaufgabe Apotheke (AT)",
+  overpass : {
+    csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
+    query:'[out:json][date:":timestamp:"];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+  	querySub: '[out:json];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
+  },
+  keyMap : loadDataFromDB.schluesselMapAGS_AT,
+  key: "ref:at:gkz",
+  ranktype:"UP"
+}
+
+
 var WAAddrWOStreet = {
   title : "Wochenaufgabe Adressen Ohne Strasse",
   overpass: {
@@ -41,6 +54,7 @@ rel(r.associatedStreet:"house")->.asHouseRel; \n\
 
 var wochenaufgaben= [];
 wochenaufgaben["Apotheke"]=WAApotheke;
+wochenaufgaben["Apotheke_AT"]=WAApotheke_AT;
 wochenaufgaben["AddrWOStreet"]=WAAddrWOStreet;
 
 exports.map = wochenaufgaben;

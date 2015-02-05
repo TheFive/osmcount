@@ -20,11 +20,13 @@ var debug   = require('debug')('LoadDataFromDB');
 exports.schluesselMapRegio = Object();
 exports.blaetterRegio = [];
 exports.schluesselMapAGS = Object();
-exports.blaetterAGS = [];
+exports.schluesselMapAGS_AT = Object();
+exports.blaetterAGS_DE = [];
+exports.blaetterAGS_AT = [];
 
 blaetterRegioList = exports.blaetterRegio;
-blaetterAGSList = exports.blaetterAGS;
-
+blaetterAGS_DEList = exports.blaetterAGS_DE;
+blaetterAGS_ATList = exports.blaetterAGS_AT
 
 var dataLoaded = false;
 var blaetterDefined = false;
@@ -40,9 +42,12 @@ adminLevel = {'1':'admin_level 1',
               '9': 'Ortsteil (9)',
               '10': 'Ortsteil (10)',
               '11': 'Ortsteil (11)'        }
+              
+adminLevel_AT = {};
 
 
 exports.initialise = function (cb) {
+    debug("initialise");
 	mongodb = config.getDB();
 	if (!dataLoaded) {
 		async.series([
@@ -64,15 +69,16 @@ exports.initialise = function (cb) {
 						} else {
 							key=value="";
 							if (doc) {
-								keyRegio = doc["de:regionalschluessel"];
-								keyAGS = doc["de:amtlicher_gemeindeschluessel"]
-								value = {};
+								var keyRegio = doc["de:regionalschluessel"];
+								var keyAGS = doc["de:amtlicher_gemeindeschluessel"]
+								var keyAGS_AT = doc ["ref:at:gkz"];
+								var value = {};
 								value.name = doc.name ;
-								if (typeof(doc.admin_level)!= 'undefined') {
-									value.typ = adminLevel[doc.admin_level];
-								}
-								else value.typ = "-";
+								value.typ = "-";
 								if (typeof(keyRegio)!='undefined' && typeof(value.name) != 'undefined') {
+									if (typeof(doc.admin_level)!= 'undefined') {
+										value.typ = adminLevel[doc.admin_level];
+									}
 									exports.schluesselMapRegio[keyRegio]=value;
 									blaetterRegioList.push(keyRegio);
 							
@@ -83,12 +89,30 @@ exports.initialise = function (cb) {
 									}
 								}
 								if (typeof(keyAGS)!='undefined' && typeof(value.name) != 'undefined') {
+									if (typeof(doc.admin_level)!= 'undefined') {
+										value.typ = adminLevel[doc.admin_level];
+									}
 									exports.schluesselMapAGS[keyAGS]=value;
-									blaetterAGSList.push(keyAGS);
+									blaetterAGS_DEList.push(keyAGS);
 							
 									while (keyAGS.charAt(keyAGS.length-1)=='0') {
 										keyAGS = keyAGS.slice(0,keyAGS.length-1);
 										exports.schluesselMapAGS[keyAGS]=value;
+									}
+								}
+								if (typeof(keyAGS_AT)!='undefined' && typeof(value.name) != 'undefined') {
+									if (typeof(doc.admin_level)!= 'undefined') {
+										value.typ = adminLevel_AT[doc.admin_level];
+										if(typeof(value.typ) == 'undefined') {
+											value.typ = "";
+										}
+									}
+									exports.schluesselMapAGS_AT[keyAGS_AT]=value;
+									blaetterAGS_ATList.push(keyAGS_AT);
+							
+									while (keyAGS_AT.charAt(keyAGS_AT.length-1)=='0') {
+										keyAGS_AT = keyAGS_AT.slice(0,keyAGS_AT.length-1);
+										exports.schluesselMapAGS_AT[keyAGS_AT]=value;
 									}
 								}
 							}
@@ -110,13 +134,22 @@ exports.initialise = function (cb) {
 					}
 				}
 				
-				blaetterAGSList.sort();
+				blaetterAGS_DEList.sort();
 				
 				
-				for (i=blaetterAGSList.length-2;i>=0;i--)
+				for (i=blaetterAGS_DEList.length-2;i>=0;i--)
 				{
-					if (blaetterAGSList[i]==blaetterAGSList[i+1].substring(0,blaetterAGSList[i].length)) {
-						blaetterAGSList.splice(i,1);
+					if (blaetterAGS_DEList[i]==blaetterAGS_DEList[i+1].substring(0,blaetterAGS_DEList[i].length)) {
+						blaetterAGS_DEList.splice(i,1);
+					}
+				}
+				blaetterAGS_ATList.sort();
+				
+				
+				for (i=blaetterAGS_ATList.length-2;i>=0;i--)
+				{
+					if (blaetterAGS_ATList[i]==blaetterAGS_ATList[i+1].substring(0,blaetterAGS_ATList[i].length)) {
+						blaetterAGS_ATList.splice(i,1);
 					}
 				}
 				

@@ -287,15 +287,21 @@ function doLoadBoundaries(cb,results) {
 	
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="loadBoundaries") {
 		debug.entry("Start: doLoadBoudnaries(cb,"+results+")");
+		console.log("Loading Boundaries");
 		lod.importBoundaries(job,cb);
 	}
 	else if (cb) cb(null,job);
 }
 function checkState(cb,results) {
 	debug.entry("checkState(cb,"+results+")");
-	job=results.readjob;
+	var job=results.readjob;
 	if (!job) {
 		debug.data("No Job");
+		cb(null,null);
+		return;
+	}
+	if (job.type != "overpass") {
+		debug.data("No Overpass Job");
 		cb(null,null);
 		return;
 	}
@@ -333,7 +339,7 @@ function doNextJob(callback) {
 		    doOverpass:      ["saveWorking", doOverpass],
 		    doInsertJobs:    ["saveWorking", doInsertJobs],
 		    doLoadBoudnaries:["saveWorking", doLoadBoundaries],
-		    saveDone:        ["doConsole","doOverpass","doInsertJobs", saveJobState]
+		    saveDone:        ["doConsole","doOverpass","doInsertJobs", "doLoadBoudnaries",saveJobState]
 		},
 		function (err,results) {
 			if (err) {
@@ -341,7 +347,7 @@ function doNextJob(callback) {
 				console.log(err);
 			}
 			if (results) debug("finished %s" ,results);
-			job = results.readjob;
+			var job = results.readjob;
 			if (!job || typeof(job.status)== 'undefined') {
 				q.push(util.waitOneMin);
 			}
@@ -366,7 +372,7 @@ function correctData(callback) {
 				console.log(err);
 			}
 			if (results) debug("finished %s" ,results);
-			job = results.readjob;
+			var job = results.readjob;
 			if (job ) {
 				q.push(correctData);
 			}

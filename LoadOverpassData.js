@@ -12,7 +12,8 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 // To be changed to a more readable import routine
 
 
-queryBoundaries='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out;' 
+queryBoundaries_DE='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out;' 
+queryBoundaries_AT='[out:json][timeout:900];area[type=boundary]["int_name"="Österreich"]["admin_level"="2"];rel(area)[admin_level];out;' 
 
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
@@ -53,10 +54,16 @@ function overpassQuery(query, cb, options) {
 
 exports.overpassQuery = overpassQuery;
 
-function loadBoundaries(cb,result) {
-	debug.entry("loadBoundaries");
-	overpassQuery(queryBoundaries,cb);
+function loadBoundariesDE(cb,result) {
+	debug.entry("loadBoundariesDE");
+	overpassQuery(queryBoundaries_DE,cb);
 }
+function loadBoundariesAT(cb,result) {
+	debug.entry("loadBoundariesAT");
+	overpassQuery(queryBoundaries_AT,cb);
+}
+
+
 function removeBoundariesData (cb,result) {
 	debug.entry("removeBoundariesData");
 	db = configuration.getDB();
@@ -67,14 +74,29 @@ function removeBoundariesData (cb,result) {
 }
 function insertBoundariesData (cb,result) {
 	debug.entry("insertBoundariesData");
-	db = configuration.getDB();
+	var db = configuration.getDB();
 	
-	boundariesOverpass = JSON.parse(result.overpass).elements;
-	boundaries = [];
+	var boundariesOverpass;
+	var boundaries = [];
+	var b;
+	
+	boundariesOverpass =JSON.parse(result.overpassDE).elements;
 	for (i=0;i<boundariesOverpass.length;i++) {
-		boundaries[i]=boundariesOverpass[i].tags;
-		boundaries[i].osm_id = boundariesOverpass[i].id;
-		boundaries[i].osm_type = boundariesOverpass[i].type;
+		b = {};
+		b = boundariesOverpass[i].tags;
+		b.osm_id = boundariesOverpass[i].id;
+		b.osm_type = boundariesOverpass[i].type;
+		boundaries.push(b);
+	}	
+    boundariesOverpass = JSON.parse(result.overpassAT).elements;
+
+	for (i=0;i<boundariesOverpass.length;i++) {
+		b = {};
+		console.dir(boundariesOverpass[i]);
+		b = boundariesOverpass[i].tags;		
+		b.osm_id = boundariesOverpass[i].id;
+		b.osm_type = boundariesOverpass[i].type;
+		boundaries.push(b);
 	}	
 	
 	db.collection("OSMBoundaries").insert(boundaries,{w:1},function(err,result){
@@ -85,19 +107,22 @@ function insertBoundariesData (cb,result) {
 
 
 exports.importBoundaries = function(job,cb)  {
-	debug.entry("importBoundaries(cb)");
+	debug.entry("importBoundaries");
 	
 	// Start Overpass Query to load data
-	async.auto ({ overpass:    loadBoundaries,
-				  removeData:  ["overpass",removeBoundariesData],
+	async.auto ({ overpassDE:    loadBoundariesDE,
+				  overpassAT:  ["overpassDE", loadBoundariesAT],
+				  removeData:  ["overpassAT","overpassDE",removeBoundariesData],
 				  insertData:  ["removeData", insertBoundariesData ] },
 				  function(err,result) {
+				    debug.entry("importBoundaries-> CB");
 				  	if (err) {
 				  		job.error = err;
 				  		job.status="error";
 				  		
 				  	}
 				  	else {
+				  		console.log("Loading Boundaries Done");
 				  		job.status="done";
 				  	}
 				  	if (cb) cb();
@@ -171,13 +196,16 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
  		blaetter = loadDataFromDB.blaetterRegio;
  	}
  	if (aufgabe == "Apotheke") {
- 		blaetter = loadDataFromDB.blaetterAGS;
+ 		blaetter = loadDataFromDB.blaetterAGS_DE;
  	}
-	if ((aufgabe == "AddrWOStreet") || (aufgabe == "Apotheke")) {
+ 	if (aufgabe == "Apotheke_AT") {
+ 		blaetter = loadDataFromDB.blaetterAGS_AT;
+ 	}
+	if ((aufgabe == "AddrWOStreet") || (aufgabe == "Apotheke")|| (aufgabe == "Apotheke_AT")) {
 		keys = blaetter;
 		for (i =0;i<keys.length;i++) {	
 			debug(keys[i]);	
-			job = {};
+			var job = {};
 			job.measure=aufgabe;
 			job.schluessel=keys[i];
 			job.status='open';
