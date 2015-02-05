@@ -152,7 +152,7 @@ exports.runOverpass= function(query, job,result, cb) {
 			result.data=JSON.parse(data).elements;
 			result.measure=measure;
 			result.count = result.data.length;
-			if (measure == "Apotheke") {
+			if ((measure == "Apotheke")||(measure == "Apotheke_AT")) {
 				result.missing = {};
 				result.existing = {}
 				result.existing.fixme = 0;
