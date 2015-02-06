@@ -19,14 +19,20 @@ var debug   = require('debug')('LoadDataFromDB');
 
 exports.schluesselMapRegio = Object();
 exports.blaetterRegio = [];
+
 exports.schluesselMapAGS = Object();
 exports.schluesselMapAGS_AT = Object();
+exports.schluesselMapPLZ_DE = Object();
 exports.blaetterAGS_DE = [];
 exports.blaetterAGS_AT = [];
+exports.blaetterPLZ_DE = [];
+
 
 blaetterRegioList = exports.blaetterRegio;
 blaetterAGS_DEList = exports.blaetterAGS_DE;
-blaetterAGS_ATList = exports.blaetterAGS_AT
+blaetterAGS_ATList = exports.blaetterAGS_AT;
+blaetterPLZ_DEList = exports.blaetterPLZ_DE;
+
 
 var dataLoaded = false;
 var blaetterDefined = false;
@@ -53,9 +59,8 @@ exports.initialise = function (cb) {
 		async.series([
 			function(callback) {
 				mongodb.collection("OSMBoundaries").find( 
-							{ boundary : "administrative" , 
-							  admin_level: {$in: ['1','2','3','4','5','6','7','8','9']}
-							}, 
+							{ }
+							, 
 								function(err, result) {
 					if (err) {
 						console.log("Error occured in function: LoadDataFromDB.initialise");
@@ -72,6 +77,10 @@ exports.initialise = function (cb) {
 								var keyRegio = doc["de:regionalschluessel"];
 								var keyAGS = doc["de:amtlicher_gemeindeschluessel"]
 								var keyAGS_AT = doc ["ref:at:gkz"];
+								var keyPLZ_DE;
+								if (doc.osmcount_country == "DE") {
+									keyPLZ_DE = doc["postal_code"];
+								} 
 								var value = {};
 								value.name = doc.name ;
 								value.typ = "-";
@@ -114,6 +123,20 @@ exports.initialise = function (cb) {
 										keyAGS_AT = keyAGS_AT.slice(0,keyAGS_AT.length-1);
 										exports.schluesselMapAGS_AT[keyAGS_AT]=value;
 									}
+								}
+								if (typeof(keyPLZ_DE)!='undefined' ) {
+									var name = doc.note;
+									if (typeof(name)== 'undefined') {
+										name = doc.name;
+									}
+								    var value = {};
+								    value.name = name ;
+								    value.typ = "-";
+									
+									exports.schluesselMapPLZ_DE[keyPLZ_DE]=value;
+									console.log(keyPLZ_DE+" "+name);
+									blaetterAGS_ATList.push(keyPLZ_DE);
+							
 								}
 							}
 						}

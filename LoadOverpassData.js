@@ -2,8 +2,6 @@ var loadDataFromDB =   require('./LoadDataFromDB.js');
 var configuration =   require('./configuration.js');
 var async = require('async');
 var debug   =  require('debug')('LoadOverpassData');
- debug.entry = require('debug')('LoadOverpassData:entry')
- debug.data = require('debug')('LoadOverpassData:data')
 var wochenaufgabe = require('./wochenaufgabe.js');
 
 
@@ -12,8 +10,10 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 // To be changed to a more readable import routine
 
 
-queryBoundaries_DE='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"];rel(area)[admin_level];out;' 
+queryBoundaries_DE='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"]->.a;\
+                     (rel(area.a)[admin_level];rel(area.a)[postal_code]);out;' 
 queryBoundaries_AT='[out:json][timeout:900];area[type=boundary]["int_name"="Österreich"]["admin_level"="2"];rel(area)[admin_level];out;' 
+queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="Schweiz"]["admin_level"="2"];rel(area)[admin_level];out;' 
 
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
@@ -23,11 +23,11 @@ var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
 var request = require('request');
 
 function overpassQuery(query, cb, options) {
-	debug.entry("overpassQuery");
+	debug("overpassQuery");
 	
     options = options || {};
     request.post(options.overpassUrl || overpassApiLinkDE, function (error, response, body) {
-    	debug.entry("overpassQuery->CB");
+    	debug("overpassQuery->CB");
 
         if (!error && response.statusCode === 200) {
             cb(undefined, body);
@@ -55,25 +55,29 @@ function overpassQuery(query, cb, options) {
 exports.overpassQuery = overpassQuery;
 
 function loadBoundariesDE(cb,result) {
-	debug.entry("loadBoundariesDE");
+	debug("loadBoundariesDE");
 	overpassQuery(queryBoundaries_DE,cb);
 }
 function loadBoundariesAT(cb,result) {
-	debug.entry("loadBoundariesAT");
+	debug("loadBoundariesAT");
 	overpassQuery(queryBoundaries_AT,cb);
+}
+function loadBoundariesCH(cb,result) {
+	debug("loadBoundariesCH");
+	overpassQuery(queryBoundaries_CH,cb);
 }
 
 
 function removeBoundariesData (cb,result) {
-	debug.entry("removeBoundariesData");
+	debug("removeBoundariesData");
 	db = configuration.getDB();
 	db.collection("OSMBoundaries").remove({},{w:1}, function (err,count) {
-		debug.entry("removeBoundariesData->CB count = "+count);
+		debug("removeBoundariesData->CB count = "+count);
 		cb(err,count);
 	})
 }
 function insertBoundariesData (cb,result) {
-	debug.entry("insertBoundariesData");
+	debug("insertBoundariesData");
 	var db = configuration.getDB();
 	
 	var boundariesOverpass;
@@ -86,6 +90,7 @@ function insertBoundariesData (cb,result) {
 		b = boundariesOverpass[i].tags;
 		b.osm_id = boundariesOverpass[i].id;
 		b.osm_type = boundariesOverpass[i].type;
+		b.osmcount_country="DE";
 		boundaries.push(b);
 	}	
     boundariesOverpass = JSON.parse(result.overpassAT).elements;
@@ -96,26 +101,39 @@ function insertBoundariesData (cb,result) {
 		b = boundariesOverpass[i].tags;		
 		b.osm_id = boundariesOverpass[i].id;
 		b.osm_type = boundariesOverpass[i].type;
+		b.osmcount_country="AT";
+		boundaries.push(b);
+	}	
+    boundariesOverpass = JSON.parse(result.overpassCH).elements;
+
+	for (i=0;i<boundariesOverpass.length;i++) {
+		b = {};
+		console.dir(boundariesOverpass[i]);
+		b = boundariesOverpass[i].tags;		
+		b.osm_id = boundariesOverpass[i].id;
+		b.osmcount_country="CH";
+		b.osm_type = boundariesOverpass[i].type;
 		boundaries.push(b);
 	}	
 	
 	db.collection("OSMBoundaries").insert(boundaries,{w:1},function(err,result){
-		debug.entry("insertBoundariesData->CB");
+		debug("insertBoundariesData->CB");
 		cb(err,null);
 	});
 }
 
 
 exports.importBoundaries = function(job,cb)  {
-	debug.entry("importBoundaries");
+	debug("importBoundaries");
 	
 	// Start Overpass Query to load data
 	async.auto ({ overpassDE:    loadBoundariesDE,
 				  overpassAT:  ["overpassDE", loadBoundariesAT],
-				  removeData:  ["overpassAT","overpassDE",removeBoundariesData],
+				  overpassCH:  ["overpassAT", "overpassDE", loadBoundariesCH],
+				  removeData:  ["overpassAT", "overpassDE","overpassCH",removeBoundariesData],
 				  insertData:  ["removeData", insertBoundariesData ] },
 				  function(err,result) {
-				    debug.entry("importBoundaries-> CB");
+				    debug("importBoundaries-> CB");
 				  	if (err) {
 				  		job.error = err;
 				  		job.status="error";
@@ -133,11 +151,11 @@ exports.importBoundaries = function(job,cb)  {
 
 
 exports.runOverpass= function(query, job,result, cb) {
-	debug.entry("runOverpass(query,"+measure+",result,cb)");
+	debug("runOverpass(query,"+measure+",result,cb)");
 	var measure=job.measure;
 	var overpassStartTime = new Date().getTime();
 	overpassQuery(query,function(error, data) {
-		debug.entry("runOverpass->CB(");	
+		debug("runOverpass->CB(");	
 		var overpassEndTime = new Date().getTime();
 		var overpassTime = overpassEndTime - overpassStartTime;
 		job.overpassTime = overpassTime;
@@ -179,7 +197,7 @@ exports.runOverpass= function(query, job,result, cb) {
 					}
 				}
 			}
-			//debug.data("Result"+JSON.stringify(result));
+			//debug("Result"+JSON.stringify(result));
 			cb();
 		}
 	}
@@ -189,7 +207,7 @@ exports.runOverpass= function(query, job,result, cb) {
 
 exports.createQuery = function(aufgabe,exectime,referenceJob)
 {
-	debug.entry("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
+	debug("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
 	var jobs = [];
  	var blaetter;
  	if (aufgabe == "AddrWOstreet") {
@@ -201,7 +219,10 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
  	if (aufgabe == "Apotheke_AT") {
  		blaetter = loadDataFromDB.blaetterAGS_AT;
  	}
-	if ((aufgabe == "AddrWOStreet") || (aufgabe == "Apotheke")|| (aufgabe == "Apotheke_AT")) {
+ 	if (aufgabe == "ApothekePLZ_DE") {
+ 		blaetter = loadDataFromDB.blaetterAGS_AT;
+ 	}
+	if ((aufgabe == "AddrWOStreet") || (aufgabe == "Apotheke")|| (aufgabe == "ApothekePLZ_DE")|| (aufgabe == "Apotheke_AT")) {
 		keys = blaetter;
 		for (i =0;i<keys.length;i++) {	
 			debug(keys[i]);	

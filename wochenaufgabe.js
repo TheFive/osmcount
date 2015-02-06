@@ -26,6 +26,32 @@ var WAApotheke_AT = {
   ranktype:"UP"
 }
 
+var WAApotheke_CH = {
+	// Der Key wäre noch zu definieren und die Key Map zu generieren
+  title : "Wochenaufgabe Apotheke (CH)",
+  overpass : {
+    csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
+    query:'[out:json][date:":timestamp:"];area["XXXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+  	querySub: '[out:json];area["XXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
+  },
+  keyMap : loadDataFromDB.schluesselMapAGS_CH,
+  key: "XXX",
+  ranktype:"UP"
+}
+
+var WAApothekePLZ_DE= {
+	// Der Key wäre noch zu definieren und die Key Map zu generieren
+  title : "Wochenaufgabe Apotheke (DE PLZ)",
+  overpass : {
+    csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
+    query:'[out:json][date:":timestamp:"];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+  	querySub: '[out:json];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
+  },
+  keyMap : loadDataFromDB.schluesselMapPLZ_DE,
+  key: "postal_code",
+  ranktype:"UP"
+}
+
 
 var WAAddrWOStreet = {
   title : "Wochenaufgabe Adressen Ohne Strasse",
@@ -56,6 +82,7 @@ var wochenaufgaben= [];
 wochenaufgaben["Apotheke"]=WAApotheke;
 wochenaufgaben["Apotheke_AT"]=WAApotheke_AT;
 wochenaufgaben["AddrWOStreet"]=WAAddrWOStreet;
+wochenaufgaben["ApothekePLZ_DE"]=WAApothekePLZ_DE;
 
 exports.map = wochenaufgaben;
 

@@ -173,7 +173,7 @@ exports.plotValues = function(req,res){
 	
 	var wochenaufgabe = req.param("measure");
 	
-	if (wochenaufgabe != "Apotheke") {
+	if ((wochenaufgabe != "Apotheke") && (wochenaufgabe != "Apotheke_AT")){
 		res.set('Content-Type', 'text/html');
 		res.end("Diese Grafik wird nur von der Wochenaufgabe Apotheke supportet");
 	}
