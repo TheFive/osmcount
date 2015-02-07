@@ -2,8 +2,6 @@ fs=require("fs");
 var util    = require('./util.js');
 var path    = require('path');
 var debug   = require('debug')('importCSV');
- debug.entry = require('debug')('importCSV:entry');
- debug.data = require('debug')('importCSV:data');
 
 
 
@@ -15,7 +13,7 @@ var debug   = require('debug')('importCSV');
 // Output: Array of JSON Objects
 
 function parseCSV(str,delimiter) {
-	debug.entry("parseCSV(...,"+delimiter+")");
+	debug("parseCSV(...,"+delimiter+")");
 	
     var arr = [];
     var quote = false;  // true means we're inside a quoted field
@@ -45,7 +43,7 @@ function parseCSV(str,delimiter) {
         // Otherwise, append the current character to the current column
         arr[row][col] += cc;
     }
-    debug.entry("leave: parseCSV(...,"+delimiter+")"+"read "+arr.length+" Elements");
+    debug("leave: parseCSV(...,"+delimiter+")"+"read "+arr.length+" Elements");
     return arr;
 }
 
@@ -53,19 +51,19 @@ function parseCSV(str,delimiter) {
 exports.parseCSV = parseCSV;
 
 exports.convertArrToJSON = function(array,defJson) {
-	debug.entry("convertArrToJSON");
+	debug("convertArrToJSON");
 	numeral = util.numeral;
 	var newData = [];
-	debug.data("Structure "+JSON.stringify(array[0]));
+	debug("Structure "+JSON.stringify(array[0]));
 	for (i=1;i<array.length;i++) {
-		debug.data("Convert Line "+i);
+		debug("Convert Line "+i);
 		newData[i-1] = util.clone(defJson);
 		
 		for (z=0;z<array[0].length;z++) {
-			debug.data("Convert Column "+z);
+			debug("Convert Column "+z);
 			key = array[0][z];
 			value = array[i][z];
-			debug.data(key+typeof(defJson[key]));
+			debug(key+typeof(defJson[key]));
 			switch(typeof(defJson[key])) {
 				case 'number':
 					newData [i-1][key]=numeral().unformat(value);
@@ -85,13 +83,13 @@ exports.convertArrToJSON = function(array,defJson) {
 }
 
 function importCSVToCollection(filename,collection,defJson,cb) {
-	debug.entry("importCSVToCollection("+filename+"..)");
+	debug("importCSVToCollection("+filename+"..)");
 
 	
 	// Open the file and copy it to a string
 	// encoding is ignored yet
 	fs.readFile(filename, 'UTF8', function (err,data) {
-		debug.entry("importCSVToCollection readFileCB" + filename);
+		debug("importCSVToCollection readFileCB" + filename);
 
 		
 		if (err) {
@@ -134,7 +132,7 @@ function importCSVToCollection(filename,collection,defJson,cb) {
 // readCSV Function to import CSV to the Measure Database
 // Input: a MongoDB, a template JSON, CSV Filename, encoding 
 exports.readCSV = function(filename,db,defJson,cb) {
-	debug.entry("readCSV("+filename+"..)");
+	debug("readCSV("+filename+"..)");
 
 
 		var collection = db.collection('DataCollection');
@@ -143,14 +141,15 @@ exports.readCSV = function(filename,db,defJson,cb) {
 		
 }
 
-exports.importApothekenVorgabe = function(db,cb) {
-	debug.entry("importApothekenVorgabe("+"..)");
-	var  defJson = {
-		source: "ABDA2011+Schätzung",
-		measure: "Apotheke",
-		apothekenVorgabe: 0.0
-	}; 
-	var filename = "Anzahl Apotheken.csv";
+exports.importApothekenVorgabe = function(measure,db,cb) {
+	debug("importApothekenVorgabe("+measure+"..)");
+	var defJson = {};
+	if (measure == "Apotheke") defJson.source = "ABDA2011+Schätzung";
+	if (measure == "Apotheke_AT") defJson.source = "ÖAK+Schätzung";
+    defJson.measure = measure;
+    defJson.apothekenVorgabe =  0.0;
+	 
+	var filename = "Anzahl "+measure+".csv";
 	filename = path.resolve(__dirname, filename);
 	var collection = db.collection('DataTarget');
 	importCSVToCollection(filename,collection,defJson,cb);

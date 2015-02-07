@@ -237,9 +237,9 @@ exports.importCSV = function(req,res){
 exports.importApotheken = function(req,res) {
 	debug.entry("importApotheken");
     var db = res.db;
-  
-    importCSV.importApothekenVorgabe(db);
-    text = "Importiert Apotheken";
+    var measure = req.params.measure;
+    importCSV.importApothekenVorgabe(measure,db);
+    text = "Importiert Apotheken "+measure;
     text += "Files imported";
     res.set('Content-Type', 'text/html');
     res.end(text);
@@ -960,7 +960,8 @@ exports.table = function(req,res){
 			}))},
 			function getVorgabe(callback) {
 				debug.entry("getVorgabe");
-				if (param.measure=="Apotheke" && param.sub =="") {
+				if (   ((param.measure=="Apotheke" ) || (param.measure == "Apotheke_AT"))
+				    && param.sub =="") {
 					collectionTarget.aggregate(	queryVorgabe
 									, (function getVorgabeCB(err, data) {
 					debug.entry("getVorgabeCB");
@@ -1095,7 +1096,9 @@ exports.table = function(req,res){
 
 		
 				// Extend two dimensional Table
-				displayVorgabe = ((param.lengthOfKey > 1)&&(param.measure=="Apotheke") && (param.sub == ""));
+				displayVorgabe = ( (param.lengthOfKey >= 1)
+				                 &&((param.measure=="Apotheke") || (param.measure=="Apotheke_AT") )
+				                 && (param.sub == ""));
 		
 
 				if (displayVorgabe) {

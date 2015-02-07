@@ -55,7 +55,7 @@ app.use('/index.html', display.main);
 app.use('/waplot/:measure.html', plotlyexport.plot);
 app.use('/wavplot/:measure.html', plotlyexport.plotValues);
 app.use('/import/csvimport.html', display.importCSV);
-app.use('/import/apotheken.html', display.importApotheken);
+app.use('/import/:measure.html', display.importApotheken);
 app.use('/table.html', display.table);
 app.use('/table/:measure.:type', display.table);
 app.use('/object/:collection/:id.html', display.object);

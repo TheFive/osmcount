@@ -99,6 +99,10 @@ function insertBoundariesData (cb,result) {
 		b = {};
 		console.dir(boundariesOverpass[i]);
 		b = boundariesOverpass[i].tags;		
+
+		// Wien Auswertungsfix
+		if (b["ref:at:gkz"] == "9,90001") b["ref:at:gkz"] ="9";
+		if (b["ref:at:gkz"] == "9;90001") b["ref:at:gkz"] ="9";
 		b.osm_id = boundariesOverpass[i].id;
 		b.osm_type = boundariesOverpass[i].type;
 		b.osmcount_country="AT";
