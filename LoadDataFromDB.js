@@ -179,6 +179,15 @@ exports.initialise = function (cb) {
 					}
 				}
 				
+				blaetterPLZ_DEList.sort();
+				
+				for (i=blaetterPLZ_DEList.length-2;i>=0;i--)
+				{
+					if (blaetterPLZ_DE[i]==blaetterPLZ_DEList[i+1].substring(0,blaetterPLZ_DEList[i].length)) {
+						blaetterPLZ_DEList.splice(i,1);
+					}
+				}
+				
 				blaetterDefined=true;
 				if (cb) cb(null);
 			}
