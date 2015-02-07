@@ -78,7 +78,7 @@ exports.initialise = function (cb) {
 								var keyAGS = doc["de:amtlicher_gemeindeschluessel"]
 								var keyAGS_AT = doc ["ref:at:gkz"];
 								var keyPLZ_DE;
-								if (doc.osmcount_country == "DE" && doc.boundary="postal_code") {
+								if (doc.osmcount_country == "DE" && doc.boundary=="postal_code") {
 									keyPLZ_DE = doc["postal_code"];
 								} 
 								var value = {};
@@ -183,7 +183,7 @@ exports.initialise = function (cb) {
 				
 				for (i=blaetterPLZ_DEList.length-2;i>=0;i--)
 				{
-					if (blaetterPLZ_DE[i]==blaetterPLZ_DEList[i+1].substring(0,blaetterPLZ_DEList[i].length)) {
+					if (blaetterPLZ_DEList[i]==blaetterPLZ_DEList[i+1].substring(0,blaetterPLZ_DEList[i].length)) {
 						blaetterPLZ_DEList.splice(i,1);
 					}
 				}
