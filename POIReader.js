@@ -1,6 +1,7 @@
 var debug    = require('debug')('POIReader');
-  debug.data = require('debug')('POIReader:data');
-  debug.entry = require('debug')('POIReader:entry');
+
+var fs=require("fs");
+var path    = require('path');
 var configuration = require('./configuration.js');
 var loadDataFromDB = require('./LoadDataFromDB.js');
 var loadOverpassData = require('./LoadOverpassData.js');
@@ -12,7 +13,7 @@ var async    = require('async');
 
 
 
-query = '[out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
+var query = '[timeout:900][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
@@ -21,16 +22,27 @@ out center meta;';
 
 
 
-function getPOIByPLZOverpass(cb,result) {
-	debug.entry("getPOIByPLZOverpass");
+function getPOIOverpass(cb,result) {
+	debug("getPOIByPLZOverpass");
+	var filename = "brd.json";
+	filename = path.resolve(__dirname, filename);
+	if (fs.existsSync(filename)) {
+		var result = fs.readFileSync(filename);
+		data = JSON.parse(result);
+		cb(null, data);
+		return;
+	}
 	console.log("Overpass Abfrage Starten");
+	
 	loadOverpassData.overpassQuery(query, function(err,result) {
-		debug.entry("getPOIByPLZOverpass->CB");
+		debug("getPOIByPLZOverpass->CB");
 		console.log("Overpass Abfrage Beendet");
 		if (err) {
-			console.log("Fehler: "+err);
+			console.log("Fehler: "+JSON.stringify(err));
+			console.log(JSON.stringify(result));
 			cb(err,null);
 		} else {
+			fs.writeFileSync(filename,result);
 			data = JSON.parse(result);
 			cb(null,data);
 		}
@@ -39,24 +51,23 @@ function getPOIByPLZOverpass(cb,result) {
 
 
 function getPOIByPLZMongo(cb,result) {
-	debug.entry("getPOIByPLZMongo");
+	debug("getPOIByPLZMongo");
 	
-	mongodb = configuration.getDB();
-	data = result.overpass.data;
-	key = result.overpass.key;
+	var mongodb = configuration.getDB();
+	var data = result.overpass;
 	list = {};
 	
 	for (i =0;i<data.length;i++) {
 		element = data[i];
 		keyIntern = element.type + element.id;
 		element.overpass = {};
-		element.overpass["de:amtlicher_gemeindeschluessel"] = key;
+		element.overpass["loadBy"] = "BRD";
 		list[keyIntern] = element;
 	}
-	mongoQuery = { "de:amtlicher_gemeindeschluessel":key, "tags.amenity": "pharmacy"}
+	var mongoQuery = { "overpass.loadBy":"BRD", "tags.amenity": "pharmacy"}
 
 	mongodb.collection("POI").find(mongoQuery).toArray( function(err,result) {
-	    debug.entry("getPOIByPLZMongo->CB");
+	    debug("getPOIByPLZMongo->CB");
 		if (err) {
 			console.log("Fehler "+err);
 			cb(err,null);
@@ -93,7 +104,7 @@ function getPOIByPLZMongo(cb,result) {
 }
 
 function removePOIFromMongo(cb,result) {
-  debug.entry("removePOIFromMongo");
+  debug("removePOIFromMongo");
   remove = result.mongo.remove;
   if (remove.length==0) {
   	cb(null,null);
@@ -103,9 +114,9 @@ function removePOIFromMongo(cb,result) {
   db = configuration.getDB();
   
   var q = async.queue(function (task, cb) {
-    debug.entry("removePOIFromMongo->Queue");
+    debug("removePOIFromMongo->Queue");
     mongodb.collection("POI").remove({_id:task.data._id}, function(err,result) {
-      debug.entry("removePOIFromMongo->MongoCB");    
+      debug("removePOIFromMongo->MongoCB");    
       if (err) {
     	console.log("Error "+err);
     	cb(err,null);
@@ -129,7 +140,7 @@ function removePOIFromMongo(cb,result) {
 
 
 function updatePOIFromMongo(cb,result) {
-  debug.entry("updatePOIFromMongo");
+  debug("updatePOIFromMongo");
   update = result.mongo.update;
   if (update.length==0) {
   	cb(null,null);
@@ -139,9 +150,9 @@ function updatePOIFromMongo(cb,result) {
   db = configuration.getDB();
 
   var q = async.queue(function (task, cb) {
-    debug.entry("updatePOIFromMongo->Queue");
+    debug("updatePOIFromMongo->Queue");
     mongodb.collection("POI").save(task.data, function(err,result) {
-      debug.entry("updatePOIFromMongo->MongoCB");    
+      debug("updatePOIFromMongo->MongoCB");    
     if (err) {
     	console.log("Error: "+err);
     	cb(err,null);
@@ -164,7 +175,7 @@ function updatePOIFromMongo(cb,result) {
 }
 
 function insertPOIFromMongo(cb,result) {
-  debug.entry("insertPOIFromMongo");
+  debug("insertPOIFromMongo");
   insert = result.mongo.insert;
   debug.data("To Be Inserted: "+update.length + " DataSets");
   db = configuration.getDB();
@@ -173,7 +184,7 @@ function insertPOIFromMongo(cb,result) {
   	return;
   }
   db.collection("POI").insert(insert, function(err,result) {
-    debug.entry("insertPOIFromMongo->CB");
+    debug("insertPOIFromMongo->CB");
     if (err) {
     	console.log("Error "+ err);
     	cb(err,null);
@@ -188,7 +199,7 @@ function insertPOIFromMongo(cb,result) {
 
 
 function nominatim(cb,result) {
-  debug.entry("nominatim");
+  debug("nominatim");
   q = async.queue(function(task,cb) {
     db = configuration.getDB();
     db.collection("POI").findOne( 
@@ -196,7 +207,7 @@ function nominatim(cb,result) {
                            {"nominatim.timestamp":{$exists:0}},
                            { "nominatim.timestamp":{$gte:"$timestamp"}}
                              ]}, function(err, obj) {
-      debug.entry("nominatim->CB("+err+","+obj+")");
+      debug("nominatim->CB("+err+","+obj+")");
       if (err) {
         console.log("Error occured in function: QueueWorker.getNextJob");
         console.log(err);
@@ -239,7 +250,7 @@ function nominatim(cb,result) {
 			}
 			//console.dir(elementData);
 			db.collection("POI").save(obj, function(err,result) {
-			  debug.entry("nominatim->MongoCB");
+			  debug("nominatim->MongoCB");
 			  if (err) {
 				console.log("Error "+err);
 				task.q.push({q:q});
@@ -260,21 +271,17 @@ function nominatim(cb,result) {
   cb(null,null);
 }
 
-exports.storePOI = function(result,schluessel,callback) {
-  debug.entry("storePOI");
-  async.auto( {overpass: function(cb) {
-  					debug.entry("overpass Function async");
-                   x = {data:result,key:schluessel};
-                   cb(null,x);
-                },
+
+  debug("storePOI");
+  async.auto( {overpass: getPOIOverpass,
              mongo:["overpass",getPOIByPLZMongo],
              update: ["mongo",updatePOIFromMongo],
              insert: ["mongo",insertPOIFromMongo],
              remove: ["mongo",removePOIFromMongo],
              nominatim: ["update","insert","remove",nominatim]},
              function(err,results) {
-             	callback();
+             	console.log("READY");
+             	
              }
              
              );
-}
