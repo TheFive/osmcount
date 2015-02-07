@@ -236,7 +236,7 @@ function doOverpassPOIPLZ(cb,results) {
 
 function doInsertJobs(cb,results) {
 	debug.entry("doInsertJobs(cb,"+results+")");
-	job=results.readjob;
+	var job=results.readjob;
 	
 	if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
 		debug.entry("Start: doInsertJobs(cb,"+results+")");
@@ -252,7 +252,7 @@ function doInsertJobs(cb,results) {
 			return;
 		}
 		var q = async.queue(function (task,callback) {
-			mongodb.collection("DataTarget").findOne({schluessel:task.schluessel}, function (err, data)
+			mongodb.collection("DataTarget").findOne({measure:job.measure,schluessel:task.schluessel}, function (err, data)
 			{
 				if (data) {
 					task.prio = data.apothekenVorgabe;
