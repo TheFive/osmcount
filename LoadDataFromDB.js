@@ -134,7 +134,7 @@ exports.initialise = function (cb) {
 								    value.typ = "-";
 									
 									exports.schluesselMapPLZ_DE[keyPLZ_DE]=value;
-									blaetterAGS_ATList.push(keyPLZ_DE);
+									blaetterPLZ_DEList.push(keyPLZ_DE);
 							
 								}
 							}

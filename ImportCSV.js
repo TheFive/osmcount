@@ -146,6 +146,7 @@ exports.importApothekenVorgabe = function(measure,db,cb) {
 	var defJson = {};
 	if (measure == "Apotheke") defJson.source = "ABDA2011+Schätzung";
 	if (measure == "Apotheke_AT") defJson.source = "ÖAK+Schätzung";
+	if (measure == "ApothekePLZ_DE") defJson.source = "Landesapothekerkammer Baden-Württemberg";
     defJson.measure = measure;
     defJson.apothekenVorgabe =  0.0;
 	 

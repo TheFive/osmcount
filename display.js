@@ -638,7 +638,9 @@ function generateFilterTable(param,header) {
     filterSubPercent = "-";
     subSelector = '';
     subPercentSelector = "";
-    if ((param.measure == "Apotheke")||(param.measure == "Apotheke_AT")) { 
+    if (  (param.measure == "Apotheke")
+        ||(param.measure == "Apotheke_AT")
+        ||(param.measure == "ApothekePLZ_DE")) { 
     	filterSub =  gl("[Name]", {sub:"missing.name"},param);
     	filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
     	filterSub += gl("[fixme]", {sub:"existing.fixme"},param);
@@ -674,10 +676,17 @@ function generateFilterTable(param,header) {
     lokSelector = '<select name="lok"> ';
   
   	var lokMin = 2;
-  	var lokMax = 12;
-  	if (param.measure == "Apotheke_AT") lokMin = 1;
+  	var lokMax = 11;
+  	if (param.measure == "Apotheke_AT") {
+  	   lokMin = 1;
+  	   lokMax = 5;
+  	}
+  	if (param.measure == "ApothekePLZ_DE") {
+  	   lokMin = 1;
+  	   lokMax = 5;
+  	  }
   	
-    for (i=lokMin;i<lokMax;i++) {
+    for (i=lokMin;i<=lokMax;i++) {
    		if (i == param.lengthOfKey) {
     		lokSelector += '<option value="'+i+'" selected>'+i+'</option>';
     	} else {
@@ -693,7 +702,7 @@ function generateFilterTable(param,header) {
     	
     	filterText+= param.locationName+" ("+param.location+")";
     	filterSelector += optionValue(param.location,filterText,param.location);
-    	for (i=param.location.length-1;i>=2;i--) {
+    	for (i=param.location.length-1;i>=lokMin;i--) {
     		location = param.location.substr(0,i);
     		if (typeof(kreisnamen[location])=='undefined') {
     			continue;
@@ -848,7 +857,7 @@ exports.table = function(req,res){
     
  	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
  	
- 	console.dir(kreisnamen);
+
    
 
     
@@ -960,7 +969,9 @@ exports.table = function(req,res){
 			}))},
 			function getVorgabe(callback) {
 				debug.entry("getVorgabe");
-				if (   ((param.measure=="Apotheke" ) || (param.measure == "Apotheke_AT"))
+				if (   ((param.measure=="Apotheke" ) || 
+				        (param.measure=="ApothekePLZ_DE" ) ||  
+				        (param.measure == "Apotheke_AT"))
 				    && param.sub =="") {
 					collectionTarget.aggregate(	queryVorgabe
 									, (function getVorgabeCB(err, data) {
@@ -1097,7 +1108,9 @@ exports.table = function(req,res){
 		
 				// Extend two dimensional Table
 				displayVorgabe = ( (param.lengthOfKey >= 1)
-				                 &&((param.measure=="Apotheke") || (param.measure=="Apotheke_AT") )
+				                 &&((param.measure=="Apotheke") || 
+				                    (param.measure=="ApothekePLZ_DE") ||
+				                    (param.measure=="Apotheke_AT") )
 				                 && (param.sub == ""));
 		
 

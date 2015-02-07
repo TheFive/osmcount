@@ -224,7 +224,7 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
  		blaetter = loadDataFromDB.blaetterAGS_AT;
  	}
  	if (aufgabe == "ApothekePLZ_DE") {
- 		blaetter = loadDataFromDB.blaetterAGS_AT;
+ 		blaetter = loadDataFromDB.blaetterPLZ_DE;
  	}
 	if ((aufgabe == "AddrWOStreet") || (aufgabe == "Apotheke")|| (aufgabe == "ApothekePLZ_DE")|| (aufgabe == "Apotheke_AT")) {
 		keys = blaetter;
