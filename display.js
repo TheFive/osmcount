@@ -20,7 +20,7 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 exports.count = function(req,res){
 	debug.entry("exports.count");
     var db = res.db;
-    collectionName = 'DataCollection';
+    var collectionName = 'DataCollection';
      if(typeof(req.param("collection"))!='undefined') {
      	collectionName = req.param("collection");
      }
@@ -40,7 +40,7 @@ exports.count = function(req,res){
 
 
 exports.main = function(req,res){
-	page = htmlPage.create();
+	var page = htmlPage.create();
 	page.content = fs.readFileSync(path.resolve(__dirname, "html","index.html"));
 	page.menu = fs.readFileSync(path.resolve(__dirname, "html","menu.html"));
 	page.footer = "OSM Count...";	
@@ -51,7 +51,7 @@ exports.main = function(req,res){
 
 exports.wochenaufgabe = function(req,res) {
 	var aufgabe = req.param("aufgabe");
-	page = htmlPage.create();
+	var page = htmlPage.create();
 	
 	page.title = wochenaufgabe.map[aufgabe].title;
 
@@ -71,7 +71,7 @@ function listValuesTable(keyname,key,object) {
 		return "<tr><td>"+keyname+"</td><td>"+object+"</td></tr>";
 	}	
 	if (typeof(object) == 'object') {
-		result = "";
+		var result = "";
 		for (k in object) {
 			if (key) { 
 			  result += listValuesTable(key+"."+k,k,object[k]);
@@ -155,7 +155,7 @@ function generateQueryCSV(measure,schluessel) {
   debug.entry("generateQueryCSV(%s,%s)",measure,schluessel);
   var query = wochenaufgabe.map[measure].overpass.query;
   query = wochenaufgabe.map[measure].overpass.query;
-  fieldList = wochenaufgabe.map[measure].overpass.csvFieldList;
+  var fieldList = wochenaufgabe.map[measure].overpass.csvFieldList;
   query = query.replace('[out:json]',fieldList);
   query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
   query = query.replace('[date:":timestamp:"]','');	
@@ -180,7 +180,7 @@ exports.overpass = function(req,res) {
 	
 	var sub = req.query.sub;
 	if (typeof(sub) == 'undefined') sub = "";
-    query = generateQuery(measure,schluessel,sub);
+    var query = generateQuery(measure,schluessel,sub);
     
 	if (!query) query = "Für die Aufgabe "+measure+" ist keine Query definiert";
 
@@ -196,7 +196,7 @@ exports.overpass = function(req,res) {
 	if (measure=="AddrWOStreet") {
 		text += '<p>Achtung, die Overpass Abfrage und die Abfrage von User:Gehrke unterschieden sich etwas. Siehe <a href="http://wiki.openstreetmap.org/wiki/DE:Overpass_API/Beispielsammlung#Hausnummern_ohne_Stra.C3.9Fe_finden">wiki</a>.</p>';
 	}
-	page = htmlPage.create();
+	var page = htmlPage.create();
 	page.content = text;
 	
 	res.set('Content-Type', 'text/html');		
@@ -220,7 +220,7 @@ exports.importCSV = function(req,res){
     	var date = new Date(year,month-1,day);
     	debug("Datum"+date+"("+year+")("+month+")("+day+")");
     	date.setTime( date.getTime() - date.getTimezoneOffset()*60*1000 );
-    	defJSON = { measure: "AddrWOStreet",  
+    	var defJSON = { measure: "AddrWOStreet",  
     					count: 0,
     					timestamp:date,
     					execdate:date,
@@ -239,7 +239,7 @@ exports.importApotheken = function(req,res) {
     var db = res.db;
     var measure = req.params.measure;
     importCSV.importApothekenVorgabe(measure,db);
-    text = "Importiert Apotheken "+measure;
+    var text = "Importiert Apotheken "+measure;
     text += "Files imported";
     res.set('Content-Type', 'text/html');
     res.end(text);
@@ -472,15 +472,17 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 	// Sort the table by the parameter
 	if (header.indexOf(param.sort>=0)) {
 		firstColumn.sort( function(a,b) {
-			va = table[a][param.sort];
-			vb = table[b][param.sort];
+			var va = table[a][param.sort];
+			var vb = table[b][param.sort];
+			if (typeof(va)!='number') va = 0;
+			if (typeof(vb)!='number') vb = 0;
 			return (vb-va)*param.sortAscending});
 	}
 	for (i=0;i<firstColumn.length;i++)
 	{
-		row = firstColumn[i];
-		tablerow = "";
-		line = table[row];
+		var row = firstColumn[i];
+		var tablerow = "";
+		var line = table[row];
 		
 		for (z=0;z<header.length;z++) {
 			var col=header[z];
@@ -488,15 +490,15 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 			var cell;
 			var content=table[row][col];
 			var f = (format[col]) ? format[col].format: null;
-			glink = (format[col]) ? format[col].generateLink:null;
+			var glink = (format[col]) ? format[col].generateLink:null;
 			
 			if (typeof(content) == "undefined") {
 				cell ="-";
 			} else {
 				if (f) {
-					cell = numeral(content).format(f);
+					cell = util.numeral(content).format(f);
 				} else if (typeof(content)=='number') {
-					cell = numeral(content).format();
+					cell = util.numeral(content).format();
 				} else {
 					cell = content; // numeral(content).format();
 				}
@@ -541,16 +543,16 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 		tablerow = "<tr>"+tablerow+"</tr>";
 		tablebody += tablerow;
 	}
-	tablerow = "";
-	line = sumrow;
+	var tablerow = "";
+	var line = sumrow;
 	for (z=0;z<header.length;z++) {
-		col=header[z];
+		var col=header[z];
 	
 		var cell = "";
 		if (z==0) cell = "Summe";
 		var content=sumrow[col];
 		var f = (format[col]) ? format[col].format: null;
-		glink = (format[col]) ? format[col].generateLink:null;
+		var glink = (format[col]) ? format[col].generateLink:null;
 		
 		var func = (format[col]) ? format[col].func: null;
 		
@@ -565,9 +567,9 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 		}
 		if (typeof(content) != "undefined" ) {
 			if (f) {
-				cell = numeral(content).format(f);
+				cell = util.numeral(content).format(f);
 			} else if (typeof(content)=='number') {
-				cell = numeral(content).format();
+				cell = util.numeral(content).format();
 			} else {
 				cell = content; // numeral(content).format();
 			}
@@ -610,7 +612,7 @@ function generateCSVTable(param,header,firstColumn,table,delimiter) {
 			if (typeof(content) == "undefined") {
 				cell ="-";
 			} else if (typeof(content) == 'number') {
-				cell = numeral(content).format('0,0.0'); 
+				cell = util.numeral(content).format('0,0.0'); 
 			} else {
 				cell = '"'+content+'"';
 			}
@@ -634,10 +636,10 @@ function optionValue(value,displayValue,selected) {
 function generateFilterTable(param,header) {
 	debug.entry("generateFilterTable");
 
-    filterSub = "-"
-    filterSubPercent = "-";
-    subSelector = '';
-    subPercentSelector = "";
+    var filterSub = "-"
+    var filterSubPercent = "-";
+    var subSelector = '';
+    var subPercentSelector = "";
     if (  (param.measure == "Apotheke")
         ||(param.measure == "Apotheke_AT")
         ||(param.measure == "ApothekePLZ_DE")) { 
@@ -673,7 +675,7 @@ function generateFilterTable(param,header) {
     
     
     
-    lokSelector = '<select name="lok"> ';
+    var lokSelector = '<select name="lok"> ';
   
   	var lokMin = 2;
   	var lokMax = 11;
@@ -695,7 +697,7 @@ function generateFilterTable(param,header) {
     }
 
     
-	filterSelector = "";
+	var filterSelector = "";
     var filterText = "";
     if (param.location!="") {
     	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
@@ -729,27 +731,27 @@ function generateFilterTable(param,header) {
 			<option value="Monat"' +((param.period == "Monat") ? " selected":"")+ '>Monat</option> \
 			<option value="Tag"' +((param.period == "Tag") ? " selected":"")+ '>Tag</option> \
 			</select>';
-	date = new Date();
-	date7 = new Date();
-	date10 = new Date();
-	date14 = new Date();
+	var date = new Date();
+	var date7 = new Date();
+	var date10 = new Date();
+	var date14 = new Date();
 	
-	date2 = date.getDate();
+	var date2 = date.getDate();
 	date7.setDate(date2-7);
 	date10.setDate(date2-10);
 	date14.setDate(date2-14);
 	
-	since = '';
-	since7 = date7.toISOString().substr(0,10);
-	since10 = date10.toISOString().substr(0,10);
-	sincex = date14.toISOString().substr(0,10);
+	var since = '';
+	var since7 = date7.toISOString().substr(0,10);
+	var since10 = date10.toISOString().substr(0,10);
+	var sincex = date14.toISOString().substr(0,10);
 	
 	if ((param.since != since7) && (param.since != since) && (param.since!= since10)&& (param.since!= sincex)) {
 		sincex = param.since;
 	}
 	
 	
-    sinceSelector = '<select name="since"> \
+    var sinceSelector = '<select name="since"> \
 			<option value="'+since+'"' +((param.since == since) ? " selected":"")+ '>'+since+'</option> \
 			<option value="'+since7+'"' +((param.since == since7) ? " selected":"")+ '>'+since7+'</option> \
 			<option value="'+since10+'"' +((param.since == since10) ? " selected":"")+ '>'+since10+'</option> \
@@ -760,9 +762,9 @@ function generateFilterTable(param,header) {
 	var filterTableL1, filterTableL2;
 	
 	// Filter on Location
-	filterTableLH = '<th class = "menu" > Ort </th>';
-	filterTableL1 = '<td class = "menu" >'+filterText+'</td>';
-	filterTableL2 = '<td class = "menu">'+filterSelector+'</td>';
+	var filterTableLH = '<th class = "menu" > Ort </th>';
+	var filterTableL1 = '<td class = "menu" >'+filterText+'</td>';
+	var filterTableL2 = '<td class = "menu">'+filterSelector+'</td>';
 	// Filter on Key
 	filterTableLH += '<th class = "menu"> Anzahl / Tags</th>';
 	filterTableL1 += '<td class = "menu">'+param.sub+'</td>';
@@ -798,7 +800,7 @@ function generateFilterTable(param,header) {
 	
 	
 	
-	filterTable = '<table class="menu"><tr>'+filterTableLH+'</tr> \
+	var filterTable = '<table class="menu"><tr>'+filterTableLH+'</tr> \
 										<tr>'+filterTableL1+'</tr> \
 										<tr>'+filterTableL2+'</tr></table>';
 	
@@ -816,10 +818,10 @@ function generateSortHeader(param,header,format) {
 
 
     
-    for (i=0;i<header.length;i++) {
+    for (var i=0;i<header.length;i++) {
     	if (header[i]=="Admin Level") continue;
     	if (header[i]=="Name") continue;
-    	link = "";
+    	var link = "";
     	if ((param.sortAscending == 1) && (header[i] == param.sort)) {
     		link = gl("", {sortdown:header[i]},param)
     	} else {
@@ -842,7 +844,7 @@ exports.table = function(req,res){
     
 
 	
-	numeral = util.numeral;
+
 
 	var param = {};
     setParams(req,param);
@@ -872,23 +874,23 @@ exports.table = function(req,res){
     
 
     
-    ranktype =wochenaufgabe.map[param.measure].ranktype;
+    var ranktype =wochenaufgabe.map[param.measure].ranktype;
 
    
  
-    valueToCount = "$count";
+    var valueToCount = "$count";
    	if (param.sub != "") {
    		valueToCount = "$"+param.sub;
    		ranktype = "down";
    	}
    	
-   	valueToDisplay = "$count";
+   	var valueToDisplay = "$count";
     
     if (param.subPercent == "Yes") {
     	valueToDisplay = { $cond : [ {$eq : ["$count",0]},0,{$divide: [ "$count","$total"]}]};
     	ranktype = "up";
     } 
-    date = new Date();
+    var date = new Date();
     date.setDate(date.getDate()-10*365);
     if (param.since != '') date = new Date(param.since);
     var filterOneMeasure = {$match: { measure: param.measure}};
@@ -983,7 +985,7 @@ exports.table = function(req,res){
 						console.log(err);
 						;
 					}
-					for (i = 0;i<data.length;i++)
+					for (var i = 0;i<data.length;i++)
 					{
 						schluessel = data[i]._id;
 						value = data[i].vorgabe;
@@ -996,11 +998,11 @@ exports.table = function(req,res){
 			function getWorkerQueueCount(callback) {
 				debug.entry("getWorkerQueueCount");
 				db = res.db;
-				collectionName = 'WorkerQueue';
+				var collectionName = 'WorkerQueue';
 				
 				// Fetch the collection test
 				var collection = db.collection(collectionName);
-				date = new Date();
+				var date = new Date();
 				collection.count({status:"open",
 				                  exectime: {$lte: date},
 				                  schluessel: {$regex: "^"+param.location},
@@ -1014,11 +1016,11 @@ exports.table = function(req,res){
 			function getErrorQueueCount(callback) {
 				debug.entry("getErrorQueueCount");
 				db = res.db;
-				collectionName = 'WorkerQueue';
+				var collectionName = 'WorkerQueue';
 				
 				// Fetch the collection test
 				var collection = db.collection(collectionName);
-				date = new Date();
+				var date = new Date();
 				collection.count({status:"error",
 								 exectime: {$lte: date},
 								 schluessel: {$regex: "^"+param.location},
@@ -1032,11 +1034,11 @@ exports.table = function(req,res){
 			function getWorkingName(callback) {
 				debug.entry("getWorkingName");
 				db = res.db;
-				collectionName = 'WorkerQueue';
+				var collectionName = 'WorkerQueue';
 				
 				// Fetch the collection test
 				var collection = db.collection(collectionName);
-				date = new Date();
+				var date = new Date();
 				collection.findOne({status:"working",
 				                    schluessel: {$regex: "^"+param.location},
 				                    measure:param.measure},
@@ -1074,8 +1076,8 @@ exports.table = function(req,res){
 			
 					var measure = items[i];
 					debug.data("Measure i"+i+JSON.stringify(measure));
-					row=measure._id.row;
-					col=measure._id.col;
+					var row=measure._id.row;
+					var col=measure._id.col;
 			
 					if (typeof(row)=='undefined' || typeof(col) == 'undefined') {
 						debug("row or col undefined"+row+col);
