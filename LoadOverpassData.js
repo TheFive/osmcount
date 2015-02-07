@@ -56,14 +56,17 @@ exports.overpassQuery = overpassQuery;
 
 function loadBoundariesDE(cb,result) {
 	debug("loadBoundariesDE");
+	console.log("loadBoundariesDE");
 	overpassQuery(queryBoundaries_DE,cb);
 }
 function loadBoundariesAT(cb,result) {
 	debug("loadBoundariesAT");
+	console.log("loadBoundariesAT");
 	overpassQuery(queryBoundaries_AT,cb);
 }
 function loadBoundariesCH(cb,result) {
 	debug("loadBoundariesCH");
+	console.log("loadBoundariesCH");
 	overpassQuery(queryBoundaries_CH,cb);
 }
 
