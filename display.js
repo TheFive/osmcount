@@ -1269,10 +1269,32 @@ exports.table = function(req,res){
 }
 
 function getValue(columns,object,d) {
-   var result;
-   if (typeof(columns) == 'object') {
+  var result;
+  //console.log("columns:"+JSON.stringify(columns));
+  //console.log("object:"+JSON.stringify(object));
+  //console.log("d:"+d);
+  if (typeof(object)=='string') return object;
+  if (typeof(object)=='undefined') return "";
+
+  if (typeof(columns) == 'object') {
+  	//console.log("typeof(columns) == 'object'");
+  	//console.dir(columns[d]);
+    if (typeof(columns[d])=='string') {
+      //console.log("typeof(columns[d])=='string'");
+      return getValue(columns,object[columns[d]],d+1);
+    }
+    else {
+       //console.log("else");
+    	var result = "";
+    	for (var i =d;i<columns.length;i++) {
+    	    if (result != "") result += ","
+    		result += getValue(columns[i],object,0);
+    	}
+    	return result;
+    }
+
    	if (typeof(object[columns[d]])=='object') {
-   		return getValue(columns,object[columns[d]],d+1);
+   		
    	} else {
    	
    		result = object[columns[d]];
@@ -1313,49 +1335,58 @@ exports.query=function(req,res) {
     	case "pharmacy": collection = db.collection('POI');
     	                 collectionName = "POI";
     	                  columns = ["Links",
-    	                            ["name","tags","name"],
-    	                            ["PLZ","nominatim","postcode"],
-    	                             ["Town","nominatim","town"],
-    	                             ["Village","nominatim","village"],
-    	                             ["City","nominatim","city"],
-    	                             ["Straße","nominatim","road"],
+    	                             ["name","tags","name"],
+    	                             ["state","nominatim","state"],
+    	                             ["state_destrict","nominatim","state_district"],
+    	                             ["county","nominatim","county"],
+    	                             ["PLZ","nominatim","postcode"],
+    	                             ["Town",["nominatim","town"],["nominatim","village"],["nominatim","city"]],
+    	                             ["Straße",["nominatim","road"],["nominatim","pedestrian"]],
     	                             ["Hausnummer","nominatim","house_number"],
     	                             ["Öffnungszeiten","tags","opening_hours"],
     	                             ["Operator","tags","operator"],
-    	                             ["Telefon","tags","phone"],
-    	                             ["Telefon2","tags","contact:phone"],
-    	                             ["Fax","tags","fax"],
-    	                             ["Fax2","tags","contact:fax"],
-    	                             ["website","tags","website"],
+    	                             ["Telefon",["tags","phone"],["tags","contact:phone"]],
+    	                             ["Fax",["tags","fax"],["tags","contact:fax"]],
+    	                             ["website",["tags","website"],["tags","contact:website"]],
     	                             ["wheelchair","tags","wheelchair"],
 
     	                             ];
     	                  query = {};
     	                  queryMenu = "";
     	                  
+    	                  if (typeof(req.query.state)!='undefined' && req.query.state != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.state"] =req.query.state;
+    	                    queryMenu += 'state:<input type="text" name="state" value="'+req.query.state+'">';
+    	                  } else queryMenu += 'state:<input type="text" name="state">';
+
+   	                      if (typeof(req.query.state_district)!='undefined' && req.query.state_district != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.state_district"] =req.query.state_district;
+    	                    queryMenu += 'state_district:<input type="text" name="state_district" value="'+req.query.state_district+'">';
+    	                  } else queryMenu += 'state_district:<input type="text" name="state_district">';
+
+   	                      if (typeof(req.query.county)!='undefined' && req.query.county != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.county"] =req.query.county;
+    	                    queryMenu += 'county:<input type="text" name="county" value="'+req.query.county+'">';
+    	                  } else queryMenu += 'county:<input type="text" name="county">';
+ 
     	                  if (typeof(req.query.postcode)!='undefined' && req.query.postcode != "") {
     	                    queryDefined = true;
     	                    query["nominatim.postcode"] =req.query.postcode;
     	                    queryMenu += 'postcode:<input type="text" name="postcode" value="'+req.query.postcode+'">';
     	                  } else queryMenu += 'postcode:<input type="text" name="postcode">';
     	                  
-     	                  if (typeof(req.query.town)!='undefined' && req.query.town != "") {
-    	                    queryDefined = true;
-    	                    query["nominatim.town"] =req.query.town;
-    	                    queryMenu += 'town:<input type="text" name="town" value="'+req.query.town+'">';
-    	                  } else queryMenu += 'town:<input type="text" name="town">';
     	                  
-    	                  if (typeof(req.query.village)!='undefined' && req.query.village != "") {
+     	                  if (typeof(req.query.city)!='undefined' && req.query.city != "") {
     	                    queryDefined = true;
-    	                    query["nominatim.village"] =req.query.village;
-    	                    queryMenu += 'village:<input type="text" name="village" value="'+req.query.village+'">';
-    	                  } else queryMenu += 'village:<input type="text" name="village">';
-    	                  
-    	                  if (typeof(req.query.city)!='undefined' && req.query.city != "") {
-    	                    queryDefined = true;
-    	                    query["nominatim.city"] =req.query.city;
-    	                    queryMenu += 'city:<input type="text" name="city" value="'+req.query.city+'">';
-    	                  } else queryMenu += 'city:<input type="text" name="city">';
+    	                    var q = [{"nominatim.town":req.query.city},
+    	                             {"nominatim.city":req.query.city},
+    	                             {"nominatim.village":req.query.city}];
+    	                    query["$or"] =q;
+    	                    queryMenu += 'town:<input type="text" name="city" value="'+req.query.city+'">';
+    	                  } else queryMenu += 'town:<input type="text" name="city">';
     	                  
     	                  if (typeof(req.query.country)!='undefined' && req.query.country != "") {
     	                    queryDefined = true;
@@ -1385,11 +1416,13 @@ exports.query=function(req,res) {
     	               columns = ["_id","type","status","measure"];
     	               query = {type:"insert"};
     }
+    //console.dir(query);
     if (collectionName != "POI" || queryDefined) {
     collection.find(query).toArray(function(err,data) {
     	if (err) {
     		res.set('Content-Type', 'text/html');
-			res.end(JSON.stringify(err));
+			res.end(JSON.stringify(err)+JSON.stringify(query));
+			
  	   		console.log("Error: "+err);
  	   		return;
     	}
