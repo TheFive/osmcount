@@ -1292,6 +1292,8 @@ exports.query=function(req,res) {
     // To be Improved with Query or Aggregation Statments
     var collection;
     var query;
+    var queryMenu;
+    var queryDefined = false;
     switch (req.params.query) {
     	case "WorkerQueue": collection = db.collection('WorkerQueue');
     						collectionName = "WorkerQueue";
@@ -1321,16 +1323,61 @@ exports.query=function(req,res) {
     	                             ["Telefon","tags","phone"]
     	                             ];
     	                  query = {};
-    	                  if (typeof(req.query.plz)!='undefined') {
-    	                    query["nominatim.postcode"] =req.query.plz;
-    	                    console.dir(query);
-    	                  }
+    	                  queryMenu = "";
+    	                  
+    	                  if (typeof(req.query.postcode)!='undefined' && req.query.postcode != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.postcode"] =req.query.postcode;
+    	                    queryMenu += 'postcode:<input type="text" name="postcode" value="'+req.query.postcode+'">';
+    	                  } else queryMenu += 'postcode:<input type="text" name="postcode">';
+    	                  
+     	                  if (typeof(req.query.town)!='undefined' && req.query.town != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.town"] =req.query.town;
+    	                    queryMenu += 'town:<input type="text" name="town" value="'+req.query.town+'">';
+    	                  } else queryMenu += 'town:<input type="text" name="town">';
+    	                  
+    	                  if (typeof(req.query.village)!='undefined' && req.query.village != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.village"] =req.query.village;
+    	                    queryMenu += 'village:<input type="text" name="village" value="'+req.query.village+'">';
+    	                  } else queryMenu += 'village:<input type="text" name="village">';
+    	                  
+    	                  if (typeof(req.query.city)!='undefined' && req.query.city != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.city"] =req.query.city;
+    	                    queryMenu += 'city:<input type="text" name="city" value="'+req.query.city+'">';
+    	                  } else queryMenu += 'city:<input type="text" name="city">';
+    	                  
+    	                  if (typeof(req.query.country)!='undefined' && req.query.country != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.country"] =req.query.country;
+    	                    queryMenu += 'country:<input type="text" name="country" value="'+req.query.country+'">';
+    	                  } else queryMenu += 'country:<input type="text" name="country">';
+    	                  
+    	                  if (typeof(req.query.missing)!='undefined' && req.query.missing != "") {
+    	                    queryDefined = true;
+    	                    query["nominatim.timestamp"] ={$exists:0};
+    	                    query["overpass.loadBy"] = req.query.missing;
+     	                  } 
+     	                  queryMenu += '<select name="missing"> \
+    	                                   <option value="">none</option> \
+    	                                  <option value="DE">DE</option> \
+    	                                  <option value="AT">AT</option> \
+    	                                  <option value="CH">CH</option> \
+    	                                  </select>';
+ 
+    	                  
+    	                  
+    	                
+    	   
+    	                  queryMenu = '<form>'+queryMenu+'<input type="submit"></form>';
     	                  break;
     	 default:collection = db.collection('WorkerQueue');
     	               columns = ["_id","type","status","measure"];
     	               query = {type:"insert"};
     }
-    
+    if (collectionName != "POI" || queryDefined) {
     collection.find(query).toArray(function(err,data) {
     	if (err) {
     		res.set('Content-Type', 'text/html');
@@ -1367,13 +1414,25 @@ exports.query=function(req,res) {
     	}
     	page =new htmlPage.create("table");
 		page.title = "Abfrage "+req.params.query;
-		page.menu ="";
+		page.menu =queryMenu;
 		page.content = '<p><table>'+table+'</table></p>';
+		page.footer = "Ergebnisse: " + data.length + " Abfrage: "+JSON.stringify(query);
+ 		res.set('Content-Type', 'text/html');
+ 		res.end(page.generatePage());
+ 		return;
+   
+    })
+    } else {
+    	page =new htmlPage.create("table");
+		page.title = "Abfrage "+req.params.query;
+		page.menu =queryMenu;
+		page.content = '<p>Bitte die POIs durch eine Query Einschränken</p>';
 		page.footer = JSON.stringify(query);
  		res.set('Content-Type', 'text/html');
  		res.end(page.generatePage());
-   
-    })
+ 		return;
+    
+    }
     
     
 }

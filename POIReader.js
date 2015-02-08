@@ -13,32 +13,60 @@ var async    = require('async');
 
 
 
-var query = '[timeout:900][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
+var query = 
+{ DE:'[timeout:900][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
-out center meta;';
+out center meta;',
+ AT: '[timeout:900][out:json];area["int_name"="Österreich"]["admin_level"="2"]->.a;\
+(node(area.a)[amenity=pharmacy]; \
+ way(area.a)[amenity=pharmacy]; \
+ rel(area.a)[amenity=pharmacy]); \
+out center meta;',
+ CH: '[timeout:900][out:json];area["int_name"="Schweiz"]["admin_level"="2"]->.a;\
+(node(area.a)[amenity=pharmacy]; \
+ way(area.a)[amenity=pharmacy]; \
+ rel(area.a)[amenity=pharmacy]); \
+out center meta;'
+}
 
 
-
+function cleanTags(elementList) {
+   for (var i = 0;i<elementList.length;i++) {
+     var data = elementList[i].tags;
+     for (k in data) {
+        console.log("Controlling "+k);
+     	if (k.search(".") >0 ) {
+     	    console.log("Fount ." +k.search("."));
+     		console.dir(data);
+     		delete data[k]; 
+     		console.log("After Delete");
+     		console.dir(data);
+     	}
+     }
+   }
+}
 
 function getPOIOverpass(cb,result) {
 	debug("getPOIByPLZOverpass");
-	var filename = "brd.json";
+	var country = result.country;
+	var filename = country+".json";
 	filename = path.resolve(__dirname, filename);
 	if (fs.existsSync(filename)) {
 		debug("Loading Data from "+filename);
 		var result = fs.readFileSync(filename);
 		data = JSON.parse(result);
 		debug("Loaded Elemnts:"+data.elements.length);
+		cleanTags(data.elements);
 		cb(null, data);
 		return;
 	}
-	console.log("Overpass Abfrage Starten");
+	debug("Overpass Abfrage Starten für "+country);
 	
-	loadOverpassData.overpassQuery(query, function(err,result) {
+	loadOverpassData.overpassQuery(query[country], function(err,result) {
 		debug("getPOIByPLZOverpass->CB");
-		debug("Overpass Abfrage Beendet");
+		debug("Overpass Abfrage Beendet für "+country);
 		if (err) {
 			console.log("Fehler: "+JSON.stringify(err));
 			console.log(JSON.stringify(result));
@@ -46,7 +74,8 @@ function getPOIOverpass(cb,result) {
 		} else {
 			fs.writeFileSync(filename,result);
 			data = JSON.parse(result);
-			debug("Loaded Elemnts:"+data.elements.length);
+			debug("Loaded Elements:"+data.elements.length);
+     		cleanTags(data.elements);
 			cb(null,data);
 		}
 	})
@@ -56,20 +85,21 @@ function getPOIOverpass(cb,result) {
 function getPOIByPLZMongo(cb,result) {
 	debug("getPOIByPLZMongo");
 	
+	var country = result.country;
 	var mongodb = config.getDB();
 	var data = result.overpass;
 	list = {};
-	debug("Loaded Elemnts:"+data.elements.length);
+	debug("Elemente geladen: "+data.elements.length+" für "+country);
 	
 	
 	for (i =0;i<data.elements.length;i++) {
 		element = data.elements[i];
 		keyIntern = element.type + element.id;
 		element.overpass = {};
-		element.overpass["loadBy"] = "BRD";
+		element.overpass["loadBy"] = country;
 		list[keyIntern] = element;
 	}
-	var mongoQuery = { "overpass.loadBy":"BRD", "tags.amenity": "pharmacy"}
+	var mongoQuery = { "overpass.loadBy":country, "tags.amenity": "pharmacy"}
 
 	mongodb.collection("POI").find(mongoQuery).toArray( function(err,result) {
 	    debug("getPOIByPLZMongo->CB");
@@ -269,6 +299,7 @@ function nominatim(cb,result) {
 			  debug("nominatim->MongoCB");
 			  if (err) {
 				console.log("Error "+err);
+				console.dir(obj);
 				task.q.push({q:q});
 				cb(err,null);
 				return;
@@ -290,7 +321,8 @@ function nominatim(cb,result) {
 
   debug("storePOI");
   async.auto( {config: config.initialiseDB,
-             overpass: getPOIOverpass,
+             country: function(cb,result) {cb(null,"AT")},
+             overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
              update: ["mongo",updatePOIFromMongo],
              insert: ["mongo",insertPOIFromMongo],
