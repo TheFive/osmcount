@@ -1287,8 +1287,11 @@ function getValue(columns,object,d) {
        //console.log("else");
     	var result = "";
     	for (var i =d;i<columns.length;i++) {
-    	    if (result != "") result += ","
-    		result += getValue(columns[i],object,0);
+    	    
+    		var result2 = getValue(columns[i],object,0);
+    		if (result != "" && result2 != "") {
+    		  result = result + "," + result2;
+    		} else result += result2;
     	}
     	return result;
     }
