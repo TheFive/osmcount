@@ -1320,7 +1320,15 @@ exports.query=function(req,res) {
     	                             ["City","nominatim","city"],
     	                             ["Straße","nominatim","road"],
     	                             ["Hausnummer","nominatim","house_number"],
-    	                             ["Telefon","tags","phone"]
+    	                             ["Öffnungszeiten","tags","opening_hours"],
+    	                             ["Operator","tags","operator"],
+    	                             ["Telefon","tags","phone"],
+    	                             ["Telefon2","tags","contact:phone"],
+    	                             ["Fax","tags","fax"],
+    	                             ["Fax2","tags","contact:fax"],
+    	                             ["website","tags","website"],
+    	                             ["wheelchair","tags","wheelchair"],
+
     	                             ];
     	                  query = {};
     	                  queryMenu = "";
