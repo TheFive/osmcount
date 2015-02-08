@@ -1360,7 +1360,7 @@ exports.query=function(req,res) {
     	                    query["nominatim.timestamp"] ={$exists:0};
     	                    query["overpass.loadBy"] = req.query.missing;
      	                  } 
-     	                  queryMenu += '<select name="missing"> \
+     	                  queryMenu += 'missing nominatim: <select name="missing"> \
     	                                   <option value="">none</option> \
     	                                  <option value="DE">DE</option> \
     	                                  <option value="AT">AT</option> \
