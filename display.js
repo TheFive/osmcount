@@ -1291,7 +1291,7 @@ exports.query=function(req,res) {
     // Fetch the collection DataCollection
     // To be Improved with Query or Aggregation Statments
     var collection;
-    
+    var query;
     switch (req.params.query) {
     	case "WorkerQueue": collection = db.collection('WorkerQueue');
     						collectionName = "WorkerQueue";
@@ -1321,6 +1321,10 @@ exports.query=function(req,res) {
     	                             ["Telefon","tags","phone"]
     	                             ];
     	                  query = {};
+    	                  if (typeof(req.query.plz)!='undefined') {
+    	                    query["nominatim.postcode"] =req.query.plz;
+    	                    console.dir(query);
+    	                  }
     	                  break;
     	 default:collection = db.collection('WorkerQueue');
     	               columns = ["_id","type","status","measure"];
@@ -1365,7 +1369,7 @@ exports.query=function(req,res) {
 		page.title = "Abfrage "+req.params.query;
 		page.menu ="";
 		page.content = '<p><table>'+table+'</table></p>';
-		pageFooter = "";
+		page.footer = JSON.stringify(query);
  		res.set('Content-Type', 'text/html');
  		res.end(page.generatePage());
    
