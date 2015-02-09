@@ -36,13 +36,13 @@ function cleanTags(elementList) {
    for (var i = 0;i<elementList.length;i++) {
      var data = elementList[i].tags;
      for (k in data) {
-        console.log("Controlling "+k);
+        //console.log("Controlling "+k);
      	if (k.search(".") >0 ) {
-     	    console.log("Fount ." +k.search("."));
-     		console.dir(data);
+     	    //console.log("Fount ." +k.search("."));
+     		//console.dir(data);
      		delete data[k]; 
-     		console.log("After Delete");
-     		console.dir(data);
+     		//console.log("After Delete");
+     		//console.dir(data);
      	}
      }
    }
@@ -86,7 +86,7 @@ function getPOIByPLZMongo(cb,result) {
 	debug("getPOIByPLZMongo");
 	
 	var country = result.country;
-	var mongodb = config.getDB();
+	var db = config.getDB();
 	var data = result.overpass;
 	list = {};
 	debug("Elemente geladen: "+data.elements.length+" für "+country);
@@ -101,7 +101,7 @@ function getPOIByPLZMongo(cb,result) {
 	}
 	var mongoQuery = { "overpass.loadBy":country, "tags.amenity": "pharmacy"}
 
-	mongodb.collection("POI").find(mongoQuery).toArray( function(err,result) {
+	db.collection("POI").find(mongoQuery).toArray( function(err,result) {
 	    debug("getPOIByPLZMongo->CB");
 		if (err) {
 			console.log("Fehler "+err);
@@ -157,7 +157,7 @@ function removePOIFromMongo(cb,result) {
   
   var q = async.queue(function (task, cb) {
     debug("removePOIFromMongo->Queue");
-    mongodb.collection("POI").remove({_id:task.data._id}, function(err,result) {
+    db.collection("POI").remove({_id:task.data._id}, function(err,result) {
       debug("removePOIFromMongo->MongoCB");    
       if (err) {
     	console.log("Error "+err);
@@ -193,7 +193,7 @@ function updatePOIFromMongo(cb,result) {
 
   var q = async.queue(function (task, cb) {
     debug("updatePOIFromMongo->Queue");
-    mongodb.collection("POI").save(task.data, function(err,result) {
+    db.collection("POI").save(task.data, function(err,result) {
       debug("updatePOIFromMongo->MongoCB");    
     if (err) {
     	console.log("Error: "+err);
@@ -321,7 +321,7 @@ function nominatim(cb,result) {
 
   debug("storePOI");
   async.auto( {config: config.initialiseDB,
-             country: function(cb,result) {cb(null,"AT")},
+             country: function(cb,result) {cb(null,"CH")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
              update: ["mongo",updatePOIFromMongo],
