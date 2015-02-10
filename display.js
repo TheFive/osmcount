@@ -94,27 +94,53 @@ exports.object = function(req,res) {
 	var objid = req.params["id"];
 	//console.log(objid);
 	var object=ObjectID(objid);
-   
-    db.collection(collectionName).findOne ({_id:object},function handleFindOneObject(err, obj) {
-    	debug.entry("handleFindOneObject");
-    	if (err) {
-    		var text = "Display Object "+ objid + " in Collection "+collectionName;
-    		text += "Error: "+JSON.stringify(err);
-    		res.set('Content-Type', 'text/html');
-    		res.end(text);
-    	} else {
-    		text = "<tr><th>Key</th><th>Value</th><tr>";
-    		text+= listValuesTable("",null,obj);
-    		
-    		page =new htmlPage.create("table");
+
+	db.collection(collectionName).findOne ({_id:object},function handleFindOneObject(err, obj) {
+		debug.entry("handleFindOneObject");
+		if (err) {
+			var text = "Display Object "+ objid + " in Collection "+collectionName;
+			text += "Error: "+JSON.stringify(err);
+			res.set('Content-Type', 'text/html');
+			res.end(text);
+		} else {
+			text = "<tr><th>Key</th><th>Value</th><tr>";
+			text+= listValuesTable("",null,obj);
+		
+			page =new htmlPage.create("table");
 			page.title = "Data Inspector";
 			page.menu ="";
-			page.content = '<p><table>'+text+'</table></p>';
- 			res.set('Content-Type', 'text/html');
- 			res.end(page.generatePage());
-    	}
-    })
-}
+			page.content = '<h1>'+collectionName+'</h1><p><table>'+text+'</table></p>';
+			res.set('Content-Type', 'text/html');
+			console.dir({schluessel:obj.schluessel,
+				                                          source: object});
+			if (collectionName == "WorkerQueue") {
+				db.collection("DataCollection").findOne ({schluessel:obj.schluessel,
+				                                          source: obj.source},
+				                                        function handleFindOneObject(err, obj2) {
+					debug.entry("handleFindOneObject2");
+					if (err) {
+						console.log(JSON.stringify(err));
+						res.end(page.generatePage());
+					} else {
+					
+						var text = "<tr><th>Key</th><th>Value</th><tr>";
+						text+= listValuesTable("",null,obj2);
+	
+						
+						page.content += '<h1>Zugehörige Daten</h1><p><table>'+text+'</table></p>';
+						res.end(page.generatePage());
+					}
+		
+						
+			  
+			})} else res.end(page.generatePage());
+		}
+	})}
+	
+
+
+
+
 
 function generateQuery(measure,schluessel,sub) {
 	debug.entry("generateQuery(%s,%s,%s)",measure,schluessel,sub);
