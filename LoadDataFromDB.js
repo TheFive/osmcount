@@ -84,7 +84,9 @@ exports.initialise = function (cb) {
 								var value = {};
 								value.name = doc.name ;
 								value.typ = "-";
-								if (typeof(keyRegio)!='undefined' && typeof(value.name) != 'undefined') {
+								if (   typeof(keyRegio)!='undefined' 
+								    && typeof(value.name) != 'undefined'
+								    && doc.boundary=="administrative") {
 									if (typeof(doc.admin_level)!= 'undefined') {
 										value.typ = adminLevel[doc.admin_level];
 									}

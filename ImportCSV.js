@@ -116,8 +116,9 @@ function importCSVToCollection(filename,collection,defJson,cb) {
 		// Quality Check, does all rows has the same count of columns ?
 		for (i=1;i<array.length;i++) {
 			if (array[0].length!=array[i].length) {
-				debug("Invalid CSV File, Number of Columns differs "+filename +" Zeile "+i);
-				if (cb) cb("Invalid CSV File",null);
+				var error = "Invalid CSV File, Number of Columns differs "+filename +" Zeile "+i
+				console.log(error);
+				if (cb) cb(error,null);
 				return
 			}
 		}

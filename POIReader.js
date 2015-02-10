@@ -14,37 +14,46 @@ var async    = require('async');
 
 
 var query = 
-{ DE:'[timeout:900][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
+{ DE:'[timeout:3600][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
 out center meta;',
- AT: '[timeout:900][out:json];area["int_name"="Österreich"]["admin_level"="2"]->.a;\
+ AT: '[timeout:1800][out:json];area["int_name"="Österreich"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
 out center meta;',
- CH: '[timeout:900][out:json];area["int_name"="Schweiz"]["admin_level"="2"]->.a;\
+ CH: '[timeout:1800][out:json];area["int_name"="Schweiz"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
 out center meta;'
 }
 
-
-function cleanTags(elementList) {
-   for (var i = 0;i<elementList.length;i++) {
-     var data = elementList[i].tags;
-     for (k in data) {
-        //console.log("Controlling "+k);
-     	if (k.search(".") >0 ) {
+function cleanObject(obj) {
+	
+     for (k in obj) {
+     	if (typeof (obj[k]) =='object') {
+     	  cleanObject(obj[k]);
+     	}
+     	if (k.indexOf(".") >0 ) {
      	    //console.log("Fount ." +k.search("."));
      		//console.dir(data);
-     		delete data[k]; 
+     		
+     		delete obj[k]; 
+     		console.log("Deletet"+k);
      		//console.log("After Delete");
      		//console.dir(data);
      	}
      }
+   }
+
+function cleanTags(elementList) {
+   debug("cleanTags");
+   for (var i = 0;i<elementList.length;i++) {
+     var data = elementList[i].tags;
+     cleanObject(data);
    }
 }
 
@@ -188,11 +197,13 @@ function updatePOIFromMongo(cb,result) {
   	cb(null,null);
   	return;
   }
+  cleanTags(update);
   debug("To Be Updated: "+update.length + " DataSets");
   db = config.getDB();
 
   var q = async.queue(function (task, cb) {
     debug("updatePOIFromMongo->Queue");
+   
     db.collection("POI").save(task.data, function(err,result) {
       debug("updatePOIFromMongo->MongoCB");    
     if (err) {
@@ -261,7 +272,7 @@ function nominatim(cb,result) {
         return;
       }
       if (obj) {
-        debug("found job %s",obj.type);
+        debug("found job %s %s",obj.type, obj.id);
         osm_type="";
 		switch (obj.type) {
 		  case "node": osm_type = "osm_type=N";
@@ -295,6 +306,7 @@ function nominatim(cb,result) {
 				obj.nominatim = elementData;
 			}
 			//console.dir(elementData);
+			cleanObject(obj);
 			db.collection("POI").save(obj, function(err,result) {
 			  debug("nominatim->MongoCB");
 			  if (err) {
@@ -320,7 +332,9 @@ function nominatim(cb,result) {
 
 
   debug("storePOI");
-  async.auto( {config: config.initialiseDB,
+  
+  async.series([ function(cb) {
+       async.auto( {config: config.initialiseDB,
              country: function(cb,result) {cb(null,"CH")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
@@ -329,8 +343,41 @@ function nominatim(cb,result) {
              remove: ["mongo",removePOIFromMongo],
              nominatim: ["update","insert","remove",nominatim]},
              function(err,results) {
-             	console.log("READY");
+             	debug("READY with CH");
+             	cb();
              	
              }
              
-             );
+             )},function(cb) {
+          async.auto( {config: config.initialiseDB,
+             country: function(cb,result) {cb(null,"DE")},
+             overpass: ["country",getPOIOverpass],
+             mongo:["config","overpass",getPOIByPLZMongo],
+             update: ["mongo",updatePOIFromMongo],
+             insert: ["mongo",insertPOIFromMongo],
+             remove: ["mongo",removePOIFromMongo],
+             nominatim: ["update","insert","remove",nominatim]},
+             function(err,results) {
+             	debug("READY with AT");
+             	cb();
+             	
+             }
+             
+             )},
+             
+             function(cb) {
+          async.auto( {config: config.initialiseDB,
+             country: function(cb,result) {cb(null,"AT")},
+             overpass: ["country",getPOIOverpass],
+             mongo:["config","overpass",getPOIByPLZMongo],
+             update: ["mongo",updatePOIFromMongo],
+             insert: ["mongo",insertPOIFromMongo],
+             remove: ["mongo",removePOIFromMongo],
+             nominatim: ["update","insert","remove",nominatim]},
+             function(err,results) {
+             	debug("READY with DE");
+             	cb();
+             	
+             }
+             
+             )}]);
