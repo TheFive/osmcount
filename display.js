@@ -1258,6 +1258,13 @@ exports.table = function(req,res){
 						separator = "<br>";
 						pageFooter += "Lade: "+ workingName + " ("+workingSchluessel+") seit "+workingTimestamp + " Minuten";
 					}
+					{
+						separator = "<br>";
+							pageFooter += '<a href="/list/WorkerQueue.html?'
+						               +'measure='+ param.measure
+						               +'&type=insert&'+
+						               '">(schedule)</a> ';
+					}
 					pageFooter += separator;
 					pageFooter += "Die Service Links bedeuten: \
 									<b>O</b> Zeige die Overpass Query \
@@ -1346,6 +1353,7 @@ exports.query=function(req,res) {
     // To be Improved with Query or Aggregation Statments
     var collection;
     var query;
+    var options={};
     var queryMenu;
     var queryDefined = false;
     switch (req.params.query) {
@@ -1363,6 +1371,7 @@ exports.query=function(req,res) {
     	               	query.measure = req.query.measure;
     	               } 
      	               console.dir(query);
+     	               options={"sort":"exectime"}
     	               break;
     	case "pharmacy": collection = db.collection('POI');
     	                 collectionName = "POI";
@@ -1383,7 +1392,7 @@ exports.query=function(req,res) {
     	                             ["wheelchair","tags","wheelchair"],
 
     	                             ];
-    	                  query = {};
+    	                  query = {};options={}; 
     	                  queryMenu = "";
     	                  
     	                  if (typeof(req.query.state)!='undefined' && req.query.state != "") {
