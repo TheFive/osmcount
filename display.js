@@ -1459,7 +1459,7 @@ exports.query=function(req,res) {
     }
     //console.dir(query);
     if (collectionName != "POI" || queryDefined) {
-    collection.find(query).toArray(function(err,data) {
+    collection.find(query,options).toArray(function(err,data) {
     	if (err) {
     		res.set('Content-Type', 'text/html');
 			res.end(JSON.stringify(err)+JSON.stringify(query));
