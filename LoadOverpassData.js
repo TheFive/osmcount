@@ -73,7 +73,7 @@ function loadBoundariesCH(cb,result) {
 
 function removeBoundariesData (cb,result) {
 	debug("removeBoundariesData");
-	db = configuration.getDB();
+	var db = configuration.getDB();
 	db.collection("OSMBoundaries").remove({},{w:1}, function (err,count) {
 		debug("removeBoundariesData->CB count = "+count);
 		cb(err,count);
@@ -86,10 +86,10 @@ function insertBoundariesData (cb,result) {
 	var boundariesOverpass;
 	var boundaries = [];
 	var b;
-	
+	var i;
 	boundariesOverpass =JSON.parse(result.overpassDE).elements;
 	for (i=0;i<boundariesOverpass.length;i++) {
-		b = {};
+		var b = {};
 		b = boundariesOverpass[i].tags;
 		b.osm_id = boundariesOverpass[i].id;
 		b.osm_type = boundariesOverpass[i].type;
@@ -99,7 +99,7 @@ function insertBoundariesData (cb,result) {
     boundariesOverpass = JSON.parse(result.overpassAT).elements;
 
 	for (i=0;i<boundariesOverpass.length;i++) {
-		b = {};
+		var b = {};
 		console.dir(boundariesOverpass[i]);
 		b = boundariesOverpass[i].tags;		
 
@@ -114,8 +114,8 @@ function insertBoundariesData (cb,result) {
     boundariesOverpass = JSON.parse(result.overpassCH).elements;
 
 	for (i=0;i<boundariesOverpass.length;i++) {
-		b = {};
-		console.dir(boundariesOverpass[i]);
+		var b = {};
+		//console.dir(boundariesOverpass[i]);
 		b = boundariesOverpass[i].tags;		
 		b.osm_id = boundariesOverpass[i].id;
 		b.osmcount_country="CH";

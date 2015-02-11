@@ -99,7 +99,9 @@ exports.initialise = function (cb) {
 										exports.schluesselMapRegio[keyRegio]=value;
 									}
 								}
-								if (typeof(keyAGS)!='undefined' && typeof(value.name) != 'undefined') {
+								if (    typeof(keyAGS)!='undefined' 
+								     && typeof(value.name) != 'undefined' 
+								      && doc.boundary=="administrative"  ){
 									if (typeof(doc.admin_level)!= 'undefined') {
 										value.typ = adminLevel[doc.admin_level];
 									}
