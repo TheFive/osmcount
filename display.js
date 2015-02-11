@@ -974,6 +974,7 @@ exports.table = function(req,res){
  	var openQueries=0;
  	var errorQueries=0;
  	var workingSchluessel="";
+ 	var workingTimestamp ="unknown";
  	var workingName="";
     var items = [];
     var vorgabe = {};
@@ -1073,6 +1074,8 @@ exports.table = function(req,res){
 					if( data) {
 					   if (data.type == "overpass") {
 					      workingSchluessel = data.schluessel;
+					      workingTimestamp = (new Date()-data.timestamp)/(1000*60); 
+					      workingTimestamp = util.numeral(workingTimestamp).format('0.00');
 					      var t =kreisnamen[workingSchluessel];
 					      if (typeof(t)=='object') {
 					      workingName = t.name;
@@ -1253,7 +1256,7 @@ exports.table = function(req,res){
 					}
 					if (workingSchluessel !="") {
 						separator = "<br>";
-						pageFooter += "Lade: "+ workingName + " ("+workingSchluessel+")";
+						pageFooter += "Lade: "+ workingName + " ("+workingSchluessel+") seit "+workingTimestamp + " Minuten";
 					}
 					pageFooter += separator;
 					pageFooter += "Die Service Links bedeuten: \
