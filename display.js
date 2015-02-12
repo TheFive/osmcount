@@ -1263,7 +1263,7 @@ exports.table = function(req,res){
 							pageFooter += '<a href="/list/WorkerQueue.html?'
 						               +'measure='+ param.measure
 						               +'&type=insert&'+
-						               '">(schedule)</a> ';
+						               '">(Zeitplan)</a> ';
 					}
 					pageFooter += separator;
 					pageFooter += "Die Service Links bedeuten: \
@@ -1354,7 +1354,7 @@ exports.query=function(req,res) {
     var collection;
     var query;
     var options={};
-    var queryMenu;
+    var queryMenu = "";
     var queryDefined = false;
     switch (req.params.query) {
     	case "WorkerQueue": collection = db.collection('WorkerQueue');
