@@ -14,7 +14,7 @@ var async    = require('async');
 
 
 var query = 
-{ DE:'[timeout:3600][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
+{ DE:'[timeout:4800][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \

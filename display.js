@@ -264,11 +264,17 @@ exports.importApotheken = function(req,res) {
 	debug.entry("importApotheken");
     var db = res.db;
     var measure = req.params.measure;
-    importCSV.importApothekenVorgabe(measure,db);
-    var text = "Importiert Apotheken "+measure;
-    text += "Files imported";
-    res.set('Content-Type', 'text/html');
-    res.end(text);
+    importCSV.importApothekenVorgabe(measure,db,function ready(err) {
+ 		var text;
+		var text = "Importiert Apotheken "+measure+"<br>";
+    	if (err) {
+    		text += "Fehler: "+JSON.stringify(err);
+    	} else {
+			text += " File imported";
+		}
+		res.set('Content-Type', 'text/html');
+		res.end(text);
+    });
 }
 	
 function gl(text, newLink, param)

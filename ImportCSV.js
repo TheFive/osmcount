@@ -104,6 +104,7 @@ function importCSVToCollection(filename,collection,defJson,cb) {
 		if(array.length<2) {
 			// CSV File is empty, log an error
 			console.log("Empty File %s",filename);
+			console.dir(array[0]);
 			if (cb) cb("empty file",null);
 			return;
 		}
@@ -126,7 +127,7 @@ function importCSVToCollection(filename,collection,defJson,cb) {
 		// Copy measures into the DataCollection MongoDB
 		var newData = exports.convertArrToJSON(array,defJson);
 
-		collection.insert(newData,{w:1},function (){if (cb) cb(null,null);});
+		collection.insert(newData,{w:1},function (err,data){if (cb) cb(err,null);});
    	});}
 
 
