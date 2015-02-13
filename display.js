@@ -1359,7 +1359,16 @@ exports.query=function(req,res) {
     switch (req.params.query) {
     	case "WorkerQueue": collection = db.collection('WorkerQueue');
     						collectionName = "WorkerQueue";
-    	               columns = ["_id","type","status","measure","schluessel","exectime","timestamp","error"];
+    	               columns = ["_id",
+    	                          "type",
+    	                          "status",
+    	                          "measure",
+    	                          "schluessel",
+    	                          "exectime",
+    	                          "timestamp",
+    	                          "error",
+    	                          ["Error Code","error","code"],
+    	                          ["Error Status Code","error","statusCode"]];
     	               query = {};
     	               if (typeof(req.query.type) != 'undefined'){
     	               	query.type = req.query.type;
