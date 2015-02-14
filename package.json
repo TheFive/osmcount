@@ -1,0 +1,28 @@
+{
+  "name": "osmcount",
+  "version": "0.1.5",
+  "description": "QA Count Tool for OpenStreetMap",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheFive/osmcount.git"
+  },
+  "keywords": [
+    "OSMCount",
+    "QualityAssurance",
+    "OpenStreetMap"
+  ],
+  "author": "TheFive",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TheFive/osmcount/issues"
+  },
+  "homepage": "https://github.com/TheFive/osmcount"
+}
