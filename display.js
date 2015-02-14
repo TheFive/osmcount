@@ -1534,7 +1534,7 @@ exports.query=function(req,res) {
 		page.title = "Abfrage "+req.params.query;
 		page.menu =queryMenu;
 		page.content = '<p><table>'+table+'</table></p>';
-		page.footer = "Ergebnisse: " + data.length + " Abfrage: "+JSON.stringify(query);
+		page.footer = "Ergebnisse: " + data.length + " Abfrage: "+JSON.stringify(query)+"<br>Aktuelle Zeit: "+new Date();
  		res.set('Content-Type', 'text/html');
  		res.end(page.generatePage());
  		return;
