@@ -6,16 +6,6 @@ var debug       = require('debug')('util');
   debug.data       = require('debug')('util:data');
 
 
-// internal Function to duplicate an object
-exports.clone = function (obj) {
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = obj.constructor();
-    for (var attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-    }
-    return copy;
-}
-
 exports.copyObject = function(dest,source) {
 	if (source == null) return;
 	if (typeof(source) != 'object') return;
@@ -24,15 +14,24 @@ exports.copyObject = function(dest,source) {
     }
 }
 
+// internal Function to duplicate an object
+exports.clone = function (obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    exports.copyObject(copy,obj);
+    return copy;
+}
+
+
 exports.createWaiter = function(seconds) {
-	ms = seconds*1000;
+	var ms = seconds*1000;
 	return function (callback) {
 		debug.data("Wait for "+seconds+" seconds");
 		setTimeout(callback,ms);
 	}
 }
-
-exports.waitOneMin = exports.createWaiter(configuration.getValue("waitTime",120));
+var waitOneMin = exports.createWaiter(configuration.getValue("waitTime",120));
+exports.waitOneMin = waitOneMin;
 
 exports.numeral = num;
 
