@@ -37,9 +37,10 @@ function parseCSV(str,delimiter) {
 
         // If it's a newline and we're not in a quoted field, move on to the next
         // row and move to column 0 of that new row
+        if (cc == '\r' && nc == '\n' && !quote) { row +=1; col = 0; ++c; continue; }
+        if (cc == '\r' && !quote) { row +=1; col = 0; continue; }
         if (cc == '\n' && !quote) { row +=1; col = 0; continue; }
-        if (cc == '\r' && !quote) continue; //just ignore this character
-
+  
         // Otherwise, append the current character to the current column
         arr[row][col] += cc;
     }

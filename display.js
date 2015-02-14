@@ -542,7 +542,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 				}
 			}
 			if (glink) {
-				cell = '<a href="'+glink(cell)+'">'+cell+'</a>';
+				cell = '<a href="'+glink(line["Schlüssel"])+'">'+cell+'</a>';
 			}
 			var cl ="";
 			if ((typeof(rank[col])!="undefined")  && (rank[col]=="up") ){
@@ -1158,6 +1158,8 @@ exports.table = function(req,res){
 					format["Vorgabe"].sum = true;
 					format["Vorgabe"].format = '0,0.0';
 					format["Vorgabe"].title = 'Schätzung';
+					format["Vorgabe"].generateLink = function(value) {
+					     return "/list/DataTarget.html?measure="+param.measure+"&schluessel="+value;}
 			
 				}
 		
@@ -1363,6 +1365,24 @@ exports.query=function(req,res) {
     var queryMenu = "";
     var queryDefined = false;
     switch (req.params.query) {
+    	case "DataTarget": collection = db.collection('DataTarget');
+    						collectionName = "DataTarget";
+    	               columns = ["_id",
+    	                          "measure",
+    	                          "schluessel",
+    	                          "name",
+    	                          "apothekenVorgabe",
+    	                          "source",
+    	                          "linkSource"];
+    	               query = {};
+    	               if (typeof(req.query.measure) != 'undefined'){
+    	               	query.measure = req.query.measure;
+    	               } 
+    	               if (typeof(req.query.schluessel) != 'undefined'){
+    	               	query.schluessel = {$regex: "^"+req.query.schluessel};
+    	               } 
+    	               options={"sort":"schluessel"}
+    	               break;
     	case "WorkerQueue": collection = db.collection('WorkerQueue');
     						collectionName = "WorkerQueue";
     	               columns = ["_id",
@@ -1386,7 +1406,7 @@ exports.query=function(req,res) {
     	               if (typeof(req.query.measure) != 'undefined'){
     	               	query.measure = req.query.measure;
     	               } 
-     	               console.dir(query);
+     	               
      	               options={"sort":"exectime"}
     	               break;
     	case "pharmacy": collection = db.collection('POI');
