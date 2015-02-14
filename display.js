@@ -1370,6 +1370,7 @@ exports.query=function(req,res) {
     	                          "status",
     	                          "measure",
     	                          "schluessel",
+    	                          "prio",
     	                          "exectime",
     	                          "timestamp",
     	                          "error",
