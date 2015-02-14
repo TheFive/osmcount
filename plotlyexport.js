@@ -5,6 +5,7 @@ var debug    = require('debug')('plotyexport');
 var configuration = require('./configuration.js');
 var loadDataFromDB = require('./LoadDataFromDB.js');
 var htmlPage = require('./htmlPage.js');
+var wochenaufgabe = require('./wochenaufgabe.js');
 
 var async    = require('async');
 
@@ -25,23 +26,23 @@ exports.plot = function(req,res){
 	debug.entry("exports.plot");
 	var db = configuration.getDB();
 	
-	var wochenaufgabe = req.param("measure");
-    var location = req.param("location");
+	var measure = req.params.measure;
+    var location = req.query.location;
     if (typeof(location) =='undefined') location="";
-    var lok = req.param("lok");
+    var lok = req.query.lok;
     var lengthOfKey = 2;
     if (typeof(parseInt(lok))=='number') lengthOfKey = parseInt(lok);
     
     var collection = db.collection('DataCollection');
    
 
-	var kreisnamen = loadDataFromDB.schluesselMapAGS;	 
- 
+	var kreisnamen =  wochenaufgabe.map[measure].keyMap; 
+
  
     valueToCount = "$count";
    	valueToDisplay = "$count";
     
-    var filterOneMeasure = {$match: { measure: wochenaufgabe}};
+    var filterOneMeasure = {$match: { measure: measure}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+location}}};
  
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
@@ -135,9 +136,9 @@ exports.plot = function(req,res){
 				}
 				graphLocation = getKreisname(location,kreisnamen);
 				
-				filenamePlotly = "OSMWA_"+wochenaufgabe+"_"+graphLocation+"_"+lengthOfKey;
+				filenamePlotly = "OSMWA_"+measure+"_"+graphLocation+"_"+lengthOfKey;
 				title = "--"
-				switch (wochenaufgabe) {
+				switch (measure) {
 					case "Apotheke": title =  "Anzahl Apotheken in OSM fuer "+graphLocation;
 					            break;
 					case "AddrWOStreet": title = "Adressen ohne Strasse fuer "+graphLocation;
@@ -171,25 +172,28 @@ exports.plotValues = function(req,res){
 	debug.entry("exports.plotValues");
 	var db = configuration.getDB();
 	
-	var wochenaufgabe = req.param("measure");
+	var measure = req.params.measure;
 	
-	if ((wochenaufgabe != "Apotheke") && (wochenaufgabe != "Apotheke_AT")){
+	
+	if (   (measure != "Apotheke") 
+	    && (measure != "Apotheke_AT")){
 		res.set('Content-Type', 'text/html');
 		res.end("Diese Grafik wird nur von der Wochenaufgabe Apotheke supportet");
+		return;
 	}
-    var location = req.param("location");
+    var location = req.query.location;
     if (typeof(location) =='undefined') location="";
 
     var collection = db.collection('DataCollection');
    
 
-	var kreisnamen = loadDataFromDB.schluesselMapAGS;	 
+ 	var kreisnamen =  wochenaufgabe.map[measure].keyMap; 
  
  
     valueToCount = "$count";
    	valueToDisplay = "$count";
     
-    var filterOneMeasure = {$match: { measure: wochenaufgabe}};
+    var filterOneMeasure = {$match: { measure: measure}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+location}}};
  
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,location.length]},
@@ -325,9 +329,9 @@ exports.plotValues = function(req,res){
 				
 				graphLocation = getKreisname(location,kreisnamen);
 				
-				filenamePlotly = "OSMWA_"+wochenaufgabe+"_"+graphLocation;
+				filenamePlotly = "OSMWA_"+measure+"_"+graphLocation;
 				title = "--"
-				switch (wochenaufgabe) {
+				switch (measure) {
 					case "Apotheke": title =  "Fehlende Apotheken Tags in OSM fuer "+graphLocation;
 					            break;
 					case "AddrWOStreet": title = "Adressen ohne Strasse fuer "+graphLocation;
