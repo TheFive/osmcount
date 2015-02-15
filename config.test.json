@@ -1,5 +1,5 @@
 {
-  "database" : "localhost/test",
+  "database" : "127.0.0.1/test",
   "username" : "test",
   "password" : "test",
   "waitTime" : 1,
