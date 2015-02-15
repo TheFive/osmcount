@@ -97,7 +97,7 @@ function importCSVToCollection(filename,collection,defJson,cb) {
 
 		
 		if (err) {
-			console.log("Error: "+err);
+			console.log(err);
 			if (cb) cb(err,null);
 			return;
 		}
@@ -137,14 +137,11 @@ function importCSVToCollection(filename,collection,defJson,cb) {
 
 // readCSV Function to import CSV to the Measure Database
 // Input: a MongoDB, a template JSON, CSV Filename, encoding 
+
 exports.readCSV = function(filename,db,defJson,cb) {
-	debug("readCSV("+filename+"..)");
-
-
-		var collection = db.collection('DataCollection');
-		importCSVToCollection(filename,collection,defJson,cb);
-		
-		
+  debug("readCSV("+filename+"..)");
+  var collection = db.collection('DataCollection');
+  importCSVToCollection(filename,collection,defJson,cb);		
 }
 
 exports.importApothekenVorgabe = function(measure,db,cb) {

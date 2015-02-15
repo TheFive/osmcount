@@ -5,14 +5,15 @@ var debug   = require('debug')('configuration');
   debug.entry = require('debug')('configuration:entry');
   debug.data = require('debug')('configuration:data');
   
+var env = process.env.NODE_ENV || 'development';
+
 var MongoClient = require('mongodb').MongoClient;
 
 
 
 
 // the configurationfile should be in the "running" directory
-var configurationFile = path.resolve(__dirname, 'configuration.json');
-var travisConfigurationFile = path.resolve(__dirname, 'travisconfiguration.json');
+var configurationFile = path.resolve(__dirname, 'config.'+env+'.json');
 var configuration;
 
 var mongodb ;

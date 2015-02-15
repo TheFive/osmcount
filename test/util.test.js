@@ -60,7 +60,7 @@ describe('createWaiter', function() {
 	})
 })
 
-describe('waitOneMin', function() {
+describe('waitOneMin second time', function() {
 	this.timeout(1000*60*2+100);
 	it('test Wait',function(done) {
 		var t1 = new Date();

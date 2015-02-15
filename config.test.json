@@ -1,0 +1,7 @@
+{
+  "database" : "localhost:27017/test",
+  "username" : "test",
+  "password" : "test",
+  "waitTime" : 1,
+  "serverport": 64163
+}

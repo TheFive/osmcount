@@ -1,5 +1,6 @@
 var assert =require('assert');
 var importCSV = require('../ImportCSV.js');
+var configuration = require('../configuration.js');
 
 
 describe('importCSV', function() {
@@ -117,6 +118,46 @@ describe('convertArrToJSON', function() {
     var ja = importCSV.convertArrToJSON(array, defJson);
     assert.deepEqual("default",ja[0].defaultValue);
     });
-  
+});
 
+describe('readCSV',function() {
+  var db;
+  before(function(done) {
+    console.log("before");
+    configuration.initialiseDB( function () {
+      db = configuration.getDB();
+      var c = (db.collection("DataCollection"));
+      if (c) {
+        c.drop(done); 
+        db.createCollection("DataCollection",function(err,data) {
+          console.log("database cleared",err);
+          done();
+        });       
+      } else done();
+    });
+  });
+  it('should fail with no filename' , function(done) {
+    db = configuration.getDB();
+    var a = importCSV.readCSV('NonExistingFile.csv',db,{},function(err,data) {
+       assert.equal(err.errno,34);
+       done();
+    })
+  }),
+  it('should load 2 datasets' , function(done) {
+    db = configuration.getDB();
+    fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10");
+    var a = importCSV.readCSV('existingFile.csv',db,{name:"",count:0},function(err,data) {
+       assert.equal(err,null);
+       db.collection("DataCollection").find({}).toArray(function(err,data) {
+         assert.equal(data.length,2);
+         assert.equal(data[0].name,'a');
+         assert.equal(data[0].count,'2');
+         assert.equal(data[1].name,'b');
+         assert.equal(data[1].count,'10');
+       })
+       done();
+       
+    })
+  });
+  
 });
