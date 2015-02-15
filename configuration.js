@@ -66,7 +66,7 @@ exports.initialiseDB = function(callback) {
 			initialisedDB=2;
 			mongodb = db;
 		}
-		debug("Connected to Database mosmcount");
+		debug("Connected to Database "+mongodbConnectStr);
 		while (initialiseCB.length>0) {
 			initialiseCB[0](returnerr);
 			initialiseCB.shift();
