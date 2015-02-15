@@ -28,6 +28,7 @@
   "dependencies": {
     "debug": "^2.1.1",
     "fs": "0.0.2",
+    "mongodb": "^1.4.30",
     "numeral": "^1.5.3",
     "path": "^0.11.14"
   },
