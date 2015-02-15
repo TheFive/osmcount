@@ -12,7 +12,7 @@ var MongoClient = require('mongodb').MongoClient;
 
 // the configurationfile should be in the "running" directory
 var configurationFile = path.resolve(__dirname, 'configuration.json');
-
+var travisConfigurationFile = path.resolve(__dirname, 'travisconfiguration.json');
 var configuration;
 
 var mongodb ;
@@ -74,7 +74,11 @@ exports.initialiseDB = function(callback) {
 }
 
 exports.initialise = function(callback) {
-	configuration = JSON.parse(fs.readFileSync(configurationFile));
+	try {
+	   configuration = JSON.parse(fs.readFileSync(configurationFile));
+	} catch (err) {
+	 configuration = JSON.parse(fs.readFileSync(travisConfigurationFile));
+	}
 	if (callback) callback();
 }
 
