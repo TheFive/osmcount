@@ -30,5 +30,8 @@
     "fs": "0.0.2",
     "numeral": "^1.5.3",
     "path": "^0.11.14"
+  },
+  "devDependencies": {
+    "mocha": "^2.1.0"
   }
 }
