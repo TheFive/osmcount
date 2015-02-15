@@ -24,5 +24,11 @@
   "bugs": {
     "url": "https://github.com/TheFive/osmcount/issues"
   },
-  "homepage": "https://github.com/TheFive/osmcount"
+  "homepage": "https://github.com/TheFive/osmcount",
+  "dependencies": {
+    "debug": "^2.1.1",
+    "fs": "0.0.2",
+    "numeral": "^1.5.3",
+    "path": "^0.11.14"
+  }
 }
