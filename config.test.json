@@ -1,7 +1,7 @@
 {
   "database" : "127.0.0.1/test",
-  "username" : "test",
-  "password" : "test",
+  "username" : "travis",
+  "password" : "travis",
   "waitTime" : 1,
   "serverport": 64163
 }

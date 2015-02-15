@@ -1,8 +1,10 @@
-language: node_js
-node_js:
+ language: node_js
+ node_js:
    - "0.10"
+install:
+  - npm install -g mocha
 services:
   - mongodb
 before_script:
   - sleep 15
-  - mongo test --eval 'db.addUser({user:"test",pwd:"test",roles: [{role:"dbOwner",db:"test"}]})'
+  - mongo test --eval 'db.addUser("test", "test");'
