@@ -15,7 +15,7 @@ describe('copy', function(){
       var d = util.clone(c);
       assert.equal(c.Z(),d.Z());
     });
-    it('clone Objects should be "diffferent" afterwards', function() {
+    it('clone Objects should be "different" afterwards', function() {
       var a = {a:1,b:2};      
       var b = util.clone(a);
       a.a = 2;

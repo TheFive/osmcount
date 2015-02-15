@@ -38,8 +38,7 @@ function parseCSV(str,delimiter) {
         // If it's a newline and we're not in a quoted field, move on to the next
         // row and move to column 0 of that new row
         if (cc == '\r' && nc == '\n' && !quote) { row +=1; col = 0; ++c; continue; }
-        if (cc == '\r' && !quote) { row +=1; col = 0; continue; }
-        if (cc == '\n' && !quote) { row +=1; col = 0; continue; }
+        if ( ((cc == '\r')||(cc == '\n')) && !quote) { row +=1; col = 0; continue; }
   
         // Otherwise, append the current character to the current column
         arr[row][col] += cc;
@@ -62,18 +61,22 @@ exports.convertArrToJSON = function(array,defJson) {
 		
 		for (z=0;z<array[0].length;z++) {
 			debug("Convert Column "+z);
-			key = array[0][z];
-			value = array[i][z];
+			var key = array[0][z];
+			var value = array[i][z];
 			debug(key+typeof(defJson[key]));
+			if (defJson[key] instanceof Date) {
+				var y=parseInt(value.slice(0,4));
+				var m=parseInt(value.slice(5,6+2));
+				var d=parseInt(value.slice(8,9+2));
+				newData[i-1][key]=new Date(y,m-1,d,0,0,0);
+				continue;
+			}
 			switch(typeof(defJson[key])) {
 				case 'number':
 					newData [i-1][key]=numeral().unformat(value);
 					break;
 				case 'date':
-					y=value.slice(0,4);
-					m=value.slice(6,6+2);
-					d=value.slice(9,9+2);
-					newData[i-1][key]=new date(y,m-1,d);
+					
 					break;
 				default:
 					newData[i-1][key]=value;
