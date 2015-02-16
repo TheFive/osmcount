@@ -128,11 +128,12 @@ describe('readCSV',function() {
       db = configuration.getDB();
       var c = (db.collection("DataCollection"));
       if (c) {
-        c.drop(done); 
+        c.drop(function(err,cb) { 
         db.createCollection("DataCollection",function(err,data) {
           console.log("database cleared",err);
           done();
-        });       
+        });  
+        });     
       } else done();
     });
   });
