@@ -146,13 +146,7 @@ exports.readCSV = function(filename,db,defJson,cb) {
 
 exports.importApothekenVorgabe = function(measure,db,cb) {
 	debug("importApothekenVorgabe("+measure+"..)");
-	var defJson = {};
-	if (measure == "Apotheke") defJson.source = "ABDA2011+Schätzung";
-	if (measure == "Apotheke_AT") defJson.source = "ÖAK+Schätzung";
-	if (measure == "ApothekePLZ_DE") defJson.source = "Landesapothekerkammer Baden-Württemberg";
-    defJson.measure = measure;
-    defJson.apothekenVorgabe =  0.0;
-	 
+	var defJson = {measure:measure,apothekenVorgabe :0.0};	 
 	var filename = "Anzahl "+measure+".csv";
 	filename = path.resolve(__dirname, filename);
 	var collection = db.collection('DataTarget');

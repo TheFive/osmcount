@@ -177,34 +177,10 @@ exports.runOverpass= function(query, job,result, cb) {
 			result.data=JSON.parse(data).elements;
 			result.measure=measure;
 			result.count = result.data.length;
-			if ((measure == "Apotheke")||(measure == "Apotheke_AT")) {
-				result.missing = {};
-				result.existing = {}
-				result.existing.fixme = 0;
-				result.missing.opening_hours = 0;
-				result.missing.phone=0;
-				result.missing.wheelchair = 0;
-				result.missing.name = 0;
-				for (i = 0 ; i< result.data.length;i++ ) {
-					p = result.data[i].tags;
-					if (!p.hasOwnProperty("opening_hours")) {
-						result.missing.opening_hours += 1;
-					}
-					if (!p.hasOwnProperty("name")) {
-						result.missing.name += 1;
-					}
-					if (!p.hasOwnProperty("wheelchair")) {
-						result.missing.wheelchair += 1;
-					}
-					if (p.hasOwnProperty("fixme")) {
-						result.existing.fixme += 1;
-					}
-					if (!p.hasOwnProperty("phone") && ! p.hasOwnProperty("contact:phone")) {
-						result.missing.phone += 1;
-					}
-				}
-			}
-			//debug("Result"+JSON.stringify(result));
+			
+			// Berechne weitere Zahlen e.g. Missung und Existing Tags
+			var tagCounter = wochenaufgabe.map[measure].tagCounter;
+			if (tagCounter) tagCounter(result.data,result);
 			cb();
 		}
 	}
