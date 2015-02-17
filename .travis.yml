@@ -3,7 +3,7 @@
    - "0.10"
    - "0.8"
 install:
-  - npm install -g mocha
+  - npm install
 services:
   - mongodb
 before_script:
@@ -16,3 +16,6 @@ before_script:
         else echo "OK"; i=$tries; fi;
       done
   - mongo test --eval 'db.addUser("test", "test");'
+
+script:
+  - npm test
