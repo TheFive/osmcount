@@ -252,16 +252,18 @@ function doInsertJobs(cb,results) {
 			return;
 		}
 		var q = async.queue(function (task,callback) {
-			mongodb.collection("DataCollection").aggregate([ {$match: { measure:task.measure,schluessel:task.schluessel}},
+/*			mongodb.collection("DataCollection").aggregate([ {$match: { measure:task.measure,schluessel:task.schluessel}},
 														  {$group: {_id:"$schluessel",
 														            max:{$max:"$count"}}}],
+								 function (err, data)*/
+			mongodb.collection("DataTarget").findOne( {measure:task.measure,schluessel:task.schluessel},
 								 function (err, data)
 			{
-				if (data.length>0) {
-					var d = data[0];
-					console.log(task.measure+task.schluessel);
-					console.dir(d);
-					task.prio = d.max;
+				if (data) {
+					var d = data;
+					//console.log(task.measure+task.schluessel);
+					//console.dir(d);
+					task.prio = d.apothekeVorgabe;
 				}
 				callback();
 			})
