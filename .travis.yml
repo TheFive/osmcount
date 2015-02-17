@@ -4,7 +4,7 @@
    - "0.10"
 
 install:
-  - echo 'hello World'
+  - npm install
 
 services:
   - mongodb
