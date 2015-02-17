@@ -26,11 +26,13 @@
   },
   "homepage": "https://github.com/TheFive/osmcount",
   "dependencies": {
+    "async": "^0.9.0",
     "debug": "^2.1.1",
     "fs": "0.0.2",
     "mongodb": "^1.4.30",
     "numeral": "^1.5.3",
-    "path": "^0.11.14"
+    "path": "^0.11.14",
+    "plotly": "^1.0.2"
   },
   "devDependencies": {
     "mocha": "^2.1.0"
