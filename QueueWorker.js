@@ -263,7 +263,7 @@ function doInsertJobs(cb,results) {
 					var d = data;
 					//console.log(task.measure+task.schluessel);
 					//console.dir(d);
-					task.prio = d.apothekeVorgabe;
+					task.prio = d.apothekenVorgabe;
 				}
 				callback();
 			})
