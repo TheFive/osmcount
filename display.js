@@ -926,7 +926,12 @@ exports.table = function(req,res){
     date.setDate(date.getDate()-10*365);
     if (param.since != '') date = new Date(param.since);
     var filterOneMeasure = {$match: { measure: param.measure}};
-    var filterSince = {$match: { timestamp: {$gte: date}}};
+ //   var filterSince = {$match: { timestamp: {$gte: date}}};
+    var filterSince = {$match: { $and: [{timestamp: {$gte: date}},
+                                        { $or:[{timestamp:{$gte: new Date(2015,1,15)}},
+                                               {timestamp: {$lte: new Date (2015,1,1)}}
+                                               ]}
+                                        ]}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+param.location}}};
  
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
