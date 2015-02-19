@@ -12,7 +12,7 @@ services:
 before_script:
   - echo 'sleep 15 and create db user'
   - sleep 15
-  - mongo test --eval db.addUser("test", "test");
+  - mongo test --eval 'db.addUser("test", "test");'
 
 script:
   - npm test
