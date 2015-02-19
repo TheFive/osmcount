@@ -41,7 +41,9 @@ exports.plot = function(req,res){
  
     valueToCount = "$count";
    	valueToDisplay = "$count";
-    
+      
+    var projection = {$project:{measure:1,timestamp:1,schluessel:1,count:1,source:1}};
+  
     var filterOneMeasure = {$match: { measure: measure}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+location}}};
  
@@ -69,7 +71,8 @@ exports.plot = function(req,res){
     
    
     	
-    var query = [filterOneMeasure,
+    var query = [projection,
+                 filterOneMeasure,
 				 filterRegionalschluessel,
     			 aggregateMeasuresProj,
     			 aggregateMeasuresGroup,
@@ -192,7 +195,16 @@ exports.plotValues = function(req,res){
  
     valueToCount = "$count";
    	valueToDisplay = "$count";
-    
+     var projection = {$project:{measure:1,
+                                timestamp:1,
+                                schluessel:1,
+                                count:1,
+                                source:1,
+                                "missing.name":1,
+                                "missing.wheelchair":1,
+                                "missing.phone":1,
+                                "missing.opening_hours":1,
+                                "existing.fixme":1}};
     var filterOneMeasure = {$match: { measure: measure}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+location}}};
  
@@ -234,7 +246,8 @@ exports.plotValues = function(req,res){
     
    
     	
-    var query = [filterOneMeasure,
+    var query = [projection,
+                 filterOneMeasure,
 				 filterRegionalschluessel,
     			 aggregateMeasuresProj,
     			 aggregateMeasuresGroup,
