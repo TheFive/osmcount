@@ -776,7 +776,7 @@ function generateFilterTable(param,header) {
 	var since = '';
 	var since7 = date7.toISOString().substr(0,10);
 	var since10 = date10.toISOString().substr(0,10);
-	var sincex = date14.toISOString().substr(0,10);
+	var sincex = "Wochenaufgabe";
 	
 	if ((param.since != since7) && (param.since != since) && (param.since!= since10)&& (param.since!= sincex)) {
 		sincex = param.since;
@@ -925,9 +925,22 @@ exports.table = function(req,res){
     var date = new Date();
     date.setDate(date.getDate()-10*365);
     if (param.since != '') date = new Date(param.since);
+    var filterSince = {$match: { timestamp: {$gte: date}}};
+
+	if (param.since == 'Wochenaufgabe') {
+	  var date = new Date();
+	  var date7 = new Date();
+	  date7.setDate(date.getDate()-7);
+	  
+      filterSince = {$match: {  $or:[{timestamp:{ $gte: date7}},
+                                         {$and : [{timestamp: {$lte: new Date (2015,1,1)}},
+                                                  {timestamp: {$gte: new Date (2015,0,31)}}]}
+                                               ]}};
+                                       
+	  
+	}    
     var projection = {$project:{measure:1,timestamp:1,schluessel:1,count:1,source:1}};
     var filterOneMeasure = {$match: { measure: param.measure}};
-    var filterSince = {$match: { timestamp: {$gte: date}}};
  //   var filterSince = {$match: { $and: [{timestamp: {$gte: date}},
  //                                       { $or:[{timestamp:{$gte: new Date(2015,1,15)}},
  //                                              {timestamp: {$lte: new Date (2015,1,1)}}
