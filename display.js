@@ -925,13 +925,14 @@ exports.table = function(req,res){
     var date = new Date();
     date.setDate(date.getDate()-10*365);
     if (param.since != '') date = new Date(param.since);
+    var projection = {$project:{measure:1,timestamp:1,schluessel:1,count:1,source:1}};
     var filterOneMeasure = {$match: { measure: param.measure}};
- //   var filterSince = {$match: { timestamp: {$gte: date}}};
-    var filterSince = {$match: { $and: [{timestamp: {$gte: date}},
-                                        { $or:[{timestamp:{$gte: new Date(2015,1,15)}},
-                                               {timestamp: {$lte: new Date (2015,1,1)}}
-                                               ]}
-                                        ]}};
+    var filterSince = {$match: { timestamp: {$gte: date}}};
+ //   var filterSince = {$match: { $and: [{timestamp: {$gte: date}},
+ //                                       { $or:[{timestamp:{$gte: new Date(2015,1,15)}},
+ //                                              {timestamp: {$lte: new Date (2015,1,1)}}
+ //                                              ]}
+//                                        ]}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+param.location}}};
  
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
@@ -958,7 +959,8 @@ exports.table = function(req,res){
     
    
     	
-    var query = [filterOneMeasure,
+    var query = [projection,
+                 filterOneMeasure,
     			 filterSince,
     			 filterRegionalschluessel,
     			 aggregateMeasuresProj,
