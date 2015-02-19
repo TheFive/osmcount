@@ -939,7 +939,16 @@ exports.table = function(req,res){
                                        
 	  
 	}    
-    var projection = {$project:{measure:1,timestamp:1,schluessel:1,count:1,source:1}};
+    var projection = {$project:{measure:1,
+                                timestamp:1,
+                                schluessel:1,
+                                count:1,
+                                source:1,
+                                "missing.name":1,
+                                "missing.wheelchair":1,
+                                "missing.phone":1,
+                                "missing.opening_hours":1,
+                                "existing.fixme":1}};
     var filterOneMeasure = {$match: { measure: param.measure}};
  //   var filterSince = {$match: { $and: [{timestamp: {$gte: date}},
  //                                       { $or:[{timestamp:{$gte: new Date(2015,1,15)}},
