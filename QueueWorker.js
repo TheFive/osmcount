@@ -65,7 +65,8 @@ function saveMeasure(result,cb) {
 	debug.entry("saveMeasure("+result+",cb)");
 
 	if (result==null) {
-		cb();
+		var err = {func:"saveMeasure",desc:"Result Empty"}
+		cb(err);
 		return;
 	}
 	debug.entry("saveMeasure->call CB");
@@ -76,7 +77,8 @@ function saveMeasure(result,cb) {
 	    	console.log("Tried to save:");
 	    	console.dir(result);
 	     	console.log(err);
-	     	cb()
+	     	err.func="saveMeasure";
+	     	cb(err)
 	     	return;
 		}
 		cb();

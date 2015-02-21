@@ -174,13 +174,13 @@ exports.runOverpass= function(query, job,result, cb) {
 			date = new Date();
 			result.timestamp=job.exectime;
 			result.count=0;
-			result.data=JSON.parse(data).elements;
+			var jsonResult=JSON.parse(data).elements;
 			result.measure=measure;
-			result.count = result.data.length;
+			result.count = jsonResult.length;
 			
 			// Berechne weitere Zahlen e.g. Missung und Existing Tags
 			var tagCounter = wochenaufgabe.map[measure].tagCounter;
-			if (tagCounter) tagCounter(result.data,result);
+			if (tagCounter) tagCounter(jsonResult,result);
 			cb();
 		}
 	}
