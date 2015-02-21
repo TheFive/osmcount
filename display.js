@@ -1,7 +1,6 @@
 var importCSV=require('./ImportCSV');
 var debug    = require('debug')('display');
-  debug.data = require('debug')('display:data');
-  debug.entry = require('debug')('display:entry');
+ 
   
 var path     = require('path');
 var fs       = require("fs");
@@ -18,7 +17,7 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 
 
 exports.count = function(req,res){
-	debug.entry("exports.count");
+	debug("exports.count");
     var db = res.db;
     var collectionName = 'DataCollection';
      if(typeof(req.param("collection"))!='undefined') {
@@ -28,7 +27,7 @@ exports.count = function(req,res){
     // Fetch the collection test
     var collection = db.collection(collectionName);
     collection.count(function handleCollectionCount(err, count) {
-    	debug.entry("handleCollectionCount");
+    	debug("handleCollectionCount");
     	res.set('Content-Type', 'text/html');
     	if(err) {
     		res.end(err);
@@ -87,7 +86,7 @@ function listValuesTable(keyname,key,object) {
 }
 
 exports.object = function(req,res) {
-	debug.entry("exports.object");
+	debug("exports.object");
 	var db = res.db;
    
 	var collectionName = req.params["collection"];
@@ -96,7 +95,7 @@ exports.object = function(req,res) {
 	var object=ObjectID(objid);
 
 	db.collection(collectionName).findOne ({_id:object},function handleFindOneObject(err, obj) {
-		debug.entry("handleFindOneObject");
+		debug("handleFindOneObject");
 		if (err) {
 			var text = "Display Object "+ objid + " in Collection "+collectionName;
 			text += "Error: "+JSON.stringify(err);
@@ -117,7 +116,7 @@ exports.object = function(req,res) {
 				db.collection("DataCollection").findOne ({schluessel:obj.schluessel,
 				                                          source: obj.source},
 				                                        function handleFindOneObject(err, obj2) {
-					debug.entry("handleFindOneObject2");
+					debug("handleFindOneObject2");
 					if (err) {
 						console.log(JSON.stringify(err));
 						res.end(page.generatePage());
@@ -143,7 +142,7 @@ exports.object = function(req,res) {
 
 
 function generateQuery(measure,schluessel,sub) {
-	debug.entry("generateQuery(%s,%s,%s)",measure,schluessel,sub);
+	debug("generateQuery(%s,%s,%s)",measure,schluessel,sub);
    
 	
 	var subQuery ="";
@@ -178,7 +177,7 @@ function generateQuery(measure,schluessel,sub) {
 }
 
 function generateQueryCSV(measure,schluessel) {
-  debug.entry("generateQueryCSV(%s,%s)",measure,schluessel);
+  debug("generateQueryCSV(%s,%s)",measure,schluessel);
   var query = wochenaufgabe.map[measure].overpass.query;
   query = wochenaufgabe.map[measure].overpass.query;
   var fieldList = wochenaufgabe.map[measure].overpass.csvFieldList;
@@ -197,7 +196,7 @@ function generateQueryCSV(measure,schluessel) {
 
 
 exports.overpass = function(req,res) {
-	debug.entry("exports.overpass");
+	debug("exports.overpass");
 	var db = res.db;
    
 	var measure = req.params["measure"];
@@ -230,7 +229,7 @@ exports.overpass = function(req,res) {
 }
 
 exports.importCSV = function(req,res){
-	debug.entry("exports.importCSV");
+	debug("exports.importCSV");
     var db = res.db;
   
     // Fetch the collection test
@@ -261,7 +260,7 @@ exports.importCSV = function(req,res){
 }
 	
 exports.importApotheken = function(req,res) {
-	debug.entry("importApotheken");
+	debug("importApotheken");
     var db = res.db;
     var measure = req.params.measure;
     importCSV.importApothekenVorgabe(measure,db,function ready(err) {
@@ -279,7 +278,7 @@ exports.importApotheken = function(req,res) {
 	
 function gl(text, newLink, param)
 {
-	debug.entry("gl");
+	debug("gl");
 	var link = "/table";
 	var type = "html";
 	if (newLink.csv == true) type = "csv";
@@ -347,7 +346,7 @@ function gl(text, newLink, param)
 }
 
 function setParams(req,param) {
-	debug.entry("setParams");
+	debug("setParams");
     // Parse html parameters
     param.measure="";    
     if(typeof(req.params["measure"])!='undefined') {
@@ -415,8 +414,8 @@ function setParams(req,param) {
 }
 
 function generateTable(param,header,firstColumn,table,format,rank, serviceLink) {
-	debug.entry("generateTable");
-	debug.data(JSON.stringify(rank));
+	debug("generateTable");
+	debug(JSON.stringify(rank));
 	
 	var tableheader = "";
 	var tablebody="";
@@ -615,7 +614,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 }
 
 function generateCSVTable(param,header,firstColumn,table,delimiter) {
-	debug.entry("generateCSVTable");
+	debug("generateCSVTable");
 	
 	var tableheader = "";
 	var tablebody="";
@@ -666,7 +665,7 @@ function optionValue(value,displayValue,selected) {
 }
 
 function generateFilterTable(param,header) {
-	debug.entry("generateFilterTable");
+	debug("generateFilterTable");
 
     var filterSub = "-"
     var filterSubPercent = "-";
@@ -846,7 +845,7 @@ function generateFilterTable(param,header) {
 }
 
 function generateSortHeader(param,header,format) {
-	debug.entry("generateSortHeader");
+	debug("generateSortHeader");
 
 
     
@@ -866,7 +865,7 @@ function generateSortHeader(param,header,format) {
 }
 
 exports.table = function(req,res){
-	debug.entry("exports.table");
+	debug("exports.table");
 	var db = res.db;
   
     // Fetch the collection DataCollection
@@ -922,20 +921,31 @@ exports.table = function(req,res){
     	valueToDisplay = { $cond : [ {$eq : ["$count",0]},0,{$divide: [ "$count","$total"]}]};
     	ranktype = "up";
     } 
-    var date = new Date();
-    date.setDate(date.getDate()-10*365);
-    if (param.since != '') date = new Date(param.since);
-    var filterSince = {$match: { timestamp: {$gte: date}}};
+    var paramSinceDate = new Date();
+    paramSinceDate.setDate(paramSinceDate.getDate()-10*365);
+    if (param.since != '') paramSinceDate = new Date(param.since);
+    var preFilter = {$match: { timestamp: {$gte: paramSinceDate},
+                                measure: param.measure,
+                                schluessel: {$regex: "^"+param.location}}};
+    var preFilterVorgabe = {$match: { 
+                                measure: param.measure,
+                                schluessel: {$regex: "^"+param.location}}};
 
 	if (param.since == 'Wochenaufgabe') {
 	  var date = new Date();
 	  var date7 = new Date();
 	  date7.setDate(date.getDate()-7);
 	  
-      filterSince = {$match: {  $or:[{timestamp:{ $gte: date7}},
+      var preFilter = {$match: { 
+                                measure: param.measure,
+                                schluessel: {$regex: "^"+param.location},
+                                $and:[{timestamp: {$gte: paramSinceDate}},
+                                 {$or:[{timestamp:{ $gte: date7}},
+                                       
                                          {$and : [{timestamp: {$lte: new Date (2015,1,1)}},
                                                   {timestamp: {$gte: new Date (2015,0,31)}}]}
-                                               ]}};
+                                               ]}]}};
+
                                        
 	  
 	}    
@@ -949,13 +959,6 @@ exports.table = function(req,res){
                                 "missing.phone":1,
                                 "missing.opening_hours":1,
                                 "existing.fixme":1}};
-    var filterOneMeasure = {$match: { measure: param.measure}};
- //   var filterSince = {$match: { $and: [{timestamp: {$gte: date}},
- //                                       { $or:[{timestamp:{$gte: new Date(2015,1,15)}},
- //                                              {timestamp: {$lte: new Date (2015,1,1)}}
- //                                              ]}
-//                                        ]}};
-    var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+param.location}}};
  
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
     						 			  timestamp: "$timestamp",
@@ -982,9 +985,7 @@ exports.table = function(req,res){
    
     	
     var query = [projection,
-                 filterOneMeasure,
-    			 filterSince,
-    			 filterRegionalschluessel,
+                 preFilter,
     			 aggregateMeasuresProj,
     			 aggregateMeasuresGroup,
     			 presort,
@@ -992,8 +993,7 @@ exports.table = function(req,res){
     			 sort];
 
 	var queryVorgabe = [
-				filterOneMeasure,
-				filterRegionalschluessel,
+				preFilterVorgabe,
 				{$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
     						 			  vorgabe: "$apothekenVorgabe"
     						 			  }},
@@ -1002,8 +1002,8 @@ exports.table = function(req,res){
     						 		  }}];
     						 		  
     						 		  
-	debug.data("query:"+JSON.stringify(query));
-	debug.data("queryVorgabe:"+JSON.stringify(queryVorgabe));
+	debug("query:"+JSON.stringify(query));
+	debug("queryVorgabe:"+JSON.stringify(queryVorgabe));
 
     var aggFunc=query;   						
  	var openQueries=0;
@@ -1015,10 +1015,10 @@ exports.table = function(req,res){
     var vorgabe = {};
     async.parallel( [ 
     	function aggregateCollection(callback) {
-    		debug.entry("aggregateCollection");
+    		debug("aggregateCollection");
 			collection.aggregate(	query
 								, (function aggregateCollectionCB(err, data) {
-				debug.entry("aggregateCollectionCB");
+				debug("aggregateCollectionCB");
 				// first copy hole table in a 2 dimensional JavaScript map
 				// may be here is some performance potential :-)
 				if (err) {
@@ -1032,14 +1032,14 @@ exports.table = function(req,res){
 				callback(err);
 			}))},
 			function getVorgabe(callback) {
-				debug.entry("getVorgabe");
+				debug("getVorgabe");
 				if (   ((param.measure=="Apotheke" ) || 
 				        (param.measure=="ApothekePLZ_DE" ) ||  
 				        (param.measure == "Apotheke_AT"))
 				    && param.sub =="") {
 					collectionTarget.aggregate(	queryVorgabe
 									, (function getVorgabeCB(err, data) {
-					debug.entry("getVorgabeCB");
+					debug("getVorgabeCB");
 					if (err) {
 						res.set('Content-Type', 'text/html');
 						res.end("error"+err);
@@ -1058,7 +1058,7 @@ exports.table = function(req,res){
 			} else callback();
 			},
 			function getWorkerQueueCount(callback) {
-				debug.entry("getWorkerQueueCount");
+				debug("getWorkerQueueCount");
 				db = res.db;
 				var collectionName = 'WorkerQueue';
 				
@@ -1070,13 +1070,13 @@ exports.table = function(req,res){
 				                  schluessel: {$regex: "^"+param.location},
 				                  measure:param.measure},
 								 function getWorkerQueueCountCB(err, count) {
-					debug.entry("getWorkerQueueCount");
+					debug("getWorkerQueueCount");
 					openQueries = count;
 					callback();
 				});  
 			},
 			function getErrorQueueCount(callback) {
-				debug.entry("getErrorQueueCount");
+				debug("getErrorQueueCount");
 				db = res.db;
 				var collectionName = 'WorkerQueue';
 				
@@ -1088,13 +1088,13 @@ exports.table = function(req,res){
 								 schluessel: {$regex: "^"+param.location},
 								 measure:param.measure},
 								 function getWorkerQueueCountCB(err, count) {
-					debug.entry("getWorkerQueueCount");
+					debug("getWorkerQueueCount");
 					errorQueries=count;
 					callback();
 				});  
 			},
 			function getWorkingName(callback) {
-				debug.entry("getWorkingName");
+				debug("getWorkingName");
 				db = res.db;
 				var collectionName = 'WorkerQueue';
 				
@@ -1105,7 +1105,7 @@ exports.table = function(req,res){
 				                    schluessel: {$regex: "^"+param.location},
 				                    measure:param.measure},
 								 function getWorkingNameCB(err, data) {
-					debug.entry("getWorkingNameCB");
+					debug("getWorkingNameCB");
 					if( data) {
 					   if (data.type == "overpass") {
 					      workingSchluessel = data.schluessel;
@@ -1125,7 +1125,7 @@ exports.table = function(req,res){
 			}
 			],
 			function displayFinalCB (err, results ) {
-				debug.entry("displayFinalCB");
+				debug("displayFinalCB");
 				// Initialising JavaScript Map
 				var header = [];
 				var firstColumn = [];
@@ -1139,7 +1139,7 @@ exports.table = function(req,res){
 			
 			
 					var measure = items[i];
-					debug.data("Measure i"+i+JSON.stringify(measure));
+					debug("Measure i"+i+JSON.stringify(measure));
 					var row=measure._id.row;
 					var col=measure._id.col;
 			
@@ -1309,7 +1309,7 @@ exports.table = function(req,res){
 									<b>#</b> Öffne Overpass Turbo mit CSV Abfrage"
 					page.footer = pageFooter;
 						
-					debug.data(JSON.stringify(query,null,' '));
+					debug(JSON.stringify(query,null,' '));
 					
 					res.set('Content-Type', 'text/html');
 					res.end(page.generatePage());
@@ -1383,7 +1383,7 @@ function getValue(columns,object,d) {
 
 
 exports.query=function(req,res) {
-	debug.entry("exports.query");
+	debug("exports.query");
 	var db = res.db;
   
     // Fetch the collection DataCollection
