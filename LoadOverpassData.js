@@ -150,7 +150,7 @@ exports.importBoundaries = function(job,cb)  {
 				  		console.log("Loading Boundaries Done");
 				  		job.status="done";
 				  	}
-				  	if (cb) cb();
+				  	if (cb) cb(err);
 				  });
 				   
 }
@@ -181,7 +181,7 @@ exports.runOverpass= function(query, job,result, cb) {
 			// Berechne weitere Zahlen e.g. Missung und Existing Tags
 			var tagCounter = wochenaufgabe.map[measure].tagCounter;
 			if (tagCounter) tagCounter(jsonResult,result);
-			cb();
+			cb(null);
 		}
 	}
 )}

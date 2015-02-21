@@ -81,7 +81,7 @@ function saveMeasure(result,cb) {
 	     	cb(err)
 	     	return;
 		}
-		cb();
+		cb(null);
 		return;
 	}	
 )}
@@ -261,13 +261,21 @@ function doInsertJobs(cb,results) {
 			mongodb.collection("DataTarget").findOne( {measure:task.measure,schluessel:task.schluessel},
 								 function (err, data)
 			{
+				if (err) {
+					console.log("Fehler beim Laden der Vorgabe: "+JSON.stringify(err))
+					task.prio = 0;
+					// Store Error in Task for Information
+					task.prioError = err;
+					
+				}
 				if (data) {
 					var d = data;
 					//console.log(task.measure+task.schluessel);
 					//console.dir(d);
 					task.prio = d.apothekenVorgabe;
 				}
-				callback();
+				
+				callback(null);
 			})
 		})
 		q.drain = function() {
@@ -396,7 +404,7 @@ exports.startQueue =function(cb) {
 	q.push(config.initialiseDB);
 	q.push(correctData);
 	q.push(doNextJob);
-	if (cb) cb();
+	if (cb) cb(null);
 }
 
 
