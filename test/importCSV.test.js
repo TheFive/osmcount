@@ -82,83 +82,79 @@ describe('importCSV', function() {
     assert.equal(array[2][1],'2');
     assert.equal(array.length,3);
   });
-});
-
-describe('convertArrToJSON', function() {
-  it('should handle string types', function() {
-    var array = importCSV.parseCSV('string;integer;real\nstring;1;1.0\nstring2;0;-1.4\n',';');
-    var defJson = {string:'',integer:'',real:''};
-    var ja = importCSV.convertArrToJSON(array, defJson);
-    assert.deepEqual({string:'string',integer:'1',real:'1.0'},ja[0]);
-    assert.deepEqual({string:'string2',integer:'0',real:'-1.4'},ja[1]);
-  });
-  it('should handle integer types', function() {
-    var array = importCSV.parseCSV('a;b;c\n1;10000;-15',';');
-    var defJson = {a:0,b:0,c:0}
-    var ja = importCSV.convertArrToJSON(array, defJson);
-    assert.deepEqual({a:1,b:10000,c:-15},ja[0]);
-  });
-  it('should handle float types', function() {
-    var array = importCSV.parseCSV('a;b;c\n1.2;10000.1;-15.2',';');
-    var defJson = {a:0,b:0,c:0}
-    var ja = importCSV.convertArrToJSON(array, defJson);
-    assert.deepEqual({a:1.2,b:10000.1,c:-15.2},ja[0]);    
-  });
-  it('should handle date types', function() {
-    var array = importCSV.parseCSV('a;b;c\n2014-10-12;2000-01-01;0000-00-00',';');
-    var defJson = {a:new Date(),b:new Date(),c:new Date()}
-    var ja = importCSV.convertArrToJSON(array, defJson);
-    assert.deepEqual(new Date(2014,10-1,12,0,0,0),ja[0].a);
-    assert.deepEqual(new Date(2000,1-1,1,0,0,0),ja[0].b);
-    assert.deepEqual(new Date(0,0-1,0,0,0,0),ja[0].c);
-  });
-  it('should handle defaults', function() {
-   var array = importCSV.parseCSV('string;integer;real\nstring;1;1.0\nstring2;0;-1.4\n',';');
-    var defJson = {defaultValue:"default"}
-    var ja = importCSV.convertArrToJSON(array, defJson);
-    assert.deepEqual("default",ja[0].defaultValue);
+  describe('convertArrToJSON', function() {
+    it('should handle string types', function() {
+      var array = importCSV.parseCSV('string;integer;real\nstring;1;1.0\nstring2;0;-1.4\n',';');
+      var defJson = {string:'',integer:'',real:''};
+      var ja = importCSV.convertArrToJSON(array, defJson);
+      assert.deepEqual({string:'string',integer:'1',real:'1.0'},ja[0]);
+      assert.deepEqual({string:'string2',integer:'0',real:'-1.4'},ja[1]);
     });
-});
+    it('should handle integer types', function() {
+      var array = importCSV.parseCSV('a;b;c\n1;10000;-15',';');
+      var defJson = {a:0,b:0,c:0}
+      var ja = importCSV.convertArrToJSON(array, defJson);
+      assert.deepEqual({a:1,b:10000,c:-15},ja[0]);
+    });
+    it('should handle float types', function() {
+      var array = importCSV.parseCSV('a;b;c\n1.2;10000.1;-15.2',';');
+      var defJson = {a:0,b:0,c:0}
+      var ja = importCSV.convertArrToJSON(array, defJson);
+      assert.deepEqual({a:1.2,b:10000.1,c:-15.2},ja[0]);    
+    });
+    it('should handle date types', function() {
+      var array = importCSV.parseCSV('a;b;c\n2014-10-12;2000-01-01;0000-00-00',';');
+      var defJson = {a:new Date(),b:new Date(),c:new Date()}
+      var ja = importCSV.convertArrToJSON(array, defJson);
+      assert.deepEqual(new Date(2014,10-1,12,0,0,0),ja[0].a);
+      assert.deepEqual(new Date(2000,1-1,1,0,0,0),ja[0].b);
+      assert.deepEqual(new Date(0,0-1,0,0,0,0),ja[0].c);
+    });
+    it('should handle defaults', function() {
+     var array = importCSV.parseCSV('string;integer;real\nstring;1;1.0\nstring2;0;-1.4\n',';');
+      var defJson = {defaultValue:"default"}
+      var ja = importCSV.convertArrToJSON(array, defJson);
+      assert.deepEqual("default",ja[0].defaultValue);
+    });
+  });
 
-describe('readCSV',function() {
-  var db;
-  before(function(done) {
-    console.log("before");
-    configuration.initialiseDB( function () {
+  describe('readCSV',function() {
+    var db;
+    before(function(done) {
+      configuration.initialiseDB( function () {
+        db = configuration.getDB();
+        var c = (db.collection("DataCollection"));
+        if (c) {
+          c.drop(function(err,cb) { 
+          db.createCollection("DataCollection",function(err,data) {
+            done();
+          });  
+          });     
+        } else done();
+      });
+    });
+    it('should fail with no filename' , function(done) {
       db = configuration.getDB();
-      var c = (db.collection("DataCollection"));
-      if (c) {
-        c.drop(function(err,cb) { 
-        db.createCollection("DataCollection",function(err,data) {
-          console.log("database cleared",err);
-          done();
-        });  
-        });     
-      } else done();
+      var a = importCSV.readCSV('NonExistingFile.csv',db,{},function(err,data) {
+         assert.equal(err.errno,34);
+         done();
+      })
     });
+    it('should load 2 datasets' , function(done) {
+      db = configuration.getDB();
+      fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10");
+      var a = importCSV.readCSV('existingFile.csv',db,{name:"",count:0},function(err,data) {
+        assert.equal(err,null);
+        db.collection("DataCollection").find({}).toArray(function(err,data) {
+           assert.equal(data.length,2);
+           assert.equal(data[0].name,'a');
+           assert.equal(data[0].count,'2');
+           assert.equal(data[1].name,'b');
+          assert.equal(data[1].count,'10');
+        }) 
+        done();       
+      })
+    });  
   });
-  it('should fail with no filename' , function(done) {
-    db = configuration.getDB();
-    var a = importCSV.readCSV('NonExistingFile.csv',db,{},function(err,data) {
-       assert.equal(err.errno,34);
-       done();
-    })
-  }),
-  it('should load 2 datasets' , function(done) {
-    db = configuration.getDB();
-    fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10");
-    var a = importCSV.readCSV('existingFile.csv',db,{name:"",count:0},function(err,data) {
-       assert.equal(err,null);
-       db.collection("DataCollection").find({}).toArray(function(err,data) {
-         assert.equal(data.length,2);
-         assert.equal(data[0].name,'a');
-         assert.equal(data[0].count,'2');
-         assert.equal(data[1].name,'b');
-         assert.equal(data[1].count,'10');
-       })
-       done();
-       
-    })
-  });
-  
 });
+
