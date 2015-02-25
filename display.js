@@ -872,6 +872,8 @@ exports.table = function(req,res){
     // To be Improved with Query or Aggregation Statments
     var collection = db.collection('DataCollection');
     var collectionTarget = db.collection('DataTarget');
+    var timeAggregate;
+    var timeVorgabe;
     
 
 	
@@ -1016,9 +1018,11 @@ exports.table = function(req,res){
     async.parallel( [ 
     	function aggregateCollection(callback) {
     		debug("aggregateCollection");
-			collection.aggregate(	query
+    		timeAggregate = new Date().getTime();
+			  collection.aggregate(	query
 								, (function aggregateCollectionCB(err, data) {
 				debug("aggregateCollectionCB");
+				timeAggregate = new Date().getTime() - timeAggregate;
 				// first copy hole table in a 2 dimensional JavaScript map
 				// may be here is some performance potential :-)
 				if (err) {
@@ -1033,6 +1037,7 @@ exports.table = function(req,res){
 			}))},
 			function getVorgabe(callback) {
 				debug("getVorgabe");
+				timeVorgabe = new Date().getTime();
 				if (   ((param.measure=="Apotheke" ) || 
 				        (param.measure=="ApothekePLZ_DE" ) ||  
 				        (param.measure == "Apotheke_AT"))
@@ -1040,6 +1045,7 @@ exports.table = function(req,res){
 					collectionTarget.aggregate(	queryVorgabe
 									, (function getVorgabeCB(err, data) {
 					debug("getVorgabeCB");
+					timeVorgabe = new Date().getTime() - timeVorgabe;
 					if (err) {
 						res.set('Content-Type', 'text/html');
 						res.end("Error in getVorgabe "+JSON.stringify(err));
@@ -1321,7 +1327,8 @@ exports.table = function(req,res){
 					pageFooter += "Die Service Links bedeuten: \
 									<b>O</b> Zeige die Overpass Query \
 									<b>R</b> Starte die Overpass Query \
-									<b>#</b> Öffne Overpass Turbo mit CSV Abfrage"
+									<b>#</b> Öffne Overpass Turbo mit CSV Abfrage";
+					pageFooter += "<br>Dauer Aggregate Funktion: "+(timeAggregate/1000)+ "s. Dauer Vorgaben: "+(timeVorgabe/1000)+"s.";
 					page.footer = pageFooter;
 						
 					debug(JSON.stringify(query,null,' '));
