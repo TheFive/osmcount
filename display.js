@@ -1023,7 +1023,7 @@ exports.table = function(req,res){
 				// may be here is some performance potential :-)
 				if (err) {
 					res.set('Content-Type', 'text/html');
-					res.end("Error: "+JSON.stringify(err));
+					res.end("Error in Aggregate: "+JSON.stringify(err));
 					console.log("Table Function, Error occured:");
 					console.log(err);
 					;
@@ -1042,7 +1042,7 @@ exports.table = function(req,res){
 					debug("getVorgabeCB");
 					if (err) {
 						res.set('Content-Type', 'text/html');
-						res.end("error"+err);
+						res.end("Error in getVorgabe "+JSON.stringify(err));
 						console.log("Table Function, Error occured:");
 						console.log(err);
 						;
@@ -1053,7 +1053,7 @@ exports.table = function(req,res){
 						value = data[i].vorgabe;
 						vorgabe [schluessel]=value;
 					}
-					callback();
+					callback(err);
 				}))
 			} else callback();
 			},
@@ -1071,7 +1071,12 @@ exports.table = function(req,res){
 				                  measure:param.measure},
 								 function getWorkerQueueCountCB(err, count) {
 					debug("getWorkerQueueCount");
-					openQueries = count;
+					if (err)  {
+					  openQueries = "#Error#";
+					} else {
+					  openQueries = count;
+					}
+					// Ignore Count Error, and 
 					callback();
 				});  
 			},
@@ -1089,7 +1094,11 @@ exports.table = function(req,res){
 								 measure:param.measure},
 								 function getWorkerQueueCountCB(err, count) {
 					debug("getWorkerQueueCount");
-					errorQueries=count;
+					if (err) {
+					  errorQueries = "#Error#"	
+					} else {
+					  errorQueries=count;
+					}
 					callback();
 				});  
 			},
@@ -1106,6 +1115,11 @@ exports.table = function(req,res){
 				                    measure:param.measure},
 								 function getWorkingNameCB(err, data) {
 					debug("getWorkingNameCB");
+					if (err) {
+						workingSchluessel = "#Error get Working#";
+						callback ();
+						return;
+					}
 					if( data) {
 					   if (data.type == "overpass") {
 					      workingSchluessel = data.schluessel;
@@ -1119,7 +1133,8 @@ exports.table = function(req,res){
 					    	workingSchluessel = "Insert " + data.measure;
 					    }
 					  }
-					}   
+					}  
+					 
 					callback();
 				});  
 			}
