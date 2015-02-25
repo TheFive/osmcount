@@ -28,16 +28,12 @@ exports.blaetterAGS_AT = [];
 exports.blaetterPLZ_DE = [];
 
 
-blaetterRegioList = exports.blaetterRegio;
-blaetterAGS_DEList = exports.blaetterAGS_DE;
-blaetterAGS_ATList = exports.blaetterAGS_AT;
-blaetterPLZ_DEList = exports.blaetterPLZ_DE;
+var blaetterRegioList = exports.blaetterRegio;
+var blaetterAGS_DEList = exports.blaetterAGS_DE;
+var blaetterAGS_ATList = exports.blaetterAGS_AT;
+var blaetterPLZ_DEList = exports.blaetterPLZ_DE;
 
-
-var dataLoaded = false;
-var blaetterDefined = false;
-
-adminLevel = {'1':'admin_level 1',
+var adminLevel_DE = {'1':'admin_level 1',
               '2': 'Staat',
               '3': 'admin_level 3',
               '4': 'Bundesland',
@@ -49,22 +45,101 @@ adminLevel = {'1':'admin_level 1',
               '10': 'Ortsteil (10)',
               '11': 'Ortsteil (11)'        }
               
-adminLevel_AT = {};
+var DE_AGS = {map: exports.schluesselMapAGS,
+             list: exports.blaetterAGS_DE,
+             keyType : "boundary",
+             keyValue : "administrative",
+             secondInfoKey : "admin_level",
+             secondInfoValueMap: adminLevel_DE};
+             
+var AT_AGS = {map : exports.schluesselMapAGS_AT,
+              list: exports.blaetterAGS_DE,
+              keyType: "boundary",
+              keyValue: "administrative"};
+              
+var DE_RGS = {map  : exports.schluesselMapRegio,
+              list : exports.blaetterRegio,
+              keyType : "boundary",
+              keyValue : "administrative",
+              secondInfoKey: "admin_level",
+              secondInfoValueMap:adminLevel_DE};
+              
+var DE_PLZ = {map  : exports.schluesselMapPLZ_DE,
+              list : exports.blaetterPLZ_DE,
+              keyType: "boundary",
+              keyValue: ["postal_code","administrative"]};
+              
+
+
+
+
+
+
+var dataLoaded = false;
+var blaetterDefined = false;
+
+
+
+
+exports.insertValue = function insertValue(map,key,osmdoc) {
+  // check Definition of key and Name
+  var keyDefined =  (typeof(key)!='undefined');
+  var nameDefined = (typeof(osmdoc.name) != 'undefined');
+  
+  // check Type of Object
+  var typeCorrect = false;
+  if (Array.isArray(map.keyValue)) {
+  	for (var i = 0; i< map.keyValue.length;i++) {
+  	  if (osmdoc[map.keyType]==map.keyValue[i]) typeCorrect = true;
+  	}
+  } else {
+    typeCorrect = (osmdoc[map.keyType]==map.keyValue);
+  }
+  
+  if (  keyDefined && nameDefined && typeCorrect ) {
+    value = {};
+    value.name = osmdoc.name;
+    value.typ = "-";
+    if (typeof(osmdoc[map.secondInfoKey])!= 'undefined') {
+      value.typ = map.secondInfoValueMap[osmdoc[map.secondInfoKey]];
+      if (typeof(value.typ) == 'undefined' ) {
+        value.typ = osmdoc[map.secondInfoKey];
+      } 	
+    }
+    map.map[key]=value;
+    map.list.push(key);
+    while (key.charAt(key.length-1)=='0') {
+    	key = key.slice(0,key.length-1);
+      map.map[key]=value;
+    }
+  }
+}
+
+exports.sortAndReduce = function sortAndReduce(list) { 
+	list.sort();
+	for (i=list.length-2;i>=0;i--)
+  {
+    if (list[i]==list[i+1].substring(0,list[i].length)) {
+		  list.splice(i,1);
+		}
+	}			
+}
+
+
 
 
 exports.initialise = function (cb) {
-    debug("initialise");
-	mongodb = config.getDB();
+  debug("initialise");
+  mongodb = config.getDB();
 	if (!dataLoaded) {
 		async.series([
 			function(callback) {
-				mongodb.collection("OSMBoundaries").find( 
-							{ }
-							, 
+				mongodb.collection("OSMBoundaries").find( {}, 
 								function(err, result) {
 					if (err) {
 						console.log("Error occured in function: LoadDataFromDB.initialise");
 						console.log(err);
+						callback(err);
 					}
 					result.each(function(err, doc) {
 						if (doc == null) {
@@ -81,123 +156,35 @@ exports.initialise = function (cb) {
 								if (doc.osmcount_country == "DE" && doc.boundary=="postal_code") {
 									keyPLZ_DE = doc["postal_code"];
 								} 
-								var value = {};
-								value.name = doc.name ;
-								value.typ = "-";
-								if (   typeof(keyRegio)!='undefined' 
-								    && typeof(value.name) != 'undefined'
-								    && doc.boundary=="administrative") {
-									if (typeof(doc.admin_level)!= 'undefined') {
-										value.typ = adminLevel[doc.admin_level];
-									}
-									exports.schluesselMapRegio[keyRegio]=value;
-									blaetterRegioList.push(keyRegio);
-							
-									while (keyRegio.charAt(keyRegio.length-1)=='0') {
-										keyRegio = keyRegio.slice(0,key.length-1);
-										
-										exports.schluesselMapRegio[keyRegio]=value;
-									}
-								}
-								if (    typeof(keyAGS)!='undefined' 
-								     && typeof(value.name) != 'undefined' 
-								      && doc.boundary=="administrative"  ){
-									if (typeof(doc.admin_level)!= 'undefined') {
-										value.typ = adminLevel[doc.admin_level];
-									}
-									exports.schluesselMapAGS[keyAGS]=value;
-									blaetterAGS_DEList.push(keyAGS);
-							
-									while (keyAGS.charAt(keyAGS.length-1)=='0') {
-										keyAGS = keyAGS.slice(0,keyAGS.length-1);
-										exports.schluesselMapAGS[keyAGS]=value;
-									}
-								}
-								if (typeof(keyAGS_AT)!='undefined' && typeof(value.name) != 'undefined') {
-									if (typeof(doc.admin_level)!= 'undefined') {
-										value.typ = adminLevel_AT[doc.admin_level];
-										if(typeof(value.typ) == 'undefined') {
-											value.typ = "";
-										}
-									}
-									exports.schluesselMapAGS_AT[keyAGS_AT]=value;
-									blaetterAGS_ATList.push(keyAGS_AT);
-							
-									while (keyAGS_AT.charAt(keyAGS_AT.length-1)=='0') {
-										keyAGS_AT = keyAGS_AT.slice(0,keyAGS_AT.length-1);
-										exports.schluesselMapAGS_AT[keyAGS_AT]=value;
-									}
-								}
-								if (typeof(keyPLZ_DE)!='undefined' ) {
-									var name = doc.note;
-									if (typeof(name)== 'undefined') {
-										name = doc.name;
-									}
-									if ( name && name.length >40) {
-									   name = name.substr(0,40);
-									   name += "...";
-									}
-								    var value = {};
-								    value.name = name ;
-								    value.typ = "-";
-									
-									exports.schluesselMapPLZ_DE[keyPLZ_DE]=value;
-									blaetterPLZ_DEList.push(keyPLZ_DE);
-							
-								}
+								exports.insertValue(DE_RGS,keyRegio,doc);
+							  exports.insertValue(DE_AGS,keyAGS,doc);
+							  exports.insertValue(AT_AGS,keyAGS_AT,doc);
+								exports.insertValue(DE_PLZ,keyPLZ_DE,doc);
 							}
 						}
 					})
 				})
 			},
-			function (err,result) {
-				if (!dataLoaded) {cb(null); return;}
-				if (blaetterDefined) {cb(null);return;}
-
-				blaetterRegioList.sort();
+			function (callback) {
+				if (!dataLoaded) {callback("No Data Loaded"); return;}
+				if (blaetterDefined) {callback(null);return;}
 				
-				
-				for (i=blaetterRegioList.length-2;i>=0;i--)
-				{
-					if (blaetterRegioList[i]==blaetterRegioList[i+1].substring(0,blaetterRegioList[i].length)) {
-						blaetterRegioList.splice(i,1);
-					}
-				}
-				
-				blaetterAGS_DEList.sort();
-				
-				
-				for (i=blaetterAGS_DEList.length-2;i>=0;i--)
-				{
-					if (blaetterAGS_DEList[i]==blaetterAGS_DEList[i+1].substring(0,blaetterAGS_DEList[i].length)) {
-						blaetterAGS_DEList.splice(i,1);
-					}
-				}
-				blaetterAGS_ATList.sort();
-				
-				
-				for (i=blaetterAGS_ATList.length-2;i>=0;i--)
-				{
-					if (blaetterAGS_ATList[i]==blaetterAGS_ATList[i+1].substring(0,blaetterAGS_ATList[i].length)) {
-						blaetterAGS_ATList.splice(i,1);
-					}
-				}
-				
-				blaetterPLZ_DEList.sort();
-				
-				for (i=blaetterPLZ_DEList.length-2;i>=0;i--)
-				{
-					if (blaetterPLZ_DEList[i]==blaetterPLZ_DEList[i+1].substring(0,blaetterPLZ_DEList[i].length)) {
-						blaetterPLZ_DEList.splice(i,1);
-					}
-				}
+				exports.sortAndReduce(blaetterRegioList);
+				exports.sortAndReduce(blaetterAGS_DEList);
+				exports.sortAndReduce(blaetterAGS_ATList);
+				exports.sortAndReduce(blaetterPLZ_DEList);
 				
 				blaetterDefined=true;
-				if (cb) cb(null);
+				callback(null);
 			}
 			
 			],
 			function(err) {
+			  if (err) {
+			    console.log("exports.initialise incomplete: "+JSON.stringify(err));
+			    cb(err);
+			    return;
+			  }
 				debug("Initialising All Done");
 				if (cb) cb(null);
 			}
