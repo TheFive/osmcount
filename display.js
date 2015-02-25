@@ -874,6 +874,7 @@ exports.table = function(req,res){
     var collectionTarget = db.collection('DataTarget');
     var timeAggregate;
     var timeVorgabe;
+    var timeTableGeneration;
     
 
 	
@@ -1148,6 +1149,7 @@ exports.table = function(req,res){
 			function displayFinalCB (err, results ) {
 				debug("displayFinalCB");
 				// Initialising JavaScript Map
+				timeTableGeneration = new Date().getTime();
 				var header = [];
 				var firstColumn = [];
 				var table =[]; 
@@ -1293,7 +1295,8 @@ exports.table = function(req,res){
 					
 					generateSortHeader(param,header,format);
 					var table = generateTable(param,header,firstColumn,table,format, rank);
-					
+					timeTableGeneration = new Date().getTime() - timeTableGeneration;
+				
 					page.content = '<p><table>'+table+'</table></p>';
 					
 					var pageFooter = "";
@@ -1328,7 +1331,7 @@ exports.table = function(req,res){
 									<b>O</b> Zeige die Overpass Query \
 									<b>R</b> Starte die Overpass Query \
 									<b>#</b> Öffne Overpass Turbo mit CSV Abfrage";
-					pageFooter += "<br>Dauer Aggregate Funktion: "+(timeAggregate/1000)+ "s. Dauer Vorgaben: "+(timeVorgabe/1000)+"s.";
+					pageFooter += "<br>Dauer Aggregate Funktion: "+(timeAggregate/1000)+ "s. Dauer Vorgaben: "+(timeVorgabe/1000)+"s. Dauer Aufbereitung: "+(timeTableGeneration/1000)+"s.";
 					page.footer = pageFooter;
 						
 					debug(JSON.stringify(query,null,' '));
