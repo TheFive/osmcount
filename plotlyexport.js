@@ -16,7 +16,7 @@ function getKreisname(schluessel,kreisnamen) {
   	if (typeof(kreisnamen[schluessel])=='undefined') return schluessel;
 	n = kreisnamen[schluessel].name;
 	n = n.replace("ü","ue");
-	n = n.replace("ö","ae");
+	n = n.replace("ö","oe");
 	n = n.replace("ä","ae");
 	n = n.replace("ß","ss");
     return n;
