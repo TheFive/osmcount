@@ -1,7 +1,7 @@
 var assert =require('assert');
 var lod = require('../LoadDataFromDB.js');
 
-describe('LoadDataFromDB', function () {
+describe.only('LoadDataFromDB', function () {
   describe('insertValues',function() 
   {
     var CC_Type  = {};
@@ -12,6 +12,8 @@ describe('LoadDataFromDB', function () {
 		beforeEach(function() {
       CC_Type.map  = {"123":1};
       CC_Type.list = []; 
+      var undef;
+      CC_Type.blaetterIgnore = undef;
 		});
     it ('should ignore undefined Key', function() {
       osmdoc = {boundary:"postal_code"}
@@ -78,6 +80,32 @@ describe('LoadDataFromDB', function () {
                                     "230":{name:"New Border",typ:"country"},
                                     "23":{name:"New Border",typ:"country"}});
       assert.deepEqual(CC_Type.list,["230000"]);
+    });
+    it ('should should use the blaetter ignore list (ignore case)', function() {
+      CC_Type.keyType = "boundary";
+      CC_Type.keyValue = "administrative";
+      CC_Type.secondInfoKey = "admin_level";
+      CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
+      CC_Type.blaetterIgnore = [{admin_level:2}]
+      osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
+      var key="0";
+      lod.insertValue(CC_Type,key,osmdoc);
+      assert.deepEqual(CC_Type.map,{"123":1,
+                                    "0":{name:"New Border",typ:"country"}});
+      assert.deepEqual(CC_Type.list,[]);
+    });
+    it ('should should use the blaetter ignore list (pass case)', function() {
+      CC_Type.keyType = "boundary";
+      CC_Type.keyValue = "administrative";
+      CC_Type.secondInfoKey = "admin_level";
+      CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
+      CC_Type.blaetterIgnore = [{admin_level:2}]
+      osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3"}
+      var key="0";
+      lod.insertValue(CC_Type,key,osmdoc);
+      assert.deepEqual(CC_Type.map,{"123":1,
+                                    "0":{name:"New Border",typ:"state"}});
+      assert.deepEqual(CC_Type.list,["0"]);
     });
   });
   describe('sortAndReduce',function() 

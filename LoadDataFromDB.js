@@ -55,7 +55,8 @@ var DE_AGS = {map: exports.schluesselMapAGS,
 var AT_AGS = {map : exports.schluesselMapAGS_AT,
               list: exports.blaetterAGS_DE,
               keyType: "boundary",
-              keyValue: "administrative"};
+              keyValue: "administrative",
+              blaetterIgnore: [{"admin_level":0}]};
               
 var DE_RGS = {map  : exports.schluesselMapRegio,
               list : exports.blaetterRegio,
@@ -106,11 +107,22 @@ exports.insertValue = function insertValue(map,key,osmdoc) {
         value.typ = osmdoc[map.secondInfoKey];
       } 	
     }
-    map.map[key]=value;
-    map.list.push(key);
-    while (key.charAt(key.length-1)=='0') {
+    var pushOnList = true;    
+    // check wether to ignore in List
+    if (typeof (map.blaetterIgnore)!='undefined') {
+      for (var i = 0;i<map.blaetterIgnore.length;i++) {
+        for (var k in map.blaetterIgnore[i]) {
+          if (osmdoc[k]==map.blaetterIgnore[i][k]) {
+            pushOnList = false;;
+          }
+        }
+      }
+    }
+    map.map[key]=value;    
+    if (pushOnList) map.list.push(key);
+    while (key.length>1 && key.charAt(key.length-1)=='0') {
     	key = key.slice(0,key.length-1);
-      map.map[key]=value;
+      if (pushOnList) map.map[key]=value;
     }
   }
 }
