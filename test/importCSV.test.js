@@ -1,6 +1,7 @@
 var assert =require('assert');
 var importCSV = require('../ImportCSV.js');
 var configuration = require('../configuration.js');
+var fs=require("fs");
 
 
 describe('importCSV', function() {
