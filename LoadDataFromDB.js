@@ -47,30 +47,33 @@ var adminLevel_DE = {'1':'admin_level 1',
               
 var DE_AGS = {map: exports.schluesselMapAGS,
              list: exports.blaetterAGS_DE,
-             keyType : "boundary",
-             keyValue : "administrative",
+             matchKey: {boundary:"administrative",
+                        osmcount_country:"DE"},
              secondInfoKey : "admin_level",
              secondInfoValueMap: adminLevel_DE};
              
 var AT_AGS = {map : exports.schluesselMapAGS_AT,
-              list: exports.blaetterAGS_DE,
-              keyType: "boundary",
-              keyValue: "administrative",
+              list: exports.blaetterAGS_AT,
+              matchKey: {boundary:"administrative",
+                         osmcount_country:"AT"},
               blaetterIgnore: [{"admin_level":2}]};
               
 var DE_RGS = {map  : exports.schluesselMapRegio,
               list : exports.blaetterRegio,
-              keyType : "boundary",
-              keyValue : "administrative",
+              matchKey: {boundary:"administrative",
+                         osmcount_country:"DE"},
               secondInfoKey: "admin_level",
               secondInfoValueMap:adminLevel_DE};
               
 var DE_PLZ = {map  : exports.schluesselMapPLZ_DE,
               list : exports.blaetterPLZ_DE,
-              keyType: "boundary",
-              keyValue: ["postal_code","administrative"]};
+              matchKey: {boundary:["postal_code","administrative"],
+                         osmcount_country:"DE"}};
               
-
+exports.DE_PLZ = DE_PLZ;
+exports.DE_RGS = DE_RGS;
+exports.AT_AGS = AT_AGS;
+exports.DE_AGS = DE_AGS;
 
 
 
@@ -88,16 +91,21 @@ exports.insertValue = function insertValue(map,key,osmdoc) {
   var nameDefined = (typeof(osmdoc.name) != 'undefined');
   
   // check Type of Object
-  var typeCorrect = false;
-  if (Array.isArray(map.keyValue)) {
-  	for (var i = 0; i< map.keyValue.length;i++) {
-  	  if (osmdoc[map.keyType]==map.keyValue[i]) typeCorrect = true;
-  	}
-  } else {
-    typeCorrect = (osmdoc[map.keyType]==map.keyValue);
+  var allTypeCorrect = true;
+  for (k in map.matchKey) {
+    var v = map.matchKey[k];
+    var typeCorrect = false;
+    if (Array.isArray(v)) {
+  	  for (var i = 0; i< v.length;i++) {
+  	    if (osmdoc[k]==v[i]) typeCorrect = true;
+  	  }
+    } else {
+      typeCorrect = (osmdoc[k]==v);
+    }
+    allTypeCorrect = (allTypeCorrect && typeCorrect);
   }
   
-  if (  keyDefined && nameDefined && typeCorrect ) {
+  if (  keyDefined && nameDefined && allTypeCorrect ) {
     value = {};
     value.name = osmdoc.name;
     value.typ = "-";

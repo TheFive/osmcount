@@ -1,4 +1,4 @@
-fs=require("fs");
+var fs=require("fs");
 var util    = require('./util.js');
 var path    = require('path');
 var debug   = require('debug')('importCSV');
