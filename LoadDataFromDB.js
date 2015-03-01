@@ -56,7 +56,7 @@ var AT_AGS = {map : exports.schluesselMapAGS_AT,
               list: exports.blaetterAGS_DE,
               keyType: "boundary",
               keyValue: "administrative",
-              blaetterIgnore: [{"admin_level":0}]};
+              blaetterIgnore: [{"admin_level":2}]};
               
 var DE_RGS = {map  : exports.schluesselMapRegio,
               list : exports.blaetterRegio,
