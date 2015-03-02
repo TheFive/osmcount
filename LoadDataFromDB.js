@@ -11,11 +11,22 @@
 
 var async=require('async');
 var mc = require('mongodb').MongoClient;
-var wochenaufgabe = require('./wochenaufgabe.js');
 var config=require('./configuration');
 var debug   = require('debug')('LoadDataFromDB');
 
 
+var dataFilter = 
+{
+  "name":1,
+  "de:regionalschluessel":1,
+  "postal_code":1,
+  "ref:at:gkz":1,
+  "de:amtlicher_gemeindeschluessel":1,
+  boundary:1,
+  admin_level:1,
+  "de:regionalschluessel":1,
+  "osmcount_country":1
+}
 
 
 var adminLevel_DE = {'1':'admin_level 1',
@@ -30,12 +41,7 @@ var adminLevel_DE = {'1':'admin_level 1',
               '10': 'Ortsteil (10)',
               '11': 'Ortsteil (11)'        }
               
-var DE_AGS = {map: Object(),
-             list: [],
-             matchKey: {boundary:"administrative",
-                        osmcount_country:"DE"},
-             secondInfoKey : "admin_level",
-             secondInfoValueMap: adminLevel_DE};
+
              
 var AT_AGS = {map : Object(),
               list: [],
@@ -58,7 +64,14 @@ var DE_PLZ = {map  : Object(),
 exports.DE_PLZ = DE_PLZ;
 exports.DE_RGS = DE_RGS;
 exports.AT_AGS = AT_AGS;
-exports.DE_AGS = DE_AGS;
+exports.DE_AGS = {map: Object(),
+             list: [],
+             matchKey: {boundary:"administrative",
+                        osmcount_country:"DE"},
+             secondInfoKey : "admin_level",
+             secondInfoValueMap: adminLevel_DE};
+             
+var DE_AGS = exports.DE_AGS;
 
 
 
@@ -139,7 +152,7 @@ exports.initialise = function (cb) {
 	if (!dataLoaded) {
 		async.series([
 			function(callback) {
-				mongodb.collection("OSMBoundaries").find( {}, wochenaufgabe.boundaryPrototype,
+				mongodb.collection("OSMBoundaries").find( {}, dataFilter,
 								function(err, result) {
 					if (err) {
 						console.log("Error occured in function: LoadDataFromDB.initialise");

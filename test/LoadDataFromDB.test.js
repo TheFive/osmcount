@@ -166,7 +166,7 @@ describe('LoadDataFromDB', function () {
         assert.deepEqual(lod.DE_PLZ.map, data.DE_PLZ.map,"DE_PLZ maps not the same");
         assert.deepEqual(lod.DE_PLZ.list,data.DE_PLZ.list,"DE_PLZ list not the same");
     });
-    it('should read the Data DE_AGS',function() {     
+    it('should read the Data DE_AGS',function() {   
         assert.deepEqual(lod.DE_AGS.map, data.DE_AGS.map,"DE_AGS map not the same");
         assert.deepEqual(lod.DE_AGS.list,data.DE_AGS.list,"DE_AGS list not the same");
     });

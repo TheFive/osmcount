@@ -34,6 +34,7 @@ async.auto( {
 	}, 
 	function (err) {
 		if (err) throw(err);
+		
 		debug("Async Configuration Ready");
 	}
 )
@@ -79,17 +80,7 @@ app.get('/*', function(req, res) {
 debug("Start Listening to Server Port");
 // Start to lisen on port
 
-try {
-  app.listen(config.getServerPort());
-} catch (err) {
-    console.log(">"+err+"<");
-  
-  if (err =="Error: listen EADDRINUSE")
-  {
-    console.log("OSMCount is allready running, please stop other instance before starting");
-    process.exit();
-  }
-}
+app.listen(config.getServerPort());
 
 
 console.log("Server has started and is listening to localhost:"+config.getServerPort());
