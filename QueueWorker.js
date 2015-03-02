@@ -2,10 +2,13 @@ var config    = require('./configuration.js');
 var lod       = require('./LoadOverpassData.js');
 var util      = require('./util.js')
 var async     = require('async');
+var fs        = require('fs');
 var debug     = require('debug')('QueueWorker');
  debug.entry  = require('debug')('QueueWorker:entry');
  debug.data   = require('debug')('QueueWorker:data');
 var ObjectID  = require('mongodb').ObjectID;
+
+exports.processSignal = '';
 
 
 function getWorkingJob(cb) {	
@@ -35,6 +38,11 @@ function getNextJob(cb) {
 	debug.entry("getNextJob(cb)");
 	var date= new Date();
 	var dateJSON = date.toJSON();
+	
+	if (exports.processSignal=='SIGINT') {
+    console.log( "\nExiting OSMCount" );
+	  process.exit();
+	}	
 	mongodb = config.getDB();
 	debug.data("Current Time %s",dateJSON);
 	debug.entry("getNextJob->call CB");

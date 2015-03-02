@@ -415,5 +415,20 @@
         "wikidata": "Q200208",
         "wikipedia": "de:Reken",
         "osmcount_country":"DE"
-      }
+      },
+      {
+    "admin_level" : "8",
+    "boundary" : "administrative",
+    "is_in" : "Bezirk Reutte,Tirol,Österreich,Europe",
+    "name" : "Vils",
+    "name:prefix:at" : "Stadtgemeinde",
+    "note" : "Stadt",
+    "postal_code" : "6682",
+    "ref:at:gkz" : "70833",
+    "type" : "boundary",
+    "wikipedia:de" : "Vils (Stadt)",
+    "osm_id" : 28755,
+    "osm_type" : "relation",
+    "osmcount_country" : "AT"
+}
 ]

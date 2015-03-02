@@ -11,27 +11,12 @@
 
 var async=require('async');
 var mc = require('mongodb').MongoClient;
-
+var wochenaufgabe = require('./wochenaufgabe.js');
 var config=require('./configuration');
 var debug   = require('debug')('LoadDataFromDB');
 
 
 
-exports.schluesselMapRegio = Object();
-exports.blaetterRegio = [];
-
-exports.schluesselMapAGS = Object();
-exports.schluesselMapAGS_AT = Object();
-exports.schluesselMapPLZ_DE = Object();
-exports.blaetterAGS_DE = [];
-exports.blaetterAGS_AT = [];
-exports.blaetterPLZ_DE = [];
-
-
-var blaetterRegioList = exports.blaetterRegio;
-var blaetterAGS_DEList = exports.blaetterAGS_DE;
-var blaetterAGS_ATList = exports.blaetterAGS_AT;
-var blaetterPLZ_DEList = exports.blaetterPLZ_DE;
 
 var adminLevel_DE = {'1':'admin_level 1',
               '2': 'Staat',
@@ -45,28 +30,28 @@ var adminLevel_DE = {'1':'admin_level 1',
               '10': 'Ortsteil (10)',
               '11': 'Ortsteil (11)'        }
               
-var DE_AGS = {map: exports.schluesselMapAGS,
-             list: exports.blaetterAGS_DE,
+var DE_AGS = {map: Object(),
+             list: [],
              matchKey: {boundary:"administrative",
                         osmcount_country:"DE"},
              secondInfoKey : "admin_level",
              secondInfoValueMap: adminLevel_DE};
              
-var AT_AGS = {map : exports.schluesselMapAGS_AT,
-              list: exports.blaetterAGS_AT,
+var AT_AGS = {map : Object(),
+              list: [],
               matchKey: {boundary:"administrative",
                          osmcount_country:"AT"},
               blaetterIgnore: [{"admin_level":2}]};
               
-var DE_RGS = {map  : exports.schluesselMapRegio,
-              list : exports.blaetterRegio,
+var DE_RGS = {map  : Object(),
+              list : [],
               matchKey: {boundary:"administrative",
                          osmcount_country:"DE"},
               secondInfoKey: "admin_level",
               secondInfoValueMap:adminLevel_DE};
               
-var DE_PLZ = {map  : exports.schluesselMapPLZ_DE,
-              list : exports.blaetterPLZ_DE,
+var DE_PLZ = {map  : Object(),
+              list : [],
               matchKey: {boundary:["postal_code","administrative"],
                          osmcount_country:"DE"}};
               
@@ -154,7 +139,7 @@ exports.initialise = function (cb) {
 	if (!dataLoaded) {
 		async.series([
 			function(callback) {
-				mongodb.collection("OSMBoundaries").find( {}, 
+				mongodb.collection("OSMBoundaries").find( {}, wochenaufgabe.boundaryPrototype,
 								function(err, result) {
 					if (err) {
 						console.log("Error occured in function: LoadDataFromDB.initialise");
@@ -189,10 +174,10 @@ exports.initialise = function (cb) {
 				if (!dataLoaded) {callback("No Data Loaded"); return;}
 				if (blaetterDefined) {callback(null);return;}
 				
-				exports.sortAndReduce(blaetterRegioList);
-				exports.sortAndReduce(blaetterAGS_DEList);
-				exports.sortAndReduce(blaetterAGS_ATList);
-				exports.sortAndReduce(blaetterPLZ_DEList);
+				exports.sortAndReduce(DE_AGS.list);
+				exports.sortAndReduce(DE_PLZ.list);
+				exports.sortAndReduce(AT_AGS.list);
+				exports.sortAndReduce(DE_RGS.list);
 				
 				blaetterDefined=true;
 				callback(null);

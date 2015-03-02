@@ -79,6 +79,11 @@ function removeBoundariesData (cb,result) {
 		cb(err,count);
 	})
 }
+function copyRelevantTags(boundary,osmData) {
+  for (k in wochenaufgabe.boundaryPrototype) {
+    b[k]=osmData.tags[k];
+  }
+}
 function insertBoundariesData (cb,result) {
 	debug("insertBoundariesData");
 	var db = configuration.getDB();
@@ -90,7 +95,8 @@ function insertBoundariesData (cb,result) {
 	boundariesOverpass =JSON.parse(result.overpassDE).elements;
 	for (i=0;i<boundariesOverpass.length;i++) {
 		var b = {};
-		b = boundariesOverpass[i].tags;
+		//b = boundariesOverpass[i].tags;
+		copyRelevantTags(b,boundariesOverpass[i]);
 		b.osm_id = boundariesOverpass[i].id;
 		b.osm_type = boundariesOverpass[i].type;
 		b.osmcount_country="DE";
@@ -191,21 +197,15 @@ exports.runOverpass= function(query, job,result, cb) {
 exports.createQuery = function(aufgabe,exectime,referenceJob)
 {
 	debug("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
+	var wa = wochenaufgabe.map[aufgabe];
+	if (typeof(wa) == 'undefined')  {
+	  referenceJob.error = "Wochenaufgabe nicht definiert";
+	  return;
+	}
 	var jobs = [];
- 	var blaetter;
- 	if (aufgabe == "AddrWOstreet") {
- 		blaetter = loadDataFromDB.blaetterRegio;
- 	}
- 	if (aufgabe == "Apotheke") {
- 		blaetter = loadDataFromDB.blaetterAGS_DE;
- 	}
- 	if (aufgabe == "Apotheke_AT") {
- 		blaetter = loadDataFromDB.blaetterAGS_AT;
- 	}
- 	if (aufgabe == "ApothekePLZ_DE") {
- 		blaetter = loadDataFromDB.blaetterPLZ_DE;
- 	}
-	if ((aufgabe == "AddrWOStreet") || (aufgabe == "Apotheke")|| (aufgabe == "ApothekePLZ_DE")|| (aufgabe == "Apotheke_AT")) {
+ 	var blaetter = wa.map.list;
+
+	if (typeof(blaetter)!='undefined') {
 		keys = blaetter;
 		for (i =0;i<keys.length;i++) {	
 			debug(keys[i]);	

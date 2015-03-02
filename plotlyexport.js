@@ -36,7 +36,7 @@ exports.plot = function(req,res){
     var collection = db.collection('DataCollection');
    
 
-	var kreisnamen =  wochenaufgabe.map[measure].keyMap; 
+	var kreisnamen =  wochenaufgabe.map[measure].map.map; 
 
  
     valueToCount = "$count";
@@ -190,7 +190,7 @@ exports.plotValues = function(req,res){
     var collection = db.collection('DataCollection');
    
 
- 	var kreisnamen =  wochenaufgabe.map[measure].keyMap; 
+ 	var kreisnamen =  wochenaufgabe.map[measure].map.map; 
  
  
     valueToCount = "$count";

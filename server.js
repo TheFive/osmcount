@@ -4,7 +4,7 @@ var async   = require('async');
 var path    = require('path');
 var debug   = require('debug')('server');
  debug.entry   = require('debug')('server:entry');
- debug.data    = require('debug')('QueueWorker:data');
+ debug.data    = require('debug')('server:data');
 
 // require own modules
 var config           = require('./configuration.js');
@@ -38,6 +38,11 @@ async.auto( {
 	}
 )
 
+
+process.on( 'SIGINT', function() {
+  console.log( "\nRequest for Shutdown OSMCount, Please wait for OverpassQuery. SIGINT (Ctrl-C)" );
+  queue.processSignal = 'SIGINT';
+})
 
 
 
@@ -73,8 +78,18 @@ app.get('/*', function(req, res) {
 
 debug("Start Listening to Server Port");
 // Start to lisen on port
-app.listen(config.getServerPort());
 
+try {
+  app.listen(config.getServerPort());
+} catch (err) {
+    console.log(">"+err+"<");
+  
+  if (err =="Error: listen EADDRINUSE")
+  {
+    console.log("OSMCount is allready running, please stop other instance before starting");
+    process.exit();
+  }
+}
 
 
 console.log("Server has started and is listening to localhost:"+config.getServerPort());

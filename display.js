@@ -731,7 +731,7 @@ function generateFilterTable(param,header) {
 	var filterSelector = "";
     var filterText = "";
     if (param.location!="") {
-    	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
+    	var kreisnamen =  wochenaufgabe.map[param.measure].map.map; 
     	
     	filterText+= param.locationName+" ("+param.location+")";
     	filterSelector += optionValue(param.location,filterText,param.location);
@@ -891,7 +891,7 @@ exports.table = function(req,res){
     	return;
     }
     
- 	var kreisnamen =  wochenaufgabe.map[param.measure].keyMap; 
+ 	var kreisnamen =  wochenaufgabe.map[param.measure].map.map; 
  	
 
    

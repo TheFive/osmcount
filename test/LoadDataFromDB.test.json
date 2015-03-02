@@ -41,6 +41,7 @@
                     },
              "list":["02000000","05111000","05554044"]
              },
-  "AT_AGS": {"map":{"0":{"name":"Österreich","typ":"-"}},
-             "list":[]}
+  "AT_AGS": {"map":{"0":{"name":"Österreich","typ":"-"},
+                    "70833":{"name":"Vils","typ":"-"}},
+             "list":["70833"]}
 }

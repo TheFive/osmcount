@@ -36,7 +36,7 @@ var WAApotheke = {
     query:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
   	querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
   },
-  keyMap : loadDataFromDB.schluesselMapAGS,
+  map : loadDataFromDB.DE_AGS,
   key: "de:amtlicher_gemeindeschluessel",
   ranktype:"UP",
   tagCounter : exports.tagCounter
@@ -50,7 +50,7 @@ var WAApotheke_AT = {
     query:'[out:json][date:":timestamp:"];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
   	querySub: '[out:json];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
   },
-  keyMap : loadDataFromDB.schluesselMapAGS_AT,
+  map: loadDataFromDB.AT_AGS,
   key: "ref:at:gkz",
   ranktype:"UP",
   tagCounter:exports.tagCounter
@@ -65,7 +65,8 @@ var WAApotheke_CH = {
     query:'[out:json][date:":timestamp:"];area["XXXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
   	querySub: '[out:json];area["XXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
   },
-  keyMap : loadDataFromDB.schluesselMapAGS_CH,
+
+  map: loadDataFromDB.CH_AGS,
   key: "XXX",
   ranktype:"UP",
   tagCounter:exports.tagCounter
@@ -80,7 +81,8 @@ var WAApothekePLZ_DE= {
     query:'[out:json][date:":timestamp:"];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
   	querySub: '[out:json];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
   },
-  keyMap : loadDataFromDB.schluesselMapPLZ_DE,
+
+  map: loadDataFromDB.DE_PLZ,
   key: "postal_code",
   ranktype:"UP",
   tagCounter:null
@@ -108,7 +110,8 @@ rel(r.associatedStreet:"house")->.asHouseRel; \n\
 (.allHousesRel; - .asHouseRel);out ids;',
 	querySub: this.query
   },
-  keyMap : loadDataFromDB.schluesselMapRegio,
+
+  map: loadDataFromDB.DE_RGS,
   key: "de:regionalschluessel",
   ranktype: "down",
   tagCounter: null
@@ -124,4 +127,15 @@ exports.map = wochenaufgaben;
 
 
 
-
+exports.boundaryPrototype = 
+{
+  "name":1,
+  "de:regionalschluessel":1,
+  "postal_code":1,
+  "ref:at:gkz":1,
+  "de:amtlicher_gemeindeschluessel":1,
+  boundary:1,
+  admin_level:1,
+  "de:regionalschluessel":1,
+  "osmcount_country":1
+}
