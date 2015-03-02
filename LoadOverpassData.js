@@ -80,54 +80,33 @@ function removeBoundariesData (cb,result) {
 	})
 }
 function copyRelevantTags(boundary,osmData) {
-  for (k in wochenaufgabe.boundaryPrototype) {
+  for (var k in wochenaufgabe.boundaryPrototype) {
     b[k]=osmData.tags[k];
   }
 }
-function insertBoundariesData (cb,result) {
-	debug("insertBoundariesData");
-	var db = configuration.getDB();
-	
-	var boundariesOverpass;
-	var boundaries = [];
-	var b;
-	var i;
-	boundariesOverpass =JSON.parse(result.overpassDE).elements;
-	for (i=0;i<boundariesOverpass.length;i++) {
+
+function copyBoundaries(overpassStr,countryStr,boundaries) {
+	var boundariesOverpass =JSON.parse(overpassStr).elements;
+	for (var i=0;i<boundariesOverpass.length;i++) {
 		var b = {};
 		//b = boundariesOverpass[i].tags;
 		copyRelevantTags(b,boundariesOverpass[i]);
 		b.osm_id = boundariesOverpass[i].id;
 		b.osm_type = boundariesOverpass[i].type;
-		b.osmcount_country="DE";
+		b.osmcount_country=countryStr;
 		boundaries.push(b);
 	}	
-    boundariesOverpass = JSON.parse(result.overpassAT).elements;
+}
 
-	for (i=0;i<boundariesOverpass.length;i++) {
-		var b = {};
-		console.dir(boundariesOverpass[i]);
-		b = boundariesOverpass[i].tags;		
+function insertBoundariesData (cb,result) {
+	debug("insertBoundariesData");
+	var db = configuration.getDB();
+	
+	var boundaries = [];
 
-		// Wien Auswertungsfix
-		if (b["ref:at:gkz"] == "9,90001") b["ref:at:gkz"] ="9";
-		if (b["ref:at:gkz"] == "9;90001") b["ref:at:gkz"] ="9";
-		b.osm_id = boundariesOverpass[i].id;
-		b.osm_type = boundariesOverpass[i].type;
-		b.osmcount_country="AT";
-		boundaries.push(b);
-	}	
-    boundariesOverpass = JSON.parse(result.overpassCH).elements;
-
-	for (i=0;i<boundariesOverpass.length;i++) {
-		var b = {};
-		//console.dir(boundariesOverpass[i]);
-		b = boundariesOverpass[i].tags;		
-		b.osm_id = boundariesOverpass[i].id;
-		b.osmcount_country="CH";
-		b.osm_type = boundariesOverpass[i].type;
-		boundaries.push(b);
-	}	
+	copyBoundaries(result.overpassCH,"CH",boundaries);
+	copyBoundaries(result.overpassDE,"DE",boundaries);
+	copyBoundaries(result.overpassAT,"AT",boundaries);
 	
 	db.collection("OSMBoundaries").insert(boundaries,{w:1},function(err,result){
 		debug("insertBoundariesData->CB");
