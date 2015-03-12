@@ -13,18 +13,18 @@ var async    = require('async');
 
 
 
-var query = 
-{ DE:'[timeout:4800][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
+var query =
+{ DE:'[timeout:900][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
 out center meta;',
- AT: '[timeout:1800][out:json];area["int_name"="Österreich"]["admin_level"="2"]->.a;\
+ AT: '[timeout:900][out:json];area["int_name"="Österreich"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
 out center meta;',
- CH: '[timeout:1800][out:json];area["int_name"="Schweiz"]["admin_level"="2"]->.a;\
+ CH: '[timeout:900][out:json];area["int_name"="Schweiz"]["admin_level"="2"]->.a;\
 (node(area.a)[amenity=pharmacy]; \
  way(area.a)[amenity=pharmacy]; \
  rel(area.a)[amenity=pharmacy]); \
@@ -32,22 +32,20 @@ out center meta;'
 }
 
 function cleanObject(obj) {
-	
-     for (k in obj) {
-     	if (typeof (obj[k]) =='object') {
-     	  cleanObject(obj[k]);
-     	}
-     	if (k.indexOf(".") >0 ) {
-     	    //console.log("Fount ." +k.search("."));
-     		//console.dir(data);
-     		
-     		delete obj[k]; 
-     		console.log("Deletet"+k);
-     		//console.log("After Delete");
-     		//console.dir(data);
-     	}
+  for (k in obj) {
+    if (typeof (obj[k]) =='object') {
+      cleanObject(obj[k]);
+    }
+    if (k.indexOf(".") >0 ) {
+     	//console.log("Fount ." +k.search("."));
+     	//console.dir(data);
+     	delete obj[k];
+     	console.log("Deletet"+k);
+     	//console.log("After Delete");
+     	//console.dir(data);
      }
-   }
+  }
+}
 
 function cleanTags(elementList) {
    debug("cleanTags");
@@ -72,7 +70,7 @@ function getPOIOverpass(cb,result) {
 		return;
 	}
 	debug("Overpass Abfrage Starten für "+country);
-	
+
 	loadOverpassData.overpassQuery(query[country], function(err,result) {
 		debug("getPOIByPLZOverpass->CB");
 		debug("Overpass Abfrage Beendet für "+country);
@@ -93,14 +91,14 @@ function getPOIOverpass(cb,result) {
 
 function getPOIByPLZMongo(cb,result) {
 	debug("getPOIByPLZMongo");
-	
+
 	var country = result.country;
-	var db = config.getDB();
+	var db = config.getMongoDB();
 	var data = result.overpass;
 	list = {};
 	debug("Elemente geladen: "+data.elements.length+" für "+country);
-	
-	
+
+
 	for (i =0;i<data.elements.length;i++) {
 		element = data.elements[i];
 		keyIntern = element.type + element.id;
@@ -136,12 +134,12 @@ function getPOIByPLZMongo(cb,result) {
 					}
 				}
 			}
-			// Check all not handled overpass result for insert 
+			// Check all not handled overpass result for insert
 			for (k in list) {
 				if (typeof(list[k]._id) == 'undefined') {
 					insert.push(list[k]);
 				}
-			}		
+			}
 			erg = {};
 			debug("To be removed: "+remove.length);
 			debug("To be updated: "+update.length);
@@ -150,7 +148,7 @@ function getPOIByPLZMongo(cb,result) {
 			erg.update = update;
 			erg.insert = insert;
 			cb(null,erg);
-		}			
+		}
 	})
 }
 
@@ -162,22 +160,22 @@ function removePOIFromMongo(cb,result) {
   	return;
   }
   debug("To Be Removed: "+remove.length + " DataSets");
-  var db = config.getDB();
-  
+  var db = config.getMongoDB();
+
   var q = async.queue(function (task, cb) {
     debug("removePOIFromMongo->Queue");
     db.collection("POI").remove({_id:task.data._id}, function(err,result) {
-      debug("removePOIFromMongo->MongoCB");    
+      debug("removePOIFromMongo->MongoCB");
       if (err) {
     	console.log("Error "+err);
     	cb(err,null);
       } else {
     	cb (null,null);
       }
-  	})   
+  	})
   }, 2);
   q.pause();
-  
+
   q.drain = function() {
     cb(null,null)
   }
@@ -199,23 +197,23 @@ function updatePOIFromMongo(cb,result) {
   }
   cleanTags(update);
   debug("To Be Updated: "+update.length + " DataSets");
-  db = config.getDB();
+  db = config.getMongoDB();
 
   var q = async.queue(function (task, cb) {
     debug("updatePOIFromMongo->Queue");
-   
+
     db.collection("POI").save(task.data, function(err,result) {
-      debug("updatePOIFromMongo->MongoCB");    
+      debug("updatePOIFromMongo->MongoCB");
     if (err) {
     	console.log("Error: "+err);
     	cb(err,null);
       } else {
     	cb (null,null);
       }
-  	})   
+  	})
   }, 10);
   q.pause();
-  
+
   q.drain = function() {
     cb(null,null)
   }
@@ -231,7 +229,7 @@ function insertPOIFromMongo(cb,result) {
   debug("insertPOIFromMongo");
   var insert = result.mongo.insert;
   debug("To Be Inserted: "+insert.length + " DataSets");
-  db = config.getDB();
+  db = config.getMongoDB();
   if (insert.length == 0) {
   	cb(null,null);
   	return;
@@ -258,8 +256,8 @@ var nominatimUrl = nominatimMapQuestUrl;
 function nominatim(cb,result) {
   debug("nominatim");
   q = async.queue(function(task,cb) {
-    db = config.getDB();
-    db.collection("POI").findOne( 
+    db = config.getMongoDB();
+    db.collection("POI").findOne(
                            {$or:[
                            {"nominatim.timestamp":{$exists:0}},
                            { "nominatim.timestamp":{$gte:"$timestamp"}}
@@ -281,7 +279,7 @@ function nominatim(cb,result) {
 					 break;
 		  case "relation": osm_type = "osm_type=R";
 					 break;
-		}		
+		}
 		// return obj as job object
 		url = nominatimUrl+"?format=json&";
 		url += osm_type;
@@ -297,7 +295,7 @@ function nominatim(cb,result) {
 		  if (response.statusCode==200) {
 			elementData = JSON.parse(body);
 			date = new Date();
-			
+
 			if (typeof(elementData.error)=='undefined') {
 				elementData.address.timestamp = date;
 				obj.nominatim = elementData.address;
@@ -324,7 +322,7 @@ function nominatim(cb,result) {
 		  }
 		})
       }
-	})	
+	})
   },1);
   q.push({q:q});
   cb(null,null);
@@ -332,9 +330,9 @@ function nominatim(cb,result) {
 
 
   debug("storePOI");
-  
+
   async.series([ function(cb) {
-       async.auto( {config: config.initialiseDB,
+       async.auto( {config: config.initialiseMongoDB,
              country: function(cb,result) {cb(null,"CH")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
@@ -345,11 +343,11 @@ function nominatim(cb,result) {
              function(err,results) {
              	debug("READY with CH");
              	cb();
-             	
+
              }
-             
+
              )},function(cb) {
-          async.auto( {config: config.initialiseDB,
+          async.auto( {config: config.initialiseMongoDB,
              country: function(cb,result) {cb(null,"DE")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
@@ -360,13 +358,13 @@ function nominatim(cb,result) {
              function(err,results) {
              	debug("READY with AT");
              	cb();
-             	
+
              }
-             
+
              )},
-             
+
              function(cb) {
-          async.auto( {config: config.initialiseDB,
+          async.auto( {config: config.initialiseMongoDB,
              country: function(cb,result) {cb(null,"AT")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
@@ -377,7 +375,7 @@ function nominatim(cb,result) {
              function(err,results) {
              	debug("READY with DE");
              	cb();
-             	
+
              }
-             
+
              )}]);

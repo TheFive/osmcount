@@ -25,52 +25,52 @@ function getKreisname(schluessel,kreisnamen) {
 exports.plot = function(req,res){
 	debug.entry("exports.plot");
 	var db = configuration.getDB();
-	
+
 	var measure = req.params.measure;
     var location = req.query.location;
     if (typeof(location) =='undefined') location="";
     var lok = req.query.lok;
     var lengthOfKey = 2;
     if (typeof(parseInt(lok))=='number') lengthOfKey = parseInt(lok);
-    
+
     var collection = db.collection('DataCollection');
-   
 
-	var kreisnamen =  wochenaufgabe.map[measure].map.map; 
 
- 
+	var kreisnamen =  wochenaufgabe.map[measure].map.map;
+
+
     valueToCount = "$count";
    	valueToDisplay = "$count";
-      
+
     var projection = {$project:{measure:1,timestamp:1,schluessel:1,count:1,source:1}};
-  
+
     var filterOneMeasure = {$match: { measure: measure}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+location}}};
- 
+
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,lengthOfKey]},
     						 			  timestamp: "$timestamp",
     						 			  timestampShort: {$substr: ["$timestamp",0,10]},
     						 			  count: valueToCount,
     						 			  total: "$count",
     						 			  source: "$source"
-    						 			  }};	
+    						 			  }};
      var aggregateMeasuresGroup = {$group: { _id: { row: "$schluessel",source:"$source"},
     						 		    count	: {$sum: "$count" },
     						 		    total	: {$sum: "$total" },
     						 		    timestamp:{$last:"$timestamp"},
     						 		    schluessel: {$last:"$schluessel"},
     						 		    timestampShort: {$last:"$timestampShort"}}};
-      
+
     var presort = {$sort: { timestamp:1}};
- 
+
     var aggregateTimeAxisStep2 = {$group: { _id: { row: "$schluessel",col:"$timestampShort"},
     						 		    cell	: {$last: valueToDisplay }}};
 
      var postsort = {$sort: { _id:1}};
-   
-    
-   
-    	
+
+
+
+
     var query = [projection,
                  filterOneMeasure,
 				 filterRegionalschluessel,
@@ -81,13 +81,13 @@ exports.plot = function(req,res){
     			 postsort];
 
 
-    						 		  
-    						 		  
+
+
 	debug.data("query:"+JSON.stringify(query));
 
-    var aggFunc=query;   						
+    var aggFunc=query;
     var items = [];
-    async.parallel( [ 
+    async.parallel( [
     	function aggregateCollection(callback) {
     		debug.entry("aggregateCollection");
 			collection.aggregate(	query
@@ -111,19 +111,19 @@ exports.plot = function(req,res){
 				//iterate total result array
 				// and generate 2 Dimensional Table
 				for (i=0;i < items.length;i++) {
-			
-			
+
+
 					measure = items[i];
 					debug.data("Measure i"+i+JSON.stringify(measure));
 					schluessel=measure._id.row;
 					datum=measure._id.col;
 					cell=parseFloat(measure.cell);
-					
-					
-					
-					//generate new Header or Rows and Cell if necessary	
+
+
+
+					//generate new Header or Rows and Cell if necessary
 					if (typeof(bundeslandRow[schluessel])=='undefined') {
-						
+
 						bundeslandRow[schluessel]={};
 						bundeslandRow[schluessel].x = [];
 						bundeslandRow[schluessel].y = [];
@@ -138,7 +138,7 @@ exports.plot = function(req,res){
 					data.push(bundeslandRow[key]);
 				}
 				graphLocation = getKreisname(location,kreisnamen);
-				
+
 				filenamePlotly = "OSMWA_"+measure+"_"+graphLocation+"_"+lengthOfKey;
 				title = "--"
 				switch (measure) {
@@ -147,13 +147,13 @@ exports.plot = function(req,res){
 					case "AddrWOStreet": title = "Adressen ohne Strasse fuer "+graphLocation;
 								break;
 					default: title = "--";
-				
+
 				}
 				var style = {title: title};
-				
+
 				var graphOptions = {filename: filenamePlotly, fileopt: "overwrite",layout:style};
 				plotly.plot(data, graphOptions, function (err, msg) {
-			
+
     			res.set('Content-Type', 'text/html');
     			if (!err) {
     				page = htmlPage.create("table");
@@ -162,11 +162,11 @@ exports.plot = function(req,res){
     				res.end(page.generatePage());
     			} else {
     				res.end("Fehler von Plotly: "+ JSON.stringify(err));
-    			}		
+    			}
 				});
-				
+
 			}
-			
+
 		)
 
 }
@@ -174,11 +174,11 @@ exports.plot = function(req,res){
 exports.plotValues = function(req,res){
 	debug.entry("exports.plotValues");
 	var db = configuration.getDB();
-	
+
 	var measure = req.params.measure;
-	
-	
-	if (   (measure != "Apotheke") 
+
+
+	if (   (measure != "Apotheke")
 	    && (measure != "Apotheke_AT")){
 		res.set('Content-Type', 'text/html');
 		res.end("Diese Grafik wird nur von der Wochenaufgabe Apotheke supportet");
@@ -188,11 +188,11 @@ exports.plotValues = function(req,res){
     if (typeof(location) =='undefined') location="";
 
     var collection = db.collection('DataCollection');
-   
 
- 	var kreisnamen =  wochenaufgabe.map[measure].map.map; 
- 
- 
+
+ 	var kreisnamen =  wochenaufgabe.map[measure].map.map;
+
+
     valueToCount = "$count";
    	valueToDisplay = "$count";
      var projection = {$project:{measure:1,
@@ -207,7 +207,7 @@ exports.plotValues = function(req,res){
                                 "existing.fixme":1}};
     var filterOneMeasure = {$match: { measure: measure}};
     var filterRegionalschluessel = {$match: {schluessel: {$regex: "^"+location}}};
- 
+
     var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,location.length]},
     						 			  timestamp: "$timestamp",
     						 			  timestampShort: {$substr: ["$timestamp",0,10]},
@@ -218,8 +218,8 @@ exports.plotValues = function(req,res){
     						 			  m_opening_hours	: "$missing.opening_hours" ,
     						 		      m_phone	:  "$missing.phone" ,
     						 		      m_wheelchair	: "$missing.wheelchair" ,
-    						 		      e_fixme	: "$existing.fixme" 
-    						 			  }};	
+    						 		      e_fixme	: "$existing.fixme"
+    						 			  }};
      var aggregateMeasuresGroup = {$group: { _id: { row: "$schluessel",source:"$source"},
     						 		    "m_name"	: {$sum: "$m_name" },
     						 		    "m_opening_hours"	: {$sum: "$m_opening_hours" },
@@ -230,9 +230,9 @@ exports.plotValues = function(req,res){
     						 		    timestamp:{$last:"$timestamp"},
     						 		    schluessel: {$last:"$schluessel"},
     						 		    timestampShort: {$last:"$timestampShort"}}};
-      
+
     var presort = {$sort: { timestamp:1}};
- 
+
     var aggregateTimeAxisStep2 = {$group: { _id: { row: "$schluessel",col:"$timestampShort"},
     						 		    "m_name"	: {$last: "$m_name" },
     						 		    "m_opening_hours"	: {$last: "$m_opening_hours" },
@@ -242,10 +242,10 @@ exports.plotValues = function(req,res){
     						 		    total	: {$last: "$total" }}};
 
      var postsort = {$sort: { _id:1}};
-   
-    
-   
-    	
+
+
+
+
     var query = [projection,
                  filterOneMeasure,
 				 filterRegionalschluessel,
@@ -256,13 +256,13 @@ exports.plotValues = function(req,res){
     			 postsort];
 
 
-    						 		  
-    						 		  
+
+
 	debug.data("query:"+JSON.stringify(query));
 
-    var aggFunc=query;   						
+    var aggFunc=query;
     var items = [];
-    async.parallel( [ 
+    async.parallel( [
     	function aggregateCollection(callback) {
     		debug.entry("aggregateCollection");
 			collection.aggregate(	query
@@ -311,10 +311,10 @@ exports.plotValues = function(req,res){
 				m_phone.y = [];
 				m_wheelchair.y = [];
 				e_fixme.y = [];
-				
+
 				for (i=0;i < items.length;i++) {
-			
-			
+
+
 					measure = items[i];
 					debug.data("Measure i"+i+JSON.stringify(measure));
 					schluessel=measure._id.row;
@@ -337,11 +337,11 @@ exports.plotValues = function(req,res){
 				data.push(m_phone);
 				data.push(m_wheelchair);
 				data.push(e_fixme);
-				
+
 				debug.data(data);
-				
+
 				graphLocation = getKreisname(location,kreisnamen);
-				
+
 				filenamePlotly = "OSMWA_"+measure+"_"+graphLocation;
 				title = "--"
 				switch (measure) {
@@ -350,10 +350,10 @@ exports.plotValues = function(req,res){
 					case "AddrWOStreet": title = "Adressen ohne Strasse fuer "+graphLocation;
 								break;
 					default: title = "--";
-				
+
 				}
 				var style = {title: title};
-				
+
 				var graphOptions = {filename: filenamePlotly, fileopt: "overwrite",layout:style};
 				plotly.plot(data, graphOptions, function (err, msg) {
     				res.set('Content-Type', 'text/html');
@@ -364,12 +364,11 @@ exports.plotValues = function(req,res){
     					res.end(page.generatePage());
     				} else {
     					res.end("Fehler von Plotly: "+ JSON.stringify(err));
-    				}		
+    				}
 				});
-				
+
 			}
-			
+
 		)
 
 }
-

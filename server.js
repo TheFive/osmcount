@@ -15,8 +15,13 @@ var display          = require('./display.js');
 var util             = require('./util.js');
 var plotlyexport        = require('./plotlyexport.js');
 
+var importDataCollection = require('./controller/importDataCollection.js');
+var displayAggregationTable = require('./controller/displayAggregationTable.js')
 
 var app = express();
+
+
+exports.dirname = __dirname;
 
 util.initialise();
 
@@ -25,16 +30,17 @@ util.initialise();
 debug("Start Async Configuration");
 async.auto( {
 		config: config.initialise,
-		mongodb: ["config",config.initialiseDB],
+		mongodb: ["config",config.initialiseMongoDB],
+    postgresdb: ["config",config.initialisePostgresDB],
 		dbdata:  ["mongodb", loadDataFromDB.initialise],
 		startQueue: ["dbdata",queue.startQueue]
-		
-		
+
+
 		//	,insertJobs: ["startQueue",queue.insertJobs]
-	}, 
+	},
 	function (err) {
 		if (err) throw(err);
-		
+
 		debug("Async Configuration Ready");
 	}
 )
@@ -60,10 +66,9 @@ app.use('/count.html', display.count);
 app.use('/index.html', display.main);
 app.use('/waplot/:measure.html', plotlyexport.plot);
 app.use('/wavplot/:measure.html', plotlyexport.plotValues);
-app.use('/import/csvimport.html', display.importCSV);
+app.use('/import/csvimport.html', importDataCollection.showPage);
 app.use('/import/:measure.html', display.importApotheken);
-app.use('/table.html', display.table);
-app.use('/table/:measure.:type', display.table);
+app.use('/table/:measure.:type', displayAggregationTable.table);
 app.use('/object/:collection/:id.html', display.object);
 app.use('/overpass/:measure/:schluessel.html', display.overpass);
 app.use('/wa/:aufgabe.html',display.wochenaufgabe);
@@ -84,5 +89,3 @@ app.listen(config.getServerPort());
 
 
 console.log("Server has started and is listening to localhost:"+config.getServerPort());
-	
-

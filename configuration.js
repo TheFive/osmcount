@@ -2,10 +2,8 @@
 var path    = require('path');
 var fs      = require('fs');
 var debug   = require('debug')('configuration');
-  debug.entry = require('debug')('configuration:entry');
-  debug.data = require('debug')('configuration:data');
-  
 var env = process.env.NODE_ENV || 'development';
+var pg = require('pg');
 
 var MongoClient = require('mongodb').MongoClient;
 
@@ -19,25 +17,39 @@ var configuration;
 var mongodb ;
 
 
-getDBString = function() {
-  debug.entry('getDBString');
+function getMongoDBString() {
+  debug('getMongoDBString');
   configuration=exports.getConfiguration();
   var userString = "";
-  if (configuration.username != "") {
-    userString = configuration.username + ':'
-                 + configuration.password +'@';
+  if (configuration.mongodb.username != "") {
+    userString = configuration.mongodb.username + ':'
+                 + configuration.mongodb.password +'@';
   }
   var mongodbConnectStr ='mongodb://'
-             + userString 
-             + configuration.database;
-  return mongodbConnectStr;        
+             + userString
+             + configuration.mongodb.database;
+  return mongodbConnectStr;
+}
+
+function getPostgresDBString() {
+  debug('getPostgresDBString');
+  configuration=exports.getConfiguration();
+  var userString = "";
+  if (configuration.postgres.username != "") {
+    userString = configuration.postgres.username + ':'
+                 + configuration.postgres.password +'@';
+  }
+  var mongodbConnectStr ='postgres://'
+             + userString
+             + configuration.postgres.database;
+  return mongodbConnectStr;
 }
 
 var initialisedDB = 0;
 var initialiseCB = [];
 
-exports.initialiseDB = function(callback) {
-  debug.entry('initialiseDB');
+exports.initialiseMongoDB = function(callback) {
+  debug('initialiseMongoDB');
   // Implement a run one behaviour
   if (initialisedDB == 2) {
     // nothing to do
@@ -52,10 +64,10 @@ exports.initialiseDB = function(callback) {
   if (callback) initialiseCB.push(callback);
   configuration=exports.getConfiguration();
 	initialisedDB=1;
-	var mongodbConnectStr = getDBString();
-	debug.data("Connect to mongo db with string: %",mongodbConnectStr);
+	var mongodbConnectStr = getMongoDBString();
+	debug("Connect to mongo db with string: %",mongodbConnectStr);
 	MongoClient.connect(mongodbConnectStr, function(err, db) {
-		debug.entry("initialiseDB->CB");
+		debug("initialiseDB->CB");
 		var returnerr;
 		if (err) {
 			console.log("Failed to connect to MongoDB");
@@ -75,6 +87,28 @@ exports.initialiseDB = function(callback) {
 	})
 }
 
+
+exports.postgresConnectStr;
+
+exports.initialisePostgresDB = function(callback) {
+  debug('initialisePostgresDB');
+
+  // Minimal Behaviour just store One Connect String
+  // Connection is established by pg object in retrieaving
+  // a client
+
+  configuration=exports.getConfiguration();
+	exports.postgresConnectStr = getPostgresDBString();
+  if (callback) callback();
+}
+
+
+
+exports.initialiseDB = function(callback) {
+  console.log("Deprecetad: configuration.initialiseDB use configuration.initialiseMongoDB instead.");
+  exports.initialiseMongoDB(callback);
+}
+
 exports.initialise = function(callback) {
 	try {
 	   configuration = JSON.parse(fs.readFileSync(configurationFile));
@@ -86,7 +120,7 @@ exports.initialise = function(callback) {
 
 
 
-  
+
 exports.getConfiguration = function() {
     if (typeof(configuration)=='undefined')
     {
@@ -105,14 +139,22 @@ exports.getValue = function(key,defValue) {
     }
     return result;
 }
-	
+
 
 exports.getDB = function() {
+  console.log('configuration.getDB deprecated, use configuration.getMongoDB instead.')
 	return mongodb;
+}
+
+exports.getMongoDB = function() {
+  return mongodb;
 }
 
 
 exports.getServerPort = function() {
 	return configuration.serverport;
 }
-            
+
+exports.getDatabaseType = function() {
+  return configuration.databaseType;
+}
