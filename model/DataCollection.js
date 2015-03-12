@@ -4,7 +4,7 @@ var fs    = require('fs');
 var async = require('async');
 
 var config    = require('../configuration.js');
-var importCSV = require('../importCSV.js');
+var importCSV = require('../ImportCSV.js');
 
 var databaseType = "postgres";
 exports.initialise = function initialise(dbType,callback) {
