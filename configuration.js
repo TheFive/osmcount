@@ -16,6 +16,8 @@ var configuration;
 
 var mongodb ;
 
+var configurationInitialised = false;
+
 
 function getMongoDBString() {
   debug('getMongoDBString');
@@ -50,6 +52,7 @@ var initialiseCB = [];
 
 exports.initialiseMongoDB = function(callback) {
   debug('initialiseMongoDB');
+  if (!configurationInitialised) exports.initialise();
   // Implement a run one behaviour
   if (initialisedDB == 2) {
     // nothing to do
@@ -92,6 +95,7 @@ exports.postgresConnectStr;
 
 exports.initialisePostgresDB = function(callback) {
   debug('initialisePostgresDB');
+  if (!configurationInitialised) exports.initialise();
 
   // Minimal Behaviour just store One Connect String
   // Connection is established by pg object in retrieaving
@@ -110,6 +114,7 @@ exports.initialiseDB = function(callback) {
 }
 
 exports.initialise = function(callback) {
+  if (configurationInitialised) return;
 	console.log("Reading Config from: "+configurationFile);
 	configuration = JSON.parse(fs.readFileSync(configurationFile));
 	if (callback) callback();

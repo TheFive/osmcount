@@ -6,7 +6,7 @@ var pg=require('pg');
 var async=require('async');
 
 
-describe.only('importCSV', function() {
+describe('importCSV', function() {
   describe('parseCSV', function() {
     it ('should handle empty files', function() {
       var array = importCSV.parseCSV('',';');
