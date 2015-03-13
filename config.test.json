@@ -1,7 +1,15 @@
 {
-  "database" : "127.0.0.1/test",
-  "username" : "test",
-  "password" : "test",
+  "serverport": 64163,
   "waitTime" : 1,
-  "serverport": 64163
+  "mongodb": {
+    "database" : "localhost:27017/test",
+    "username" : "test",
+    "password" : "test"
+
+  },
+  "postgres": {
+    "database" : "localhost:5432/testdb",
+    "username" : "test",
+    "password" : "test"
+  }
 }

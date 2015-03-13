@@ -6,7 +6,7 @@ var fs   = require("fs");
 var path = require('path');
 
 describe('LoadDataFromDB', function () {
-  describe('insertValues',function() 
+  describe('insertValues',function()
   {
     var CC_Type  = {};
     CC_Type.map  = {"123":1};
@@ -14,7 +14,7 @@ describe('LoadDataFromDB', function () {
 		beforeEach(function() {
       CC_Type.matchKey= {boundary:["postal_code","administrative"]}
       CC_Type.map  = {"123":1};
-      CC_Type.list = []; 
+      CC_Type.list = [];
       var undef;
       CC_Type.blaetterIgnore = undef;
 		});
@@ -130,7 +130,7 @@ describe('LoadDataFromDB', function () {
       assert.deepEqual(CC_Type.list,[]);
     });
   });
-  describe('sortAndReduce',function() 
+  describe('sortAndReduce',function()
   {
   	list = ['1','12','120','120','13','121','134','135'];
   	lod.sortAndReduce(list);
@@ -153,7 +153,7 @@ describe('LoadDataFromDB', function () {
       assert.notEqual(typeof(data),'undefined');
       assert.notEqual(0,data.length);
       configuration.initialiseDB( function() {
-        db = configuration.getDB();
+        db = configuration.getMongoDB();
         dbHelper.prepareCollection(db,"OSMBoundaries","OSMBoundaries.test.json",function()
         { lod.initialise(done);});
       });
@@ -166,11 +166,11 @@ describe('LoadDataFromDB', function () {
         assert.deepEqual(lod.DE_PLZ.map, data.DE_PLZ.map,"DE_PLZ maps not the same");
         assert.deepEqual(lod.DE_PLZ.list,data.DE_PLZ.list,"DE_PLZ list not the same");
     });
-    it('should read the Data DE_AGS',function() {   
+    it('should read the Data DE_AGS',function() {
         assert.deepEqual(lod.DE_AGS.map, data.DE_AGS.map,"DE_AGS map not the same");
         assert.deepEqual(lod.DE_AGS.list,data.DE_AGS.list,"DE_AGS list not the same");
     });
-    it('should read the Data AT_AGS',function() {            
+    it('should read the Data AT_AGS',function() {
         assert.deepEqual(lod.AT_AGS.map, data.AT_AGS.map,"AT_AGS map not the same");
         assert.deepEqual(lod.AT_AGS.list,data.AT_AGS.list,"AT_AGS list not the same");
     });

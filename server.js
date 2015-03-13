@@ -58,7 +58,7 @@ debug("Initialising HTML Routes");
 // and publish Mongo DB to all functions via res
 app.use(function(req, res, next){
     debug("Url Called: %s",req.url);
-    res.db= config.getDB();
+    res.db= config.getMongoDB();
     next();
 });
 

@@ -126,7 +126,7 @@ describe.only('importCSV', function() {
     var db;
     before(function(done) {
       configuration.initialiseMongoDB( function () {
-        db = configuration.getDB();
+        db = configuration.getMongoDB();
         var c = (db.collection("DataCollection"));
         if (c) {
           c.drop(function(err,cb) {
@@ -138,14 +138,14 @@ describe.only('importCSV', function() {
       });
     });
     it('should fail with no filename' , function(done) {
-      db = configuration.getDB();
+      db = configuration.geMongotDB();
       var a = importCSV.readCSVMongoDB('NonExistingFile.csv',db,{},function(err,data) {
          assert.equal(err.errno,34);
          done();
       })
     });
     it('should load 2 datasets' , function(done) {
-      db = configuration.getDB();
+      db = configuration.getMongoDB();
       fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10");
       var a = importCSV.readCSVMongoDB('existingFile.csv',db,{name:"",count:0},function(err,data) {
         assert.equal(err,null);

@@ -1,4 +1,4 @@
-var config    = require('./configuration.js');
+tvar config    = require('./configuration.js');
 var lod       = require('./LoadOverpassData.js');
 var util      = require('./util.js')
 var async     = require('async');

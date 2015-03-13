@@ -110,11 +110,8 @@ exports.initialiseDB = function(callback) {
 }
 
 exports.initialise = function(callback) {
-	try {
-	   configuration = JSON.parse(fs.readFileSync(configurationFile));
-	} catch (err) {
-	 configuration = JSON.parse(fs.readFileSync(travisConfigurationFile));
-	}
+	console.log("Reading Config from: "+configurationFile);
+	configuration = JSON.parse(fs.readFileSync(configurationFile));
 	if (callback) callback();
 }
 

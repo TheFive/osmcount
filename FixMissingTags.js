@@ -15,7 +15,7 @@ var object=ObjectID("54bbda23a9fff29864d116b4");
 var async    = require('async');
 
 function correctMissingError(cb,result) {
-  configuration.getDB().collection("DataCollection").find( 
+  configuration.getMongoDB().collection("DataCollection").find(
 							      {"missing.name":{$exists:0},measure:"Apotheke"}).each(
 								function(err,result) {
   if (err) {
@@ -33,19 +33,19 @@ function correctMissingError(cb,result) {
   //console.log("Nacher: Result");
   //console.dir(result);
    console.log("saved call");
-  configuration.getDB().collection("DataCollection").save(result,{w:1},function(err,r){
+  configuration.getMongoDB().collection("DataCollection").save(result,{w:1},function(err,r){
    console.log("saved called");
   	if (err) {
   		console.log("error during Save");
   		console.dir(err);
-  		
+
   	} else {
   		console.log("Updated: "+r);
   	}
   	});
-	
-	
-								
+
+
+
 });}
 
 
@@ -56,5 +56,5 @@ async.auto( {db:configuration.initialiseDB,
 	         	console.dir(result.error);
 	         	cb();
 	         }
-             
+
              );

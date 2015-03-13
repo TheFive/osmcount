@@ -1,6 +1,8 @@
 {
-  "database" : "localhost:PORT/database",
-  "username" : "USER",
-  "password" : "PWD",
+  "mongodb": {
+    "database" : "localhost:PORT/database",
+    "username" : "USER",
+    "password" : "PWD"
+  }
   "serverport": portnumber
 }

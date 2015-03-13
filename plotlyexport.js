@@ -24,7 +24,7 @@ function getKreisname(schluessel,kreisnamen) {
 
 exports.plot = function(req,res){
 	debug.entry("exports.plot");
-	var db = configuration.getDB();
+	var db = configuration.getMongoDB();
 
 	var measure = req.params.measure;
     var location = req.query.location;
@@ -173,7 +173,7 @@ exports.plot = function(req,res){
 
 exports.plotValues = function(req,res){
 	debug.entry("exports.plotValues");
-	var db = configuration.getDB();
+	var db = configuration.getMongoDB();
 
 	var measure = req.params.measure;
 

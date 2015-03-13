@@ -28,8 +28,8 @@ async.auto( {
 		config: config.initialise,
 		mongodb: ["config",config.initialiseMongoDB],
     postgresdb: ["config",config.initialisePostgresDB],
-    export: ["mongodb",exportMongoDB],
-    import: ["export","postgresdb",importPostgresDB]
+    //export: ["mongodb",exportMongoDB],
+    import: ["postgresdb",importPostgresDB]
 	},
 	function (err) {
 		if (err) throw(err);
