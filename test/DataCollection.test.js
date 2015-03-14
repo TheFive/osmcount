@@ -30,6 +30,7 @@ describe.only('DataCollection', function() {
           function(done) {client.query("DROP TABLE IF EXISTS DataCollection",done);},
           function(done) {client.query(DataCollection.postgresDB.createTableString,done);},
         ],function(err) {
+          if (err) console.dir(err);
           assert.equal(null,err);
           pgdone();
           bddone();
