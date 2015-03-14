@@ -115,6 +115,7 @@ exports.initialiseDB = function(callback) {
 
 exports.initialise = function(callback) {
   if (configurationInitialised) return;
+  configurationInitialised = true;
 	console.log("Reading Config from: "+configurationFile);
 	configuration = JSON.parse(fs.readFileSync(configurationFile));
 	if (callback) callback();

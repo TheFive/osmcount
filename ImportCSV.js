@@ -191,7 +191,7 @@ function importCSVToPostgresTable(filename,defJson,cb) {
 					  if (existing != "" ) existing += ",";
 						existing += '"' + k + '"=>"' +item.existing[k] + '"';
 					}
-				  client.query("INSERT into test (key,timestamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)",
+				  client.query("INSERT into datacollection (key,timestamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)",
 					                    [key,timestamp,measure,count,missing,existing], function(err,result) {
 				    callback(err);
 				  })
