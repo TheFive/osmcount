@@ -6,7 +6,7 @@ var configuration = require('../configuration.js');
 var DataCollection = require('../model/DataCollection.js')
 
 
-describe.only('DataCollection', function() {
+describe('DataCollection', function() {
   describe('aggregatePostgresDB',function() {
     configuration.initialisePostgresDB();
 
