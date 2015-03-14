@@ -7,6 +7,16 @@ var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
 
 var databaseType = "postgres";
+
+exports.postgresDB = {
+  createTableString :
+    'CREATE TABLE datacollection (measure text,key text,stamp timestamp with time zone, \
+          count integer,  missing hstore,existing hstore,source character(64)) \
+        WITH ( \
+          OIDS=FALSE \
+        ); '
+}
+
 exports.initialise = function initialise(dbType,callback) {
   debug('exports.initialise');
   if (dbType) {
@@ -33,30 +43,54 @@ exports.importCSV =function(filename,defJson,cb) {
 function aggregatePostgresDB(param,cb) {
   debug('aggregatePostgresDB');
   var result = [];
-  var paramSinceDate = new Date(1900,0,1);
+  var paramSinceDate = new Date(2000,0,1);
   var paramUpToDate  = new Date(2999,0,1);
-  if (param.since != '') paramSinceDate = new Date(param.since);
-  if (param.upTo != '')  paramUpToDate = new Date(param.upTo);
+  var paramLocation = param.location;
+  if (typeof(paramLocation)=='undefined') {
+    paramLocation = '';
+  }
+  var paramLocationLength = paramLocation.length;
+  if (param.since != '' && typeof(param.since)!='undefined') {
+    paramSinceDate = new Date(param.since);
+  }
+  if (param.upTo != '' && typeof(param.upTo) != 'undefined')  {
+    paramUpToDate = new Date(param.upTo);
+  }
 
   pg.connect(config.postgresConnectStr,function(err,client,pgdone){
+    debug('aggregatePostgresDB->CB');
+    if (err) {
+      console.log(err);
+      cb(err);
+      pgdone();
+      return;
+    }
     var query = client.query(
-      "SELECT substr(key,1,$1) as key,\
-              substr(to_char(timestamp,'YYYY-MM-DD'),1,$2) as timestamp,\
-              sum(count) as cell from test \
+      "SELECT substr(key,1,$1) as k,\
+              substr(to_char(stamp,'YYYY-MM-DD'),1,$2) as t,\
+              sum(count) as cell from datacollection \
               where measure = $3 \
-                 and timestamp >= $4 \
-                 and timestamp <= $5 \
-              group by key,measure,timestamp",
+                 and stamp >= $4 \
+                 and stamp <= $5 \
+                 and substr(key,1,$6) = $7 \
+              group by k,t",
               [param.lengthOfKey,
                 param.lengthOfTime,
                 param.measure,
                 paramSinceDate,
-                paramUpToDate]);
+                paramUpToDate,
+                paramLocationLength,
+                paramLocation]);
+    query.on('error', function(err){
+      console.log(err);
+      pgdone();
+      cb(err,null);
+    });
     query.on('row',function(row){
       var r = {};
       r._id = {};
-      r._id.row = row.key;
-      r._id.col = row.timestamp;
+      r._id.row = row.k;
+      r._id.col = row.t;
       r.cell = row.cell;
 
       result.push(r);
