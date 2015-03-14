@@ -1,5 +1,4 @@
-//
-//
+
 // LoadDataFromDB.js
 //
 // This module loads static data from the database to have all relevant
@@ -41,26 +40,21 @@ var adminLevel_DE = {'1':'admin_level 1',
               '10': 'Ortsteil (10)',
               '11': 'Ortsteil (11)'        }
 
-
-
 var AT_AGS = {map : Object(),
               list: [],
               matchKey: {boundary:"administrative",
                          osmcount_country:"AT"},
               blaetterIgnore: [{"admin_level":2}]};
-
 var DE_RGS = {map  : Object(),
               list : [],
               matchKey: {boundary:"administrative",
                          osmcount_country:"DE"},
               secondInfoKey: "admin_level",
               secondInfoValueMap:adminLevel_DE};
-
 var DE_PLZ = {map  : Object(),
               list : [],
               matchKey: {boundary:["postal_code","administrative"],
                          osmcount_country:"DE"}};
-
 exports.DE_PLZ = DE_PLZ;
 exports.DE_RGS = DE_RGS;
 exports.AT_AGS = AT_AGS;
@@ -186,7 +180,6 @@ exports.initialise = function (cb) {
 			function (callback) {
 				if (!dataLoaded) {callback("No Data Loaded"); return;}
 				if (blaetterDefined) {callback(null);return;}
-
 				exports.sortAndReduce(DE_AGS.list);
 				exports.sortAndReduce(DE_PLZ.list);
 				exports.sortAndReduce(AT_AGS.list);

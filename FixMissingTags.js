@@ -38,14 +38,10 @@ function correctMissingError(cb,result) {
   	if (err) {
   		console.log("error during Save");
   		console.dir(err);
-
   	} else {
   		console.log("Updated: "+r);
   	}
   	});
-
-
-
 });}
 
 
@@ -56,5 +52,3 @@ async.auto( {db:configuration.initialiseDB,
 	         	console.dir(result.error);
 	         	cb();
 	         }
-
-             );
