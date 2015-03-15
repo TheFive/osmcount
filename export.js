@@ -1,5 +1,6 @@
 var async   = require('async');
 var path    = require('path');
+var program = require('commander');
 var debug   = require('debug')('export');
 
 // require own modules
@@ -11,28 +12,114 @@ var DataCollection = require('./model/DataCollection.js');
 var WorkerQueue    = require('./model/WorkerQueue.js');
 
 
+program
+  .option('-f [filename]','filename [filename]','')
+  .option('-e --export','Export Data')
+  .option('-i --import','import Data')
+  .option('--datacollection','Use DataCollection Container')
+  .option('--workerqueue', 'Use WorkerQueue Container')
+  .option('--mongo','Use MongoDB')
+  .option('--postgres','Use PostgresDB')
+  .parse(process.argv);
 
 exports.dirname = __dirname;
 
+
+if (program.F=='') {
+  console.log("Please enter a Filename");
+  process.exit();
+} else {
+  program.filename = program.F;
+}
+
 util.initialise();
 
-function importPostgresDB(cb) {
+function importPostgresDBDataCollection(cb) {
+  if (!program.import || !program.postgres || !program.datacollection) {
+    cb();
+    return;
+  };
   console.log("Start Import Data Collection (PostgresDB)");
   DataCollection.initialise("postgres");
-  DataCollection.import("datacollection.json",cb);
+  DataCollection.import(program.filename,cb);
 }
+function importPostgresDBWorkerQueue(cb) {
+  if (!program.import || !program.postgres || !program.workerqueue) {
+    cb();
+    return;
+  };
+  console.log("Start Import WorkerQueue (PostgresDB)");
+  DataCollection.initialise("postgres");
+  DataCollection.import(program.filename,cb);
+}
+
+function importMongoDBDataCollection(cb) {
+  if (!program.import || !program.mongo || !program.datacollection) {
+    cb();
+    return;
+  };
+  console.log("Import DataCollection Mongo DB not implemented yet.");
+  cb();
+}
+function importMongoDBWorkerQueue(cb) {
+  if (!program.import || !program.mongo || !program.workerqueue) {
+    cb();
+    return;
+  };
+  console.log("Import WorkerQueue Mongo DB not implemented yet.");
+  cb();
+}
+
 function exportMongoDBDataCollection(cb) {
+  if (!program.export || !program.mongo || !program.datacollection) {
+    cb();
+    return;
+  };
   console.log("Start Export Data Collection (MongoDB)");
   DataCollection.initialise("mongo");
-  DataCollection.export("datacollection.json",cb);
+  DataCollection.export(program.filename,cb);
 
 }
 function exportMongoDBWorkerQueue(cb) {
+  if (!program.export || !program.mongo || !program.workerqueue) {
+    cb();
+    return;
+  };
   console.log("Start Export WorkerQueue (MongoDB)")
   DataCollection.initialise("mongo");
-  WorkerQueue.export("WorkerQueue.json",cb);
-
+  WorkerQueue.export(program.filename,cb);
 }
+function exportPostgresDBDataCollection(cb) {
+  if (!program.export || !program.postgres || !program.datacollection) {
+    cb();
+    return;
+  };
+  console.log("Export Data Collection (PostgresDB) not implemented yet");
+  cb();
+}
+function exportPostgresDBWorkerQueue(cb) {
+  if (!program.export || !program.postgres || !program.workerqueue) {
+    cb();
+    return;
+  };
+  console.log("Export WorkerQueue (PostgresDB) not implemented yet");
+  cb();
+}
+
+function handleImportExport(cb) {
+  async.parallel(
+    [
+    importMongoDBDataCollection,
+    importMongoDBWorkerQueue,
+    exportMongoDBDataCollection,
+    exportMongoDBWorkerQueue,
+    importPostgresDBWorkerQueue,
+    importPostgresDBDataCollection,
+    exportPostgresDBWorkerQueue,
+    exportPostgresDBDataCollection
+    ], function(err) {cb(err);})
+}
+
 
 console.log("Start Data Export");
 
@@ -40,9 +127,7 @@ async.auto( {
     config: config.initialise,
     mongodb: ["config",config.initialiseMongoDB],
     postgresdb: ["config",config.initialisePostgresDB],
-    exportWorkerQueue: ["mongodb",exportMongoDBWorkerQueue],
-    exportDataCollection: ["exportWorkerQueue",exportMongoDBDataCollection]
-    //import: ["postgresdb",importPostgresDB]
+    handleImportExport: ["mongodb","postgresdb",handleImportExport]
   },
   function (err) {
     if (err) {

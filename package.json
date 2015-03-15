@@ -27,6 +27,7 @@
   "homepage": "https://github.com/TheFive/osmcount",
   "dependencies": {
     "async": "^0.9.0",
+    "commander": "^2.7.1",
     "debug": "^2.1.1",
     "fs": "0.0.2",
     "mongodb": "^1.4.30",
