@@ -41,7 +41,7 @@ async.auto( {
     mongodb: ["config",config.initialiseMongoDB],
     postgresdb: ["config",config.initialisePostgresDB],
     exportWorkerQueue: ["mongodb",exportMongoDBWorkerQueue],
-    exportDataCollection: ["mongodb",exportMongoDBDataCollection]
+    exportDataCollection: ["exportWorkerQueue",exportMongoDBDataCollection]
     //import: ["postgresdb",importPostgresDB]
   },
   function (err) {

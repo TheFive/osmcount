@@ -281,8 +281,7 @@ function exportMongoDB(filename,cb) {
         fs.appendFileSync(filename,JSON.stringify(doc)+'\n');
       } else {
         fs.appendFileSync(filename,"]");
-        console.log("DataLength to Export: "+count);
-        console.log(filename +" is exported");
+        console.log(filename +" is exported with "+count+" datasets.");
         if (cb) cb();
       }
     })
