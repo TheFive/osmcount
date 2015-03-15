@@ -409,7 +409,7 @@ function correctData(callback) {
 
 exports.startQueue =function(cb) {
   debug.entry("startQueue(cb)");
-  q.push(config.initialiseDB);
+  q.push(config.initialiseMongoDB);
   q.push(correctData);
   q.push(doNextJob);
   if (cb) cb(null);

@@ -46,7 +46,7 @@ function correctMissingError(cb,result) {
 
 
 
-async.auto( {db:configuration.initialiseDB,
+async.auto( {db:configuration.initialiseMongoDB,
 	         error:["db",correctMissingError]},
 	         function (cb,result) {
 	         	console.dir(result.error);

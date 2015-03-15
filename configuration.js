@@ -70,7 +70,7 @@ exports.initialiseMongoDB = function(callback) {
 	var mongodbConnectStr = getMongoDBString();
 	debug("Connect to mongo db with string: %",mongodbConnectStr);
 	MongoClient.connect(mongodbConnectStr, function(err, db) {
-		debug("initialiseDB->CB");
+		debug("initialiseMongoDB->CB");
 		var returnerr;
 		if (err) {
 			console.log("Failed to connect to MongoDB");
