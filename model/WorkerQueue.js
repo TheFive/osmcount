@@ -112,6 +112,10 @@ function exportMongoDB(filename,cb) {
     var delimiter="";
     var count=0;
     data.each(function (err,doc) {
+      if (err) {
+        cb(err);
+        return
+      }
       if (doc) {
         fs.appendFileSync(filename,delimiter);
         delimiter=",";
