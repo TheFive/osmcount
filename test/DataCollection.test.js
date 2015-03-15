@@ -24,17 +24,13 @@ describe('DataCollection', function() {
 
 
     beforeEach(function(bddone) {
-      pg.connect(configuration.postgresConnectStr,function(err,client,pgdone) {
-        assert.equal(err,null);
-        async.series([
-          function(done) {client.query("DROP TABLE IF EXISTS DataCollection",done);},
-          function(done) {client.query(DataCollection.postgresDB.createTableString,done);},
-        ],function(err) {
-          if (err) console.dir(err);
-          assert.equal(null,err);
-          pgdone();
-          bddone();
-        });
+      async.series([
+        DataCollection.dropTable,
+        DataCollection.createTable
+      ],function(err) {
+        if (err) console.dir(err);
+        assert.equal(null,err);
+        bddone();
       });
     });
     context('test different group functions',function(bddone){

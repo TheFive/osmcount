@@ -17,23 +17,28 @@ function importPostgresDB(cb) {
   DataCollection.initialise("postgres");
   DataCollection.import("datacollection.json",cb);
 }
-function exportMongoDB(cb) {
+function exportMongoDBDataCollection(cb) {
   DataCollection.initialise("mongo");
   DataCollection.export("datacollection.json",cb);
+
+}
+function exportMongoDBWorkerQueue(cb) {
+  DataCollection.initialise("mongo");
+  WorkerQueue.export("WorkerQueue.json",cb);
 
 }
 
 debug("Start Async Configuration");
 async.auto( {
-		config: config.initialise,
-		mongodb: ["config",config.initialiseMongoDB],
+    config: config.initialise,
+    mongodb: ["config",config.initialiseMongoDB],
     postgresdb: ["config",config.initialisePostgresDB],
-    //export: ["mongodb",exportMongoDB],
-    import: ["postgresdb",importPostgresDB]
-	},
-	function (err) {
-		if (err) throw(err);
-
-		console.log("export / import done");
-	}
+    exportWorkerQueue: ["mongodb",exportMongoDBWorkerQueue],
+    exportDataCollection: ["mongodb",exportMongoDBDataCollection]
+    //import: ["postgresdb",importPostgresDB]
+  },
+  function (err) {
+    if (err) throw(err);
+    console.log("export / import done");
+  }
 )

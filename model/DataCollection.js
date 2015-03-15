@@ -8,7 +8,7 @@ var importCSV = require('../ImportCSV.js');
 
 var databaseType = "postgres";
 
-exports.postgresDB = {
+var postgresDB = {
   createTableString :
     'CREATE TABLE datacollection (measure text,key text,stamp timestamp with time zone, \
           count integer,  missing hstore,existing hstore,source character(64)) \
@@ -16,6 +16,29 @@ exports.postgresDB = {
           OIDS=FALSE \
         ); '
 }
+
+exports.dropTable = function(cb) {
+  debug('exports.dropTable');
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    client.query("DROP TABLE IF EXISTS DataCollection",function(err){
+      debug("DataCollection Table Dropped");
+      cb(err)
+    });
+
+    pgdone();
+  })  
+}
+
+exports.createTable = function(cb) {
+  debug('exports.createTable');
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    client.query(postgresDB.createTableString,function(err) {
+      debug('DataCollection Table Created');
+      cb(err);
+    });
+    pgdone();
+  })
+} 
 
 exports.initialise = function initialise(dbType,callback) {
   debug('exports.initialise');
@@ -37,6 +60,46 @@ exports.importCSV =function(filename,defJson,cb) {
   if (databaseType == "postgres") {
     importCSV.readCSVPostgresDB(filename,defJson,cb);
   }
+}
+
+function insertDataToPostgres (data,cb) {
+  debug('insertDataToPostgres');
+  debug('Connect String:'+config.postgresConnectStr);
+  pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
+    if (err) {
+      if (cb) {
+        cb(err);
+      } else {
+        throw (err);
+      }
+      return;
+    }
+    var result = "Datensätze: "+data.length; 
+    function insertData(item,callback){
+      debug('insertDataToPostgres->insertData');
+      var key = item.schluessel;
+      var timestamp = item.timestamp;
+      var measure = item.measure;
+      var count = item.count;
+      var missing = "";
+      for (var k in item.missing) {
+        if (missing != "" ) missing += ",";
+        missing += '"' + k + '"=>"' +item.missing[k] + '"';
+      }
+      var existing = "";
+      for (var k in item.existing) {
+        if (existing != "" ) existing += ",";
+        existing += '"' + k + '"=>"' +item.existing[k] + '"';
+      }
+      client.query("INSERT into datacollection (key,stamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)",
+                          [key,timestamp,measure,count,missing,existing], function(err,result) {
+        callback(err);
+        debug('Error after Insert'+err);
+      })
+    }
+    async.each(data,insertData,function(err) {pgdone();cb(err,result);})
+  })
+
 }
 
 
@@ -273,4 +336,15 @@ exports.import = function(filename,cb) {
 exports.export = function(filename,cb){
   debug('exports.export')
    exportMongoDB(filename,cb);
+}
+
+exports.insertData = function(data,cb) {
+  debug('exports.insertData');
+  if (databaseType == "mongo") {
+    assert.equal("mongodb not implemented yet",null);
+  }
+  if (databaseType == "postgres") {
+    insertDataToPostgres(data,cb);
+  }
+ 
 }

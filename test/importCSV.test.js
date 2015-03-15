@@ -4,6 +4,7 @@ var configuration = require('../configuration.js');
 var fs=require('fs');
 var pg=require('pg');
 var async=require('async');
+var DataCollection=require('../model/DataCollection.js')
 
 
 describe('importCSV', function() {
@@ -138,7 +139,7 @@ describe('importCSV', function() {
       });
     });
     it('should fail with no filename' , function(done) {
-      db = configuration.geMongotDB();
+      db = configuration.getMongoDB();
       var a = importCSV.readCSVMongoDB('NonExistingFile.csv',db,{},function(err,data) {
          assert.equal(err.errno,34);
          done();
@@ -176,8 +177,8 @@ describe('importCSV', function() {
       pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
         assert.equal(err,null);
         async.series([
-          function(done) {client.query("DROP TABLE IF EXISTS DataCollection",done);},
-          function(done) {client.query("CREATE TABLE IF NOT EXISTS DataCollection (id SERIAL, data JSON);",done);},
+          DataCollection.dropTable,
+          DataCollection.createTable
         ],function(err) {
           assert.equal(null,err);
           pgdone();
@@ -192,20 +193,20 @@ describe('importCSV', function() {
       })
     });
     it('should load 2 datasets' , function(done) {
-      fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10");
+      fs.writeFileSync("existingFile.csv","schluessel;count\na;2\nb;10");
       var a = importCSV.readCSVPostgresDB('existingFile.csv',{name:"",count:0},function(err,data) {
         assert.equal(data,"Datensätze: 2");
         assert.equal(err,null);
         pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
           assert.equal(err,null);
-          client.query("select data from DataCollection;",function(err,data){
+          client.query("select key,count from DataCollection;",function(err,data){
             assert.equal(err,null);
             assert.notEqual(null,data);
             assert.equal(data.rows.length,2);
-            assert.equal(data.rows[0].data.name,'a');
-            assert.equal(data.rows[0].data.count,'2');
-            assert.equal(data.rows[1].data.name,'b');
-            assert.equal(data.rows[1].data.count,'10');
+            assert.equal(data.rows[0].key,'a');
+            assert.equal(data.rows[0].count,'2');
+            assert.equal(data.rows[1].key,'b');
+            assert.equal(data.rows[1].count,'10');
             done();
             pgdone();
             client.end();

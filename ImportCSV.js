@@ -5,6 +5,7 @@ var debug   = require('debug')('importCSV');
 var pg      = require('pg');
 var config  = require('./configuration.js');
 var async   = require('async');
+var DataCollection = require('./model/DataCollection.js');
 
 
 
@@ -138,68 +139,36 @@ function importCSVToPostgresTable(filename,defJson,cb) {
 	debug("importCSVToPostgresCollection("+filename+"..)");
 	// Open the file and copy it to a string
 	// encoding is ignored yet
-	pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
+	fs.readFile(filename, 'UTF8', function (err,data) {
+	  debug("importCSVToPostgresCollection readFileCB" + filename);
 		if (err) {
-			if (cb) {
-			  cb(err);
-			} else {
-			  throw (err);
-			}
+			if (cb) cb(err,null);
 			return;
 		}
-		fs.readFile(filename, 'UTF8', function (err,data) {
-		  debug("importCSVToPostgresCollection readFileCB" + filename);
-				if (err) {
-					if (cb) cb(err,null);
-					return;
-				}
-				// convert the content of the file to an JSON array
-				array = parseCSV(data,";");
-				if(array.length<2) {
-					// CSV File is empty, log an error
-					if (cb) cb("empty file",null);
-					return;
-				}
-				else {
-					// just log the column and rows for debugging reasons
-					debug("Number of Lines in CSV "+array.length);
-					debug("Number of Columns in CSV"+array[0].length)
-				}
-				// Quality Check, does all rows has the same count of columns ?
-				for (i=1;i<array.length;i++) {
-					if (array[0].length!=array[i].length) {
-						var error = "Invalid CSV File, Number of Columns differs "+filename +" Zeile "+i
-						if (cb) cb(error,null);
-						return
-					}
-				}
-				// Copy measures into the DataCollection MongoDB
-				var newData = exports.convertArrToJSON(array,defJson);
-				var result = "Datensätze: "+newData.length;
-				function insertData(item,callback){
-					var key = item.schluessel;
-					var timestamp = item.timestamp;
-					var measure = item.measure;
-					var count = item.count;
-					var missing = "";
-					for (var k in item.missing) {
-					  if (missing != "" ) missing += ",";
-						missing += '"' + k + '"=>"' +item.missing[k] + '"';
-					}
-					var existing = "";
-					for (var k in item.existing) {
-					  if (existing != "" ) existing += ",";
-						existing += '"' + k + '"=>"' +item.existing[k] + '"';
-					}
-				  client.query("INSERT into datacollection (key,timestamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)",
-					                    [key,timestamp,measure,count,missing,existing], function(err,result) {
-				    callback(err);
-				  })
-				}
-				async.each(newData,insertData,function(err) {pgdone();cb(err,result);})
-		});
-	})
-
+		// convert the content of the file to an JSON array
+		array = parseCSV(data,";");
+		if(array.length<2) {
+			// CSV File is empty, log an error
+			if (cb) cb("empty file",null);
+			return;
+		}
+		else {
+			// just log the column and rows for debugging reasons
+			debug("Number of Lines in CSV "+array.length);
+			debug("Number of Columns in CSV"+array[0].length);
+		}
+		// Quality Check, does all rows has the same count of columns ?
+		for (i=1;i<array.length;i++) {
+			if (array[0].length!=array[i].length) {
+				var error = "Invalid CSV File, Number of Columns differs "+filename +" Zeile "+i;
+				if (cb) cb(error,null);
+				return
+			}
+		}
+		// Copy measures into the DataCollection MongoDB
+		var newData = exports.convertArrToJSON(array,defJson);
+		DataCollection.insertData(newData,cb);
+	});
 }
 // readCSV Function to import CSV to the Measure Database
 // Input: a MongoDB, a template JSON, CSV Filename, encoding
