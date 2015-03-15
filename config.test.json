@@ -10,6 +10,6 @@
   "postgres": {
     "database" : "localhost:5432/testdb",
     "username" : "test",
-    "password" : ""
+    "password" : "test"
   }
 }
