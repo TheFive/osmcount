@@ -42,7 +42,11 @@ async.auto( {
     //import: ["postgresdb",importPostgresDB]
   },
   function (err) {
-    if (err) throw(err);
-    console.log("export / import done");
+    if (err) {
+      console.log("Error occured: "+err);
+    }
+    else {
+      console.log("export / import done");
+    }
   }
 )
