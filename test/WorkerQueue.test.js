@@ -8,7 +8,7 @@ var configuration = require('../configuration.js');
 var WorkerQueue = require('../model/WorkerQueue.js')
 
 
-describe.only('WorkerQueue', function() {
+describe('WorkerQueue', function() {
   describe('import',function(bddone) {
     beforeEach(function(bddone) {
       async.series([

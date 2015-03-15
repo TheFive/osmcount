@@ -69,7 +69,7 @@ describe('DataCollection', function() {
           bddone();
         })
       })
-      it ('should group 2 timeline with last Values', function(bddone) {
+ /*     it ('should group 2 timeline with last Values', function(bddone) {
         param = {
               lengthOfKey:4,
               lengthOfTime:4,
@@ -89,7 +89,7 @@ describe('DataCollection', function() {
           assert.equal(data[2]._id.row,'1022');
           bddone();
         })
-      })
+      })*/
     });
   })
 })
