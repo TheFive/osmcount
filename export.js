@@ -14,21 +14,25 @@ exports.dirname = __dirname;
 util.initialise();
 
 function importPostgresDB(cb) {
+  console.log("Start Import Data Collection (PostgresDB)");
   DataCollection.initialise("postgres");
   DataCollection.import("datacollection.json",cb);
 }
 function exportMongoDBDataCollection(cb) {
+  console.log("Start Export Data Collection (MongoDB)");
   DataCollection.initialise("mongo");
   DataCollection.export("datacollection.json",cb);
 
 }
 function exportMongoDBWorkerQueue(cb) {
+  console.log("Start Export WorkerQueue (MongoDB)")
   DataCollection.initialise("mongo");
   WorkerQueue.export("WorkerQueue.json",cb);
 
 }
 
-debug("Start Async Configuration");
+console.log("Start Data Export");
+
 async.auto( {
     config: config.initialise,
     mongodb: ["config",config.initialiseMongoDB],
