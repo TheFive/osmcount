@@ -3,9 +3,12 @@ var path    = require('path');
 var debug   = require('debug')('export');
 
 // require own modules
-var config           = require('./configuration.js');
-var util             = require('./util.js');
+var config         = require('./configuration.js');
+var util           = require('./util.js');
+
+// require model modules
 var DataCollection = require('./model/DataCollection.js');
+var WorkerQueue    = require('./model/WorkerQueue.js');
 
 
 
