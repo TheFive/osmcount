@@ -50,6 +50,7 @@ async.auto( {
     }
     else {
       console.log("export / import done");
+      process.exit();
     }
   }
 )
