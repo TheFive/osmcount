@@ -191,3 +191,33 @@ exports.getWorkingTask = function (cb) {
   debug('getWorkingTask');
   getWorkingTaskMongoDB(cb);
 }
+
+function getNextOpenTaskMongoDB(cb) {
+  debug('getWorkingTaskMongoDB');
+  var db=config.getMongoDB();
+  var collectionName = 'WorkerQueue';
+  var date= new Date();
+  // Fetch the collection test
+  var collection = db.collection(collectionName);
+  collection.findOne({ status : "open" ,
+               exectime: {$lte: date}
+              },
+              {
+                "sort": [['prio','desc']]
+              },cb);  
+}
+
+exports.getNextOpenTask = function (cb) {
+  debug('getNextOpenTask');
+  getNextOpenTaskMongoDB(cb);
+}
+
+exports.saveTaskMongoDB = function(task,cb) {
+  var db=config.getMongoDB();
+  db.collection("WorkerQueue").save(task,{w:1}, cb);
+}
+
+exports.saveTask= function(task,cb) {
+  debug('saveTask');
+  saveTaskMongoDB(task,cb);
+}

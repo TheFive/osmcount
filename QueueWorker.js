@@ -4,28 +4,23 @@ var util      = require('./util.js')
 var async     = require('async');
 var fs        = require('fs');
 var debug     = require('debug')('QueueWorker');
- debug.entry  = require('debug')('QueueWorker:entry');
- debug.data   = require('debug')('QueueWorker:data');
 var ObjectID  = require('mongodb').ObjectID;
 
 exports.processSignal = '';
 
 
 function getWorkingJob(cb) {
-  debug.entry("getWorkingJob(cb)");
-  mongodb = config.getMongoDB();
-  mongodb.collection("WorkerQueue").findOne(
-              { status : "working"
-              }, function(err, obj)
+  debug("getWorkingJob(cb)");
+  WorkerQueue.getWorkingTask(function(err, obj)
   {
-    debug.entry("getWorkingJob->CB("+err+","+obj+")");
+    debug("getWorkingJob->CB("+err+","+obj+")");
     if (err) {
       console.log("Error occured in function: QueueWorker.getNextJob");
       console.log(err);
     }
 
     if (obj) {
-      debug.data("found job %s",obj.type);
+      debug("found job %s",obj.type);
       // return obj as job object
       obj.status="open";
     }
@@ -35,33 +30,22 @@ function getWorkingJob(cb) {
 
 
 function getNextJob(cb) {
-  debug.entry("getNextJob(cb)");
-  var date= new Date();
-  var dateJSON = date.toJSON();
-
+  debug("getNextJob(cb)");
+ 
   if (exports.processSignal=='SIGINT') {
     console.log( "\nExiting OSMCount" );
     process.exit();
   }
-  mongodb = config.getMongoDB();
-  debug.data("Current Time %s",dateJSON);
-  debug.entry("getNextJob->call CB");
-  mongodb.collection("WorkerQueue").findOne(
-              { status : "open" ,
-               exectime: {$lte: date}
-              },
-              {
-                "sort": [['prio','desc']]
-              }, function(err, obj)
+  WorkerQueue.getNextOpenTask(function(err, obj)
   {
-    debug.entry("getNextJob->CB("+err+","+obj+")");
+    debug("getNextJob->CB("+err+","+obj+")");
     if (err) {
       console.log("Error occured in function: QueueWorker.getNextJob");
       console.log(err);
     }
 
     if (obj) {
-      debug.data("found job %s",obj.type);
+      debug("found job %s",obj.type);
       // return obj as job object
       obj.status="working";
     }
@@ -70,16 +54,16 @@ function getNextJob(cb) {
 )}
 
 function saveMeasure(result,cb) {
-  debug.entry("saveMeasure("+result+",cb)");
+  debug("saveMeasure("+result+",cb)");
 
   if (result==null) {
     var err = {func:"saveMeasure",desc:"Result Empty"}
     cb(err);
     return;
   }
-  debug.entry("saveMeasure->call CB");
+  debug("saveMeasure->call CB");
   mongodb.collection("DataCollection").save(result,{w:1}, function (err, num){
-    debug.entry("saveMeasure->CB("+err+","+num+")");
+    debug("saveMeasure->CB("+err+","+num+")");
       if (err) {
         console.log("Error occured in function: OueueWorker.saveMeasure");
         console.log("Tried to save:");
@@ -95,20 +79,20 @@ function saveMeasure(result,cb) {
 )}
 
 function saveJobState(cb,job) {
-      debug.entry("saveJobState Function(cb,"+job+")");
+      debug("saveJobState Function(cb,"+job+")");
       job = job.readjob;
-      if (job) debug.data("job.status=%s",job.status);
+      if (job) debug("job.status=%s",job.status);
       if (job==null || job.status == 'undefined') {
-        debug.data("saveJobState(): Jobstatus unclear: Nothing to execute");
+        debug("saveJobState(): Jobstatus unclear: Nothing to execute");
         cb(null,job);
         return;
       }
       date = new Date();
       job.timestamp = date;
       debug("Saving Jobsstatus to %s",job.status);
-      debug.entry("saveJobState()->call CB");
-      mongodb.collection("WorkerQueue").save(job,{w:1}, function (err, num){
-        debug.entry("saveJobState()->CB("+err+","+num+")");
+      debug("saveJobState()->call CB");
+      WorkerQueue.saveTaks(job, function (err, num){
+        debug("saveJobState()->CB("+err+","+num+")");
         if (err) {
           console.log("Error occured in function: OueueWorker.saveJobState");
           console.log(err);
@@ -123,15 +107,15 @@ function saveJobState(cb,job) {
 // Creating async queue and start to initialise Database
 // (should be done in server in future)
 var q= async.queue(function (task,cb) {
-  debug.entry("async.queue Start Next Task");
+  debug("async.queue Start Next Task");
   task(cb);
 },1);
 
 function doConsole(cb,results) {
-  debug.entry("doConsole(cb,"+results+")");
+  debug("doConsole(cb,"+results+")");
   job=results.readjob;
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type == "console") {
-    debug.entry("Start: doConsole(cb,"+results+")");
+    debug("Start: doConsole(cb,"+results+")");
     debug(job.text);
     job.status = "done";
   }
@@ -140,7 +124,7 @@ function doConsole(cb,results) {
 
 
 function doOverpass(cb,results) {
-  debug.entry("doOverpass(cb,"+results+")");
+  debug("doOverpass(cb,"+results+")");
   var job=results.readjob;
   var startTime = new Date().getTime();
   var startOverpass;
@@ -148,7 +132,7 @@ function doOverpass(cb,results) {
   var endSave;
   //debug(JSON.stringify(job));
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpass") {
-    debug.entry("Start: doOverpass(cb,"+results+")");
+    debug("Start: doOverpass(cb,"+results+")");
       measure=job.measure;
       query=job.query;
       var result= {};
@@ -166,7 +150,7 @@ function doOverpass(cb,results) {
         }],
         function (err,ergebnis) {
           endSave = new Date().getTime();
-          debug.entry("doOverpass->finalCB  ");
+          debug("doOverpass->finalCB  ");
           if (err) {
             console.log("Error occured in function: QueueWorker.doOverpass");
             console.log(err);
@@ -202,11 +186,11 @@ function doOverpass(cb,results) {
 }
 
 function doOverpassPOIPLZ(cb,results) {
-  debug.entry("doOverpassPOIPLZ(cb,"+results+")");
+  debug("doOverpassPOIPLZ(cb,"+results+")");
   job=results.readjob;
-  //debug.data(JSON.stringify(job));
+  //debug(JSON.stringify(job));
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpassPOIPLZ") {
-    debug.entry("Start: doOverpassPOIPLZ(cb,"+results+")");
+    debug("Start: doOverpassPOIPLZ(cb,"+results+")");
       plz=job.plz;
       query=job.query;
       var result= {};
@@ -227,7 +211,7 @@ function doOverpassPOIPLZ(cb,results) {
 
         }],
         function (err,ergebnis) {
-          debug.entry("doOverpassPOIPLZ->finalCB  ");
+          debug("doOverpassPOIPLZ->finalCB  ");
           if (err) {
             console.log("Error occured in function: QueueWorker.doOverpass");
             console.log(err);
@@ -245,11 +229,11 @@ function doOverpassPOIPLZ(cb,results) {
 }
 
 function doInsertJobs(cb,results) {
-  debug.entry("doInsertJobs(cb,"+results+")");
+  debug("doInsertJobs(cb,"+results+")");
   var job=results.readjob;
 
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
-    debug.entry("Start: doInsertJobs(cb,"+results+")");
+    debug("Start: doInsertJobs(cb,"+results+")");
     mongodb = config.getMongoDB();
     var jobs = lod.createQuery(job.measure,job.exectime,job);
     console.log("Trigger to load "+job.measure+" at "+job.exectime + " Number Jobs "+ jobs.length);
@@ -308,26 +292,26 @@ function doInsertJobs(cb,results) {
 }
 
 function doLoadBoundaries(cb,results) {
-  debug.entry("doLoadBoundaries(cb,"+results+")");
+  debug("doLoadBoundaries(cb,"+results+")");
   job=results.readjob;
 
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="loadBoundaries") {
-    debug.entry("Start: doLoadBoudnaries(cb,"+results+")");
+    debug("Start: doLoadBoudnaries(cb,"+results+")");
     console.log("Loading Boundaries");
     lod.importBoundaries(job,cb);
   }
   else if (cb) cb(null,job);
 }
 function checkState(cb,results) {
-  debug.entry("checkState(cb,"+results+")");
+  debug("checkState(cb,"+results+")");
   var job=results.readjob;
   if (!job) {
-    debug.data("No Job");
+    debug("No Job");
     cb(null,null);
     return;
   }
   if (job.type != "overpass") {
-    debug.data("No Overpass Job");
+    debug("No Overpass Job");
     cb(null,null);
     return;
   }
@@ -337,14 +321,14 @@ function checkState(cb,results) {
 
               , function(err, count)
   {
-    debug.entry("checkState->CB");
+    debug("checkState->CB");
     if (count==1) {
       job.status = "done";
-      debug.data("Close Job");
+      debug("Close Job");
     }
     else if (count==0) {
       job.status = "open";
-      debug.data("Job Still open");
+      debug("Job Still open");
     } else {
       job.status = "error";
       job.error = "Found "+count+" matching this request " +job.source+ " " + job.schluessel;
@@ -358,7 +342,7 @@ function checkState(cb,results) {
 
 
 function doNextJob(callback) {
-  debug.entry("doNextJob(cb)");
+  debug("doNextJob(cb)");
   async.auto( {readjob:     getNextJob,
         saveWorking:     ["readjob",saveJobState],
         doConsole:       ["saveWorking", doConsole],
@@ -387,7 +371,7 @@ function doNextJob(callback) {
 
 
 function correctData(callback) {
-  debug.entry("correctData(cb)");
+  debug("correctData(cb)");
   async.auto( {readjob:     getWorkingJob,
              correctData: ["readjob",checkState],
             saveDone:    ["correctData", saveJobState]
@@ -408,7 +392,7 @@ function correctData(callback) {
 }
 
 exports.startQueue =function(cb) {
-  debug.entry("startQueue(cb)");
+  debug("startQueue(cb)");
   q.push(config.initialiseMongoDB);
   q.push(correctData);
   q.push(doNextJob);
