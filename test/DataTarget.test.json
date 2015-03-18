@@ -1,0 +1,18 @@
+[
+{
+    "source" : "Schätzung ABDA",
+    "measure" : "Apotheke",
+    "apothekenVorgabe" : 0.214,
+    "schluessel" : "01053079",
+    "name" : "Labenz",
+    "linkSource" : ""
+},
+
+{
+    "source" : "Schätzung ABDA",
+    "measure" : "Apotheke",
+    "apothekenVorgabe" : 0.043,
+    "schluessel" : "01053080",
+    "name" : "Langenlehsten",
+    "linkSource" : ""
+}]
