@@ -137,16 +137,7 @@ function aggregatePostgresDB(param,cb) {
       pgdone();
       return;
     }
-    var queryStr =  "SELECT substr(key,1,$1) as k,\
-              to_char(stamp,$2) as t,\
-              sum(count) as cell from datacollection \
-              where measure = $3 \
-                 and stamp >= $4 \
-                 and stamp <= $5 \
-                 and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
-                               datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
-                 and substr(key,1,$6) = $7 \
-              group by k,t";
+    var cellCalculation = "sum(count) as cell";
     var bindParam = [param.lengthOfKey,
                 paramTimeFormat,
                 param.measure,
@@ -155,32 +146,32 @@ function aggregatePostgresDB(param,cb) {
                 paramLocationLength,
                 paramLocation];
     if (typeof(param.sub)=='undefined') param.sub ='';
+    if (typeof(param.subPercent)=='undefined') param.subPercent = "no";
     if (param.sub.match(/missing*/)) {
       var value = param.sub.substr(8,99);
-      queryStr = "SELECT substr(key,1,$1) as k,\
-              to_char(stamp,$2) as t,\
-              sum((missing->'"+value+"')::int) as cell from datacollection \
-              where measure = $3 \
-                 and stamp >= $4 \
-                 and stamp <= $5 \
-                 and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
-                               datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
-                 and substr(key,1,$6) = $7 \
-              group by k,t";
+      cellCalculation = "sum((missing->'"+value+"')::int) as cell"
+      if (param.subPercent == "Yes") {
+        cellCalculation = "(100 *sum((missing->'"+value+"')::int))/sum(count) as cell";
+      }
     }
      if (param.sub.match(/existing*/)) {
       var value = param.sub.substr(9,99);
-      queryStr = "SELECT substr(key,1,$1) as k,\
-              to_char(stamp,$2) as t, \
-              sum((existing->'"+value+"')::int) as cell from datacollection \
-              where measure = $3 \
+      cellCalculation =  "sum((existing->'"+value+"')::int) as cell";
+      if (param.subPercent == "Yes") {
+        cellCalculation = "(100 *sum((existing->'"+value+"')::int))/sum(count) as cell";
+      }
+    }
+    var queryStr = "SELECT substr(key,1,$1) as k,\
+              to_char(stamp,$2) as t," 
+              + cellCalculation + 
+              " from datacollection where measure = $3 \
                  and stamp >= $4 \
                  and stamp <= $5 \
                  and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
                                datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
                  and substr(key,1,$6) = $7 \
-              group by k,t";
-    }
+              group by k,t;"
+
     console.log(queryStr);
     var query = client.query(queryStr,bindParam);
     query.on('error', function(err){

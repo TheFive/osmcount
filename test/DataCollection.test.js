@@ -1,19 +1,19 @@
-var pg=require('pg');
-var async = require('async');
+var pg     =require('pg');
+var async  = require('async');
 var should = require('should');
 
-var configuration = require('../configuration.js');
+var config = require('../configuration.js');
 var DataCollection = require('../model/DataCollection.js')
 
 
 describe('DataCollection', function() {
   describe('aggregatePostgresDB',function() {
-    configuration.initialisePostgresDB();
+    config.initialisePostgresDB();
 
     // Create one pgclient for all tests, and release it afterwards
     var pgclient;
     before(function(bddone) {
-      pgclient = new pg.Client(configuration.postgresConnectStr);
+      pgclient = new pg.Client(config.postgresConnectStr);
       pgclient.connect(bddone);
 
     });
@@ -86,6 +86,22 @@ describe('DataCollection', function() {
           should(data).match([ { _id: { row: '101', col: '2012' }, cell: 11 },
                                { _id: { row: '1022', col: '2012' }, cell: 24 },
                                { _id: { row: '1021', col: '2012' }, cell: 13 } ]);
+          bddone();
+        })
+      })
+      it('should group 2 timeline with last Values with percentage calculation', function(bddone) {
+        param = {
+              lengthOfKey:4,
+              lengthOfTime:4,
+              measure:'test',
+              sub : "missing.B",
+              subPercent : "Yes"
+        };
+        DataCollection.aggregate(param,function done(err,data) {
+          should.equal(err,null);
+          should(data).match([ { _id: { row: '101', col: '2012' }, cell: 9 },
+                               { _id: { row: '1022', col: '2012' }, cell: 4 },
+                               { _id: { row: '1021', col: '2012' }, cell: 0 } ]);
           bddone();
         })
       })
