@@ -865,8 +865,6 @@ exports.table = function(req,res){
           var measure = items[i];
           debug("Measure i"+i+JSON.stringify(measure));
 
-          // Mongo DB Variant, has to be consolidated
-          // PostgresVariant uses same format
           var row=measure._id.row;
           var col=measure._id.col;
 
