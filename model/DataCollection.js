@@ -137,8 +137,7 @@ function aggregatePostgresDB(param,cb) {
       pgdone();
       return;
     }
-    var query = client.query(
-      "SELECT substr(key,1,$1) as k,\
+    var queryStr =  "SELECT substr(key,1,$1) as k,\
               to_char(stamp,$2) as t,\
               sum(count) as cell from datacollection \
               where measure = $3 \
@@ -147,14 +146,43 @@ function aggregatePostgresDB(param,cb) {
                  and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
                                datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
                  and substr(key,1,$6) = $7 \
-              group by k,t",
-              [param.lengthOfKey,
+              group by k,t";
+    var bindParam = [param.lengthOfKey,
                 paramTimeFormat,
                 param.measure,
                 paramSinceDate,
                 paramUpToDate,
                 paramLocationLength,
-                paramLocation]);
+                paramLocation];
+    if (typeof(param.sub)=='undefined') param.sub ='';
+    if (param.sub.match(/missing*/)) {
+      var value = param.sub.substr(8,99);
+      queryStr = "SELECT substr(key,1,$1) as k,\
+              to_char(stamp,$2) as t,\
+              sum((missing->'"+value+"')::int) as cell from datacollection \
+              where measure = $3 \
+                 and stamp >= $4 \
+                 and stamp <= $5 \
+                 and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
+                               datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
+                 and substr(key,1,$6) = $7 \
+              group by k,t";
+    }
+     if (param.sub.match(/existing*/)) {
+      var value = param.sub.substr(9,99);
+      queryStr = "SELECT substr(key,1,$1) as k,\
+              to_char(stamp,$2) as t, \
+              sum((existing->'"+value+"')::int) as cell from datacollection \
+              where measure = $3 \
+                 and stamp >= $4 \
+                 and stamp <= $5 \
+                 and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
+                               datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
+                 and substr(key,1,$6) = $7 \
+              group by k,t";
+    }
+    console.log(queryStr);
+    var query = client.query(queryStr,bindParam);
     query.on('error', function(err){
       console.log(err);
       pgdone();
@@ -166,6 +194,8 @@ function aggregatePostgresDB(param,cb) {
       r._id.row = row.k;
       r._id.col = row.t;
       r.cell = row.cell;
+      if (!(row.cell)) r.cell = 0;
+      r.cell = parseInt(r.cell);
 
       result.push(r);
     });
