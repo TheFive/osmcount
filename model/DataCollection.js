@@ -119,6 +119,15 @@ function aggregatePostgresDB(param,cb) {
   if (param.upTo != '' && typeof(param.upTo) != 'undefined')  {
     paramUpToDate = new Date(param.upTo);
   }
+  var paramTimeFormat = 'YYYY-MM-DD';
+  if (param.lengthOfTime == 4) {
+    paramTimeFormat = 'YYYY';
+  }
+  if (param.lengthOfTime == 7) {
+    paramTimeFormat = 'YYYY-MM';
+  }
+  console.log(paramTimeFormat);
+
 
   pg.connect(config.postgresConnectStr,function(err,client,pgdone){
     debug('aggregatePostgresDB->CB');
@@ -130,15 +139,17 @@ function aggregatePostgresDB(param,cb) {
     }
     var query = client.query(
       "SELECT substr(key,1,$1) as k,\
-              substr(to_char(stamp,'YYYY-MM-DD'),1,$2) as t,\
+              to_char(stamp,$2) as t,\
               sum(count) as cell from datacollection \
               where measure = $3 \
                  and stamp >= $4 \
                  and stamp <= $5 \
+                 and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
+                               datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
                  and substr(key,1,$6) = $7 \
               group by k,t",
               [param.lengthOfKey,
-                param.lengthOfTime,
+                paramTimeFormat,
                 param.measure,
                 paramSinceDate,
                 paramUpToDate,
@@ -321,7 +332,7 @@ function importPostgresDB(filename,cb) {
   			if (existing != "" ) existing += ",";
   			existing += '"' + k + '"=>"' +item.existing[k] + '"';
   		}
-  		client.query("INSERT into test (key,timestamp,measure,count,missing,existing,source) VALUES($1,$2,$3,$4,$5,$6,$7)",
+  		client.query("INSERT into datacollection (key,timestamp,measure,count,missing,existing,source) VALUES($1,$2,$3,$4,$5,$6,$7)",
   					                    [key,timestamp,measure,count,missing,existing,source], function(err,result) {
   	    callback(err);
   		})

@@ -1,4 +1,4 @@
-var debug = require('debug')('WorkerQueue');
+var debug = require('debug')('DataTarget');
 var pg    = require('pg');
 var fs    = require('fs');
 var async = require('async');
@@ -8,20 +8,18 @@ var importCSV = require('../ImportCSV.js');
 
 var databaseType = "postgres";
 
-var postgresDB = {
-  createTableString :
-    'CREATE TABLE workerqueue (id bigserial primary key,measure text,key text,stamp timestamp with time zone, \
-          status text,  exectime timestamp with time zone,type text,query text,source text) \
-        WITH ( \
-          OIDS=FALSE \
-        ); '
-}
+var postgresDB = { 
+  createTableString: 
+  "CREATE TABLE datatarget ( key text, measure text, target double precision, \
+      name text, sourceText text, sourceLink text, id bigserial NOT NULL, \
+      CONSTRAINT id_datatarget PRIMARY KEY (id) )"
+};
 
 exports.dropTable = function(cb) {
   debug('exports.dropTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    client.query("DROP TABLE IF EXISTS WorkerQueue",function(err){
-      debug("WorkerQueue Table Dropped");
+    client.query("DROP TABLE IF EXISTS datatarget",function(err){
+      debug("datatarget Table Dropped");
       cb(err)
     });
 
@@ -33,7 +31,7 @@ exports.createTable = function(cb) {
   debug('exports.createTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     client.query(postgresDB.createTableString,function(err) {
-      debug('WorkerQueue Table Created');
+      debug('datatarget Table Created');
       cb(err);
     });
     pgdone();
@@ -53,7 +51,7 @@ exports.initialise = function initialise(dbType,callback) {
 
 exports.importCSV =function(filename,defJson,cb) {
   debug('exports.importCSV');
-  console.log("No importCSV implemented for WorkerQueue, try import JSON");
+  console.log("No importCSV implemented for datatarget, try import JSON");
   cb("No importCSV implemented",null);
 }
 
@@ -74,17 +72,13 @@ function insertDataToPostgres (data,cb) {
     function insertData(item,callback){
       debug('insertDataToPostgres->insertData');
       var key = item.schluessel;
-      var stamp = item.timestamp;
       var measure = item.measure;
-      var status = item.status;
-      var exectime = item.exectime;
-      var type = item.type;
-      var query = item.query;
-      var source = item._id;
-     
-
-      client.query("INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
-                          [key,stamp,measure,status,exectime,type,query,source], function(err,result) {
+      var target = item.apothekenVorgabe;
+      var name = item.name;
+      var sourceText = item.source;
+      var sourceLink = item.linkSource;
+      client.query("INSERT into datatarget (key,measure,target,name,sourceText,sourceLink) VALUES($1,$2,$3,$4,$5,$6)",
+                          [key,measure,target,name,sourceText,sourceLink,], function(err,result) {
         callback(err);
         debug('Error after Insert'+err);
       })
@@ -99,7 +93,7 @@ function insertDataToPostgres (data,cb) {
 function exportMongoDB(filename,cb) {
   debug("exportMongoDB("+filename+")");
   var db = config.getMongoDB();
-  var collection = db.collection('WorkerQueue');
+  var collection = db.collection('DataTarget');
   collection.find({},function exportsMongoDBCB1(err,data) {
     debug('exportsMongoDBCB1');
     if (err) {
@@ -162,32 +156,4 @@ exports.insertData = function(data,cb) {
   }
 }
 
-function countMongoDB(query,cb) {
-  debug('countMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = 'WorkerQueue';
 
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.count(query, cb);
-}
-
-exports.count = function(query,cb) {
-  debug('count');
-  countMongoDB(query,cb);
-}
-
-
-function getWorkingTaskMongoDB(cb) {
-  debug('getWorkingTaskMongoDB');
-  var db=config.getMongoDB();
-  var collectionName = 'WorkerQueue';
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.findOne({status:"working"},cb);  
-}
-exports.getWorkingTask = function (cb) {
-  debug('getWorkingTask');
-  getWorkingTaskMongoDB(cb);
-}
