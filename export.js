@@ -49,8 +49,8 @@ function importPostgresDBWorkerQueue(cb) {
     return;
   };
   console.log("Start Import WorkerQueue (PostgresDB)");
-  DataCollection.initialise("postgres");
-  DataCollection.import(program.filename,cb);
+  WorkerQueue.initialise("postgres");
+  WorkerQueue.import(program.filename,cb);
 }
 
 function importMongoDBDataCollection(cb) {
@@ -135,7 +135,7 @@ async.auto( {
     }
     else {
       console.log("export / import done");
-      process.exit();
     }
+    process.exit();
   }
 )
