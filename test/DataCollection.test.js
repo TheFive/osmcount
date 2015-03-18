@@ -1,6 +1,6 @@
 var pg=require('pg');
 var async = require('async');
-var assert = require('assert');
+var should = require('should');
 
 var configuration = require('../configuration.js');
 var DataCollection = require('../model/DataCollection.js')
@@ -29,7 +29,7 @@ describe('DataCollection', function() {
         DataCollection.createTable
       ],function(err) {
         if (err) console.dir(err);
-        assert.equal(null,err);
+        should.not.exist(err);
         bddone();
       });
     });
@@ -58,14 +58,14 @@ describe('DataCollection', function() {
               measure:'test',
         };
         DataCollection.aggregate(param,function done(err,data) {
-          assert.equal(err,null);
-          assert.equal(data.length,2);
-          assert.equal(data[0].cell,45);
-          assert.equal(data[0]._id.col,'2012-10-01');
-          assert.equal(data[0]._id.row,'10');
-          assert.equal(data[1].cell,48);
-          assert.equal(data[1]._id.col,'2012-11-01');
-          assert.equal(data[1]._id.row,'10');
+          should.equal(err,null);
+          should.equal(data.length,2);
+          should.equal(data[0].cell,45);
+          should.equal(data[0]._id.col,'2012-10-01');
+          should.equal(data[0]._id.row,'10');
+          should.equal(data[1].cell,48);
+          should.equal(data[1]._id.col,'2012-11-01');
+          should.equal(data[1]._id.row,'10');
           bddone();
         })
       })
@@ -76,17 +76,17 @@ describe('DataCollection', function() {
               measure:'test',
         };
         DataCollection.aggregate(param,function done(err,data) {
-          assert.equal(err,null);
-          assert.equal(data.length,3);
-          assert.equal(data[0].cell,11);
-          assert.equal(data[0]._id.col,'2012');
-          assert.equal(data[0]._id.row,'10');
-          assert.equal(data[1].cell,13);
-          assert.equal(data[1]._id.col,'2012');
-          assert.equal(data[1]._id.row,'1021');
-          assert.equal(data[2].cell,24);
-          assert.equal(data[2]._id.col,'2012');
-          assert.equal(data[2]._id.row,'1022');
+          should.equal(err,null);
+          should.equal(data.length,3);
+          should.equal(data[0].cell,11);
+          should.equal(data[0]._id.col,'2012');
+          should.equal(data[0]._id.row,'10');
+          should.equal(data[1].cell,13);
+          should.equal(data[1]._id.col,'2012');
+          should.equal(data[1]._id.row,'1021');
+          should.equal(data[2].cell,24);
+          should.equal(data[2]._id.col,'2012');
+          should.equal(data[2]._id.row,'1022');
           bddone();
         })
       })*/

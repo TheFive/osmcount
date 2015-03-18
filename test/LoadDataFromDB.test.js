@@ -1,4 +1,4 @@
-var assert =require('assert');
+var should = require('should');
 var lod = require('../LoadDataFromDB.js');
 var configuration = require('../configuration.js');
 var dbHelper = require('../test/dbHelper.js');
@@ -21,33 +21,33 @@ describe('LoadDataFromDB', function () {
     it ('should ignore undefined Key', function() {
       osmdoc = {boundary:"postal_code"}
       var key;
-      assert.equal (typeof(key) ,'undefined');
+      should.not.exist (key);
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1});
-      assert.equal(CC_Type.list.length,0);
+      should(CC_Type.map).match({"123":1});
+      should.equal(CC_Type.list.length,0);
     });
     it ('should ignore undefined osmdoc.name', function() {
       osmdoc = {boundary:"postal_code"}
       var key="23";
-      assert.equal (typeof(osmdoc.name) ,'undefined');
+      should.not.exist (osmdoc.name);
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1});
-      assert.equal(CC_Type.list.length,0);
+      should(CC_Type.map).match({"123":1});
+      should.equal(CC_Type.list.length,0);
     });
     it ('should ignore wrong osmtype (List of Values)', function() {
       osmdoc = {boundary:"something special",name:"halöle"}
       var key="23";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1});
-      assert.equal(CC_Type.list.length,0);
+      should(CC_Type.map).match({"123":1});
+      should.equal(CC_Type.list.length,0);
     });
     it ('should ignore wrong osmtype (values)', function() {
       CC_Type.matchKey = {bounday:"administrative"};
       osmdoc = {boundary:"something special",name:"halöle"}
       var key="23";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1});
-      assert.equal(CC_Type.list.length,0);
+      should(CC_Type.map).match({"123":1});
+      should.equal(CC_Type.list.length,0);
     });
     it('should insert osmtype (List of Values)', function() {
       CC_Type.secondInfoKey = "admin_level";
@@ -55,8 +55,8 @@ describe('LoadDataFromDB', function () {
       osmdoc = {boundary:"administrative",name:"New Border"}
       var key="23";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1,"23":{name:"New Border",typ:"-"}});
-      assert.deepEqual(CC_Type.list,["23"]);
+      should(CC_Type.map).match({"123":1,"23":{name:"New Border",typ:"-"}});
+      should(CC_Type.list).match(["23"]);
     });
     it ('should insert osmtype (values)', function() {
       CC_Type.secondInfoKey = "admin_level";
@@ -64,8 +64,8 @@ describe('LoadDataFromDB', function () {
       osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
       var key="23";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1,"23":{name:"New Border",typ:"country"}});
-      assert.deepEqual(CC_Type.list,["23"]);
+      should(CC_Type.map).match({"123":1,"23":{name:"New Border",typ:"country"}});
+      should(CC_Type.list).match(["23"]);
     });
     it ('should insert osmtype with ending 0 multiple', function() {
       CC_Type.matchKey = {boundary:"administrative"};
@@ -74,13 +74,13 @@ describe('LoadDataFromDB', function () {
       osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
       var key="230000";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1,
+      should(CC_Type.map).match({"123":1,
                                     "230000":{name:"New Border",typ:"country"},
                                     "23000":{name:"New Border",typ:"country"},
                                     "2300":{name:"New Border",typ:"country"},
                                     "230":{name:"New Border",typ:"country"},
                                     "23":{name:"New Border",typ:"country"}});
-      assert.deepEqual(CC_Type.list,["230000"]);
+      should(CC_Type.list).match(["230000"]);
     });
     it ('should should use the blaetter ignore list (ignore case)', function() {
       CC_Type.matchKey = {boundary:"administrative"};
@@ -90,9 +90,9 @@ describe('LoadDataFromDB', function () {
       osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
       var key="0";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1,
+      should(CC_Type.map).match({"123":1,
                                     "0":{name:"New Border",typ:"country"}});
-      assert.deepEqual(CC_Type.list,[]);
+      should(CC_Type.list).match([]);
     });
     it ('should should use the blaetter ignore list (pass case)', function() {
       CC_Type.matchKey = {boundary:"administrative"};
@@ -102,9 +102,9 @@ describe('LoadDataFromDB', function () {
       osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3"}
       var key="0";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1,
+      should(CC_Type.map).match({"123":1,
                                     "0":{name:"New Border",typ:"state"}});
-      assert.deepEqual(CC_Type.list,["0"]);
+      should(CC_Type.list).match(["0"]);
     });
     it ('should handle multiple keys (positive)', function() {
       CC_Type.matchKey = {boundary:"administrative",osmcount_country:"DE"};
@@ -114,9 +114,9 @@ describe('LoadDataFromDB', function () {
       osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3",osmcount_country:"DE"}
       var key="0";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1,
+      should(CC_Type.map).match({"123":1,
                                     "0":{name:"New Border",typ:"state"}});
-      assert.deepEqual(CC_Type.list,["0"]);
+      should(CC_Type.list).match(["0"]);
     });
     it ('should handle multiple keys (negative)', function() {
       CC_Type.matchKey = {boundary:"administrative",osmcount_country:"DE"};
@@ -126,15 +126,15 @@ describe('LoadDataFromDB', function () {
       osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3",osmcount_country:"AT"}
       var key="0";
       lod.insertValue(CC_Type,key,osmdoc);
-      assert.deepEqual(CC_Type.map,{"123":1});
-      assert.deepEqual(CC_Type.list,[]);
+      should(CC_Type.map).match({"123":1});
+      should(CC_Type.list).match([]);
     });
   });
   describe('sortAndReduce',function()
   {
   	list = ['1','12','120','120','13','121','134','135'];
   	lod.sortAndReduce(list);
-  	assert.deepEqual(list,['120','121','134','135']);
+  	should(list).match(['120','121','134','135']);
   });
   describe('initialise',function() {
     var db;
@@ -150,29 +150,28 @@ describe('LoadDataFromDB', function () {
           throw(err);
         }
       }
-      assert.notEqual(typeof(data),'undefined');
-      assert.notEqual(0,data.length);
+      should.exist(data);
       configuration.initialiseDB( function() {
         db = configuration.getMongoDB();
-        dbHelper.prepareCollection(db,"OSMBoundaries","OSMBoundaries.test.json",function()
-        { lod.initialise(done);});
+        dbHelper.prepareCollection(db,"OSMBoundaries","OSMBoundaries.test.json",function(err)
+        { lod.initialise(done(err));});
       });
     });
     it('should read the Data DE_RGS',function() {
-      assert.deepEqual(lod.DE_RGS.map, data.DE_RGS.map,"DE_RGS maps not the same");
-      assert.deepEqual(lod.DE_RGS.list,data.DE_RGS.list,"DE_RGS list not the same");
+      should(data.DE_RGS.map).match(lod.DE_RGS.map);
+      should(data.DE_RGS.list).match(lod.DE_RGS.list);
     });
     it('should read the Data DE_PLZ',function() {
-        assert.deepEqual(lod.DE_PLZ.map, data.DE_PLZ.map,"DE_PLZ maps not the same");
-        assert.deepEqual(lod.DE_PLZ.list,data.DE_PLZ.list,"DE_PLZ list not the same");
+        should(lod.DE_PLZ.map).match(data.DE_PLZ.map);
+        should(lod.DE_PLZ.list).match(data.DE_PLZ.list);
     });
     it('should read the Data DE_AGS',function() {
-        assert.deepEqual(lod.DE_AGS.map, data.DE_AGS.map,"DE_AGS map not the same");
-        assert.deepEqual(lod.DE_AGS.list,data.DE_AGS.list,"DE_AGS list not the same");
+        should(lod.DE_AGS.map).match(data.DE_AGS.map);
+        should(lod.DE_AGS.list).match(data.DE_AGS.list);
     });
     it('should read the Data AT_AGS',function() {
-        assert.deepEqual(lod.AT_AGS.map, data.AT_AGS.map,"AT_AGS map not the same");
-        assert.deepEqual(lod.AT_AGS.list,data.AT_AGS.list,"AT_AGS list not the same");
+        should(lod.AT_AGS.map).match(data.AT_AGS.map);
+        should(lod.AT_AGS.list).match(data.AT_AGS.list);
     });
   });
 });
