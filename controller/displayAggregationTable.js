@@ -724,10 +724,7 @@ exports.table = function(req,res){
                       }}];
 
 
-  debug("query:"+JSON.stringify(query));
-  debug("queryVorgabe:"+JSON.stringify(queryVorgabe));
 
-  var aggFunc=query;
   var openQueries=0;
   var errorQueries=0;
   var workingSchluessel="";

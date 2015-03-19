@@ -1,10 +1,13 @@
-var config    = require('./configuration.js');
-var lod       = require('./LoadOverpassData.js');
-var util      = require('./util.js')
+var ObjectID  = require('mongodb').ObjectID;
+var debug     = require('debug')('QueueWorker');
 var async     = require('async');
 var fs        = require('fs');
-var debug     = require('debug')('QueueWorker');
-var ObjectID  = require('mongodb').ObjectID;
+
+
+var config      = require('./configuration.js');
+var lod         = require('./LoadOverpassData.js');
+var WorkerQueue = require('./model/WorkerQueue.js');
+var util        = require('./util.js')
 
 exports.processSignal = '';
 
@@ -91,7 +94,7 @@ function saveJobState(cb,job) {
       job.timestamp = date;
       debug("Saving Jobsstatus to %s",job.status);
       debug("saveJobState()->call CB");
-      WorkerQueue.saveTaks(job, function (err, num){
+      WorkerQueue.saveTask(job, function (err, num){
         debug("saveJobState()->CB("+err+","+num+")");
         if (err) {
           console.log("Error occured in function: OueueWorker.saveJobState");

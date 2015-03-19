@@ -207,12 +207,12 @@ function getNextOpenTaskMongoDB(cb) {
               },cb);  
 }
 
-exports.getNextOpenTask = function (cb) {
+exports.getNextOpenTask = function getNextOpenTask(cb) {
   debug('getNextOpenTask');
   getNextOpenTaskMongoDB(cb);
 }
 
-exports.saveTaskMongoDB = function(task,cb) {
+ function saveTaskMongoDB(task,cb) {
   var db=config.getMongoDB();
   db.collection("WorkerQueue").save(task,{w:1}, cb);
 }

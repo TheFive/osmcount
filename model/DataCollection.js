@@ -126,7 +126,6 @@ function aggregatePostgresDB(param,cb) {
   if (param.lengthOfTime == 7) {
     paramTimeFormat = 'YYYY-MM';
   }
-  console.log(paramTimeFormat);
 
 
   pg.connect(config.postgresConnectStr,function(err,client,pgdone){
@@ -151,14 +150,14 @@ function aggregatePostgresDB(param,cb) {
       var value = param.sub.substr(8,99);
       cellCalculation = "sum((missing->'"+value+"')::int) as cell"
       if (param.subPercent == "Yes") {
-        cellCalculation = "(100 *sum((missing->'"+value+"')::int))/sum(count) as cell";
+        cellCalculation = "(sum((missing->'"+value+"')::float))/sum(count) as cell";
       }
     }
      if (param.sub.match(/existing*/)) {
       var value = param.sub.substr(9,99);
       cellCalculation =  "sum((existing->'"+value+"')::int) as cell";
       if (param.subPercent == "Yes") {
-        cellCalculation = "(100 *sum((existing->'"+value+"')::int))/sum(count) as cell";
+        cellCalculation = "(sum((existing->'"+value+"')::float))/sum(count) as cell";
       }
     }
     var queryStr = "SELECT substr(key,1,$1) as k,\
@@ -172,7 +171,6 @@ function aggregatePostgresDB(param,cb) {
                  and substr(key,1,$6) = $7 \
               group by k,t;"
 
-    console.log(queryStr);
     var query = client.query(queryStr,bindParam);
     query.on('error', function(err){
       console.log(err);
@@ -186,7 +184,7 @@ function aggregatePostgresDB(param,cb) {
       r._id.col = row.t;
       r.cell = row.cell;
       if (!(row.cell)) r.cell = 0;
-      r.cell = parseInt(r.cell);
+      r.cell = parseFloat(r.cell);
 
       result.push(r);
     });
@@ -213,8 +211,7 @@ function aggregateMongoDB(param,cb) {
   }
   if (param.since != '') paramSinceDate = new Date(param.since);
   if (param.upTo != '')  paramUpToDate = new Date(param.upTo);
-  console.log(paramSinceDate);
-  console.log(paramUpToDate);
+
   var preFilter = {$match: { $and: [{timestamp: {$gte: paramSinceDate}},
                                     {timestamp: {$lte: paramUpToDate}}],
                              measure: param.measure,

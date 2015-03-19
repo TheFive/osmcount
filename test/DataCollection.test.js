@@ -99,8 +99,8 @@ describe('DataCollection', function() {
         };
         DataCollection.aggregate(param,function done(err,data) {
           should.equal(err,null);
-          should(data).match([ { _id: { row: '101', col: '2012' }, cell: 9 },
-                               { _id: { row: '1022', col: '2012' }, cell: 4 },
+          should(data).match([ { _id: { row: '101', col: '2012' }, cell: 0.0909090909090909 },
+                               { _id: { row: '1022', col: '2012' }, cell: 0.0416666666666667 },
                                { _id: { row: '1021', col: '2012' }, cell: 0 } ]);
           bddone();
         })
