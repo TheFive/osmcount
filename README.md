@@ -1,6 +1,7 @@
 osmcount
 ========
 
+[![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=SwitchToPostgres)](https://travis-ci.org/TheFive/osmcount)
 Project to count several OpenStreetMap objects with the Overpass API to motivate quality assurance.
 
 1. Vision
