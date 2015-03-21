@@ -3,8 +3,7 @@ language: node_js
 node_js:
  - "0.10"
 
-before_install:
-  - sudo pip install codecov
+
 
 install:
  - npm install
@@ -25,8 +24,7 @@ before_script:
   - psql testdb -c "CREATE EXTENSION hstore SCHEMA public;" -U postgres
 
 
-after_success:
-  - codecov
+
 
 script:
   - npm test
