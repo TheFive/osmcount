@@ -1,9 +1,13 @@
 osmcount
 ========
 
-[![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=SwitchToPostgres)](https://travis-ci.org/TheFive/osmcount) (Switch to Postgres)
+Master: [![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=master)](https://travis-ci.org/TheFive/osmcount)
+[![codecov.io](https://codecov.io/github/TheFive/osmcount/coverage.svg?branch=master)](https://codecov.io/github/cainus/codecov
 
-[![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=master)](https://travis-ci.org/TheFive/osmcount) (Master)
+
+Switch To Postgres:[![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=SwitchToPostgres)](https://travis-ci.org/TheFive/osmcount) 
+[![codecov.io](https://codecov.io/github/TheFive/osmcount/coverage.svg?branch=SwitchToPostgres)](https://codecov.io/github/cainus/codecov.io?branch=master)
+
 
 Project to count several OpenStreetMap objects with the Overpass API to motivate quality assurance.
 
