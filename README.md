@@ -1,11 +1,11 @@
 osmcount
 ========
 
-Master: [![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=master)](https://travis-ci.org/TheFive/osmcount)
+Master:   [![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=master)](https://travis-ci.org/TheFive/osmcount)
 [![codecov.io](https://codecov.io/github/TheFive/osmcount/coverage.svg?branch=master)](https://codecov.io/github/TheFive/osmcount/coverage.svg?branch=master)
 
 
-Switch To Postgres:[![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=SwitchToPostgres)](https://travis-ci.org/TheFive/osmcount) 
+Switch To Postgres: [![Build Status](https://travis-ci.org/TheFive/osmcount.svg?branch=SwitchToPostgres)](https://travis-ci.org/TheFive/osmcount) 
 [![codecov.io](https://codecov.io/github/TheFive/osmcount/coverage.svg?branch=SwitchToPostgres)](https://codecov.io/github/TheFive/osmcount/coverage.svg?branch=SwitchToPostgres)
 
 
