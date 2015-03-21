@@ -2,6 +2,7 @@ var debug = require('debug')('WorkerQueue');
 var pg    = require('pg');
 var fs    = require('fs');
 var async = require('async');
+var should = require('should');
 
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
@@ -59,14 +60,11 @@ exports.importCSV =function(filename,defJson,cb) {
 
 function insertDataToPostgres (data,cb) {
   debug('insertDataToPostgres');
+  should.exist(cb);
   debug('Connect String:'+config.postgresConnectStr);
   pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
     if (err) {
-      if (cb) {
-        cb(err);
-      } else {
-        throw (err);
-      }
+      cb(err);
       return;
     }
     var result = "Datensätze: "+data.length; 
@@ -94,20 +92,18 @@ function insertDataToPostgres (data,cb) {
 
 }
 
-
-
 function exportMongoDB(filename,cb) {
   debug("exportMongoDB("+filename+")");
+  should.exist(cb);
   var db = config.getMongoDB();
   var collection = db.collection('WorkerQueue');
   collection.find({},function exportsMongoDBCB1(err,data) {
     debug('exportsMongoDBCB1');
     if (err) {
       console.log("exportMongoDB Error: "+err);
-      if (cb) cb(err);
+      cb(err);
       return;
     }
-
     fs.writeFileSync(filename,"[");
     var delimiter="";
     var count=0;
@@ -126,7 +122,7 @@ function exportMongoDB(filename,cb) {
         fs.appendFileSync(filename,"]");
         console.log("DataLength to Export: "+count);
         console.log(filename +" is exported");
-        if (cb) cb();
+        cb();
       }
     })
   })
@@ -172,9 +168,60 @@ function countMongoDB(query,cb) {
   collection.count(query, cb);
 }
 
+function countPostgresDB(query,cb) {
+  debug('countPostgresDB');
+
+
+  var whereClause = ""
+  if (typeof(query.schluessel)!= 'undefined') {
+    whereClause = "key ~ '"+query.schluessel+"'";
+  } 
+  if (typeof(query.source) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "source = '"+query.source+"'";
+  }
+  if (typeof(query.measure) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "measure = '"+query.measure+"'";
+  }
+  if (typeof(query.status) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "status = '"+query.status+"'";
+  }
+  if (typeof(query.type) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "type = '"+query.type+"'";
+  }
+  if (typeof(query.timestamp) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "stamp = '"+query.timestamp+"'";
+  }
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    client.query("select count(*) from workerqueue where "+whereClause,
+                                function(err,result) {
+      
+      if (!err) {
+        var count = result.rows[0].count;
+        cb (null,count);
+        pgdone();
+        return;
+      }
+      cb(err,null);
+      pgdone();
+      return;
+    })
+  })
+
+}
+
 exports.count = function(query,cb) {
   debug('count');
-  countMongoDB(query,cb);
+  if (databaseType == 'mongodb') {
+   countMongoDB(query,cb);
+  }
+  if (databaseType == "postgres") {
+    countPostgresDB (query,cb);
+  }
 }
 
 

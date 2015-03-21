@@ -7,22 +7,19 @@ var DataCollection = require('../model/DataCollection.js')
 
 
 describe('DataCollection', function() {
-  describe('aggregatePostgresDB',function() {
+  var pgclient; 
+  // Create one pgclient for all tests, and release it afterwards
+  before(function(bddone) {
     config.initialisePostgresDB();
+    pgclient = new pg.Client(config.postgresConnectStr);
+    pgclient.connect(bddone);
 
-    // Create one pgclient for all tests, and release it afterwards
-    var pgclient;
-    before(function(bddone) {
-      pgclient = new pg.Client(config.postgresConnectStr);
-      pgclient.connect(bddone);
-
-    });
-    after(function(bddone) {
-      pgclient.end();
-      bddone();
-    })
-
-
+  });
+  after(function(bddone) {
+    pgclient.end();
+    bddone();
+  })
+  describe('aggregatePostgresDB',function() {
     beforeEach(function(bddone) {
       async.series([
         DataCollection.dropTable,
@@ -138,5 +135,94 @@ describe('DataCollection', function() {
         })
       })
     });
+  })
+  describe('count', function() {
+    before( function(bddone){
+       async.series([
+        DataCollection.dropTable,
+        DataCollection.createTable
+      ],function(err) {
+        if (err) console.dir(err);
+        should.not.exist(err);
+        
+
+       /* Short Data Table
+             2012-10-01  2012-11-01 
+        101    10          11
+        1021   12          13
+        1022   23          24
+
+        A    2012-10-01  2012-11-01 
+        101    1           
+        1021              0
+        1022   3          
+
+        */
+      pgclient.query("insert into datacollection (measure,key,stamp,count,source,missing,existing)  \
+                         values ('testa','101',to_date('2012-10-01','YYYY-MM-DD'),10,'1','A=>1','fixme=>101'),\
+                                ('testa','1021',to_date('2012-10-01','YYYY-MM-DD'),12,'1','B=>1','fixme=>1021'),\
+                                ('testa','1022',to_date('2012-10-01','YYYY-MM-DD'),23,'1','A=>3','fixme=>1022'),\
+                                ('testb','101',to_date('2012-11-01','YYYY-MM-DD'),11,'2','B=>1','fixme=>1'),\
+                                ('testb','1021',to_date('2012-11-01','YYYY-MM-DD'),13,'2','A=>0','fixme=>2'),\
+                                ('testb','1022',to_date('2012-11-01','YYYY-MM-DD'),24,'2','B=>1','fixme=>3');",
+        bddone);
+      });
+    });
+    it('should count measure', function (bddone) {
+      DataCollection.count({measure:'testa'},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(3);
+        bddone();
+      });
+    })
+    it('should count key (no regex)', function (bddone) {
+      DataCollection.count({schluessel:'1021'},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(2);
+        bddone();
+      })
+    })
+    it('should count key (regex)', function (bddone) {
+      DataCollection.count({schluessel:'^102'},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(4);
+        bddone();
+      })
+    })
+    it('should count source', function (bddone) {
+      DataCollection.count({source:1},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(3);
+        bddone();
+      })
+    })
+    it('should count timestamp', function (bddone) {
+      DataCollection.count({timestamp:'2012-10-01'},function(err,data){
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(3);
+        bddone();
+      })
+    })
+    it('should count count', function (bddone) {
+      DataCollection.count({count:13},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(1);
+        bddone();
+      });
+    })
+    it('should count multiple Values', function (bddone) {
+      DataCollection.count({source:1,measure:'testa',schluessel:'^102'},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(2);
+        bddone();
+      });
+    })
   })
 })

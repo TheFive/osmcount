@@ -2,6 +2,7 @@ var debug = require('debug')('DataCollection');
 var pg    = require('pg');
 var fs    = require('fs');
 var async = require('async');
+var should = require('should');
 
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
@@ -373,10 +374,89 @@ exports.export = function(filename,cb){
 exports.insertData = function(data,cb) {
   debug('exports.insertData');
   if (databaseType == "mongo") {
-    assert.equal("mongodb not implemented yet",null);
+    should.exist(null,"mongodb not implemented yet");
   }
   if (databaseType == "postgres") {
     insertDataToPostgres(data,cb);
   }
- 
 }
+exports.saveMongoDB =function(data,cb) {
+  var db = config.getMongoDB();
+  db.collection("DataCollection").save(data,{w:1}, cb);
+}
+
+exports.savePostgresDB = function(data,cb) {
+  debug('savePostgresDB');
+  should.not.exist(data.id);
+  exports.insertData([data],cb);
+}
+exports.save = function(data,cb) {
+  debug('exports.save');
+  if (databaseType == "mongo") {
+    exports.saveMongoDB(data,cb);
+  }
+  if (databaseType == "postgres") {
+    exports.savePostgresDB(data,cb);
+  }
+}
+
+function countPostgresDB(query,cb) {
+  debug('countPostgresDB');
+  var whereClause = ""
+  if (typeof(query.schluessel)!= 'undefined') {
+    whereClause = "key ~ '"+query.schluessel+"'";
+  } 
+  if (typeof(query.source) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "source = '"+query.source+"'";
+  }
+  if (typeof(query.measure) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "measure = '"+query.measure+"'";
+  }
+  if (typeof(query.timestamp) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "stamp = '"+query.timestamp+"'";
+  }
+ if (typeof(query.count) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "count = "+query.count;
+  }
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    client.query("select count(*) from datacollection where "+whereClause,
+                                function(err,result) {
+      
+      if (!err) {
+        var count = result.rows[0].count;
+        cb (null,count);
+        pgdone();
+        return;
+      }
+      cb(err,null);
+      pgdone();
+      return;
+    })
+  })
+
+}
+
+function countMongoDB(query,cb) {
+  debug('countMongoDB');
+  var db = config.getMongoDB();
+  var collectionName = 'DataCollection';
+
+  // Fetch the collection test
+  var collection = db.collection(collectionName);
+  collection.count(query, cb);
+}
+
+exports.count = function(query,cb) {
+  debug('count');
+  if (databaseType == "mongodb") {
+    countMongoDB(query,cb);
+  }
+  if (databaseType == "postgres") {
+    countPostgresDB(query,cb);
+  }
+}
+

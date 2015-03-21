@@ -1,4 +1,4 @@
-var ObjectID  = require('mongodb').ObjectID;
+
 var debug     = require('debug')('QueueWorker');
 var async     = require('async');
 var fs        = require('fs');
@@ -8,6 +8,8 @@ var config      = require('./configuration.js');
 var lod         = require('./LoadOverpassData.js');
 var WorkerQueue = require('./model/WorkerQueue.js');
 var util        = require('./util.js')
+
+var DataCollection = require('./model/DataCollection.js')
 
 exports.processSignal = '';
 
@@ -65,7 +67,7 @@ function saveMeasure(result,cb) {
     return;
   }
   debug("saveMeasure->call CB");
-  mongodb.collection("DataCollection").save(result,{w:1}, function (err, num){
+  DataCollection.save(result, function (err, num){
     debug("saveMeasure->CB("+err+","+num+")");
       if (err) {
         console.log("Error occured in function: OueueWorker.saveMeasure");
@@ -237,7 +239,6 @@ function doInsertJobs(cb,results) {
 
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
     debug("Start: doInsertJobs(cb,"+results+")");
-    mongodb = config.getMongoDB();
     var jobs = lod.createQuery(job.measure,job.exectime,job);
     console.log("Trigger to load "+job.measure+" at "+job.exectime + " Number Jobs "+ jobs.length);
     if (jobs.length == 0) {
@@ -248,48 +249,7 @@ function doInsertJobs(cb,results) {
       if (cb) cb(null,job);
       return;
     }
-    var q = async.queue(function (task,callback) {
-/*      mongodb.collection("DataCollection").aggregate([ {$match: { measure:task.measure,schluessel:task.schluessel}},
-                              {$group: {_id:"$schluessel",
-                                        max:{$max:"$count"}}}],
-                 function (err, data)*/
-      mongodb.collection("DataTarget").findOne( {measure:task.measure,schluessel:task.schluessel},
-                 function (err, data)
-      {
-        if (err) {
-          console.log("Fehler beim Laden der Vorgabe: "+JSON.stringify(err))
-          task.prio = 0;
-          // Store Error in Task for Information
-          task.prioError = err;
-
-        }
-        if (data) {
-          var d = data;
-          //console.log(task.measure+task.schluessel);
-          //console.dir(d);
-          task.prio = d.apothekenVorgabe;
-        }
-
-        callback(null);
-      })
-    })
-    q.drain = function() {
-     mongodb.collection("WorkerQueue").insert(jobs,
-      function (err, records) {
-        if (err) {
-          console.log("Error occured in function: QueueWorker.doInsertJobs");
-          console.log(err);
-          job.status="error";
-          job.error = JSON.stringify(err);
-          err=null; //error wird gespeichert, kann daher hier auf NULL gesetzt werden.
-        } else {
-          debug("All Inserted %i" ,records.length);
-          job.status='done';
-        }
-        cb(err,job);
-      })
-    }
-    q.push(jobs);
+    cb(null,job);
   }
   else if (cb) cb(null,job);
 }
@@ -305,6 +265,7 @@ function doLoadBoundaries(cb,results) {
   }
   else if (cb) cb(null,job);
 }
+
 function checkState(cb,results) {
   debug("checkState(cb,"+results+")");
   var job=results.readjob;
@@ -318,8 +279,7 @@ function checkState(cb,results) {
     cb(null,null);
     return;
   }
-  mongodb = config.getMongoDB();
-  mongodb.collection("DataCollection").count(
+  DataCollection.count(
               { source : job.source,schluessel:job.schluessel}
 
               , function(err, count)
