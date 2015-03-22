@@ -1,7 +1,9 @@
-var loadDataFromDB = require('./LoadDataFromDB.js');
-var configuration  = require('./configuration.js');
 var async          = require('async');
 var debug          = require('debug')('LoadOverpassData');
+var should         = require('should');
+
+var loadDataFromDB = require('./LoadDataFromDB.js');
+var configuration  = require('./configuration.js');
 var wochenaufgabe  = require('./wochenaufgabe.js');
 
 
@@ -174,15 +176,18 @@ exports.runOverpass= function(query, job,result, cb) {
 
 
 
-exports.createQuery = function(aufgabe,exectime,referenceJob)
+exports.createQuery = function(referenceJob)
 {
-	debug("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
+	debug("createQuery");
+	should.exist(referenceJob);
+  var jobs = [];
+	var aufgabe = referenceJob.measure;
+	var exectime = referenceJob.exectime;
 	var wa = wochenaufgabe.map[aufgabe];
 	if (typeof(wa) == 'undefined')  {
 	  referenceJob.error = "Wochenaufgabe nicht definiert";
-	  return;
+	  return jobs;
 	}
-	var jobs = [];
  	var blaetter = wa.map.list;
 
 	if (typeof(blaetter)!='undefined') {
@@ -197,7 +202,13 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 			job.type = "overpass";
 			job.query = wochenaufgabe.map[aufgabe].overpass.query.replace(':schluessel:',job.schluessel);
 			job.query = job.query.replace(':timestamp:',exectime.toISOString());
-			job.source = referenceJob._id;
+			if (typeof(referenceJob._id)!='undefined') {
+			  job.source = referenceJob._id;	
+			}
+			if (typeof(referenceJob.id)!='undefined') {
+			  job.source = referenceJob.id;	
+			}
+			
 			jobs.push(job);
 
 		}

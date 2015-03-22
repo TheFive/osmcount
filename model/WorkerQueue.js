@@ -12,7 +12,7 @@ var databaseType = "postgres";
 var postgresDB = {
   createTableString :
     'CREATE TABLE workerqueue (id bigserial primary key,measure text,key text,stamp timestamp with time zone, \
-          status text,  exectime timestamp with time zone,type text,query text,source text,prio int) \
+          status text,  exectime timestamp with time zone,type text,query text,source text,prio integer) \
         WITH ( \
           OIDS=FALSE \
         ); '
@@ -49,6 +49,7 @@ exports.initialise = function initialise(dbType,callback) {
   else {
     databaseType = config.getDatabaseType();
   }
+  debug('Database Type is now %s',databaseType);
   if (callback) callback();
 }
 
@@ -84,7 +85,7 @@ function insertDataToPostgres (data,cb) {
       client.query("INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
                           [key,stamp,measure,status,exectime,type,query,source], function(err,result) {
         callback(err);
-        debug('Error after Insert'+err);
+        if (err) debug('Error after Insert'+err);
       })
     }
     async.each(data,insertData,function(err) {pgdone();cb(err,result);})
@@ -143,13 +144,17 @@ function importPostgresDB(filename,cb) {
 }
 
 exports.import = function(filename,cb) {
-  debug('exports.import')
+  debug('exports.import');
+  // for now, only postgres import is needed
+  should(databaseType).equal('postgres');
   importPostgresDB(filename,cb);
 }
 
 // Exports all DataCollection Objects to a JSON File
 exports.export = function(filename,cb){
   debug('exports.export')
+  // for now only mongo export is needed
+  should(databaseType).equal('mongodb');
    exportMongoDB(filename,cb);
 }
 
@@ -201,7 +206,10 @@ function countPostgresDB(query,cb) {
     if (whereClause != '') whereClause += " and ";
     whereClause += "stamp = '"+query.timestamp+"'";
   }
-  console.log(config.postgresConnectStr);
+  if (typeof(query.id) != 'undefined') {
+    if (whereClause != '') whereClause += " and ";
+    whereClause += "id = '"+query.id+"'";
+  }
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
       cb(err,null);
@@ -211,7 +219,6 @@ function countPostgresDB(query,cb) {
     client.query("select count(*) from workerqueue where "+whereClause,
                                 function(err,result) {
       should.not.exist(err);
-      console.dir(result);
       var count = result.rows[0].count;
       cb (null,count);
       pgdone();
@@ -255,7 +262,7 @@ function getNextTaskPostgresDB(status,cb) {
                          from workerqueue \
                          where status = $1 \
                            and exectime <= now() \
-                          order by prio desc",
+                          order by prio desc limit 1",
                         [status]);
     query.on('row',function(row) {
       var result = {};
@@ -308,8 +315,6 @@ function getNextOpenTaskMongoDB(cb) {
               },cb);
 }
 
-
-
 exports.getNextOpenTask = function getNextOpenTask(cb) {
   debug('getNextOpenTask');
   if (databaseType == "mongodb") {
@@ -328,6 +333,7 @@ function saveTaskMongoDB(task,cb) {
 
 function saveTaskPostgresDB(task,cb) {
   debug('saveTaskPostgresDB');
+  console.log(task);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     var key = task.schluessel;
     var stamp = task.timestamp;
@@ -344,9 +350,8 @@ function saveTaskPostgresDB(task,cb) {
                                          = ($1,$2,$3,$4,$5,$6,$7,$8) \
                                          WHERE id = $9",
                         [key,stamp,measure,status,exectime,type,query,source,id], function(err,result) {
-      console.log("Updated");
-      console.dir(result);
-      console.log(id);
+      should.not.exist(err);
+      debug('Saved Rows %s with id %s status %s',result.rowCount,id,status);
       pgdone();
       cb(err);
       return;

@@ -2,6 +2,7 @@
 var debug     = require('debug')('QueueWorker');
 var async     = require('async');
 var fs        = require('fs');
+var should    = require('should');
 
 
 var config      = require('./configuration.js');
@@ -20,7 +21,7 @@ function getWorkingJob(cb) {
   {
     debug("getWorkingJob->CB("+err+","+obj+")");
     if (err) {
-      console.log("Error occured in function: QueueWorker.getNextJob");
+      console.log("Error occured in function: QueueWorker.getWorkingJob");
       console.log(err);
     }
 
@@ -28,6 +29,10 @@ function getWorkingJob(cb) {
       debug("found job %s",obj.type);
       // return obj as job object
       obj.status="open";
+    } else {
+      var err = "No Working Job Found";
+      cb(err,null);
+      return;
     }
     cb(err,obj);
   }
@@ -54,29 +59,31 @@ function getNextJob(cb) {
       // return obj as job object
       obj.status="working";
     }
+    else {
+      // No Job loaded
+      var err = {}
+      err.text = "No Job Loaded";
+      cb(err,null);
+      return;
+    }
     cb(err,obj);
   }
 )}
 
+
 function saveMeasure(result,cb) {
   debug("saveMeasure("+result+",cb)");
-
-  if (result==null) {
-    var err = {func:"saveMeasure",desc:"Result Empty"}
-    cb(err);
-    return;
-  }
-  debug("saveMeasure->call CB");
+  should.exist(result);
   DataCollection.save(result, function (err, num){
     debug("saveMeasure->CB("+err+","+num+")");
-      if (err) {
-        console.log("Error occured in function: OueueWorker.saveMeasure");
-        console.log("Tried to save:");
-        console.dir(result);
-         console.log(err);
-         err.func="saveMeasure";
-         cb(err)
-         return;
+    if (err) {
+      console.log("Error occured in function: OueueWorker.saveMeasure");
+      console.log("Tried to save:");
+      console.dir(result);
+      console.log(err);
+      err.func="saveMeasure";
+      cb(err)
+      return;
     }
     cb(null);
     return;
@@ -84,29 +91,25 @@ function saveMeasure(result,cb) {
 )}
 
 function saveJobState(cb,job) {
-      debug("saveJobState Function(cb,"+job+")");
-      job = job.readjob;
-      if (job) debug("job.status=%s",job.status);
-      if (job==null || job.status == 'undefined') {
-        debug("saveJobState(): Jobstatus unclear: Nothing to execute");
-        cb(null,job);
-        return;
-      }
-      date = new Date();
-      job.timestamp = date;
-      debug("Saving Jobsstatus to %s",job.status);
-      debug("saveJobState()->call CB");
-      WorkerQueue.saveTask(job, function (err, num){
-        debug("saveJobState()->CB("+err+","+num+")");
-        if (err) {
-          console.log("Error occured in function: OueueWorker.saveJobState");
-          console.log(err);
-        } else {
+  debug("saveJobState Function(cb,"+job+")");
+  job = job.readjob;
+  should.exist(job);
+  should.exist(job.status);
+  date = new Date();
+  job.timestamp = date;
+  debug("Saving Jobsstatus to %s",job.status);
+  debug("saveJobState()->call CB");
+  WorkerQueue.saveTask(job, function (err, num){
+    debug("saveJobState()->CB("+err+","+num+")");
+    if (err) {
+      console.log("Error occured in function: OueueWorker.saveJobState");
+      console.log(err);
+    } else {
 
-        }
-        cb(err,job);
-      }
-  )}
+    }
+    cb(err,job);
+  })
+}
 
 
 // Creating async queue and start to initialise Database
@@ -236,10 +239,12 @@ function doOverpassPOIPLZ(cb,results) {
 function doInsertJobs(cb,results) {
   debug("doInsertJobs(cb,"+results+")");
   var job=results.readjob;
-
-  if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="insert") {
+  should.exist(job);
+  should.exist(job.status);
+  if (job.status =="working" && job.type=="insert") {
     debug("Start: doInsertJobs(cb,"+results+")");
     var jobs = lod.createQuery(job.measure,job.exectime,job);
+    
     console.log("Trigger to load "+job.measure+" at "+job.exectime + " Number Jobs "+ jobs.length);
     if (jobs.length == 0) {
       // No Jobs created
@@ -249,7 +254,8 @@ function doInsertJobs(cb,results) {
       if (cb) cb(null,job);
       return;
     }
-    cb(null,job);
+    WorkerQueue.insertData(jobs,cb);
+    job.status = "done";
   }
   else if (cb) cb(null,job);
 }
@@ -316,6 +322,7 @@ function doNextJob(callback) {
     },
     function (err,results) {
       if (err) {
+
         console.log("Error occured in function: QueueWorker.doNextJob");
         console.log(err);
       }
@@ -329,6 +336,7 @@ function doNextJob(callback) {
     }
   )
 }
+exports.doNextJob = doNextJob;
 
 
 
@@ -341,8 +349,10 @@ function correctData(callback) {
     },
     function (err,results) {
       if (err) {
-        console.log("Error occured in function: QueueWorker.doNextJob");
-        console.log(err);
+        if (err != "No Working Job Found") {
+          console.log("Error occured in function: QueueWorker.correctData");
+          console.log(err);
+        }
       }
       if (results) debug("finished %s" ,results);
       var job = results.readjob;
