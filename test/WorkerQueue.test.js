@@ -50,6 +50,13 @@ describe('WorkerQueue', function() {
         bddone();
       });
     });
+    it('should handle wrong filenames',function(bddone){
+      var filename = path.resolve(__dirname, "WorkerQueue.test.jsonNEXIST");
+      WorkerQueue.import(filename,function(err,data){
+        should.exist(err);
+        bddone();
+      });
+    });
   });
   describe('count',function(bddone){
     before( function(bddone){
@@ -59,7 +66,7 @@ describe('WorkerQueue', function() {
       ],function(err) {
         if (err) console.dir(err);
         should.not.exist(err);
-        
+
       pgclient.query("insert into workerqueue (measure,key,status,type,source,stamp,exectime)  \
                          values ('testa','101' ,'done','overpass','AA',to_date('2012-10-01','YYYY-MM-DD'),to_date('2012-10-01','YYYY-MM-DD')),\
                                 ('testa','1012','done','overpass','AA',to_date('2012-10-01','YYYY-MM-DD'),to_date('2012-10-01','YYYY-MM-DD')),\
@@ -144,4 +151,37 @@ describe('WorkerQueue', function() {
       });
     })
   })
+  describe('saveTask',function(bddone) {
+    beforeEach(function(bddone) {
+      async.series([
+        WorkerQueue.dropTable,
+        WorkerQueue.createTable
+      ],function(err) {
+        if (err) console.dir(err);
+        should.equal(null,err);
+        bddone();
+      });
+    });
+    it('should getNextTask and Update it',function(bddone){
+      var filename = path.resolve(__dirname, "WorkerQueue.test.json");
+      //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
+      WorkerQueue.import(filename,function(err,data){
+        should.not.exist(err);
+        WorkerQueue.getNextOpenTask(function(err,data) {
+          should.not.exist(err);
+          data.status = "working";
+          var key = data.schluessel;
+          WorkerQueue.saveTask(data,function(err,data){
+            should.not.exist(err);
+            WorkerQueue.getWorkingTask(function(err,data) {
+              should.not.exist(err);
+              should.exist(data);
+              should(data.schluessel).equal(key);
+              bddone();
+            })
+          })
+        });
+      });
+    });
+  });
 })

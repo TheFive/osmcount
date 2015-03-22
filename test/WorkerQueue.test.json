@@ -13,7 +13,7 @@
     "_id" : "5496e6bbf98718ef4a297576",
     "measure" : "AddrWOStreet",
     "schluessel" : "010020000000",
-    "status" : "done",
+    "status" : "open",
     "exectime" : "2014-12-21T16:26:50.944+01:00",
     "type" : "overpass",
     "query" : "area[type=boundary][\"de:regionalschluessel\"=\"010020000000\"]->.boundaryarea; rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet;  way(area.boundaryarea)[\"addr:housenumber\"][\"addr:street\"!~\".\"][\"addr:place\"!~\".\"]->.allHousesWay; way(r.associatedStreet:\"house\")->.asHouseWay; (.allHousesWay; - .asHouseWay); out ids;  node(area.boundaryarea)[\"addr:housenumber\"][\"addr:street\"!~\".\"][\"addr:place\"!~\".\"]->.allHousesNode; node(r.associatedStreet:\"house\")->.asHouseNode; (.allHousesNode; - .asHouseNode);out ids;  rel(area.boundaryarea)[\"addr:housenumber\"][\"addr:street\"!~\".\"][\"addr:place\"!~\".\"]->.allHousesRel; rel(r.associatedStreet:\"house\")->.asHouseRel; (.allHousesRel; - .asHouseRel);out ids;",

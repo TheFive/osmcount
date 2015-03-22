@@ -12,7 +12,7 @@ var databaseType = "postgres";
 var postgresDB = {
   createTableString :
     'CREATE TABLE workerqueue (id bigserial primary key,measure text,key text,stamp timestamp with time zone, \
-          status text,  exectime timestamp with time zone,type text,query text,source text) \
+          status text,  exectime timestamp with time zone,type text,query text,source text,prio int) \
         WITH ( \
           OIDS=FALSE \
         ); '
@@ -27,7 +27,7 @@ exports.dropTable = function(cb) {
     });
 
     pgdone();
-  })  
+  })
 }
 
 exports.createTable = function(cb) {
@@ -39,7 +39,7 @@ exports.createTable = function(cb) {
     });
     pgdone();
   })
-} 
+}
 
 exports.initialise = function initialise(dbType,callback) {
   debug('exports.initialise');
@@ -67,7 +67,7 @@ function insertDataToPostgres (data,cb) {
       cb(err);
       return;
     }
-    var result = "Datensätze: "+data.length; 
+    var result = "Datensätze: "+data.length;
     debug("Start insert "+ data.length + " datasets");
     function insertData(item,callback){
       debug('insertDataToPostgres->insertData');
@@ -79,7 +79,7 @@ function insertDataToPostgres (data,cb) {
       var type = item.type;
       var query = item.query;
       var source = item._id;
-     
+
 
       client.query("INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
                           [key,stamp,measure,status,exectime,type,query,source], function(err,result) {
@@ -131,10 +131,15 @@ function exportMongoDB(filename,cb) {
 function importPostgresDB(filename,cb) {
   debug('importPostgresDB')
   debug('Filename %s',filename);
-  data = fs.readFileSync(filename);
+  try {
+    data = fs.readFileSync(filename);
+  } catch (err) {
+    cb(err);
+    return;
+  }
   newData = JSON.parse(data);
   insertDataToPostgres(newData,cb);
- 
+
 }
 
 exports.import = function(filename,cb) {
@@ -175,7 +180,7 @@ function countPostgresDB(query,cb) {
   var whereClause = ""
   if (typeof(query.schluessel)!= 'undefined') {
     whereClause = "key ~ '"+query.schluessel+"'";
-  } 
+  }
   if (typeof(query.source) != 'undefined') {
     if (whereClause != '') whereClause += " and ";
     whereClause += "source = '"+query.source+"'";
@@ -234,11 +239,58 @@ function getWorkingTaskMongoDB(cb) {
 
   // Fetch the collection test
   var collection = db.collection(collectionName);
-  collection.findOne({status:"working"},cb);  
+  collection.findOne({status:"working"},cb);
+}
+
+function getNextTaskPostgresDB(status,cb) {
+  debug('getNextOpenTaskPostgresDB');
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pddone();
+      return;
+    }
+
+    var query = client.query("select id,key,stamp,measure,status,exectime,type,query,source  \
+                         from workerqueue \
+                         where status = $1 \
+                           and exectime <= now() \
+                          order by prio desc",
+                        [status]);
+    query.on('row',function(row) {
+      var result = {};
+      result.schluessel = row.key;
+      result.timestamp = row.stamp;
+      result.measure = row.measure;
+      result.status = row.status;
+      result.exectime = row.exectime;
+      result.type = row.type;
+      result.query = row.query;
+      result.source = row.source;
+      result.id = row.id;
+      pgdone();
+      cb(null,result);
+      return;
+    })
+    query.on('end',function(result){
+      if(result.rowCount==0) {
+        cb(null,null);
+        pgdone();
+        return;
+      }
+    })
+  })
 }
 exports.getWorkingTask = function (cb) {
   debug('getWorkingTask');
-  getWorkingTaskMongoDB(cb);
+  if (databaseType == "mongodb") {
+    getWorkingTaskMongoDB(cb);  
+  }
+  if (databaseType == "postgres") {
+    getNextTaskPostgresDB("working",cb);
+  }
+  
+
 }
 
 function getNextOpenTaskMongoDB(cb) {
@@ -253,20 +305,62 @@ function getNextOpenTaskMongoDB(cb) {
               },
               {
                 "sort": [['prio','desc']]
-              },cb);  
+              },cb);
 }
+
+
 
 exports.getNextOpenTask = function getNextOpenTask(cb) {
   debug('getNextOpenTask');
-  getNextOpenTaskMongoDB(cb);
+  if (databaseType == "mongodb") {
+    getNextOpenTaskMongoDB(cb);  
+  }
+  if (databaseType == "postgres") {
+    getNextTaskPostgresDB("open",cb);
+  }
 }
 
- function saveTaskMongoDB(task,cb) {
+function saveTaskMongoDB(task,cb) {
+  debug('saveTaskMongoDB');
   var db=config.getMongoDB();
   db.collection("WorkerQueue").save(task,{w:1}, cb);
 }
 
-exports.saveTask= function(task,cb) {
+function saveTaskPostgresDB(task,cb) {
+  debug('saveTaskPostgresDB');
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    var key = task.schluessel;
+    var stamp = task.timestamp;
+    var measure = task.measure;
+    var status = task.status;
+    var exectime = task.exectime;
+    var type = task.type;
+    var query = task.query;
+    var source = task._id;
+    var id = task.id;
+
+
+    client.query("update workerqueue SET (key,stamp,measure,status,exectime,type,query,source)  \
+                                         = ($1,$2,$3,$4,$5,$6,$7,$8) \
+                                         WHERE id = $9",
+                        [key,stamp,measure,status,exectime,type,query,source,id], function(err,result) {
+      console.log("Updated");
+      console.dir(result);
+      console.log(id);
+      pgdone();
+      cb(err);
+      return;
+    })
+  })
+}
+
+exports.saveTask = function(task,cb) {
   debug('saveTask');
-  saveTaskMongoDB(task,cb);
+  should.exist(cb);
+  if (databaseType == 'mongodb') {
+    saveTaskMongoDB(task,cb);
+  }
+  if (databaseType == 'postgres') {
+    saveTaskPostgresDB(task,cb);
+  }
 }
