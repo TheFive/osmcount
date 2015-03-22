@@ -8,8 +8,8 @@ var importCSV = require('../ImportCSV.js');
 
 var databaseType = "postgres";
 
-var postgresDB = { 
-  createTableString: 
+var postgresDB = {
+  createTableString:
   "CREATE TABLE datatarget ( key text, measure text, target double precision, \
       name text, sourceText text, sourceLink text, id bigserial NOT NULL, \
       CONSTRAINT id_datatarget PRIMARY KEY (id) )"
@@ -24,7 +24,7 @@ exports.dropTable = function(cb) {
     });
 
     pgdone();
-  })  
+  })
 }
 
 exports.createTable = function(cb) {
@@ -36,7 +36,7 @@ exports.createTable = function(cb) {
     });
     pgdone();
   })
-} 
+}
 
 exports.initialise = function initialise(dbType,callback) {
   debug('exports.initialise');
@@ -67,7 +67,7 @@ function insertDataToPostgres (data,cb) {
       }
       return;
     }
-    var result = "Datensätze: "+data.length; 
+    var result = "Datensätze: "+data.length;
     debug("Start insert "+ data.length + " datasets");
     function insertData(item,callback){
       debug('insertDataToPostgres->insertData');
@@ -129,10 +129,16 @@ function exportMongoDB(filename,cb) {
 function importPostgresDB(filename,cb) {
   debug('importPostgresDB')
   debug('Filename %s',filename);
-  data = fs.readFileSync(filename);
+  try {
+    data = fs.readFileSync(filename);
+  }
+  catch (err) {
+    cb(err,null);
+    return;
+  }
   newData = JSON.parse(data);
   insertDataToPostgres(newData,cb);
- 
+
 }
 
 exports.import = function(filename,cb) {
@@ -155,6 +161,3 @@ exports.insertData = function(data,cb) {
     insertDataToPostgres(data,cb);
   }
 }
-
-
-
