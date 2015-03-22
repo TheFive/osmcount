@@ -197,7 +197,6 @@ function countPostgresDB(query,cb) {
     whereClause += "stamp = '"+query.timestamp+"'";
   }
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    should.not.exist(err);
     client.query("select count(*) from workerqueue where "+whereClause,
                                 function(err,result) {
       

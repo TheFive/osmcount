@@ -118,11 +118,35 @@ describe('WorkerQueue', function() {
         bddone();
       });
     })
+    it('should count type', function (bddone) {
+      WorkerQueue.count({type:'overpass'},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(6);
+        bddone();
+      });
+    })
     it('should count multiple Values', function (bddone) {
       WorkerQueue.count({measure:'testb',status:'working'},function(err,data) {
         should.not.exist(err);
         data = parseInt(data);
         should(data).equal(1);
+        bddone();
+      });
+    })
+    it('should handle an error', function (bddone) {
+      var conStr;
+      before(function() {
+        // remember correct string
+        var conStr = config.postgresConnectStr;
+        config.postgresConnectStr = "no connection with this string";
+      })
+      after(function() {
+        // and store it back
+        config.postgresConnectStr = conStr;
+      })
+      WorkerQueue.count({measure:'testb',status:'working'},function(err,data) {
+        should.exist(err);
         bddone();
       });
     })
