@@ -30,6 +30,20 @@ describe('DataCollection', function() {
         bddone();
       });
     });
+    it('should handle connection errors', function(bddone) {
+      var conStr = config.postgresConnectStr;
+      config.postgresConnectStr = "no connection with this string";
+      param = {
+            lengthOfKey:2,
+            lengthOfTime:10,
+            measure:'test',
+      };
+      DataCollection.aggregate(param,function done(err,data) {
+        should.exist(err);
+        config.postgresConnectStr = conStr;
+        bddone();
+      });
+    });
     context('test different group functions',function(bddone){
       beforeEach( function(bddone){
         /* Short Data Table
