@@ -1,7 +1,7 @@
 var should = require('should');
 
 
-var lod    =require('../LoadoverpassData.js');
+var lod    =require('../LoadOverpassData.js');
 var wochenaufgabe = require('../wochenaufgabe.js');
 
 
