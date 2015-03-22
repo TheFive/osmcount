@@ -135,18 +135,12 @@ describe('WorkerQueue', function() {
       });
     })
     it('should handle an error', function (bddone) {
-      var conStr;
-      before(function() {
-        // remember correct string
-        var conStr = config.postgresConnectStr;
-        config.postgresConnectStr = "no connection with this string";
-      })
-      after(function() {
-        // and store it back
-        config.postgresConnectStr = conStr;
-      })
+      var conStr = config.postgresConnectStr;
+      console.log("destroy config connect string");
+      config.postgresConnectStr = "no connection with this string";
       WorkerQueue.count({measure:'testb',status:'working'},function(err,data) {
         should.exist(err);
+        config.postgresConnectStr = conStr;
         bddone();
       });
     })

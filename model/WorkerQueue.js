@@ -196,17 +196,19 @@ function countPostgresDB(query,cb) {
     if (whereClause != '') whereClause += " and ";
     whereClause += "stamp = '"+query.timestamp+"'";
   }
+  console.log(config.postgresConnectStr);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err,null);
+      pgdone();
+      return;
+    }
     client.query("select count(*) from workerqueue where "+whereClause,
                                 function(err,result) {
-      
-      if (!err) {
-        var count = result.rows[0].count;
-        cb (null,count);
-        pgdone();
-        return;
-      }
-      cb(err,null);
+      should.not.exist(err);
+      console.dir(result);
+      var count = result.rows[0].count;
+      cb (null,count);
       pgdone();
       return;
     })
