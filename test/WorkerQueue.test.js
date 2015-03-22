@@ -36,7 +36,7 @@ describe('WorkerQueue', function() {
       WorkerQueue.import(filename,function(err,data){
         if (err) console.dir(err);
         should.equal(err,null);
-        should(data).eql("Datensätze: 2");
+        should(data).eql("Datens√§tze: 2");
         bddone();
       });
     });
