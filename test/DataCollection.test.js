@@ -72,6 +72,23 @@ describe('DataCollection', function() {
           bddone();
         })
       })
+      it ('should group filter Timeframe', function(bddone) {
+        param = {
+              lengthOfKey:2,
+              lengthOfTime:10,
+              since : '2012-10-30',
+              upTo :  '2012-11-02',
+              measure:'test'
+        };
+        DataCollection.aggregate(param,function done(err,data) {
+          should.equal(err,null);
+          should.equal(data.length,1);
+          should.equal(data[0].cell,48);
+          should.equal(data[0]._id.col,'2012-11-01');
+          should.equal(data[0]._id.row,'10');
+          bddone();
+        })
+      })
       it('should group 2 timeline with last Values', function(bddone) {
         param = {
               lengthOfKey:4,
