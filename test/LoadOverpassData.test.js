@@ -8,6 +8,7 @@ var wochenaufgabe = require('../wochenaufgabe.js');
 
 
 
+
 describe('LoadOverpassData',function() {
   describe('createQuery',function() {
     it ('should put an error for wrong Wochenaufgaben', function (bddone) {
@@ -75,4 +76,28 @@ describe('LoadOverpassData',function() {
       })
     })
   });
+  describe.only('runOverpass',function() {
+    it ('should load and parse overpassdata',function(bddone){
+      wochenaufgabe.map["test"]={map:{list:['1','2']},
+                                 overpass:{query:"TEST :schluessel: TEST"},
+                                 tagCounter:wochenaufgabe.tagCounter};
+
+      var job = {measure:"test"};
+      job.exectime = new Date();
+      var result = {};
+      var scope = nock('http://overpass-api.de/api/interpreter')
+                    .post('',"data=This%20is%20a%20overpassquery")
+                  
+                    .replyWithFile(200, __dirname+"/LoadOverpassData.json");
+      lod.runOverpass("This is a overpassquery",job,result,function(error,body) {
+        should.not.exist(error);
+        should.exist(job.overpassTime);
+        should(result.timestamp).equal(job.exectime);
+        should(result.count).equal(12);
+        should(result.missing).eql({ opening_hours: 1, phone: 1, wheelchair: 5, name: 0 });
+        should(result.existing).eql({ fixme: 0 });
+        bddone();
+      });
+    })
+  })
 });
