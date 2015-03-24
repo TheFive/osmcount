@@ -110,8 +110,7 @@ exports.object = function(req,res) {
 			page.menu ="";
 			page.content = '<h1>'+collectionName+'</h1><p><table>'+text+'</table></p>';
 			res.set('Content-Type', 'text/html');
-			console.dir({schluessel:obj.schluessel,
-				                                          source: object});
+
 			if (collectionName == "WorkerQueue") {
 				db.collection("DataCollection").findOne ({schluessel:obj.schluessel,
 				                                          source: obj.source},
@@ -213,14 +212,11 @@ function getValue(columns,object,d) {
   if (typeof(object)=='undefined') return "";
 
   if (typeof(columns) == 'object') {
-  	//console.log("typeof(columns) == 'object'");
-  	//console.dir(columns[d]);
+
     if (typeof(columns[d])=='string') {
-      //console.log("typeof(columns[d])=='string'");
       return getValue(columns,object[columns[d]],d+1);
     }
     else {
-       //console.log("else");
     	var result = "";
     	for (var i =d;i<columns.length;i++) {
 
@@ -385,7 +381,6 @@ exports.query=function(req,res) {
     	               columns = ["_id","type","status","measure"];
     	               query = {type:"insert"};
     }
-    //console.dir(query);
     if (collectionName != "POI" || queryDefined) {
     collection.find(query,options).toArray(function(err,data) {
     	if (err) {

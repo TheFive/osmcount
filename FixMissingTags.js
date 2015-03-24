@@ -23,16 +23,13 @@ function correctMissingError(cb,result) {
     return;
   }
   if (result== null) return;
-  //console.log("Vorher: Result");
-  //console.dir(result);
+
   result.count=0;
   result.count = result.data.length;
   var tagCounter = wochenaufgabe.map[result.measure].tagCounter);
   if (tagCounter) tagCounter(result.data,result);
 
-  //console.log("Nacher: Result");
-  //console.dir(result);
-   console.log("saved call");
+  console.log("saved call");
   configuration.getMongoDB().collection("DataCollection").save(result,{w:1},function(err,r){
    console.log("saved called");
   	if (err) {

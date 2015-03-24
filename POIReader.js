@@ -37,12 +37,7 @@ function cleanObject(obj) {
       cleanObject(obj[k]);
     }
     if (k.indexOf(".") >0 ) {
-     	//console.log("Fount ." +k.search("."));
-     	//console.dir(data);
      	delete obj[k];
-     	console.log("Deletet"+k);
-     	//console.log("After Delete");
-     	//console.dir(data);
      }
   }
 }
@@ -303,7 +298,6 @@ function nominatim(cb,result) {
 				elementData.timestamp = date;
 				obj.nominatim = elementData;
 			}
-			//console.dir(elementData);
 			cleanObject(obj);
 			db.collection("POI").save(obj, function(err,result) {
 			  debug("nominatim->MongoCB");
