@@ -1,0 +1,218 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API",
+  "osm3s": {
+    "timestamp_osm_base": "2015-03-23T20:35:02Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 511092054,
+  "lat": 51.6553787,
+  "lon": 6.6323809,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 (0) 281 2066786",
+    "name": "Engelapotheke",
+    "opening_hours": "Mo,Tu,Th,Fr 08:30-13:00,14:30-18:30; We 08:30-13:00; Sa 08:30-12:30",
+    "operator": "Meike Brühl",
+    "phone": "+49 (0) 281 51499",
+    "website": "http://www.engel-wesel.de/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 588036550,
+  "lat": 51.6633814,
+  "lon": 6.6408810,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 2 81 / 53 38 0",
+    "name": "Schepersfeld Apotheke",
+    "opening_hours": "Mo,Tu,Th,Fr 08:00-13:00,14:30-18:30; Sa 08:00-13:00",
+    "operator": "Sören Schmidt",
+    "phone": "+49 2 81 / 53 36 9",
+    "website": "http://www.tannen-apotheke.com/apotheke/schepersfeld_apotheke.htm",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 1318704254,
+  "lat": 51.6738565,
+  "lon": 6.6476256,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 2 81 / 53 07 99",
+    "name": "Tannenapotheke",
+    "opening_hours": "Mo,Tu,Th,Fr 08:00-12:00,14:30-18:30; We, Sa 08:00-12:00",
+    "operator": "Sören Schmidt",
+    "phone": "+49 2 81 / 50 25 7",
+    "website": "http://www.tannen-apotheke.com/apotheke/willkommen.htm",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2840103902,
+  "lat": 51.6566205,
+  "lon": 6.6117211,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 2 81 / 25 44 7",
+    "name": "Löwen Apotheke",
+    "opening_hours": "Mo-Fr 08:00-18:30; Sa 08:00-13:00",
+    "operator": "Sören Schmidt",
+    "phone": "+49 2 81 / 22 53 3",
+    "website": "http://www.tannen-apotheke.com/apotheke/loewen_apotheke.htm",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 3188684983,
+  "lat": 51.6634801,
+  "lon": 6.6188002,
+  "tags": {
+    "addr:city": "Wesel",
+    "addr:housenumber": "12a",
+    "addr:postcode": "46483",
+    "addr:street": "Blankenburgstraße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "name": "Blankenburg-Apotheke"
+  }
+},
+{
+  "type": "node",
+  "id": 3332917023,
+  "lat": 51.6584946,
+  "lon": 6.6573357,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 281 2066848",
+    "name": "Apotheke Am Wittenberg",
+    "opening_hours": "Mo,Tu,Th,Fr 08:30-12:30,14:30-18:30; We 08:30-13:00; Sa 09:00-12:00",
+    "operator": "Dorothea Kerkhoff-Walter",
+    "phone": "+49 281 82440",
+    "website": "http://www.apotheke-am-wittenberg.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 3332966794,
+  "lat": 51.6574296,
+  "lon": 6.6192792,
+  "tags": {
+    "addr:housenumber": "27",
+    "addr:street": "Hohe Straße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 281 31223",
+    "name": "Adler-Apotheke Wesel",
+    "opening_hours": "Mo-Fr 08:00-18:30; Sa 09:00-14:00",
+    "operator": "Ute Liman",
+    "phone": "+49 281 24151",
+    "website": "http://www.adler-apotheke-wesel.de/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 3332966795,
+  "lat": 51.6565708,
+  "lon": 6.6234985,
+  "tags": {
+    "addr:housenumber": "6",
+    "addr:street": "Wilhelmstraße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 281/2 84 60",
+    "name": "Bahnhof-Apotheke",
+    "opening_hours": "Mo,Tu,Th,Fr 08:30-13:00,14:30-18:30; We 08:30-13:00; Sa 08:30-12:30",
+    "operator": "Irmhild Eichelbaum",
+    "phone": "+49 281/2 28 11",
+    "website": "http://www.bahnhof-apotheke-wesel.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 3332966797,
+  "lat": 51.6577406,
+  "lon": 6.6250473,
+  "tags": {
+    "addr:housenumber": "15",
+    "addr:street": "Kaiserring",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 281/3 18 32",
+    "name": "Kaiserring-Apotheke",
+    "opening_hours": "Mo,Tu,Th,Fr 08:00-13:00,14:30-18:30; We 08:00-13:00; Sa 09:00-12:30",
+    "operator": "Helmut Gerke",
+    "phone": "+49 281/1 57 99",
+    "website": "http://www.kaiserring-apotheke.de/",
+    "wheelchair": "limited"
+  }
+},
+{
+  "type": "node",
+  "id": 3332966798,
+  "lat": 51.6576648,
+  "lon": 6.6177479,
+  "tags": {
+    "addr:housenumber": "64",
+    "addr:street": "Hohe Straße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 281/2 44 79",
+    "name": "Rosen-Apotheke",
+    "opening_hours": "Mo-Fr 08:30-18:30; Sa 08:30-14:30",
+    "operator": "Markus Heringer",
+    "phone": "+49 281/2 45 45",
+    "website": "http://www.rosen-apotheke-wesel.de/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 3332966799,
+  "lat": 51.6573185,
+  "lon": 6.6143245,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 2 81 / 27 08 8",
+    "name": "Schwanen-Apotheke",
+    "opening_hours": "Mo-Fr 08:30-18:30; Sa 08:30-13:00",
+    "operator": "Gabriele Kopka",
+    "phone": "+49 2 81 / 21 35 0",
+    "website": "http://www.schwanen-apotheke-wesel.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 3332966800,
+  "lat": 51.6746923,
+  "lon": 6.6100412,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "fax": "+49 281/6 84 01 37",
+    "name": "St. Willibrordus-Apotheke",
+    "opening_hours": "Mo,Tu,Th,Fr 08:00-12:30,14:30-18:30; We,Sa 08:00-12:30",
+    "operator": "Norbert Rueter",
+    "phone": "+49 281/6 14 79",
+    "website": "http://www.st-willibrordus-apotheke.de/"
+  }
+}
+
+  ]
+}

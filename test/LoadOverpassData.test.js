@@ -88,7 +88,7 @@ describe('LoadOverpassData',function() {
       var scope = nock('http://overpass-api.de/api/interpreter')
                     .post('',"data=This%20is%20a%20overpassquery")
                   
-                    .replyWithFile(200, __dirname+"/LoadOverpassData.json");
+                    .replyWithFile(200, __dirname+"/LoadOverpassData.test.json");
       lod.runOverpass("This is a overpassquery",job,result,function(error,body) {
         should.not.exist(error);
         should.exist(job.overpassTime);
