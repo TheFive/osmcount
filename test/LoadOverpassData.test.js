@@ -76,7 +76,7 @@ describe('LoadOverpassData',function() {
       })
     })
   });
-  describe.only('runOverpass',function() {
+  describe('runOverpass',function() {
     it ('should load and parse overpassdata',function(bddone){
       wochenaufgabe.map["test"]={map:{list:['1','2']},
                                  overpass:{query:"TEST :schluessel: TEST"},
