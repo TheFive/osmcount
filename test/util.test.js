@@ -80,6 +80,7 @@ describe('util',function(){
       util.initialise();
       should(numeral(1.1).format("1.0")).equal('1,1');
       should(numeral(1000).format()).equal('1.000');
+      should(numeral(1).format('0o')).equal('1.');
     })
 	})
 
