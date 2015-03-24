@@ -122,7 +122,6 @@ describe('importCSV', function() {
       })
     });
     it('should load 2 datasets' , function(done) {
-      db = configuration.getMongoDB();
       fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10");
       var a = importCSV.readCSVMongoDB('existingFile.csv',db,{name:"",count:0},function(err,data) {
         should.equal(err,null);
@@ -144,10 +143,17 @@ describe('importCSV', function() {
         done();
       });
     })
+    it('should generate an error on column numbers differs',function(bddone){
+      fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10\c;4;5");
+      var a = importCSV.readCSVMongoDB('existingFile.csv',db,{name:"",count:0},function(err,data) {
+        should.exist(err);
+        should(err).match(/^Invalid CSV File, Number of Columns differs/);
+        bddone();
+      })
+    })
 
   });
   describe('readCSVpostgres',function() {
-    var db;
     before(function(bddone) {
       configuration.initialisePostgresDB();
       pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
@@ -197,5 +203,14 @@ describe('importCSV', function() {
         done();
       })
     })
+    it('should generate an error on column numbers differs',function(bddone){
+      fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10\c;4;5");
+      var a = importCSV.readCSVPostgresDB('existingFile.csv',{name:"",count:0},function(err,data) {
+        should.exist(err);
+        should(err).match(/^Invalid CSV File, Number of Columns differs/);
+        bddone();
+      })
+    })
+
   });
 });
