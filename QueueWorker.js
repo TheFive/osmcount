@@ -76,7 +76,6 @@ function saveMeasure(result,cb) {
     if (err) {
       console.log("Error occured in function: OueueWorker.saveMeasure");
       console.log("Tried to save:");
-      console.dir(result);
       console.log(err);
       err.func="saveMeasure";
       cb(err)
@@ -90,7 +89,6 @@ function saveMeasure(result,cb) {
 function saveJobState(cb,result) {
   debug("saveJobState Function(cb,"+job+")");
   var job = result.readjob;
-  console.dir(result);
   should.exist(job);
   should.exist(job.status);
   var date = new Date();
@@ -124,7 +122,6 @@ function doConsole(cb,results) {
     debug("Start: doConsole(cb,"+results+")");
     debug(job.text);
     job.status = "done";
-    console.dir(results);
   }
   cb(null,job);
 }
