@@ -4,6 +4,7 @@ var fs    = require('fs');
 var async = require('async');
 var should = require('should');
 
+var util   = require('../util.js');
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
 
@@ -82,12 +83,8 @@ function insertDataToPostgres (data,cb) {
       var timestamp = item.timestamp;
       var measure = item.measure;
       var count = item.count;
-      var missing = "";
-      for (var k in item.missing) {
-        if (missing != "" ) missing += ",";
-        missing += '"' + k + '"=>"' +item.missing[k] + '"';
-      }
-      var existing = "";
+      var missing  = util.toHStore(item.missing);
+      var existing = util.toHStore(item.existing);
       for (var k in item.existing) {
         if (existing != "" ) existing += ",";
         existing += '"' + k + '"=>"' +item.existing[k] + '"';

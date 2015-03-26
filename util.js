@@ -56,3 +56,12 @@ exports.initialise = function() {
     });
 	num.language('de');
 }
+
+exports.toHStore = function(object) {
+  var result="";
+  for (var k in object) {
+    if (result != "" ) result += ",";
+    result += '"' + k + '"=>"' +object[k] + '"';
+  }
+  return result;
+}
