@@ -3,8 +3,6 @@ var express = require('express');
 var async   = require('async');
 var path    = require('path');
 var debug   = require('debug')('server');
- debug.entry   = require('debug')('server:entry');
- debug.data    = require('debug')('server:data');
 
 // require own modules
 var config           = require('./configuration.js');

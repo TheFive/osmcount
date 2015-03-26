@@ -87,12 +87,13 @@ function saveMeasure(result,cb) {
   }
 )}
 
-function saveJobState(cb,job) {
+function saveJobState(cb,result) {
   debug("saveJobState Function(cb,"+job+")");
-  job = job.readjob;
+  var job = result.readjob;
+  console.dir(result);
   should.exist(job);
   should.exist(job.status);
-  date = new Date();
+  var date = new Date();
   job.timestamp = date;
   debug("Saving Jobsstatus to %s",job.status);
   debug("saveJobState()->call CB");
@@ -118,11 +119,12 @@ var q= async.queue(function (task,cb) {
 
 function doConsole(cb,results) {
   debug("doConsole(cb,"+results+")");
-  job=results.readjob;
+  var job=results.readjob;
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type == "console") {
     debug("Start: doConsole(cb,"+results+")");
     debug(job.text);
     job.status = "done";
+    console.dir(results);
   }
   cb(null,job);
 }
@@ -350,6 +352,7 @@ function runNextJobs(callback) {
         }
         q.push(runNextJobs);
       }
+      debug('leaving runNextJobs');
       callback();        
     })
 }
@@ -383,8 +386,8 @@ function correctData(callback) {
 
 exports.startQueue =function(cb) {
   debug("startQueue(cb)");
+  q.drain = function () {cb();}
   q.push(config.initialiseMongoDB);
   q.push(correctData);
   q.push(runNextJobs);
-  if (cb) cb(null);
 }
