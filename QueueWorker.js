@@ -13,6 +13,7 @@ var util        = require('./util.js')
 var DataCollection = require('./model/DataCollection.js')
 
 exports.processSignal = '';
+exports.processExit;
 
 
 function getWorkingJob(cb) {
@@ -42,10 +43,6 @@ function getWorkingJob(cb) {
 function getNextJob(cb) {
   debug("getNextJob(cb)");
  
-  if (exports.processSignal=='SIGINT') {
-    console.log( "\nExiting OSMCount" );
-    process.exit();
-  }
   WorkerQueue.getNextOpenTask(function(err, obj)
   {
     debug("getNextJob->CB("+err+","+obj+")");
@@ -243,7 +240,7 @@ function doInsertJobs(cb,results) {
   should.exist(job.status);
   if (job.status =="working" && job.type=="insert") {
     debug("Start: doInsertJobs(cb,"+results+")");
-    var jobs = lod.createQuery(job.measure,job.exectime,job);
+    var jobs = lod.createQuery(job);
     
     console.log("Trigger to load "+job.measure+" at "+job.exectime + " Number Jobs "+ jobs.length);
     if (jobs.length == 0) {
@@ -328,17 +325,37 @@ function doNextJob(callback) {
       }
       if (results) debug("finished %s" ,results);
       var job = results.readjob;
-      if (!job || typeof(job.status)== 'undefined') {
-        q.push(util.waitOneMin);
-      }
-      q.push(doNextJob);
-      callback();
+      callback(null,job);
     }
   )
 }
+
+function runNextJobs(callback) {
+  debug('runNextJobs');
+  async.auto({
+    doNextJob: doNextJob
+  },
+    function(err,results) {
+      if (err) {
+        console.log("Error occured in function: QueueWorker.doNextJob");
+        console.log(err);
+      }
+      if (exports.processSignal=='SIGINT') {
+        console.log( "\nExiting OSMCount" );
+        exports.processExit();
+      } else {
+        var job = results.doNextJob;
+        if (!job || typeof(job.status)== 'undefined') {
+          q.push(util.waitOneMin);
+        }
+        q.push(runNextJobs);
+      }
+      callback();        
+    })
+}
+
 exports.doNextJob = doNextJob;
-
-
+exports.runNextJobs = runNextJobs;
 
 
 function correctData(callback) {
@@ -368,6 +385,6 @@ exports.startQueue =function(cb) {
   debug("startQueue(cb)");
   q.push(config.initialiseMongoDB);
   q.push(correctData);
-  q.push(doNextJob);
+  q.push(runNextJobs);
   if (cb) cb(null);
 }

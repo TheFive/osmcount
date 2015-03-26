@@ -49,6 +49,7 @@ async.auto( {
 process.on( 'SIGINT', function() {
   console.log( "\nRequest for Shutdown OSMCount, Please wait for OverpassQuery. SIGINT (Ctrl-C)" );
   queue.processSignal = 'SIGINT';
+  queue.processExit = function() {process.exit();}
 })
 
 

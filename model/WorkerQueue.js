@@ -6,13 +6,14 @@ var should = require('should');
 
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
+var util      = require('../util.js');
 
 var databaseType = "postgres";
 
 var postgresDB = {
   createTableString :
     'CREATE TABLE workerqueue (id bigserial primary key,measure text,key text,stamp timestamp with time zone, \
-          status text,  exectime timestamp with time zone,type text,query text,source text,prio integer) \
+          status text,  exectime timestamp with time zone,type text,query text,source text,prio integer,error hstore) \
         WITH ( \
           OIDS=FALSE \
         ); '
@@ -21,23 +22,34 @@ var postgresDB = {
 exports.dropTable = function(cb) {
   debug('exports.dropTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    client.query("DROP TABLE IF EXISTS WorkerQueue",function(err){
+    if (err) {
+      pgdone();
+      cb(err);
+      return;
+    }
+    client.query("DROP TABLE IF EXISTS workerqueue",function(err){
       debug("WorkerQueue Table Dropped");
+      pgdone();
       cb(err)
     });
-
-    pgdone();
   })
 }
 
 exports.createTable = function(cb) {
   debug('exports.createTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
+    debug('Call Create Table');
+    debug(postgresDB.createTableString);
     client.query(postgresDB.createTableString,function(err) {
       debug('WorkerQueue Table Created');
+      pgdone();
       cb(err);
     });
-    pgdone();
   })
 }
 
@@ -80,10 +92,11 @@ function insertDataToPostgres (data,cb) {
       var type = item.type;
       var query = item.query;
       var source = item._id;
+      var error = util.toHStore(item.error)
 
 
-      client.query("INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",
-                          [key,stamp,measure,status,exectime,type,query,source], function(err,result) {
+      client.query("INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source,error) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+                          [key,stamp,measure,status,exectime,type,query,source,error], function(err,result) {
         callback(err);
         if (err) debug('Error after Insert'+err);
       })
@@ -155,7 +168,7 @@ exports.export = function(filename,cb){
   debug('exports.export')
   // for now only mongo export is needed
   should(databaseType).equal('mongodb');
-   exportMongoDB(filename,cb);
+  exportMongoDB(filename,cb);
 }
 
 exports.insertData = function(data,cb) {
