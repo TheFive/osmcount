@@ -321,51 +321,22 @@ function exportMongoDB(filename,cb) {
 
 function importPostgresDB(filename,cb) {
   debug('importPostgresDB')
-  pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
-    if (err) {
-      if (cb) {
-  			 cb(err);
-  		} else {
-  			 throw (err);
-  		}
-  		return;
-  	}
-    data = fs.readFileSync(filename);
-    newData = JSON.parse(data);
-    function insertData(item,callback){
-  		var key = item.schluessel;
-  		var timestamp = item.timestamp;
-  		var measure = item.measure;
-  		var count = item.count;
-      var source = item.source;
-  		var missing = "";
-  		for (var k in item.missing) {
-  			if (missing != "" ) missing += ",";
-  			missing += '"' + k + '"=>"' +item.missing[k] + '"';
-  		}
-  		var existing = "";
-  		for (var k in item.existing) {
-  			if (existing != "" ) existing += ",";
-  			existing += '"' + k + '"=>"' +item.existing[k] + '"';
-  		}
-  		client.query("INSERT into datacollection (key,timestamp,measure,count,missing,existing,source) VALUES($1,$2,$3,$4,$5,$6,$7)",
-  					                    [key,timestamp,measure,count,missing,existing,source], function(err,result) {
-  	    callback(err);
-  		})
-  	}
-  	async.each(newData,insertData,function(err) {pgdone();cb(err);})
-  });
+  var data = fs.readFileSync(filename);
+  var newData = JSON.parse(data);
+  insertDataToPostgres(newData,cb);
 }
 
 exports.import = function(filename,cb) {
   debug('exports.import')
+  should(databaseType).equal('postgres');
   importPostgresDB(filename,cb);
 }
 
 // Exports all DataCollection Objects to a JSON File
 exports.export = function(filename,cb){
   debug('exports.export')
-   exportMongoDB(filename,cb);
+  should(databaseType).equal('mongo');
+  exportMongoDB(filename,cb);
 }
 
 exports.insertData = function(data,cb) {
@@ -449,7 +420,7 @@ function countMongoDB(query,cb) {
 
 exports.count = function(query,cb) {
   debug('count');
-  if (databaseType == "mongodb") {
+  if (databaseType == "mongo") {
     countMongoDB(query,cb);
   }
   if (databaseType == "postgres") {
