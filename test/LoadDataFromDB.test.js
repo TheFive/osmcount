@@ -151,7 +151,7 @@ describe('LoadDataFromDB', function () {
         }
       }
       should.exist(data);
-      configuration.initialiseDB( function() {
+      configuration.initialiseMongoDB( function() {
         db = configuration.getMongoDB();
         dbHelper.prepareCollection(db,"OSMBoundaries","OSMBoundaries.test.json",function(err)
         { lod.initialise(done(err));});

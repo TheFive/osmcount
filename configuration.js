@@ -109,7 +109,7 @@ exports.initialisePostgresDB = function(callback) {
 
 
 exports.initialiseDB = function(callback) {
-  console.log("Deprecetad: configuration.initialiseDB use configuration.initialiseMongoDB instead.");
+  console.log("Deprecated: configuration.initialiseDB use configuration.initialiseMongoDB instead.");
   exports.initialiseMongoDB(callback);
 }
 

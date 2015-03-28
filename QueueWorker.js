@@ -59,7 +59,7 @@ function getNextJob(cb) {
     else {
       // No Job loaded
       var err = {}
-      err.text = "No Job Loaded";
+      err.message = "No Job Loaded";
       cb(err,null);
       return;
     }
@@ -317,7 +317,7 @@ function doNextJob(callback) {
         saveDone:        ["doConsole","doOverpass","doInsertJobs", "doLoadBoudnaries",saveJobState]
     },
     function (err,results) {
-      if (err) {
+      if (err && !(typeof(err.message) != "undefined" && err.message === 'No Job Loaded' )) {
 
         console.log("Error occured in function: QueueWorker.doNextJob");
         console.log(err);
