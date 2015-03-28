@@ -346,7 +346,6 @@ function saveTaskMongoDB(task,cb) {
 
 function saveTaskPostgresDB(task,cb) {
   debug('saveTaskPostgresDB');
-  console.log(task);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     var key = task.schluessel;
     var stamp = task.timestamp;

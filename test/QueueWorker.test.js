@@ -1,22 +1,25 @@
 var should    = require('should');
 var pg        = require('pg');
 var async     = require('async');
+var nock      = require('nock');
 
 
-var config      = require('../configuration.js');
-var util      = require('../util.js');
-var WorkerQueue = require('../model/WorkerQueue.js');
-var QueueWorker = require('../QueueWorker.js');
-var wochenaufgabe = require('../wochenaufgabe.js');
+var config         = require('../configuration.js');
+var util           = require('../util.js');
+var WorkerQueue    = require('../model/WorkerQueue.js');
+var DataCollection = require('../model/DataCollection.js');
+var QueueWorker    = require('../QueueWorker.js');
+var wochenaufgabe  = require('../wochenaufgabe.js');
 
 describe('QueueWorker',function(){
   beforeEach(function(bddone) {
     config.initialisePostgresDB();
     async.series([
       WorkerQueue.dropTable,
-      WorkerQueue.createTable
+      WorkerQueue.createTable,
+      DataCollection.dropTable,
+      DataCollection.createTable
     ],function(err) {
-      console.log('### closed beforeEach QueueWorker');
       should.not.exist(err);
       bddone();
     });
@@ -68,6 +71,44 @@ describe('QueueWorker',function(){
         })
       })
     })
+    it('should work on overpass Queries',function(bddone) {
+      wochenaufgabe.map["test"]={map:{list:['1','2']},overpass:{query:"TEST :schluessel: TEST"}};
+      var singleStep = {id:"1",schluessel:"102",measure:"test",type:"overpass",query:"This is an overpassquery",status:"open",exectime: new Date()};
+      var valueList = [singleStep];
+      var scope = nock('http://overpass-api.de/api/interpreter')
+                  .post('',"data=This%20is%20an%20overpassquery")             
+                  .replyWithFile(200, __dirname + '/LoadOverpassData.test.json');
+      WorkerQueue.insertData(valueList,function(err,data) {
+        should.not.exist(err);
+        should(data).equal('Datensätze: 1');
+        QueueWorker.doNextJob(function(err,data){
+          should.not.exist(err);
+          singleStep.status = "done";
+          should(data).match(singleStep);
+          async.parallel([
+            function (done) {
+              WorkerQueue.count({id:1,status:"done"},function(err,data){
+                should.not.exist(err);
+                should(data).equal('1');
+                done(); 
+              })          
+            },
+            function(done) {
+              DataCollection.count({measure:"test",schluessel:"102",count:12},function(err,data){
+                should.not.exist(err);
+                should(data).equal('1');
+                done();
+              });
+            }
+            ],function(err) {
+              should.not.exist(err);
+              bddone();
+            }
+          );
+        })
+      })
+    })
+
   })
   describe('runNextJobs',function(){
     it('should work 3 doConsole',function(bddone) {
@@ -97,5 +138,6 @@ describe('QueueWorker',function(){
       });
     });
   })
+
 })
 
