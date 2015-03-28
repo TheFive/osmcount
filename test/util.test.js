@@ -1,8 +1,8 @@
-var should = require('should');
-
-var util   = require('../util');
-var config = require('../configuration');
+var should  = require('should');
 var numeral = require('numeral');
+var util    = require('../util');
+
+var config  = require('../configuration.js');
 
 describe('util',function(){
 

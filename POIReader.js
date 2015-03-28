@@ -1,11 +1,11 @@
 var debug    = require('debug')('POIReader');
+var fs       = require("fs");
+var path     = require('path');
+var request  = require('request');
 
-var fs=require("fs");
-var path    = require('path');
-var config = require('./configuration.js');
-var loadDataFromDB = require('./LoadDataFromDB.js');
-var loadOverpassData = require('./LoadOverpassData.js');
-var request = require('request');
+var config           = require('./configuration.js');
+var loadDataFromDB   = require('./model/LoadDataFromDB.js');
+var loadOverpassData = require('./model/LoadOverpassData.js');
 
 
 var async    = require('async');

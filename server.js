@@ -7,11 +7,11 @@ var debug   = require('debug')('server');
 // require own modules
 var config           = require('./configuration.js');
 var queue            = require('./QueueWorker.js');
-var loadDataFromDB   = require('./LoadDataFromDB.js');
-var loadOverpassData = require('./LoadOverpassData.js')
+var loadDataFromDB   = require('./model/LoadDataFromDB.js');
+var loadOverpassData = require('./model/LoadOverpassData.js')
 var display          = require('./display.js');
 var util             = require('./util.js');
-var plotlyexport        = require('./plotlyexport.js');
+var plotlyexport     = require('./plotlyexport.js');
 
 var importDataCollection = require('./controller/importDataCollection.js');
 var displayAggregationTable = require('./controller/displayAggregationTable.js')

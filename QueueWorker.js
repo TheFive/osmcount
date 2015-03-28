@@ -6,7 +6,7 @@ var should    = require('should');
 
 
 var config      = require('./configuration.js');
-var lod         = require('./LoadOverpassData.js');
+var lod         = require('./model/LoadOverpassData.js');
 var WorkerQueue = require('./model/WorkerQueue.js');
 var util        = require('./util.js')
 

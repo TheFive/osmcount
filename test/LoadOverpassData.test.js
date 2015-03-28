@@ -3,7 +3,7 @@ var assert = require('assert');
 var nock   = require('nock');
 
 
-var lod    =require('../LoadOverpassData.js');
+var lod           =require('../model/LoadOverpassData.js');
 var wochenaufgabe = require('../wochenaufgabe.js');
 
 

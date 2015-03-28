@@ -8,10 +8,11 @@
 //
 //
 
-var async=require('async');
-var mc = require('mongodb').MongoClient;
-var config=require('./configuration');
-var debug   = require('debug')('LoadDataFromDB');
+var async    = require('async');
+var mc       = require('mongodb').MongoClient;
+var debug    = require('debug')('LoadDataFromDB');
+
+var config   = require('../configuration.js');
 
 
 var dataFilter =

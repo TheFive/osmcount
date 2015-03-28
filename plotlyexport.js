@@ -1,13 +1,12 @@
-var plotly = require('plotly')('thefive.osm','8c8akglymf');
-var debug    = require('debug')('plotyexport');
-  debug.data = require('debug')('plotyexport:data');
-  debug.entry = require('debug')('plotyexport:entry');
-var configuration = require('./configuration.js');
-var loadDataFromDB = require('./LoadDataFromDB.js');
-var htmlPage = require('./htmlPage.js');
-var wochenaufgabe = require('./wochenaufgabe.js');
+var plotly        = require('plotly')('thefive.osm','8c8akglymf');
+var debug         = require('debug')('plotyexport');
+var async         = require('async');
 
-var async    = require('async');
+var htmlPage       = require('./htmlPage.js');
+var configuration  = require('./configuration.js');
+var wochenaufgabe  = require('./wochenaufgabe.js');
+
+var loadDataFromDB = require('./model/LoadDataFromDB.js');
 
 
 
@@ -23,7 +22,7 @@ function getKreisname(schluessel,kreisnamen) {
 }
 
 exports.plot = function(req,res){
-	debug.entry("exports.plot");
+	debug("exports.plot");
 	var db = configuration.getMongoDB();
 
 	var measure = req.params.measure;
@@ -83,16 +82,16 @@ exports.plot = function(req,res){
 
 
 
-	debug.data("query:"+JSON.stringify(query));
+	debug("query:"+JSON.stringify(query));
 
     var aggFunc=query;
     var items = [];
     async.parallel( [
     	function aggregateCollection(callback) {
-    		debug.entry("aggregateCollection");
+    		debug("aggregateCollection");
 			collection.aggregate(	query
 								, (function aggregateCollectionCB(err, data) {
-				debug.entry("aggregateCollectionCB");
+				debug("aggregateCollectionCB");
 				// first copy hole table in a 2 dimensional JavaScript map
 				// may be here is some performance potential :-)
 				if (err) {
@@ -114,7 +113,7 @@ exports.plot = function(req,res){
 
 
 					measure = items[i];
-					debug.data("Measure i"+i+JSON.stringify(measure));
+					debug("Measure i"+i+JSON.stringify(measure));
 					schluessel=measure._id.row;
 					datum=measure._id.col;
 					cell=parseFloat(measure.cell);
@@ -172,7 +171,7 @@ exports.plot = function(req,res){
 }
 
 exports.plotValues = function(req,res){
-	debug.entry("exports.plotValues");
+	debug("exports.plotValues");
 	var db = configuration.getMongoDB();
 
 	var measure = req.params.measure;
@@ -258,16 +257,16 @@ exports.plotValues = function(req,res){
 
 
 
-	debug.data("query:"+JSON.stringify(query));
+	debug("query:"+JSON.stringify(query));
 
     var aggFunc=query;
     var items = [];
     async.parallel( [
     	function aggregateCollection(callback) {
-    		debug.entry("aggregateCollection");
+    		debug("aggregateCollection");
 			collection.aggregate(	query
 								, (function aggregateCollectionCB(err, data) {
-				debug.entry("aggregateCollectionCB");
+				debug("aggregateCollectionCB");
 				// first copy hole table in a 2 dimensional JavaScript map
 				// may be here is some performance potential :-)
 				if (err) {
@@ -280,7 +279,7 @@ exports.plotValues = function(req,res){
 				callback(err);
 			}))}],
 			function displayFinalCB (err, results ) {
-				debug.entry("displayFinalCB");
+				debug("displayFinalCB");
 				// Initialising JavaScript Map
 				//iterate total result array
 				// and generate 2 Dimensional Table
@@ -316,7 +315,7 @@ exports.plotValues = function(req,res){
 
 
 					measure = items[i];
-					debug.data("Measure i"+i+JSON.stringify(measure));
+					debug("Measure i"+i+JSON.stringify(measure));
 					schluessel=measure._id.row;
 					datum=measure._id.col;
 					m_name.y.push(parseFloat(measure.m_name));
@@ -338,7 +337,7 @@ exports.plotValues = function(req,res){
 				data.push(m_wheelchair);
 				data.push(e_fixme);
 
-				debug.data(data);
+				debug(data);
 
 				graphLocation = getKreisname(location,kreisnamen);
 

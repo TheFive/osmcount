@@ -1,9 +1,11 @@
 var should = require('should');
-var lod = require('../LoadDataFromDB.js');
+var fs     = require("fs");
+var path   = require('path');
+
+
 var configuration = require('../configuration.js');
-var dbHelper = require('../test/dbHelper.js');
-var fs   = require("fs");
-var path = require('path');
+var lod           = require('../model/LoadDataFromDB.js');
+var dbHelper      = require('../test/dbHelper.js');
 
 describe('LoadDataFromDB', function () {
   describe('insertValues',function()

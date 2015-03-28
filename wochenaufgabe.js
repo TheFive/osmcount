@@ -1,4 +1,4 @@
-var loadDataFromDB = require('./LoadDataFromDB.js');
+var loadDataFromDB = require('./model/LoadDataFromDB.js');
 
 exports.tagCounter = function tagCounter(osmdata,result) {
   result.missing = {};

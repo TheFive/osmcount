@@ -2,10 +2,10 @@ var async          = require('async');
 var debug          = require('debug')('LoadOverpassData');
 var should         = require('should');
 
-var loadDataFromDB = require('./LoadDataFromDB.js');
-var configuration  = require('./configuration.js');
-var wochenaufgabe  = require('./wochenaufgabe.js');
+var configuration  = require('../configuration.js');
+var wochenaufgabe  = require('../wochenaufgabe.js');
 
+var loadDataFromDB = require('./LoadDataFromDB.js');
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
 
