@@ -167,7 +167,7 @@ exports.import = function(filename,cb) {
 exports.export = function(filename,cb){
   debug('exports.export')
   // for now only mongo export is needed
-  should(databaseType).equal('mongodb');
+  should(databaseType).equal('mongo');
   exportMongoDB(filename,cb);
 }
 
@@ -243,7 +243,7 @@ function countPostgresDB(query,cb) {
 
 exports.count = function(query,cb) {
   debug('count');
-  if (databaseType == 'mongodb') {
+  if (databaseType == 'mongo') {
    countMongoDB(query,cb);
   }
   if (databaseType == "postgres") {
@@ -303,7 +303,7 @@ function getNextTaskPostgresDB(status,cb) {
 }
 exports.getWorkingTask = function (cb) {
   debug('getWorkingTask');
-  if (databaseType == "mongodb") {
+  if (databaseType == "mongo") {
     getWorkingTaskMongoDB(cb);  
   }
   if (databaseType == "postgres") {
@@ -330,7 +330,7 @@ function getNextOpenTaskMongoDB(cb) {
 
 exports.getNextOpenTask = function getNextOpenTask(cb) {
   debug('getNextOpenTask');
-  if (databaseType == "mongodb") {
+  if (databaseType == "mongo") {
     getNextOpenTaskMongoDB(cb);  
   }
   if (databaseType == "postgres") {
@@ -374,7 +374,7 @@ function saveTaskPostgresDB(task,cb) {
 exports.saveTask = function(task,cb) {
   debug('saveTask');
   should.exist(cb);
-  if (databaseType == 'mongodb') {
+  if (databaseType == 'mongo') {
     saveTaskMongoDB(task,cb);
   }
   if (databaseType == 'postgres') {

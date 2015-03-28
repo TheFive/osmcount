@@ -1,7 +1,8 @@
-var debug = require('debug')('DataTarget');
-var pg    = require('pg');
-var fs    = require('fs');
-var async = require('async');
+var debug  = require('debug')('DataTarget');
+var pg     = require('pg');
+var fs     = require('fs');
+var async  = require('async');
+var should = require('should');
 
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
@@ -143,13 +144,15 @@ function importPostgresDB(filename,cb) {
 
 exports.import = function(filename,cb) {
   debug('exports.import')
+  should(databaseType).equal('postgres');
   importPostgresDB(filename,cb);
 }
 
 // Exports all DataCollection Objects to a JSON File
 exports.export = function(filename,cb){
   debug('exports.export')
-   exportMongoDB(filename,cb);
+  should(databaseType).equal('mongo');
+  exportMongoDB(filename,cb);
 }
 
 exports.insertData = function(data,cb) {
