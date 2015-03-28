@@ -51,25 +51,25 @@ describe('LoadOverpassData',function() {
   describe('overpassQuery',function(bddone) {
     it('should handle a query',function(bddone) {
       var scope = nock('http://overpass-api.de/api/interpreter')
-                  .post('',"data=This%20is%20a%20overpassquery")
+                  .post('',"data=This%20is%20an%20overpassquery")
                 
                   .reply(200, {
                     name: 'someJsonData',
                     data:[{name:3}]
                   });
-      lod.overpassQuery("This is a overpassquery",function(error,body) {
+      lod.overpassQuery("This is an overpassquery",function(error,body) {
         should.not.exist(error);
         body = JSON.parse(body);
         should(body).eql({name: 'someJsonData',data:[{name:3}]});
         bddone();
       })
     })
-    it('should handle a Timeout',function(bddone) {
+    it('should handle an Overcrowded',function(bddone) {
       var scope = nock('http://overpass-api.de/api/interpreter')
-                  .post('',"data=This%20is%20a%20overpassquery")
+                  .post('',"data=This%20is%20an%20overpassquery")
                 
                   .reply(504, "Server Overcrowded");
-      lod.overpassQuery("This is a overpassquery",function(error,body) {
+      lod.overpassQuery("This is an overpassquery",function(error,body) {
         should.exist(error);
         should(error.statusCode).equal(504);
         bddone();
@@ -86,10 +86,10 @@ describe('LoadOverpassData',function() {
       job.exectime = new Date();
       var result = {};
       var scope = nock('http://overpass-api.de/api/interpreter')
-                    .post('',"data=This%20is%20a%20overpassquery")
+                    .post('',"data=This%20is%20an%20overpassquery")
                   
                     .replyWithFile(200, __dirname+"/LoadOverpassData.test.json");
-      lod.runOverpass("This is a overpassquery",job,result,function(error,body) {
+      lod.runOverpass("This is an overpassquery",job,result,function(error,body) {
         should.not.exist(error);
         should.exist(job.overpassTime);
         should(result.timestamp).equal(job.exectime);
