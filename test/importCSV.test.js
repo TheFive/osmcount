@@ -98,119 +98,130 @@ describe('importCSV', function() {
       should.deepEqual("default",ja[0].defaultValue);
     });
   });
-
-  describe('readCSVMongoDB',function() {
-    var db;
-    before(function(done) {
-      configuration.initialiseMongoDB( function () {
-        db = configuration.getMongoDB();
-        var c = (db.collection("DataCollection"));
-        if (c) {
-          c.drop(function(err,cb) {
-          db.createCollection("DataCollection",function(err,data) {
-            done();
-          });
-          });
-        } else done();
-      });
-    });
-    it('should fail with no filename' , function(done) {
-      db = configuration.getMongoDB();
-      var a = importCSV.readCSVMongoDB('NonExistingFile.csv',db,{},function(err,data) {
-         should.equal(err.errno,34);
-         done();
-      })
-    });
-    it('should load 2 datasets' , function(done) {
-      fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10");
-      var a = importCSV.readCSVMongoDB('existingFile.csv',db,{name:"",count:0},function(err,data) {
-        should.equal(err,null);
-        should.equal(data,"Datensätze: 2");
-        db.collection("DataCollection").find({}).toArray(function(err,data) {
-          should.equal(data.length,2);
-          should.equal(data[0].name,'a');
-          should.equal(data[0].count,'2');
-          should.equal(data[1].name,'b');
-          should.equal(data[1].count,'10');
-        })
-        done();
-      })
-    });
-    it('should handle empty Files' ,function (done) {
-      fs.writeFileSync("emtyFile.csv","");
-      var a = importCSV.readCSVMongoDB('emtyFile.csv',db,{name:"",count:0},function(err,data) {
-        should.equal(err,"empty file");
-        done();
-      });
-    })
-    it('should generate an error on column numbers differs',function(bddone){
-      fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10\c;4;5");
-      var a = importCSV.readCSVMongoDB('existingFile.csv',db,{name:"",count:0},function(err,data) {
-        should.exist(err);
-        should(err).match(/^Invalid CSV File, Number of Columns differs/);
+  context('readCSV',function() {
+    var filename = "testfile.csv";
+    afterEach(function(bddone) {
+      fs.exists(filename, function(err) {
+        if (err) {
+          fs.unlink(filename);
+        }
         bddone();
       })
     })
-
-  });
-  describe('readCSVpostgres',function() {
-    before(function(bddone) {
-      configuration.initialisePostgresDB();
-      pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
-        should.equal(err,null);
-        async.series([
-          DataCollection.dropTable,
-          DataCollection.createTable
-        ],function(err) {
-          should.equal(null,err);
-          pgdone();
-          bddone();
+    describe('readCSVMongoDB',function() {
+      var db;
+      before(function(done) {
+        configuration.initialiseMongoDB( function () {
+          db = configuration.getMongoDB();
+          var c = (db.collection("DataCollection"));
+          if (c) {
+            c.drop(function(err,cb) {
+            db.createCollection("DataCollection",function(err,data) {
+              done();
+            });
+            });
+          } else done();
         });
       });
-    });
-    it('should fail with no filename' , function(done) {
-      var a = importCSV.readCSVPostgresDB('NonExistingFile.csv',{},function(err,data) {
-        should.equal(err.errno,34);
-        done();
+      it('should fail with no filename' , function(done) {
+        db = configuration.getMongoDB();
+        var a = importCSV.readCSVMongoDB('NonExistingFile.csv',db,{},function(err,data) {
+           should.equal(err.errno,34);
+           done();
+        })
+      });
+      it('should load 2 datasets' , function(done) {
+        fs.writeFileSync(filename,"name;count\na;2\nb;10");
+        var a = importCSV.readCSVMongoDB(filename,db,{name:"",count:0},function(err,data) {
+          should.equal(err,null);
+          should.equal(data,"Datensätze: 2");
+          db.collection("DataCollection").find({}).toArray(function(err,data) {
+            should.equal(data.length,2);
+            should.equal(data[0].name,'a');
+            should.equal(data[0].count,'2');
+            should.equal(data[1].name,'b');
+            should.equal(data[1].count,'10');
+          })
+          done();
+        })
+      });
+      it('should handle empty Files' ,function (done) {
+        fs.writeFileSync(filename,"");
+        var a = importCSV.readCSVMongoDB(filename,db,{name:"",count:0},function(err,data) {
+          should.equal(err,"empty file");
+          done();
+        });
       })
+      it('should generate an error on column numbers differs',function(bddone){
+        fs.writeFileSync(filename,"name;count\na;2\nb;10\c;4;5");
+        var a = importCSV.readCSVMongoDB(filename,db,{name:"",count:0},function(err,data) {
+          should.exist(err);
+          should(err).match(/^Invalid CSV File, Number of Columns differs/);
+          bddone();
+        })
+      })
+
     });
-    it('should load 2 datasets' , function(done) {
-      fs.writeFileSync("existingFile.csv","schluessel;count\na;2\nb;10");
-      var a = importCSV.readCSVPostgresDB('existingFile.csv',{name:"",count:0},function(err,data) {
-        should.equal(data,"Datensätze: 2");
-        should.equal(err,null);
+    describe('readCSVpostgres',function() {
+      before(function(bddone) {
+        configuration.initialisePostgresDB();
         pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
           should.equal(err,null);
-          client.query("select key,count from DataCollection;",function(err,data){
-            should.equal(err,null);
-            should.notEqual(null,data);
-            should.equal(data.rows.length,2);
-            should.equal(data.rows[0].key,'a');
-            should.equal(data.rows[0].count,'2');
-            should.equal(data.rows[1].key,'b');
-            should.equal(data.rows[1].count,'10');
-            done();
+          async.series([
+            DataCollection.dropTable,
+            DataCollection.createTable
+          ],function(err) {
+            should.equal(null,err);
             pgdone();
-            client.end();
-            });
+            bddone();
           });
+        });
+      });
+      it('should fail with no filename' , function(done) {
+        var a = importCSV.readCSVPostgresDB('NonExistingFile.csv',{},function(err,data) {
+          should.equal(err.errno,34);
+          done();
+        })
+      });
+      it('should load 2 datasets' , function(done) {
+        fs.writeFileSync(filename,"schluessel;count\na;2\nb;10");
+        var a = importCSV.readCSVPostgresDB(filename,{name:"",count:0},function(err,data) {
+          should.equal(data,"Datensätze: 2");
+          should.equal(err,null);
+          pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
+            should.equal(err,null);
+            client.query("select key,count from DataCollection;",function(err,data){
+              should.equal(err,null);
+              should.notEqual(null,data);
+              should.equal(data.rows.length,2);
+              should.equal(data.rows[0].key,'a');
+              should.equal(data.rows[0].count,'2');
+              should.equal(data.rows[1].key,'b');
+              should.equal(data.rows[1].count,'10');
+              done();
+              pgdone();
+              client.end();
+              });
+            });
+        })
+      });
+      it('should handle empty Files' ,function (done) {
+        fs.writeFileSync(filename,"");
+        var a = importCSV.readCSVPostgresDB(filename,{name:"",count:0},function(err,result) {
+          should.equal(err,"empty file");
+          done();
+        })
       })
-    });
-    it('should handle empty Files' ,function (done) {
-      fs.writeFileSync("emtyFile.csv","");
-      var a = importCSV.readCSVPostgresDB('emtyFile.csv',{name:"",count:0},function(err,result) {
-        should.equal(err,"empty file");
-        done();
+      it('should generate an error on column numbers differs',function(bddone){
+        fs.writeFileSync(filename,"name;count\na;2\nb;10\c;4;5");
+        var a = importCSV.readCSVPostgresDB(filename,{name:"",count:0},function(err,data) {
+          should.exist(err);
+          should(err).match(/^Invalid CSV File, Number of Columns differs/);
+          bddone();
+        })
       })
-    })
-    it('should generate an error on column numbers differs',function(bddone){
-      fs.writeFileSync("existingFile.csv","name;count\na;2\nb;10\c;4;5");
-      var a = importCSV.readCSVPostgresDB('existingFile.csv',{name:"",count:0},function(err,data) {
-        should.exist(err);
-        should(err).match(/^Invalid CSV File, Number of Columns differs/);
-        bddone();
-      })
-    })
 
-  });
+    });
+
+  })
 });
