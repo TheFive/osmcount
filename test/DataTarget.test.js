@@ -27,7 +27,7 @@ describe('DataTarget', function() {
       DataTarget.import(filename,function(err,data){
         if (err) console.dir(err);
         should.not.exist(err,null);
-        should.equal(data,"Datensätze: 2");
+        should.equal(data,"Datensätze: 3");
         bddone();
       });
     });

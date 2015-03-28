@@ -15,4 +15,6 @@
     "schluessel" : "01053080",
     "name" : "Langenlehsten",
     "linkSource" : ""
-}]
+},
+{"_id":"54b41b3cbe744fe00fed646a","measure":"Apotheke","schluessel":"16077026","status":"done","exectime":"2015-01-12T19:06:36.753Z","type":"overpass","query":"[out:json];area[\"de:amtlicher_gemeindeschluessel\"=\"16077026\"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;","source":"54b41b2f3ea60eccad04fdb2","timestamp":"2015-01-12T19:06:39.746Z"}
+]
