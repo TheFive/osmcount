@@ -8,7 +8,7 @@
 
   },
   "postgres": {
-    "database" : "localhost:5432/testdb",
+    "database" : "localhost:5433/testdb",
     "username" : "test",
     "password" : "test"
   }

@@ -151,7 +151,6 @@ exports.initialise = function (cb) {
           debug('Loaded from Database %s rows',result.length);
           for (var i = 0;i<result.length;i++) {
             doc = result[i];
-            console.dir(doc);
 						key=value="";
 						if (doc) {
 							var keyRegio = doc["de:regionalschluessel"];

@@ -218,7 +218,6 @@ function findPostgresDB(query,cb) {
     var rows = [];
     query.on('row', function(row) {
       rows.push(row.to_json);
-      console.dir(row);
     });
     query.on('end', function(result) {
       //fired once and only once, after the last row has been returned and after all 'row' events are emitted

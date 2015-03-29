@@ -12,6 +12,7 @@ var util           = require('./util.js');
 var DataCollection = require('./model/DataCollection.js');
 var WorkerQueue    = require('./model/WorkerQueue.js');
 var DataTarget     = require('./model/DataTarget.js');
+var OSMData        = require('./model/OSMData.js');
 
 
 program
@@ -20,7 +21,8 @@ program
   .option('-i --import','import Data')
   .option('--datacollection','Use DataCollection Container')
   .option('--workerqueue', 'Use WorkerQueue Container')
-  .option('--datatarget', 'Use DatTarget Container')
+  .option('--datatarget', 'Use DataTarget Container')
+  .option('--osmdata', 'Use OSMData Container')
   .option('--mongo','Use MongoDB')
   .option('--postgres','Use PostgresDB')
   .option('--all')
@@ -38,12 +40,14 @@ if (program.F=='') {
   	dirname = path.join(__dirname,program.F);
   	program.dcFilename=path.join(dirname,"datacollection.json");  
   	program.dtFilename=path.join(dirname,"datatarget.json")  ;
-  	program.wqFilename=path.join(dirname,"workerqueue.json") ; 
+    program.wqFilename=path.join(dirname,"workerqueue.json") ; 
+    program.odFilename=path.join(dirname,"osmdata.json") ; 
   	
   } else {
 	  program.dcFilename=path.join(dirname,program.F);
 	  program.dtFilename=path.join(dirname,program.F);  
-	  program.wqFilename=path.join(dirname,program.F); 
+    program.wqFilename=path.join(dirname,program.F); 
+    program.odFilename=path.join(dirname,program.F); 
   }
 }
 
@@ -70,6 +74,7 @@ function importData(cb) {
   DataCollection.initialise("postgres");
   DataTarget.initialise("postgres");
   WorkerQueue.initialise("postgres");
+  OSMData.initialise("postgres");
   debug('postgres initialised');
   async.series([
   	function(callback) {
@@ -84,12 +89,18 @@ function importData(cb) {
 			  DataTarget.import(program.dtFilename,callback);
 		  } else callback(); 
   	},
-  	function(callback) {
-		  if (program.workerqueue || program.all) {
+    function(callback) {
+      if (program.workerqueue || program.all) {
         console.log("Start Import WorkerQueue (PostgresDB)");
-			  WorkerQueue.import(program.wqFilename,callback);
-		  } else callback(); 
-  	}
+        WorkerQueue.import(program.wqFilename,callback);
+      } else callback(); 
+    },
+    function(callback) {
+      if (program.osdmata || program.all) {
+        console.log("Start Import OSMData (PostgresDB)");
+        OSMData.import(program.odFilename,callback);
+      } else callback(); 
+    }
   	],function(err) {cb(err)});
 }
 
@@ -104,7 +115,9 @@ function createTables(callback) {
 		DataTarget.dropTable,
 		DataTarget.createTable,
 		WorkerQueue.dropTable,
-		WorkerQueue.createTable
+		WorkerQueue.createTable,
+    OSMData.dropTable,
+    OSMData.createTable
 		],function(err) {callback(err);});
 }
 
@@ -122,6 +135,7 @@ function exportData(cb) {
   DataCollection.initialise("mongo");
   DataTarget.initialise("mongo");
   WorkerQueue.initialise("mongo");
+  OSMData.initialise('mongo');
   debug('mongo initialised');
   async.series([
   	function(callback) {
@@ -139,12 +153,18 @@ function exportData(cb) {
 			  DataTarget.export(program.dtFilename,callback);
 		  } else callback(); 
   	},
-  	function(callback) {
-		  if (program.workerqueue || program.all) {
+    function(callback) {
+      if (program.workerqueue || program.all) {
         console.log("Start Export WorkerQueue (MongoDB)");
-			  WorkerQueue.export(program.wqFilename,callback);
-		  } else callback(); 
-  	}
+        WorkerQueue.export(program.wqFilename,callback);
+      } else callback(); 
+    },
+    function(callback) {
+      if (program.osmdata || program.all) {
+        console.log("Start Export OSMData (MongoDB)");
+        OSMData.export(program.odFilename,callback);
+      } else callback(); 
+    }
   	],function(err) {cb(err)});
 }
 
