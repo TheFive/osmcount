@@ -1,13 +1,25 @@
 var should = require('should');
 var fs     = require("fs");
 var path   = require('path');
+var async  = require('async');
 
 
-var configuration = require('../configuration.js');
+var config = require('../configuration.js');
 var lod           = require('../model/LoadDataFromDB.js');
-var dbHelper      = require('../test/dbHelper.js');
+var OSMData       = require('../model/OSMData.js');
+
 
 describe('LoadDataFromDB', function () {
+  before(function(bddone){
+    async.series(
+      [config.initialisePostgresDB,
+       OSMData.dropTable,
+       OSMData.createTable
+      ],function(err) {
+        should.not.exist(err);
+        bddone();
+      });
+  })
   describe('insertValues',function()
   {
     var CC_Type  = {};
@@ -153,21 +165,36 @@ describe('LoadDataFromDB', function () {
         }
       }
       should.exist(data);
-      configuration.initialiseMongoDB( function() {
-        db = configuration.getMongoDB();
-        dbHelper.prepareCollection(db,"OSMBoundaries","OSMBoundaries.test.json",function(err)
-        { lod.initialise(done(err));});
-      });
+      var filename = path.resolve(__dirname, "OSMBoundaries.test.json");
+      OSMData.initialise('postgres');
+      //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
+      OSMData.import(filename,function(err,data){
+        should.not.exist(err);
+        should(data).equal("Datensätze: 6");
+        lod.initialise(done);
+      })
     });
     it('should read the Data DE_RGS',function() {
-      should(data.DE_RGS.map).match(lod.DE_RGS.map);
-      should(data.DE_RGS.list).match(lod.DE_RGS.list);
+      console.log('data.DE_RGS.map-----------------');
+      console.dir(data.DE_RGS.map);
+      console.log('lod.DE_RGS.map-----------------');
+      console.dir(lod.DE_RGS.map);
+      should(lod.DE_RGS.map).match(data.DE_RGS.map);
+      should(lod.DE_RGS.list).match(data.DE_RGS.list);
     });
     it('should read the Data DE_PLZ',function() {
+      console.log('lod.DE_PLZ.map-----------------');
+      console.dir(lod.DE_PLZ.map);
+      console.log('data.DE_PLZ.map-----------------');
+      console.dir(data.DE_PLZ.map);
         should(lod.DE_PLZ.map).match(data.DE_PLZ.map);
         should(lod.DE_PLZ.list).match(data.DE_PLZ.list);
     });
     it('should read the Data DE_AGS',function() {
+      console.log('lod.DE_AGS.map-----------------');
+      console.dir(lod.DE_AGS.map);
+      console.log('data.DE_AGS.map-----------------');
+      console.dir(data.DE_AGS.map);
         should(lod.DE_AGS.map).match(data.DE_AGS.map);
         should(lod.DE_AGS.list).match(data.DE_AGS.list);
     });

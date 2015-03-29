@@ -53,6 +53,11 @@ var initialiseCB = [];
 exports.initialiseMongoDB = function(callback) {
   debug('initialiseMongoDB');
   if (!configurationInitialised) exports.initialise();
+
+  if (configuration.mongodb.initialise == false) {
+    callback();
+    return;
+  }
   // Implement a run one behaviour
   if (initialisedDB == 2) {
     // nothing to do
@@ -100,6 +105,10 @@ exports.initialisePostgresDB = function(callback) {
   // Minimal Behaviour just store One Connect String
   // Connection is established by pg object in retrieaving
   // a client
+  if (configuration.postgres.initialise == false) {
+    callback();
+    return;
+  }
 
   configuration=exports.getConfiguration();
 	exports.postgresConnectStr = getPostgresDBString();

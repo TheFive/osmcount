@@ -13,20 +13,10 @@ var mc       = require('mongodb').MongoClient;
 var debug    = require('debug')('LoadDataFromDB');
 
 var config   = require('../configuration.js');
+var OSMData  = require('../model/OSMData.js')
 
 
-var dataFilter =
-{
-  "name":1,
-  "de:regionalschluessel":1,
-  "postal_code":1,
-  "ref:at:gkz":1,
-  "de:amtlicher_gemeindeschluessel":1,
-  boundary:1,
-  admin_level:1,
-  "de:regionalschluessel":1,
-  "osmcount_country":1
-}
+
 
 
 var adminLevel_DE = {'1':'admin_level 1',
@@ -79,6 +69,9 @@ var blaetterDefined = false;
 
 
 exports.insertValue = function insertValue(map,key,osmdoc) {
+  debug('insertValue');
+  debug('key:%s',key);
+  debug(JSON.stringify(osmdoc));
   // check Definition of key and Name
   var keyDefined =  (typeof(key)!='undefined');
   var nameDefined = (typeof(osmdoc.name) != 'undefined');
@@ -119,6 +112,7 @@ exports.insertValue = function insertValue(map,key,osmdoc) {
         }
       }
     }
+    debug('map.map[key]=value; --> key: %s, Value: %s',key,value);
     map.map[key]=value;
     if (pushOnList) map.list.push(key);
     while (key.length>1 && key.charAt(key.length-1)=='0') {
@@ -147,35 +141,34 @@ exports.initialise = function (cb) {
 	if (!dataLoaded) {
 		async.series([
 			function(callback) {
-				mongodb.collection("OSMBoundaries").find( {}, dataFilter,
+        OSMData.find( {},
 								function(err, result) {
 					if (err) {
 						console.log("Error occured in function: LoadDataFromDB.initialise");
 						console.log(err);
 						callback(err);
 					}
-					result.each(function(err, doc) {
-						if (doc == null) {
-							//schleife beendet
-							dataLoaded=true;
-							callback(null);
-						} else {
-							key=value="";
-							if (doc) {
-								var keyRegio = doc["de:regionalschluessel"];
-								var keyAGS = doc["de:amtlicher_gemeindeschluessel"]
-								var keyAGS_AT = doc ["ref:at:gkz"];
-								var keyPLZ_DE;
-								if (doc.osmcount_country == "DE" && doc.boundary=="postal_code") {
-									keyPLZ_DE = doc["postal_code"];
-								}
-								exports.insertValue(DE_RGS,keyRegio,doc);
-							  exports.insertValue(DE_AGS,keyAGS,doc);
-							  exports.insertValue(AT_AGS,keyAGS_AT,doc);
-								exports.insertValue(DE_PLZ,keyPLZ_DE,doc);
+          debug('Loaded from Database %s rows',result.length);
+          for (var i = 0;i<result.length;i++) {
+            doc = result[i];
+            console.dir(doc);
+						key=value="";
+						if (doc) {
+							var keyRegio = doc["de:regionalschluessel"];
+							var keyAGS = doc["de:amtlicher_gemeindeschluessel"]
+							var keyAGS_AT = doc ["ref:at:gkz"];
+							var keyPLZ_DE;
+							if (doc.osmcount_country == "DE" && doc.boundary=="postal_code") {
+								keyPLZ_DE = doc["postal_code"];
 							}
-						}
-					})
+							exports.insertValue(DE_RGS,keyRegio,doc);
+						  exports.insertValue(DE_AGS,keyAGS,doc);
+						  exports.insertValue(AT_AGS,keyAGS_AT,doc);
+							exports.insertValue(DE_PLZ,keyPLZ_DE,doc);
+            }
+					}
+          dataLoaded = true;
+          callback(null);
 				})
 			},
 			function (callback) {
@@ -198,7 +191,7 @@ exports.initialise = function (cb) {
 			    return;
 			  }
 				debug("Initialising All Done");
-				if (cb) cb(null);
+				cb(null);
 			}
 		)
 	}

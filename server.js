@@ -29,7 +29,7 @@ debug("Start Async Configuration");
 async.auto( {
 		config: config.initialise,
 		mongodb: ["config",config.initialiseMongoDB],
-    postgresdb: ["config",config.initialisePostgresDB],
+        postgresdb: ["config",config.initialisePostgresDB],
 		dbdata:  ["mongodb", loadDataFromDB.initialise],
 		startQueue: ["dbdata",queue.startQueue]
 
