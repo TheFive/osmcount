@@ -99,6 +99,11 @@ describe('util',function(){
       should(util.toHStore({name:"test",poing:"ping"})).equal('"name"=>"test","poing"=>"ping"');
       should(util.toHStore({name:"CountAll",count:2,missing:4})).equal('"name"=>"CountAll","count"=>"2","missing"=>"4"');
     })
+    it('should escape " and \\ ',function () {
+      should(util.toHStore({name:"test",poing:'ping "hallo"'})).equal('"name"=>"test","poing"=>"ping \\"hallo\\""');
+      should(util.toHStore({name:"test",poing:'ping \\ me'})).equal('"name"=>"test","poing"=>"ping \\\\ me"');
+
+    })
   })
 })
 

@@ -1,9 +1,7 @@
-var configuration = require('./configuration.js');
-var num  = require('numeral');
-var de       = require('numeral/languages/de');
-var debug       = require('debug')('util');
-  debug.entry       = require('debug')('util:entry');
-  debug.data       = require('debug')('util:data');
+var config = require('./configuration.js');
+var num    = require('numeral');
+var de     = require('numeral/languages/de');
+var debug  = require('debug')('util');
 
 
 exports.copyObject = function(dest,source) {
@@ -26,11 +24,11 @@ exports.clone = function (obj) {
 exports.createWaiter = function(seconds) {
 	var ms = seconds*1000;
 	return function (callback) {
-		debug.data("Wait for "+seconds+" seconds");
+		debug("Wait for "+seconds+" seconds");
 		setTimeout(callback,ms);
 	}
 }
-var waitOneMin = exports.createWaiter(configuration.getValue("waitTime",120));
+var waitOneMin = exports.createWaiter(config.getValue("waitTime",120));
 exports.waitOneMin = waitOneMin;
 
 exports.numeral = num;
@@ -57,11 +55,27 @@ exports.initialise = function() {
 	num.language('de');
 }
 
+function escapeString(string) {
+	var result='';
+	for (var i=0;i<string.length;i++) {
+		if (string[i]=='"') {
+			result += '\\\"';
+			continue;
+		}
+		if (string[i]=='\\') {
+			result += '\\\\';
+			continue;
+		}
+		result += string[i];
+  }
+  return result;
+}
 exports.toHStore = function(object) {
-  var result="";
+  var result='';
   for (var k in object) {
     if (result != "" ) result += ",";
-    result += '"' + k + '"=>"' +object[k] + '"';
+    var value = "" + object[k];
+    result += '"' + k + '"=>"' +escapeString(value) + '"';
   }
   return result;
 }

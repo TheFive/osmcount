@@ -3,6 +3,8 @@ var pg    = require('pg');
 var fs    = require('fs');
 var async = require('async');
 var should = require('should');
+var ProgressBar = require('progress');
+
 
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
@@ -81,6 +83,11 @@ function insertDataToPostgres (data,cb) {
       return;
     }
     var result = "Datensätze: "+data.length;
+    var bar;
+    if (data.length>100) {
+      bar = new ProgressBar('Importing WorkerQueue: [:bar] :percent :total :etas', { total: data.length });
+    }
+
     debug("Start insert "+ data.length + " datasets");
     function insertData(item,callback){
       debug('insertDataToPostgres->insertData');
@@ -97,7 +104,14 @@ function insertDataToPostgres (data,cb) {
 
       client.query("INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source,error) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)",
                           [key,stamp,measure,status,exectime,type,query,source,error], function(err,result) {
+        if (err) {
+          err.item = JSON.stringify(item);
+          err.itemError = error;
+        }
+        if (bar) bar.tick();
+
         callback(err);
+
         if (err) debug('Error after Insert'+err);
       })
     }

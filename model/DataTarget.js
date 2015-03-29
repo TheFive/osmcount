@@ -3,6 +3,8 @@ var pg     = require('pg');
 var fs     = require('fs');
 var async  = require('async');
 var should = require('should');
+var ProgressBar = require('progress');
+
 
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
@@ -70,6 +72,10 @@ function insertDataToPostgres (data,cb) {
     }
     var result = "Datensätze: "+data.length;
     debug("Start insert "+ data.length + " datasets");
+    var bar;
+    if (data.length>100) {
+      bar = new ProgressBar('Importing DataTarget: [:bar] :percent :total :etas', { total: data.length });
+    }
     function insertData(item,callback){
       debug('insertDataToPostgres->insertData');
       var key = item.schluessel;
@@ -80,11 +86,18 @@ function insertDataToPostgres (data,cb) {
       var sourceLink = item.linkSource;
       client.query("INSERT into datatarget (key,measure,target,name,sourceText,sourceLink) VALUES($1,$2,$3,$4,$5,$6)",
                           [key,measure,target,name,sourceText,sourceLink,], function(err,result) {
+        if (err) {
+          err.item = item;
+        }
+        if (bar) bar.tick();
         callback(err);
         debug('Error after Insert'+err);
       })
     }
-    async.each(data,insertData,function(err) {pgdone();cb(err,result);})
+    async.each(data,insertData,function(err) {
+      pgdone();
+      cb(err,result);
+    })
   })
 
 }

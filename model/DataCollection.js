@@ -3,6 +3,8 @@ var pg    = require('pg');
 var fs    = require('fs');
 var async = require('async');
 var should = require('should');
+var ProgressBar = require('progress');
+
 
 var util   = require('../util.js');
 var config    = require('../configuration.js');
@@ -77,6 +79,11 @@ function insertDataToPostgres (data,cb) {
       return;
     }
     var result = "Datensätze: "+data.length; 
+    var bar;
+    if (data.length>100) {
+      bar = new ProgressBar('Importing DataCollection: [:bar] :percent :total :etas', { total: data.length });
+    }
+
     function insertData(item,callback){
       debug('insertDataToPostgres->insertData');
       var key = item.schluessel;
@@ -91,7 +98,11 @@ function insertDataToPostgres (data,cb) {
       }
       client.query("INSERT into datacollection (key,stamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)",
                           [key,timestamp,measure,count,missing,existing], function(err,result) {
+        if (err) {
+          err.item = item;
+        }
         callback(err);
+        if (bar) bar.tick();
         debug('Error after Insert'+err);
       })
     }

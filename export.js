@@ -11,7 +11,7 @@ var util           = require('./util.js');
 // require model modules
 var DataCollection = require('./model/DataCollection.js');
 var WorkerQueue    = require('./model/WorkerQueue.js');
-var DataTarget     = require('./model/WorkerQueue.js');
+var DataTarget     = require('./model/DataTarget.js');
 
 
 program
@@ -47,6 +47,13 @@ if (program.F=='') {
   }
 }
 
+if ((program.mongo!= true) && !(program.postrges != true)) {
+  console.log("Please Enter a Database");
+  console.log(program.mongo);
+  console.log(program.postgres);
+  process.exit();
+}
+
 debug('initialising util');
 util.initialise();
 
@@ -63,7 +70,7 @@ function importData(cb) {
   DataCollection.initialise("postgres");
   DataTarget.initialise("postgres");
   WorkerQueue.initialise("postgres");
-  debug('posgres initialised');
+  debug('postgres initialised');
   async.series([
   	function(callback) {
 		  if (program.datacollection || program.all) {
