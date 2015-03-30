@@ -13,7 +13,7 @@ var display          = require('./display.js');
 var util             = require('./util.js');
 var plotlyexport     = require('./plotlyexport.js');
 
-var importDataCollection = require('./controller/importDataCollection.js');
+var importDataCollection = require('./controller/ImportDataCollection.js');
 var displayAggregationTable = require('./controller/displayAggregationTable.js')
 
 var app = express();
