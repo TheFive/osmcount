@@ -146,6 +146,7 @@ describe('importCSV', function() {
         })
       });
       it('should handle empty Files' ,function (done) {
+        fs.writeFileSync(filename,"Write Something, nothing fails @travis");
         fs.writeFileSync(filename,"");
         var a = importCSV.readCSVMongoDB(filename,db,{name:"",count:0},function(err,data) {
           should.equal(err,"empty file");
