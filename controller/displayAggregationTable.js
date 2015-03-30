@@ -2,11 +2,12 @@ var debug = require('debug')('displayAggregationTable');
 var async = require('async');
 
 
-var util          = require('../util.js');
-var htmlPage      = require('../htmlPage.js');
-var wochenaufgabe = require('../wochenaufgabe.js');
+var util           = require('../util.js');
+var htmlPage       = require('../htmlPage.js');
+var wochenaufgabe  = require('../wochenaufgabe.js');
 var DataCollection = require('../model/DataCollection.js');
-var WorkerQueue   = require('../model/WorkerQueue.js');
+var WorkerQueue    = require('../model/WorkerQueue.js');
+var DataTarget     = require('../model/DataTarget.js');
 
 
 
@@ -660,7 +661,6 @@ exports.table = function(req,res){
   debug("exports.table");
   var db = res.db;
   // To be Improved with Query or Aggregation Statments
-  var collectionTarget = db.collection('DataTarget');
   var timeAggregate;
   var timeVorgabe;
   var timeTableGeneration;
@@ -760,25 +760,24 @@ exports.table = function(req,res){
                 (param.measure=="ApothekePLZ_DE" ) ||
                 (param.measure == "Apotheke_AT"))
             && param.sub =="") {
-          collectionTarget.aggregate( queryVorgabe
-                  , (function getVorgabeCB(err, data) {
-          debug("getVorgabeCB");
-          timeVorgabe = new Date().getTime() - timeVorgabe;
-          if (err) {
-            res.set('Content-Type', 'text/html');
-            res.end("Error in getVorgabe "+JSON.stringify(err));
-            console.log("Table Function, Error occured:");
-            console.log(err);
-            ;
-          }
-          for (var i = 0;i<data.length;i++)
-          {
-            schluessel = data[i]._id;
-            value = data[i].vorgabe;
-            vorgabe [schluessel]=value;
-          }
-          callback(err);
-        }))
+          DataTarget.aggregate(param,function getVorgabeCB(err, data) {
+            debug("getVorgabeCB");
+            timeVorgabe = new Date().getTime() - timeVorgabe;
+            if (err) {
+              res.set('Content-Type', 'text/html');
+              res.end("Error in getVorgabe "+JSON.stringify(err));
+              console.log("Table Function, Error occured:");
+              console.log(err);
+              ;
+            }
+            for (var i = 0;i<data.length;i++)
+            {
+              schluessel = data[i]._id;
+              value = data[i].vorgabe;
+              vorgabe [schluessel]=value;
+            }
+            callback(err);
+        })
       } else callback();
       },
       function getWorkerQueueCount(callback) {

@@ -177,3 +177,92 @@ exports.insertData = function(data,cb) {
     insertDataToPostgres(data,cb);
   }
 }
+
+
+function aggregatePostgresDB(param,cb) {
+  debug('aggregatePostgresDB');
+  var result = [];
+
+  var paramLocation = param.location;
+  if (typeof(paramLocation)=='undefined') {
+    paramLocation = '';
+  }
+  var paramLocationLength = paramLocation.length;
+
+
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone){
+    debug('aggregatePostgresDB->CB');
+    if (err) {
+      console.log(err);
+      cb(err);
+      pgdone();
+      return;
+    }
+    var cellCalculation = "sum(target) as cell";
+    var bindParam = [param.lengthOfKey,
+                param.measure,
+                paramLocationLength,
+                paramLocation];
+    var queryStr = "SELECT substr(key,1,$1) as k,sum(target) as t \
+                 from datatarget where measure = $2 \
+                 and substr(key,1,$3) = $4 \
+                 group by k";
+
+    var query = client.query(queryStr,bindParam);
+    query.on('error', function(err){
+      console.log(err);
+      pgdone();
+      cb(err,null);
+    });
+    query.on('row',function(row){
+      var r = {};
+      r._id = row.k;
+      r.vorgabe = row.t;
+      result.push(r);
+    });
+    query.on('end',function() {
+      pgdone();
+      cb(null,result);
+    })
+  });
+}
+
+function aggregateMongoDB(param,cb) {
+  debug('aggregateMongoDB');
+
+  var db = config.getMongoDB();
+  var collection = db.collection('DataTarget');
+  var preFilterVorgabe = {$match: {
+                              measure: param.measure,
+                              schluessel: {$regex: "^"+param.location}}};
+
+
+
+  var queryVorgabe = [
+        preFilterVorgabe,
+        {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
+                        vorgabe: "$apothekenVorgabe"
+                        }},
+          {$group: { _id:  "$schluessel",
+                 vorgabe  : {$sum: "$vorgabe" },
+                      }}];
+  collection.aggregate(query,cb);
+
+}
+/*
+the aggregate Function accepts the following parameters
+lengthOfKey:  lenghtOfKey for group clause,
+location:     key to filter on,
+measure:      measure to work on,
+*/
+
+exports.aggregate = function(param,cb) {
+  debug('exports.aggregate');
+  if (databaseType == "mongo") {
+    aggregateMongoDB(param,cb);
+    return;
+  }
+  if (databaseType == "postgres") {
+    aggregatePostgresDB(param,cb);
+  }
+}
