@@ -175,32 +175,20 @@ describe('LoadDataFromDB', function () {
       })
     });
     it('should read the Data DE_RGS',function() {
-      console.log('data.DE_RGS.map-----------------');
-      console.dir(data.DE_RGS.map);
-      console.log('lod.DE_RGS.map-----------------');
-      console.dir(lod.DE_RGS.map);
       should(lod.DE_RGS.map).match(data.DE_RGS.map);
       should(lod.DE_RGS.list).match(data.DE_RGS.list);
     });
     it('should read the Data DE_PLZ',function() {
-      console.log('lod.DE_PLZ.map-----------------');
-      console.dir(lod.DE_PLZ.map);
-      console.log('data.DE_PLZ.map-----------------');
-      console.dir(data.DE_PLZ.map);
-        should(lod.DE_PLZ.map).match(data.DE_PLZ.map);
-        should(lod.DE_PLZ.list).match(data.DE_PLZ.list);
+      should(lod.DE_PLZ.map).match(data.DE_PLZ.map);
+      should(lod.DE_PLZ.list).match(data.DE_PLZ.list);
     });
     it('should read the Data DE_AGS',function() {
-      console.log('lod.DE_AGS.map-----------------');
-      console.dir(lod.DE_AGS.map);
-      console.log('data.DE_AGS.map-----------------');
-      console.dir(data.DE_AGS.map);
-        should(lod.DE_AGS.map).match(data.DE_AGS.map);
-        should(lod.DE_AGS.list).match(data.DE_AGS.list);
+      should(lod.DE_AGS.map).match(data.DE_AGS.map);
+      should(lod.DE_AGS.list).match(data.DE_AGS.list);
     });
     it('should read the Data AT_AGS',function() {
-        should(lod.AT_AGS.map).match(data.AT_AGS.map);
-        should(lod.AT_AGS.list).match(data.AT_AGS.list);
+      should(lod.AT_AGS.map).match(data.AT_AGS.map);
+      should(lod.AT_AGS.list).match(data.AT_AGS.list);
     });
   });
 });
