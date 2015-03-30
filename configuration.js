@@ -41,10 +41,14 @@ function getPostgresDBString() {
     userString = configuration.postgres.username + ':'
                  + configuration.postgres.password +'@';
   }
-  var mongodbConnectStr ='postgres://'
+  var connectStr ='postgres://'
              + userString
              + configuration.postgres.database;
-  return mongodbConnectStr;
+  if ((typeof(configuration.postgres.connectstr)!='undefined' ) &&
+      (configuration.postgres.connectstr != '' ) {
+        connectStr = configuration.postgres.connectstr.
+      }
+  return connectStr;
 }
 
 var initialisedDB = 0;
