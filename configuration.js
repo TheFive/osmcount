@@ -46,7 +46,7 @@ function getPostgresDBString() {
              + configuration.postgres.database;
   if ((typeof(configuration.postgres.connectstr)!='undefined' ) &&
       (configuration.postgres.connectstr != '' )) {
-        connectStr = configuration.postgres.connectstr.
+        connectStr = configuration.postgres.connectstr;
       }
   return connectStr;
 }
