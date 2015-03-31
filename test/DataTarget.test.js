@@ -9,19 +9,18 @@ var DataTarget = require('../model/DataTarget.js')
 
 
 describe('DataTarget', function() {
-  describe('import',function(bddone) {
-
-    beforeEach(function(bddone) {
-      DataTarget.initialise('postgres');
-      async.series([
-        DataTarget.dropTable,
-        DataTarget.createTable
-      ],function(err) {
-        if (err) console.dir(err);
-        should.equal(null,err);
-        bddone();
-      });
+  beforeEach(function(bddone) {
+    DataTarget.initialise('postgres');
+    async.series([
+      DataTarget.dropTable,
+      DataTarget.createTable
+    ],function(err) {
+      if (err) console.dir(err);
+      should.equal(null,err);
+      bddone();
     });
+  });
+  describe('import',function(bddone) {
     it('should import data',function(bddone){
       var filename = path.resolve(__dirname, "DataTarget.test.json");
       //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
@@ -54,4 +53,21 @@ describe('DataTarget', function() {
       });
     });
   })
+  describe('aggregate',function(bddone) {
+    it('aggretate two values',function(bddone){
+      var filename = path.resolve(__dirname, "DataTarget.test.json");
+      //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
+      DataTarget.import(filename,function(err,data){
+        should.not.exist(err);
+        should.equal(data,"Datensätze: 2");
+        var param = {measure:"Apotheke",lengthOfKey:1};
+        DataTarget.aggregate(param,function(err,data){
+          should.not.exist(err);
+          should(data.length).equal(1);
+          should(data[0].vorgabe).equal(0.257);
+          bddone();
+        })
+      });
+    });
+  });
 })
