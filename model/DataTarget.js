@@ -63,11 +63,7 @@ function insertDataToPostgres (data,cb) {
   debug('Connect String:'+config.postgresConnectStr);
   pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
     if (err) {
-      if (cb) {
-        cb(err);
-      } else {
-        throw (err);
-      }
+      cb(err);
       return;
     }
     var result = "Datensätze: "+data.length;
