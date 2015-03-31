@@ -6,9 +6,10 @@ var should = require('should');
 var ProgressBar = require('progress');
 
 
-var util   = require('../util.js');
-var config    = require('../configuration.js');
-var importCSV = require('../ImportCSV.js');
+var util           = require('../util.js');
+var config         = require('../configuration.js');
+var importCSV      = require('../ImportCSV.js');
+var postgresMapper = require('../model/postgresMapper.js')
 
 var databaseType = "postgres";
 
@@ -379,43 +380,19 @@ exports.save = function(data,cb) {
   }
 }
 
+var map={tableName:'datacollection',
+         regex:{schluessel:true},
+         keys:{
+          schluessel:'key',
+          source:'source',
+          measure:'measure',
+          timestamp:'stamp',
+          count:'count'
+         }}
+
 function countPostgresDB(query,cb) {
   debug('countPostgresDB');
-  var whereClause = ""
-  if (typeof(query.schluessel)!= 'undefined') {
-    whereClause = "key ~ '"+query.schluessel+"'";
-  } 
-  if (typeof(query.source) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "source = '"+query.source+"'";
-  }
-  if (typeof(query.measure) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "measure = '"+query.measure+"'";
-  }
-  if (typeof(query.timestamp) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "stamp = '"+query.timestamp+"'";
-  }
- if (typeof(query.count) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "count = "+query.count;
-  }
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    client.query("select count(*) from datacollection where "+whereClause,
-                                function(err,result) {
-      
-      if (!err) {
-        var count = result.rows[0].count;
-        cb (null,count);
-        pgdone();
-        return;
-      }
-      cb(err,null);
-      pgdone();
-      return;
-    })
-  })
+  postgresMapper.count(map,query,cb);
 
 }
 

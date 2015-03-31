@@ -77,6 +77,14 @@ describe('WorkerQueue', function() {
         bddone);
       });
     });
+    it('should count all', function (bddone) {
+      WorkerQueue.count({},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(6);
+        bddone();
+      });
+    })
     it('should count measure', function (bddone) {
       WorkerQueue.count({measure:'testa'},function(err,data) {
         should.not.exist(err);

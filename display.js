@@ -11,6 +11,9 @@ var htmlPage     = require('./htmlPage.js');
 
 var wochenaufgabe = require('./wochenaufgabe.js');
 
+var DataCollection = require('./model/DataCollection.js');
+var DataTarget     = require('./model/DataTarget.js');
+var WorkerQueue    = require('./model/WorkerQueue.js');
 
 
 
@@ -18,19 +21,21 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 
 exports.count = function(req,res){
 	debug("exports.count");
-    var db = res.db;
-    var collectionName = 'DataCollection';
-     if(typeof(req.param("collection"))!='undefined') {
-     	collectionName = req.param("collection");
-     }
+    var container;
+    var collectionName = req.param("collection");
+    switch(collectionName) {
+        case "DataCollection":container = DataCollection;break;
+        case "DataTarget":    container = DataTarget;break;
+        case "WorkerQueue":   container = WorkerQueue;break;
+        default: container = DataCollection;collectionName = "DataCollection";
+    }
 
     // Fetch the collection test
-    var collection = db.collection(collectionName);
-    collection.count(function handleCollectionCount(err, count) {
+    container.count({},function handleCollectionCount(err, count) {
     	debug("handleCollectionCount");
     	res.set('Content-Type', 'text/html');
     	if(err) {
-    		res.end(err);
+    		res.end(JSON.stringify(err));
     	} else {
     		res.end("There are " + count + " records in Collection "+ collectionName);
     	}

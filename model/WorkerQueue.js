@@ -6,9 +6,10 @@ var should = require('should');
 var ProgressBar = require('progress');
 
 
-var config    = require('../configuration.js');
-var importCSV = require('../ImportCSV.js');
-var util      = require('../util.js');
+var config         = require('../configuration.js');
+var importCSV      = require('../ImportCSV.js');
+var util           = require('../util.js');
+var postgresMapper = require('../model/postgresMapper.js');
 
 var databaseType = "postgres";
 
@@ -205,54 +206,22 @@ function countMongoDB(query,cb) {
   collection.count(query, cb);
 }
 
+
+var map= {
+  tableName:"workerqueue",
+  regex:{schluessel:true},
+  keys: {schluessel:"key",
+         source:'source',
+         measure:'measure',
+         status:'status',
+         type:'type',
+         timestamp:'stamp',
+         id:'id'
+       }
+}
 function countPostgresDB(query,cb) {
   debug('countPostgresDB');
-
-
-  var whereClause = ""
-  if (typeof(query.schluessel)!= 'undefined') {
-    whereClause = "key ~ '"+query.schluessel+"'";
-  }
-  if (typeof(query.source) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "source = '"+query.source+"'";
-  }
-  if (typeof(query.measure) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "measure = '"+query.measure+"'";
-  }
-  if (typeof(query.status) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "status = '"+query.status+"'";
-  }
-  if (typeof(query.type) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "type = '"+query.type+"'";
-  }
-  if (typeof(query.timestamp) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "stamp = '"+query.timestamp+"'";
-  }
-  if (typeof(query.id) != 'undefined') {
-    if (whereClause != '') whereClause += " and ";
-    whereClause += "id = '"+query.id+"'";
-  }
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      cb(err,null);
-      pgdone();
-      return;
-    }
-    client.query("select count(*) from workerqueue where "+whereClause,
-                                function(err,result) {
-      should.not.exist(err);
-      var count = result.rows[0].count;
-      cb (null,count);
-      pgdone();
-      return;
-    })
-  })
-
+  postgresMapper.count(map,query,cb);
 }
 
 exports.count = function(query,cb) {

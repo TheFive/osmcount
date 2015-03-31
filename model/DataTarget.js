@@ -8,6 +8,8 @@ var ProgressBar = require('progress');
 
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
+var postgresMapper = require('../model/postgresMapper.js')
+
 
 var databaseType = "postgres";
 
@@ -17,6 +19,19 @@ var postgresDB = {
       name text, sourceText text, sourceLink text, id bigserial NOT NULL, \
       CONSTRAINT id_datatarget PRIMARY KEY (id) )"
 };
+
+var map= {
+  tableName:"datatarget",
+  regex:{schluessel:true},
+  keys: {schluessel:"key",
+         measure:'measure',
+         target: 'ApothekenVorgabe',
+         name: 'name',
+         source:'sourceText',
+         sourceLink:'sourceLink',
+         id:'id'
+       }
+}
 
 exports.dropTable = function(cb) {
   debug('exports.dropTable');
@@ -260,5 +275,33 @@ exports.aggregate = function(param,cb) {
   }
   if (databaseType == "postgres") {
     aggregatePostgresDB(param,cb);
+  }
+}
+
+function countMongoDB(query,cb) {
+  debug('countMongoDB');
+  var db = config.getMongoDB();
+  var collectionName = 'DataTarget';
+
+  // Fetch the collection test
+  var collection = db.collection(collectionName);
+  collection.count(query, cb);
+}
+
+
+
+function countPostgresDB(query,cb) {
+  debug('countPostgresDB');
+  postgresMapper.count(map,query,cb);
+
+}
+
+exports.count = function(query,cb) {
+  debug('count');
+  if (databaseType == 'mongo') {
+   countMongoDB(query,cb);
+  }
+  if (databaseType == "postgres") {
+    countPostgresDB (query,cb);
   }
 }

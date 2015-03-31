@@ -199,6 +199,14 @@ describe('DataCollection', function() {
         bddone);
       });
     });
+    it('should count all', function (bddone) {
+      DataCollection.count({},function(err,data) {
+        should.not.exist(err);
+        data = parseInt(data);
+        should(data).equal(6);
+        bddone();
+      });
+    })
     it('should count measure', function (bddone) {
       DataCollection.count({measure:'testa'},function(err,data) {
         should.not.exist(err);

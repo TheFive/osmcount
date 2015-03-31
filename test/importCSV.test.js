@@ -207,6 +207,8 @@ describe('importCSV', function() {
         })
       });
       it('should handle empty Files' ,function (done) {
+        // Unlink looks to be to fast, so write something and then an empty file.
+        fs.writeFileSync(filename,"something");
         fs.writeFileSync(filename,"");
         var a = importCSV.readCSVPostgresDB(filename,{name:"",count:0},function(err,result) {
           should.equal(err,"empty file");
