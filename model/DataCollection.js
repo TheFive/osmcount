@@ -25,9 +25,14 @@ var postgresDB = {
 exports.dropTable = function(cb) {
   debug('exports.dropTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
     client.query("DROP TABLE IF EXISTS DataCollection",function(err){
       debug("DataCollection Table Dropped");
-      cb(err)
+      cb(null)
     });
 
     pgdone();
@@ -37,6 +42,11 @@ exports.dropTable = function(cb) {
 exports.createTable = function(cb) {
   debug('exports.createTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
     client.query(postgresDB.createTableString,function(err) {
       debug('DataCollection Table Created');
       cb(err);
@@ -47,11 +57,16 @@ exports.createTable = function(cb) {
 
 exports.initialise = function initialise(dbType,callback) {
   debug('exports.initialise');
-  if (dbType) {
+
+  if (typeof(dbType) != 'function') {
     databaseType = dbType;
   }
   else {
     databaseType = config.getDatabaseType();
+    callback = dbType;
+  }
+  if (databaseType == 'postgres') {
+    postgresMapper.invertMap(map);
   }
   if (callback) callback();
 }
@@ -413,6 +428,33 @@ exports.count = function(query,cb) {
   }
   if (databaseType == "postgres") {
     countPostgresDB(query,cb);
+  }
+}
+
+function findMongoDB(query,options,cb) {
+  debug('findMongoDB');
+  var db = config.getMongoDB();
+  var collectionName = 'DataCollection';
+
+  // Fetch the collection test
+  var collection = db.collection(collectionName);
+  collection.find(query,options).toArray(cb);
+}
+
+
+
+function findPostgresDB(query,options,cb) {
+  debug('findPostgresDB');
+  postgresMapper.find(map,query,options,cb);
+}
+
+exports.find = function(query,options,cb) {
+  debug('find');
+  if (databaseType == 'mongo') {
+   findMongoDB(query,options,cb);
+  }
+  if (databaseType == "postgres") {
+    findPostgresDB (query,options,cb);
   }
 }
 

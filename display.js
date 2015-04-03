@@ -5,7 +5,6 @@ var debug    = require('debug')('display');
 var path     = require('path');
 var fs       = require("fs");
 var async    = require('async');
-var ObjectID = require('mongodb').ObjectID;
 var util     = require('./util.js');
 var htmlPage     = require('./htmlPage.js');
 
@@ -67,13 +66,14 @@ exports.wochenaufgabe = function(req,res) {
 
 
 function listValuesTable(keyname,key,object) {
-	if (key == '_id') return "";
+    if (key == '_id') return "";
+    if (key == 'id') return "";
 	if (object instanceof Date) {
 		return "<tr><td>"+keyname+"</td><td>"+object.toString()+"</td></tr>";
 	}
-	if (object instanceof ObjectID) {
+/*	if (object instanceof ObjectID) {
 		return "<tr><td>"+keyname+"</td><td>"+object+"</td></tr>";
-	}
+	}*/
 	if (typeof(object) == 'object') {
 		var result = "";
 		for (k in object) {
@@ -97,9 +97,14 @@ exports.object = function(req,res) {
 	var collectionName = req.params["collection"];
 	var objid = req.params["id"];
 	//console.log(objid);
-	var object=ObjectID(objid);
+	var collection;
+    switch(collectionName) {
+        case "DataTarget": collection=DataTarget;break;
+        case "DataCollection": collection = DataCollection;break;
+        case "WorkerQueue": collection = WorkerQueue;break;
+    }
 
-	db.collection(collectionName).findOne ({_id:object},function handleFindOneObject(err, obj) {
+	collection.find ({id:objid},{},function handleFindOneObject(err, obj) {
 		debug("handleFindOneObject");
 		if (err) {
 			var text = "Display Object "+ objid + " in Collection "+collectionName;
@@ -258,9 +263,9 @@ exports.query=function(req,res) {
     var queryMenu = "";
     var queryDefined = false;
     switch (req.params.query) {
-    	case "DataTarget": collection = db.collection('DataTarget');
+    	case "DataTarget": collection = DataTarget;
     						collectionName = "DataTarget";
-    	               columns = ["_id",
+    	               columns = ["id",
     	                          "measure",
     	                          "schluessel",
     	                          "name",
@@ -272,11 +277,11 @@ exports.query=function(req,res) {
     	               	query.measure = req.query.measure;
     	               }
     	               if (typeof(req.query.schluessel) != 'undefined'){
-    	               	query.schluessel = {$regex: "^"+req.query.schluessel};
+    	               	query.schluessel = req.query.schluessel;
     	               }
     	               options={"sort":"schluessel"}
     	               break;
-    	case "WorkerQueue": collection = db.collection('WorkerQueue');
+    	case "WorkerQueue": collection = WorkerQueue;
     						collectionName = "WorkerQueue";
     	               columns = ["_id",
     	                          "type",
@@ -302,7 +307,7 @@ exports.query=function(req,res) {
 
      	               options={"sort":"exectime"}
     	               break;
-    	case "pharmacy": collection = db.collection('POI');
+    	case "pharmacy": //collection = POI;
     	                 collectionName = "POI";
     	                  columns = ["Links",
     	                             ["name","tags","name"],
@@ -382,15 +387,15 @@ exports.query=function(req,res) {
 
     	                  queryMenu = '<form>'+queryMenu+'<input type="submit"></form>';
     	                  break;
-    	 default:collection = db.collection('WorkerQueue');
+    	 default:collection = WorkerQueue;
     	               columns = ["_id","type","status","measure"];
     	               query = {type:"insert"};
     }
     if (collectionName != "POI" || queryDefined) {
-    collection.find(query,options).toArray(function(err,data) {
+    collection.find(query,options,function(err,data) {
     	if (err) {
     		res.set('Content-Type', 'text/html');
-			res.end(JSON.stringify(err)+JSON.stringify(query));
+			res.end("Fehler beim Find: \n"+JSON.stringify(err)+JSON.stringify(query));
 
  	   		console.log("Error: "+err);
  	   		return;
@@ -409,9 +414,9 @@ exports.query=function(req,res) {
     	for (i = 0;i<data.length;i++) {
     	  tablerow = "";
     	  d = data [i];
-    	  tablerow = '<td> <a href="/object/'+collectionName+'/'+d._id+'.html">'+d._id+'</a></td>';
+    	  tablerow = '<td> <a href="/object/'+collectionName+'/'+d.id+'.html">'+d.id+'</a></td>';
     	  if (req.params.query == "pharmacy") {
-    	    link1 = '<a href="/object/'+collectionName+'/'+d._id+'.html">Data</a>';
+    	    link1 = '<a href="/object/'+collectionName+'/'+d.id+'.html">Data</a>';
     	    link2 = '<a href="https://www.openstreetmap.org/'+d.type+'/'+d.id+'">OSM</a>';
     	     tablerow = '<td>'+link1+"  "+ link2+'</td>';
     	  }

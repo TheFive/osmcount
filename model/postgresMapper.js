@@ -5,21 +5,35 @@ var should = require('should');
 
 var config = require('../configuration.js');
 
+exports.invertMap= function invertMap(map) {
+	debug('invertMap');
+  map.invertKeys= {};
+  for (k in map.keys) {
+    var pgkey = map.keys[k].toLowerCase();
+    should.not.exist(map.invertKeys[pgkey]);
+    map.invertKeys[pgkey]=k;
+  }
+}
 
-
-exports.count = function(map,query,cb) {
-  debug('count');
+function createWhereClause(map,query) {
+  debug('createWhereClause');
   var whereClause = ""
   for (var k in map.keys) {
-  	if (typeof(query[k])!='undefined'){
-  		var op = '=';
-  		if (map.regex[k] == true) op = '~';
-  		if (whereClause != '') whereClause += " and ";
-  		whereClause += map.keys[k]+' '+op+" '"+query[k]+"'";
-  	}
+    if (typeof(query[k])!='undefined'){
+      var op = '=';
+      if (map.regex[k] == true) op = '~';
+      if (whereClause != '') whereClause += " and ";
+      whereClause += map.keys[k]+' '+op+" '"+query[k]+"'";
+    }
   }
   debug("generated where clause: %s",whereClause);
   if(whereClause != '') whereClause = "where "+whereClause;
+  return whereClause;
+}
+
+exports.count = function count(map,query,cb) {
+  debug('count');
+  var whereClause = createWhereClause(map,query);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
       cb(err,null);
@@ -33,6 +47,52 @@ exports.count = function(map,query,cb) {
       cb (null,count);
       pgdone();
       return;
+    })
+  })
+}
+
+function createFieldList(map) {
+  debug('createFieldList');
+  should.exist(map.invertKeys);
+  var fieldList = '';
+  for (var k in map.invertKeys) {
+    if (fieldList !='') fieldList += ",";
+    fieldList += k;
+  } 
+  debug('FieldList %s',fieldList);
+  return fieldList;
+}
+
+exports.find = function find(map,query,options,cb) {
+  debug('find');
+  var whereClause = createWhereClause(map,query);
+  var fieldList = createFieldList(map);
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err,null);
+      pgdone();
+      return;
+    }
+    var result = [];
+    var query = client.query("select "+fieldList+" from "+map.tableName+ ' '+whereClause);
+    query.on('row',function(row){
+      var json = {};
+      for (k in map.invertKeys) {
+        json[map.invertKeys[k]] = row[k];
+      }
+      console.log("convertet JSON:");
+      console.dir(json);
+      console.log("Original Row");
+      console.dir(row);
+      result.push(json);
+    })
+    query.on('end',function(){
+      cb(null,result);
+      pgdone();
+    })
+    query.on('error',function(err){
+      cb(err,null);
+      pgdone();
     })
   })
 }

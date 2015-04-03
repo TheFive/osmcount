@@ -9,6 +9,9 @@ var config           = require('./configuration.js');
 var queue            = require('./QueueWorker.js');
 var loadDataFromDB   = require('./model/LoadDataFromDB.js');
 var loadOverpassData = require('./model/LoadOverpassData.js')
+var DataTarget       = require('./model/DataTarget.js')
+var DataCollection   = require('./model/DataCollection.js')
+var WorkerQueue      = require('./model/WorkerQueue.js')
 var display          = require('./display.js');
 var util             = require('./util.js');
 var plotlyexport     = require('./plotlyexport.js');
@@ -30,6 +33,9 @@ async.auto( {
 		config: config.initialise,
 		mongodb: ["config",config.initialiseMongoDB],
         postgresdb: ["config",config.initialisePostgresDB],
+        datatarget: ["postgresdb",DataTarget.initialise],
+        workerqueue: ["postgresdb",WorkerQueue.initialise],
+        datacollection: ["postgresdb",DataCollection.initialise],
 		dbdata:  ["mongodb", loadDataFromDB.initialise],
 		startQueue: ["dbdata",queue.startQueue]
 

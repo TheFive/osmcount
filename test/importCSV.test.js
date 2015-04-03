@@ -110,17 +110,25 @@ describe('importCSV', function() {
     })
     describe('readCSVMongoDB',function() {
       var db;
-      before(function(done) {
+      before(function(bddone) {
         configuration.initialiseMongoDB( function () {
-          db = configuration.getMongoDB();
-          var c = (db.collection("DataCollection"));
-          if (c) {
-            c.drop(function(err,cb) {
-            db.createCollection("DataCollection",function(err,data) {
-              done();
-            });
-            });
-          } else done();
+          var db;
+          async.series(
+            [function(done) {
+              db = configuration.getMongoDB();
+              should.exist(db);
+              var c = (db.collection("DataCollection"));
+              if (!c) {
+                done();
+                return;
+              }
+              c.drop(done);
+            }, function(done) {
+                db.createCollection("DataCollection",done);
+              }
+            ],
+            function(err){bddone(err)}
+          );
         });
       });
       it('should fail with no filename' , function(done) {

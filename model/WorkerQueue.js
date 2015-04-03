@@ -22,6 +22,22 @@ var postgresDB = {
         ); '
 }
 
+exports.initialise = function initialise(dbType,callback) {
+  debug('exports.initialise');
+
+  if (typeof(dbType) != 'function') {
+    databaseType = dbType;
+  }
+  else {
+    databaseType = config.getDatabaseType();
+    callback = dbType;
+  }
+  if (databaseType == 'postgres') {
+    postgresMapper.invertMap(map);
+  }
+  if (callback) callback();
+}
+
 exports.dropTable = function(cb) {
   debug('exports.dropTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
@@ -56,17 +72,7 @@ exports.createTable = function(cb) {
   })
 }
 
-exports.initialise = function initialise(dbType,callback) {
-  debug('exports.initialise');
-  if (dbType) {
-    databaseType = dbType;
-  }
-  else {
-    databaseType = config.getDatabaseType();
-  }
-  debug('Database Type is now %s',databaseType);
-  if (callback) callback();
-}
+
 
 exports.importCSV =function(filename,defJson,cb) {
   debug('exports.importCSV');
@@ -362,5 +368,32 @@ exports.saveTask = function(task,cb) {
   }
   if (databaseType == 'postgres') {
     saveTaskPostgresDB(task,cb);
+  }
+}
+
+function findMongoDB(query,options,cb) {
+  debug('findMongoDB');
+  var db = config.getMongoDB();
+  var collectionName = 'WorkerQueue';
+
+  // Fetch the collection test
+  var collection = db.collection(collectionName);
+  collection.find(query,options).toArray(cb);
+}
+
+
+
+function findPostgresDB(query,options,cb) {
+  debug('findPostgresDB');
+  postgresMapper.find(map,query,options,cb);
+}
+
+exports.find = function(query,options,cb) {
+  debug('find');
+  if (databaseType == 'mongo') {
+   findMongoDB(query,options,cb);
+  }
+  if (databaseType == "postgres") {
+    findPostgresDB (query,options,cb);
   }
 }

@@ -34,6 +34,11 @@ var postgresDB = {
 exports.dropTable = function(cb) {
   debug('exports.dropTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
     client.query("DROP TABLE IF EXISTS osmdata",function(err){
       debug("OSMData Table Dropped");
       cb(err)
@@ -46,6 +51,11 @@ exports.dropTable = function(cb) {
 exports.createTable = function(cb) {
   debug('exports.createTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
     client.query(postgresDB.createTableString,function(err) {
       debug('OSMDat Table Created');
       cb(err);

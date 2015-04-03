@@ -25,10 +25,10 @@ var map= {
   regex:{schluessel:true},
   keys: {schluessel:"key",
          measure:'measure',
-         target: 'ApothekenVorgabe',
+         apothekenVorgabe: 'target',
          name: 'name',
-         source:'sourceText',
-         sourceLink:'sourceLink',
+         source:'sourcetext',
+         sourceLink:'sourcelink',
          id:'id'
        }
 }
@@ -36,6 +36,11 @@ var map= {
 exports.dropTable = function(cb) {
   debug('exports.dropTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
     client.query("DROP TABLE IF EXISTS datatarget",function(err){
       debug("datatarget Table Dropped");
       cb(err)
@@ -48,6 +53,11 @@ exports.dropTable = function(cb) {
 exports.createTable = function(cb) {
   debug('exports.createTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
     client.query(postgresDB.createTableString,function(err) {
       debug('datatarget Table Created');
       cb(err);
@@ -58,11 +68,16 @@ exports.createTable = function(cb) {
 
 exports.initialise = function initialise(dbType,callback) {
   debug('exports.initialise');
-  if (dbType) {
+
+  if (typeof(dbType) != 'function') {
     databaseType = dbType;
   }
   else {
     databaseType = config.getDatabaseType();
+    callback = dbType;
+  }
+  if (databaseType == 'postgres') {
+    postgresMapper.invertMap(map);
   }
   if (callback) callback();
 }
@@ -305,3 +320,32 @@ exports.count = function(query,cb) {
     countPostgresDB (query,cb);
   }
 }
+
+function findMongoDB(query,options,cb) {
+  debug('findMongoDB');
+  var db = config.getMongoDB();
+  var collectionName = 'DataTarget';
+
+  // Fetch the collection test
+  var collection = db.collection(collectionName);
+  collection.find(query,options).toArray(cb);
+}
+
+
+
+function findPostgresDB(query,options,cb) {
+  debug('findPostgresDB');
+  postgresMapper.find(map,query,options,cb);
+}
+
+exports.find = function(query,options,cb) {
+  debug('find');
+  if (databaseType == 'mongo') {
+   findMongoDB(query,options,cb);
+  }
+  if (databaseType == "postgres") {
+    findPostgresDB (query,options,cb);
+  }
+}
+
+
