@@ -3,7 +3,9 @@ var fs    = require('fs');
 var pg    = require('pg');
 var async = require('async');
 
+var dbHelper = require('./dbHelper.js');
 var importCSV = require('../ImportCSV.js');
+
 var configuration = require('../configuration.js');
 var DataCollection=require('../model/DataCollection.js')
 
@@ -112,19 +114,13 @@ describe('importCSV', function() {
       var db;
       before(function(bddone) {
         configuration.initialiseMongoDB( function () {
-          var db;
+          var db=configuration.getMongoDB();
+          should.exist(db);
           async.series(
             [function(done) {
-              db = configuration.getMongoDB();
-              should.exist(db);
-              var c = (db.collection("DataCollection"));
-              if (!c) {
-                done();
-                return;
-              }
-              c.drop(done);
+              dbHelper.dropCollection(db,"DataCollection",done);
             }, function(done) {
-                db.createCollection("DataCollection",done);
+                dbHelper.createCollection(db,"DataCollection",done);
               }
             ],
             function(err){bddone(err)}
