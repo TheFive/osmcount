@@ -122,7 +122,7 @@ function insertDataToPostgres (data,cb) {
         debug('Error after Insert'+err);
       })
     }
-    async.each(data,insertData,function(err) {pgdone();cb(err,result);})
+    async.eachLimit(data,1,insertData,function(err) {pgdone();cb(err,result);})
   })
 
 }
