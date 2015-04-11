@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/TheFive/osmcount",
   "dependencies": {
+    "JSONStream": "^0.10.0",
     "async": "^0.9.0",
     "codecov.io": "0.0.8",
     "commander": "^2.7.1",

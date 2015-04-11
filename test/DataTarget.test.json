@@ -1,4 +1,8 @@
-[
+{
+    "collection":"DataTarget",
+    "version":1,
+    "count":2
+}
 {
     "source" : "Schätzung ABDA",
     "measure" : "Apotheke",
@@ -6,7 +10,7 @@
     "schluessel" : "01053079",
     "name" : "Labenz",
     "linkSource" : ""
-},
+}
 
 {
     "source" : "Schätzung ABDA",
@@ -15,4 +19,4 @@
     "schluessel" : "01053080",
     "name" : "Langenlehsten",
     "linkSource" : ""
-}]
+}

@@ -4,6 +4,9 @@ var fs     = require('fs');
 var async  = require('async');
 var should = require('should');
 var ProgressBar = require('progress');
+var JSONStream  = require('JSONStream');
+var  es         = require('event-stream');
+
 
 
 var config    = require('../configuration.js');
@@ -88,7 +91,7 @@ exports.importCSV =function(filename,defJson,cb) {
   cb("No importCSV implemented",null);
 }
 
-function insertDataToPostgres (data,cb) {
+function insertStreamToPostgres (internal,stream,cb) {
   debug('insertDataToPostgres');
   debug('Connect String:'+config.postgresConnectStr);
   pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
@@ -96,33 +99,62 @@ function insertDataToPostgres (data,cb) {
       cb(err);
       return;
     }
-    var result = "Datensätze: "+data.length;
-    debug("Start insert "+ data.length + " datasets");
+
+    var counter = 0;
     var bar;
-    if (data.length>100) {
-      bar = new ProgressBar('Importing DataTarget: [:bar] :percent :total :etas', { total: data.length });
-    }
+    var versionDefined = false;
+
     function insertData(item,callback){
-      debug('insertDataToPostgres->insertData');
+      debug('insertStreamToPostgres->insertData');
+      if (!internal) {
+        if (typeof(item.collection) == 'string') {
+          if (item.collection == "DataTarget") {
+            should(item.version).equal(1,"Import Version is not equal 1");
+            versionDefined = true;
+            bar = new ProgressBar('Importing DataTarget: [:bar] :percent :current :total :etas', { total: item.count });
+            callback();
+            return;
+          }
+        }
+        should.ok(versionDefined,"No Version Number and FileType in File");     
+      }
       var key = item.schluessel;
       var measure = item.measure;
       var target = item.apothekenVorgabe;
       var name = item.name;
       var sourceText = item.source;
       var sourceLink = item.linkSource;
-      client.query("INSERT into datatarget (key,measure,target,name,sourceText,sourceLink) VALUES($1,$2,$3,$4,$5,$6)",
-                          [key,measure,target,name,sourceText,sourceLink,], function(err,result) {
-        if (err) {
-          err.item = item;
-        }
-        if (bar) bar.tick();
-        callback(err);
+      var query = client.query("INSERT into datatarget (key,measure,target,name,sourceText,sourceLink) VALUES($1,$2,$3,$4,$5,$6)",
+                          [key,measure,target,name,sourceText,sourceLink,]);
+      query.on("error",function(err){
         debug('Error after Insert'+err);
+        err.item = item;
+        callback(err);
+        cb(err);
       })
-    }
-    async.each(data,insertData,function(err) {
-      pgdone();
-      cb(err,result);
+      query.on("end",function(){        
+        counter = counter +1;
+        debug("query.end was called");
+        if (bar) bar.tick();
+        callback();
+      })
+      // Undocumneted ? 
+      // Create Backpressure to reduce write speed...
+      return false;
+   }
+
+    var pipe = stream.pipe(es.map(insertData));
+
+    stream.on('end',function() {
+      debug("parser.on('end')")
+      //insertData({"result":result},cb)
+
+      cb(null,"Datensätze: "+counter);
+    })
+    stream.on('error',function(err) {
+      debug("parser.on('error);")
+
+      cb(err);
     })
   })
 
@@ -166,19 +198,30 @@ function exportMongoDB(filename,cb) {
   })
 }
 
+var getStream = function (filename) {
+    var stream = fs.createReadStream(filename, {encoding: 'utf8'});
+        return stream;
+};
+
+
+
+function importPostgresDBStream(filename,cb) {
+  debug('importPostgresDBStream');
+
+  var stream = getStream(filename);
+  var parser = JSONStream.parse();
+  
+
+
+  insertStreamToPostgres(false,stream.pipe(parser),cb);
+}
+
 function importPostgresDB(filename,cb) {
   debug('importPostgresDB')
-  debug('Filename %s',filename);
-  try {
-    data = fs.readFileSync(filename);
-  }
-  catch (err) {
-    cb(err,null);
-    return;
-  }
-  newData = JSON.parse(data);
-  insertDataToPostgres(newData,cb);
-
+/*  var data = fs.readFileSync(filename);
+  var newData = JSON.parse(data);
+  insertDataToPostgres(newData,cb);*/
+  importPostgresDBStream(filename,cb);
 }
 
 exports.import = function(filename,cb) {
@@ -197,10 +240,15 @@ exports.export = function(filename,cb){
 exports.insertData = function(data,cb) {
   debug('exports.insertData');
   if (databaseType == "mongo") {
-    assert.equal("mongodb not implemented yet",null);
+    should.exist(null,"mongodb not implemented yet");
   }
   if (databaseType == "postgres") {
-    insertDataToPostgres(data,cb);
+
+    // Turn Data into a stream
+    var reader = es.readArray(data);
+
+    // use Stream Function to put data to Postgres
+    insertStreamToPostgres(true,reader,cb);
   }
 }
 

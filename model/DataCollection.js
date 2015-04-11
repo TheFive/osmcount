@@ -1,10 +1,12 @@
 var debug = require('debug')('DataCollection');
-var pg    = require('pg');
-var fs    = require('fs');
-var async = require('async');
-var should = require('should');
+var pg          = require('pg');
+var fs          = require('fs');
+var async       = require('async');
+var should      = require('should');
 var ProgressBar = require('progress');
 
+var JSONStream  = require('JSONStream');
+var  es         = require('event-stream');
 
 var util           = require('../util.js');
 var config         = require('../configuration.js');
@@ -82,8 +84,8 @@ exports.importCSV =function(filename,defJson,cb) {
   }
 }
 
-function insertDataToPostgres (data,cb) {
-  debug('insertDataToPostgres');
+function insertStreamToPostgres (internal,stream,cb) {
+  debug('insertStreamToPostgres');
   debug('Connect String:'+config.postgresConnectStr);
   pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
     if (err) {
@@ -94,14 +96,25 @@ function insertDataToPostgres (data,cb) {
       }
       return;
     }
-    var result = "Datensätze: "+data.length; 
+
+    var counter = 0;
     var bar;
-    if (data.length>100) {
-      bar = new ProgressBar('Importing DataCollection: [:bar] :percent :total :etas', { total: data.length });
-    }
+    var versionDefined = false;
 
     function insertData(item,callback){
-      debug('insertDataToPostgres->insertData');
+      debug('insertStreamToPostgres->insertData');
+      if (!internal) {
+        if (typeof(item.collection) == 'string') {
+          if (item.collection == "DataCollection") {
+            should(item.version).equal(1,"Import Version is not equal 1");
+            versionDefined = true;
+            bar = new ProgressBar('Importing DataCollection: [:bar] :percent :current :total :etas', { total: item.count });
+            callback();
+            return;
+          }
+        }
+        should.ok(versionDefined,"No Version Number and FileType in File");    
+      }
       var key = item.schluessel;
       var timestamp = item.timestamp;
       var measure = item.measure;
@@ -112,21 +125,56 @@ function insertDataToPostgres (data,cb) {
         if (existing != "" ) existing += ",";
         existing += '"' + k + '"=>"' +item.existing[k] + '"';
       }
-      client.query("INSERT into datacollection (key,stamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)",
-                          [key,timestamp,measure,count,missing,existing], function(err,result) {
-        if (err) {
-          err.item = item;
-        }
-        callback(err);
-        if (bar) bar.tick();
+      var query = client.query("INSERT into datacollection (key,stamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)",
+                          [key,timestamp,measure,count,missing,existing]);
+      query.on("error",function(err){
         debug('Error after Insert'+err);
+        err.item = item;
+        callback(err);
       })
+      query.on("end",function(){        
+        counter = counter +1;
+        debug("query.end was called");
+        if (bar) bar.tick();
+        callback();
+      })
+      // Undocumneted ? 
+      // Create Backpressure to reduce write speed...
+      return false;
     }
-    async.eachLimit(data,1,insertData,function(err) {pgdone();cb(err,result);})
+    var ls, mapper;
+    var parser;
+    if (internal) {
+      ls = stream.pipe(es.map(insertData));
+      parser = ls;
+      mapper = ls;
+    }
+    else {
+      parser = JSONStream.parse();
+
+      var mapper = es.map(insertData);
+      ls = stream.pipe(parser).pipe(mapper);
+    }
+    parser.on('end',function() {debug("parser.on('end');")})
+    stream.on('end',function() {debug("stream.on('end');")})
+    mapper.on('end',function() {debug("mapper.on('end');")})
+    ls.on('end',function() {
+      debug("ls.on('end')");
+
+      // Quickhack  because is called two times
+      if (!this.wasCalled) cb(null,"Datensätze: "+counter);
+      this.wasCalled = true;
+    })
+    ls.on('error',function(err) {
+      debug("ls.on('error);")
+
+      cb(err);
+    })
+
+
   })
 
 }
-
 
 function aggregatePostgresDB(param,cb) {
   debug('aggregatePostgresDB');
@@ -346,11 +394,35 @@ function exportMongoDB(filename,cb) {
   })
 }
 
+ 
+ 
+
+
+ 
+
+var getStream = function (filename) {
+    var stream = fs.createReadStream(filename, {encoding: 'utf8'});
+        return stream;
+};
+
+
+
+function importPostgresDBStream(filename,cb) {
+  debug('importPostgresDBStream');
+
+
+  var stream = getStream(filename);
+
+
+  insertStreamToPostgres(false,stream,cb);
+}
+
 function importPostgresDB(filename,cb) {
   debug('importPostgresDB')
-  var data = fs.readFileSync(filename);
+/*  var data = fs.readFileSync(filename);
   var newData = JSON.parse(data);
-  insertDataToPostgres(newData,cb);
+  insertDataToPostgres(newData,cb);*/
+  importPostgresDBStream(filename,cb);
 }
 
 exports.import = function(filename,cb) {
@@ -372,7 +444,12 @@ exports.insertData = function(data,cb) {
     should.exist(null,"mongodb not implemented yet");
   }
   if (databaseType == "postgres") {
-    insertDataToPostgres(data,cb);
+
+    // Turn Data into a stream
+    var reader = es.readArray(data);
+
+    // use Stream Function to put data to Postgres
+    insertStreamToPostgres(true,reader,cb);
   }
 }
 exports.saveMongoDB =function(data,cb) {

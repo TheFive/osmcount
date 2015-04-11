@@ -1,6 +1,7 @@
 var pg     =require('pg');
 var async  = require('async');
 var should = require('should');
+var path   = require('path');
 
 var config = require('../configuration.js');
 var DataCollection = require('../model/DataCollection.js')
@@ -19,6 +20,32 @@ describe('DataCollection', function() {
     pgclient.end();
     bddone();
   })
+  describe('import',function(bddone) {
+    it('should import data',function(bddone){
+      var filename = path.resolve(__dirname, "DataCollectionImport.test.json");
+      //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
+      DataCollection.import(filename,function(err,data){
+        if (err) console.dir(err);
+        should.not.exist(err,null);
+        should.equal(data,"Datensätze: 3");
+        bddone();
+      });
+    });
+    it('should handle connection String Problems.',function(bddone){
+      var cstr = config.postgresConnectStr;
+      config.postgresConnectStr = "murks";
+      var filename = path.resolve(__dirname, "DataCollectionImport.test.json");   
+      //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});      
+      DataCollection.import(filename,function(err,data){
+        should.exist(err);
+        // Do not forget to restore connection String
+        config.postgresConnectStr = cstr;
+        bddone();
+      });
+    });
+
+  });
+
   describe('aggregatePostgresDB',function() {
     beforeEach(function(bddone) {
       async.series([
