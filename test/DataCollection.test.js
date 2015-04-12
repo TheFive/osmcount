@@ -8,19 +8,30 @@ var DataCollection = require('../model/DataCollection.js')
 
 
 describe('DataCollection', function() {
-  var pgclient; 
   // Create one pgclient for all tests, and release it afterwards
+  var pgclient;
   before(function(bddone) {
     config.initialisePostgresDB();
     pgclient = new pg.Client(config.postgresConnectStr);
     pgclient.connect(bddone);
-
   });
   after(function(bddone) {
     pgclient.end();
     bddone();
   })
+
   describe('import',function(bddone) {
+    before(function(bddone) {
+      async.series([
+        function(done) {DataCollection.dropTable(done)},
+        function(done) {DataCollection.createTable(done)}
+      ],function(err) {
+        if (err) console.dir(err);
+        should.not.exist(err);
+        bddone();
+      });
+    });
+
     it('should import data',function(bddone){
       var filename = path.resolve(__dirname, "DataCollectionImport.test.json");
       //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
@@ -49,8 +60,8 @@ describe('DataCollection', function() {
   describe('aggregatePostgresDB',function() {
     beforeEach(function(bddone) {
       async.series([
-        DataCollection.dropTable,
-        DataCollection.createTable
+        function(done) {DataCollection.dropTable(done)},
+        function(done) {DataCollection.createTable(done)}
       ],function(err) {
         if (err) console.dir(err);
         should.not.exist(err);
@@ -197,8 +208,8 @@ describe('DataCollection', function() {
   describe('count', function() {
     before( function(bddone){
        async.series([
-        DataCollection.dropTable,
-        DataCollection.createTable
+        function(done) {DataCollection.dropTable(done)},
+        function(done) {DataCollection.createTable(done)}
       ],function(err) {
         if (err) console.dir(err);
         should.not.exist(err);

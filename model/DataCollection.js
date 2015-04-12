@@ -4,28 +4,28 @@ var fs          = require('fs');
 var async       = require('async');
 var should      = require('should');
 var ProgressBar = require('progress');
-
+  
 var JSONStream  = require('JSONStream');
 var  es         = require('event-stream');
 
 var util           = require('../util.js');
 var config         = require('../configuration.js');
 var importCSV      = require('../ImportCSV.js');
-var postgresMapper = require('../model/postgresMapper.js')
+var postgresMapper = require('../model/postgresMapper.js');
 
-var databaseType = "postgres";
 
-var postgresDB = {
-  createTableString :
-    'CREATE TABLE datacollection (measure text,key text,stamp timestamp with time zone, \
-          count integer,  missing hstore,existing hstore,source character(64)) \
-        WITH ( \
-          OIDS=FALSE \
-        ); '
+function DataCollectionClass() {
+  debug('DataCollectionClass');
+  this.databaseType = "postgres"; 
+  this.tableName = "DataCollection";
+  this.createTableString = 'CREATE TABLE datacollection (measure text,key text,stamp timestamp with time zone, \
+                  count integer,  missing hstore,existing hstore,source character(64)) WITH ( OIDS=FALSE ); ';
 }
 
-exports.dropTable = function(cb) {
-  debug('exports.dropTable');
+
+
+DataCollectionClass.prototype.dropTable = function(cb) {
+  debug('DataCollectionClass.prototype.dropTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
       cb(err);
@@ -34,54 +34,59 @@ exports.dropTable = function(cb) {
     }
     client.query("DROP TABLE IF EXISTS DataCollection",function(err){
       debug("DataCollection Table Dropped");
-      cb(null)
+      cb(null);
     });
 
     pgdone();
   })  
 }
 
-exports.createTable = function(cb) {
-  debug('exports.createTable');
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      cb(err);
-      pgdone();
-      return;
-    }
-    client.query(postgresDB.createTableString,function(err) {
-      debug('DataCollection Table Created');
-      cb(err);
-    });
-    pgdone();
-  })
-} 
+DataCollectionClass.prototype.createTable = postgresMapper.createTable;
 
-exports.initialise = function initialise(dbType,callback) {
-  debug('exports.initialise');
+
+DataCollectionClass.prototype.initialise = function initialise(dbType,callback) {
+  debug('DataCollectionClass.prototype.initialise');
 
   if (typeof(dbType) != 'function') {
-    databaseType = dbType;
+    this.databaseType = dbType;
   }
   else {
-    databaseType = config.getDatabaseType();
+    this.databaseType = config.getDatabaseType();
     callback = dbType;
   }
-  if (databaseType == 'postgres') {
+  if (this.databaseType == 'postgres') {
     postgresMapper.invertMap(map);
   }
   if (callback) callback();
 }
 
-exports.importCSV =function(filename,defJson,cb) {
-  debug('exports.importCSV');
-  if (databaseType == "mongo") {
-    importCSV.readCSVMongoDB(filename,defJson,cb);
-    return;
-  }
-  if (databaseType == "postgres") {
-    importCSV.readCSVPostgresDB(filename,defJson,cb);
-  }
+DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
+  debug('DataCollectionClass.prototype.importCSV');
+  var me = this;
+  async.auto({
+    loadData: function(callback) {
+      importCSV.importCSVFileToJSON(filename,defJson,callback);
+    },
+    mongo: ["loadData",function(callback,asyncresult) {
+      if (me.databaseType !="mongo") return callback(null,null);
+      var newData = asyncresult.loadData;
+      var db = config.getMongoDB();
+      var collection = db.collection('DataCollection');
+      result = "Datensätze: "+newData.length;
+      collection.insert(newData,{w:1},function (err,data){callback(err,result);});
+    }],
+    postgres: ["loadData",function(callback,asyncresult) {
+      if (me.databaseType != "postgres") return callback(null,null);
+      var newData = asyncresult.loadData;
+      me.insertData(newData,callback);
+    }]},
+    function(err,asyncresult) {
+      var result;
+      if (asyncresult.mongo!=null) result = asyncresult.mongo;
+      if (asyncresult.postgres!=null) result = asyncresult.postgres;
+      cb(err,result);
+    }
+  );
 }
 
 function insertStreamToPostgres (internal,stream,cb) {
@@ -348,13 +353,13 @@ lengthOfTime: lenghtOfTime for group clause,
 location:     key to filter on
 */
 
-exports.aggregate = function(param,cb) {
-  debug('exports.aggregate');
-  if (databaseType == "mongo") {
+DataCollectionClass.prototype.aggregate = function(param,cb) {
+  debug('DataCollectionClass.prototype.aggregate');
+  if (this.databaseType == "mongo") {
     aggregateMongoDB(param,cb);
     return;
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     aggregatePostgresDB(param,cb);
   }
 }
@@ -425,25 +430,25 @@ function importPostgresDB(filename,cb) {
   importPostgresDBStream(filename,cb);
 }
 
-exports.import = function(filename,cb) {
-  debug('exports.import')
-  should(databaseType).equal('postgres');
+DataCollectionClass.prototype.import = function(filename,cb) {
+  debug('DataCollectionClass.prototype.import')
+  should(this.databaseType).equal('postgres');
   importPostgresDB(filename,cb);
 }
 
 // Exports all DataCollection Objects to a JSON File
-exports.export = function(filename,cb){
-  debug('exports.export')
-  should(databaseType).equal('mongo');
+DataCollectionClass.prototype.export = function(filename,cb){
+  debug('DataCollectionClass.prototype.export')
+  should(this.databaseType).equal('mongo');
   exportMongoDB(filename,cb);
 }
 
-exports.insertData = function(data,cb) {
-  debug('exports.insertData');
-  if (databaseType == "mongo") {
+DataCollectionClass.prototype.insertData = function(data,cb) {
+  debug('DataCollectionClass.prototype.insertData');
+  if (this.databaseType == "mongo") {
     should.exist(null,"mongodb not implemented yet");
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
 
     // Turn Data into a stream
     var reader = es.readArray(data);
@@ -452,23 +457,23 @@ exports.insertData = function(data,cb) {
     insertStreamToPostgres(true,reader,cb);
   }
 }
-exports.saveMongoDB =function(data,cb) {
+DataCollectionClass.prototype.saveMongoDB =function(data,cb) {
   var db = config.getMongoDB();
   db.collection("DataCollection").save(data,{w:1}, cb);
 }
 
-exports.savePostgresDB = function(data,cb) {
+DataCollectionClass.prototype.savePostgresDB = function(data,cb) {
   debug('savePostgresDB');
   should.not.exist(data.id);
-  exports.insertData([data],cb);
+  this.insertData([data],cb);
 }
-exports.save = function(data,cb) {
-  debug('exports.save');
-  if (databaseType == "mongo") {
-    exports.saveMongoDB(data,cb);
+DataCollectionClass.prototype.save = function(data,cb) {
+  debug('DataCollectionClass.prototype.save');
+  if (this.databaseType == "mongo") {
+    this.saveMongoDB(data,cb);
   }
-  if (databaseType == "postgres") {
-    exports.savePostgresDB(data,cb);
+  if (this.databaseType == "postgres") {
+    this.savePostgresDB(data,cb);
   }
 }
 
@@ -498,12 +503,12 @@ function countMongoDB(query,cb) {
   collection.count(query, cb);
 }
 
-exports.count = function(query,cb) {
-  debug('count');
-  if (databaseType == "mongo") {
+DataCollectionClass.prototype.count = function(query,cb) {
+  debug('DataCollectionClass.prototype.count');
+  if (this.databaseType == "mongo") {
     countMongoDB(query,cb);
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     countPostgresDB(query,cb);
   }
 }
@@ -525,13 +530,16 @@ function findPostgresDB(query,options,cb) {
   postgresMapper.find(map,query,options,cb);
 }
 
-exports.find = function(query,options,cb) {
+DataCollectionClass.prototype.find = function(query,options,cb) {
   debug('find');
-  if (databaseType == 'mongo') {
+  if (this.databaseType == 'mongo') {
    findMongoDB(query,options,cb);
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     findPostgresDB (query,options,cb);
   }
 }
+
+
+module.exports  = new DataCollectionClass();
 

@@ -17,8 +17,8 @@ describe('QueueWorker',function(){
     async.series([
       WorkerQueue.dropTable,
       WorkerQueue.createTable,
-      DataCollection.dropTable,
-      DataCollection.createTable
+      DataCollection.dropTable.bind(DataCollection),
+      DataCollection.createTable.bind(DataCollection)
     ],function(err) {
       should.not.exist(err);
       bddone();

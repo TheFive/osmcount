@@ -6,8 +6,8 @@ var async = require('async');
 var dbHelper = require('./dbHelper.js');
 var importCSV = require('../ImportCSV.js');
 
-var configuration = require('../configuration.js');
-var DataCollection=require('../model/DataCollection.js')
+var configuration  = require('../configuration.js');
+var DataCollection = require('../model/DataCollection.js')
 
 
 describe('importCSV', function() {
@@ -115,6 +115,7 @@ describe('importCSV', function() {
       before(function(bddone) {
         configuration.initialiseMongoDB( function () {
           var db=configuration.getMongoDB();
+          DataCollection.initialise("mongo");
           should.exist(db);
           async.series(
             [function(done) {
@@ -127,16 +128,19 @@ describe('importCSV', function() {
           );
         });
       });
+      after(function(bddone) {
+        DataCollection.initialise("postgres",bddone);
+      })
       it('should fail with no filename' , function(done) {
         db = configuration.getMongoDB();
-        var a = importCSV.readCSVMongoDB('NonExistingFile.csv',db,{},function(err,data) {
+        DataCollection.importCSV('NonExistingFile.csv',{},function(err,data) {
            should.equal(err.errno,34);
            done();
         })
       });
       it('should load 2 datasets' , function(done) {
         fs.writeFileSync(filename,"name;count\na;2\nb;10");
-        var a = importCSV.readCSVMongoDB(filename,db,{name:"",count:0},function(err,data) {
+        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
           should.equal(err,null);
           should.equal(data,"Datensätze: 2");
           db.collection("DataCollection").find({}).toArray(function(err,data) {
@@ -152,14 +156,14 @@ describe('importCSV', function() {
       it('should handle empty Files' ,function (done) {
         fs.writeFileSync(filename,"Write Something, nothing fails @travis");
         fs.writeFileSync(filename,"");
-        var a = importCSV.readCSVMongoDB(filename,db,{name:"",count:0},function(err,data) {
+        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
           should.equal(err,"empty file");
           done();
         });
       })
       it('should generate an error on column numbers differs',function(bddone){
         fs.writeFileSync(filename,"name;count\na;2\nb;10\c;4;5");
-        var a = importCSV.readCSVMongoDB(filename,db,{name:"",count:0},function(err,data) {
+        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
           should.exist(err);
           should(err).match(/^Invalid CSV File, Number of Columns differs/);
           bddone();
@@ -173,8 +177,8 @@ describe('importCSV', function() {
         pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
           should.equal(err,null);
           async.series([
-            DataCollection.dropTable,
-            DataCollection.createTable
+            DataCollection.dropTable.bind(DataCollection),
+            DataCollection.createTable.bind(DataCollection)
           ],function(err) {
             should.equal(null,err);
             pgdone();
@@ -183,14 +187,14 @@ describe('importCSV', function() {
         });
       });
       it('should fail with no filename' , function(done) {
-        var a = importCSV.readCSVPostgresDB('NonExistingFile.csv',{},function(err,data) {
+        DataCollection.importCSV('NonExistingFile.csv',{},function(err,data) {
           should.equal(err.errno,34);
           done();
         })
       });
       it('should load 2 datasets' , function(done) {
         fs.writeFileSync(filename,"schluessel;count\na;2\nb;10");
-        var a = importCSV.readCSVPostgresDB(filename,{name:"",count:0},function(err,data) {
+        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
           should.equal(data,"Datensätze: 2");
           should.equal(err,null);
           pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
@@ -214,14 +218,14 @@ describe('importCSV', function() {
         // Unlink looks to be to fast, so write something and then an empty file.
         fs.writeFileSync(filename,"something");
         fs.writeFileSync(filename,"");
-        var a = importCSV.readCSVPostgresDB(filename,{name:"",count:0},function(err,result) {
+        DataCollection.importCSV(filename,{name:"",count:0},function(err,result) {
           should.equal(err,"empty file");
           done();
         })
       })
       it('should generate an error on column numbers differs',function(bddone){
         fs.writeFileSync(filename,"name;count\na;2\nb;10\c;4;5");
-        var a = importCSV.readCSVPostgresDB(filename,{name:"",count:0},function(err,data) {
+        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
           should.exist(err);
           should(err).match(/^Invalid CSV File, Number of Columns differs/);
           bddone();

@@ -40,8 +40,9 @@ exports.count = function count(map,query,cb) {
       pgdone();
       return;
     }
-    client.query("select count(*) from "+map.tableName+ ' '+whereClause,
-                                function(err,result) {
+    var queryStr = "select count(*) from "+map.tableName+ ' '+whereClause;
+    console.log(queryStr);
+    client.query(queryStr,function(err,result) {
       should.not.exist(err);
       var count = result.rows[0].count;
       cb (null,count);
@@ -96,3 +97,19 @@ exports.find = function find(map,query,options,cb) {
     })
   })
 }
+
+exports.createTable = function(cb) {
+  debug('exports.createTable');
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
+    client.query(this.createTableString,function(err) {
+      debug('%s Table Created',this.tableName);
+      cb(err);
+    });
+    pgdone();
+  }.bind(this))
+} 
