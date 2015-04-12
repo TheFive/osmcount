@@ -31,6 +31,7 @@
     "codecov.io": "0.0.8",
     "commander": "^2.7.1",
     "debug": "^2.1.1",
+    "event-stream": "^3.3.0",
     "express": "^4.12.3",
     "fs": "0.0.2",
     "istanbul": "^0.3.8",
