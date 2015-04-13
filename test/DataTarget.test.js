@@ -12,8 +12,8 @@ describe('DataTarget', function() {
   beforeEach(function(bddone) {
     DataTarget.initialise('postgres');
     async.series([
-      DataTarget.dropTable,
-      DataTarget.createTable
+      DataTarget.dropTable.bind(DataTarget),
+      DataTarget.createTable.bind(DataTarget)
     ],function(err) {
       if (err) console.dir(err);
       should.equal(null,err);

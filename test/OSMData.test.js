@@ -14,8 +14,8 @@ describe('OSMData', function() {
     beforeEach(function(bddone) {
       async.series([
         config.initialisePostgresDB,
-        OSMData.dropTable,
-        OSMData.createTable
+        OSMData.dropTable.bind(OSMData),
+        OSMData.createTable.bind(OSMData)
       ],function(err) {
         if (err) console.dir(err);
         should.equal(null,err);

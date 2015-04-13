@@ -15,8 +15,8 @@ describe('QueueWorker',function(){
   beforeEach(function(bddone) {
     config.initialisePostgresDB();
     async.series([
-      WorkerQueue.dropTable,
-      WorkerQueue.createTable,
+      WorkerQueue.dropTable.bind(WorkerQueue),
+      WorkerQueue.createTable.bind(WorkerQueue),
       DataCollection.dropTable.bind(DataCollection),
       DataCollection.createTable.bind(DataCollection)
     ],function(err) {

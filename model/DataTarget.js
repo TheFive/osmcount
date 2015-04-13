@@ -14,79 +14,43 @@ var importCSV = require('../ImportCSV.js');
 var postgresMapper = require('../model/postgresMapper.js')
 
 
-var databaseType = "postgres";
 
-var postgresDB = {
-  createTableString:
-  "CREATE TABLE datatarget ( key text, measure text, target double precision, \
+
+
+
+
+
+function DataTarget() {
+  debug('DataTarget');
+  this.databaseType = "postgres"; 
+  this.tableName = "datatarget";
+  this.collectionName = "DataTarget";
+  this.createTableString = "CREATE TABLE datatarget ( key text, measure text, target double precision, \
       name text, sourceText text, sourceLink text, id bigserial NOT NULL, \
       CONSTRAINT id_datatarget PRIMARY KEY (id) )"
-};
-
-var map= {
-  tableName:"datatarget",
-  regex:{schluessel:true},
-  keys: {schluessel:"key",
-         measure:'measure',
-         apothekenVorgabe: 'target',
-         name: 'name',
-         source:'sourcetext',
-         sourceLink:'sourcelink',
-         id:'id'
-       }
+  this.map= {
+    tableName:"datatarget",
+    regex:{schluessel:true},
+    keys: {schluessel:"key",
+           measure:'measure',
+           apothekenVorgabe: 'target',
+           name: 'name',
+           source:'sourcetext',
+           sourceLink:'sourcelink',
+           id:'id'
+         }}
 }
 
-exports.dropTable = function(cb) {
-  debug('exports.dropTable');
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      cb(err);
-      pgdone();
-      return;
-    }
-    client.query("DROP TABLE IF EXISTS datatarget",function(err){
-      debug("datatarget Table Dropped");
-      cb(err)
-    });
+DataTarget.prototype.dropTable = postgresMapper.dropTable;
+DataTarget.prototype.createTable = postgresMapper.createTable;
+DataTarget.prototype.initialise = postgresMapper.initialise;
+DataTarget.prototype.count = postgresMapper.count;
 
-    pgdone();
-  })
-}
 
-exports.createTable = function(cb) {
-  debug('exports.createTable');
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      cb(err);
-      pgdone();
-      return;
-    }
-    client.query(postgresDB.createTableString,function(err) {
-      debug('datatarget Table Created');
-      cb(err);
-    });
-    pgdone();
-  })
-}
 
-exports.initialise = function initialise(dbType,callback) {
-  debug('exports.initialise');
 
-  if (typeof(dbType) != 'function') {
-    databaseType = dbType;
-  }
-  else {
-    databaseType = config.getDatabaseType();
-    callback = dbType;
-  }
-  if (databaseType == 'postgres') {
-    postgresMapper.invertMap(map);
-  }
-  if (callback) callback();
-}
-
-exports.importCSV =function(filename,defJson,cb) {
-  debug('exports.importCSV');
+DataTarget.prototype.importCSV =function(filename,defJson,cb) {
+  debug('DataTarget.prototype.importCSV');
   console.log("No importCSV implemented for datatarget, try import JSON");
   cb("No importCSV implemented",null);
 }
@@ -224,25 +188,25 @@ function importPostgresDB(filename,cb) {
   importPostgresDBStream(filename,cb);
 }
 
-exports.import = function(filename,cb) {
-  debug('exports.import')
-  should(databaseType).equal('postgres');
+DataTarget.prototype.import = function(filename,cb) {
+  debug('DataTarget.prototype.import')
+  should(this.databaseType).equal('postgres');
   importPostgresDB(filename,cb);
 }
 
 // Exports all DataCollection Objects to a JSON File
-exports.export = function(filename,cb){
-  debug('exports.export')
-  should(databaseType).equal('mongo');
+DataTarget.prototype.export = function(filename,cb){
+  debug('DataTarget.prototype.export')
+  should(this.databaseType).equal('mongo');
   exportMongoDB(filename,cb);
 }
 
-exports.insertData = function(data,cb) {
-  debug('exports.insertData');
-  if (databaseType == "mongo") {
+DataTarget.prototype.insertData = function(data,cb) {
+  debug('DataTarget.prototype.insertData');
+  if (this.databaseType == "mongo") {
     should.exist(null,"mongodb not implemented yet");
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
 
     // Turn Data into a stream
     var reader = es.readArray(data);
@@ -330,44 +294,18 @@ location:     key to filter on,
 measure:      measure to work on,
 */
 
-exports.aggregate = function(param,cb) {
-  debug('exports.aggregate');
-  if (databaseType == "mongo") {
+DataTarget.prototype.aggregate = function(param,cb) {
+  debug('DataTarget.prototype.aggregate');
+  if (this.databaseType == "mongo") {
     aggregateMongoDB(param,cb);
     return;
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     aggregatePostgresDB(param,cb);
   }
 }
 
-function countMongoDB(query,cb) {
-  debug('countMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = 'DataTarget';
 
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.count(query, cb);
-}
-
-
-
-function countPostgresDB(query,cb) {
-  debug('countPostgresDB');
-  postgresMapper.count(map,query,cb);
-
-}
-
-exports.count = function(query,cb) {
-  debug('count');
-  if (databaseType == 'mongo') {
-   countMongoDB(query,cb);
-  }
-  if (databaseType == "postgres") {
-    countPostgresDB (query,cb);
-  }
-}
 
 function findMongoDB(query,options,cb) {
   debug('findMongoDB');
@@ -386,14 +324,16 @@ function findPostgresDB(query,options,cb) {
   postgresMapper.find(map,query,options,cb);
 }
 
-exports.find = function(query,options,cb) {
-  debug('find');
-  if (databaseType == 'mongo') {
+DataTarget.prototype.find = function(query,options,cb) {
+  debug('DataTarget.prototype.find');
+  if (this.databaseType == 'mongo') {
    findMongoDB(query,options,cb);
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     findPostgresDB (query,options,cb);
   }
 }
+
+module.exports = new DataTarget();
 
 

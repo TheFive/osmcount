@@ -9,6 +9,27 @@ var ProgressBar = require('progress');
 var config    = require('../configuration.js');
 var importCSV = require('../ImportCSV.js');
 var util      = require('../util.js')
+var postgresMapper = require('../model/postgresMapper.js')
+
+
+function OSMData() {
+  debug('OSMData');
+  this.databaseType = "postgres"; 
+  this.tableName = "OSMData";
+  this.collectionName = "OSMBoundaries";
+  this.createTableString = "CREATE TABLE osmdata ( id bigserial NOT NULL,data hstore, \
+      CONSTRAINT id_osmdata PRIMARY KEY (id) )";
+ this.map= {
+    tableName:"osmdata",
+    regex:{schluessel:false},
+    keys: {id:'id'
+         }}
+}
+
+OSMData.prototype.dropTable = postgresMapper.dropTable;
+OSMData.prototype.createTable = postgresMapper.createTable;
+OSMData.prototype.initialise = postgresMapper.initialise;
+OSMData.prototype.count = postgresMapper.count;
 
 var dataFilter =
 {
@@ -23,60 +44,13 @@ var dataFilter =
   "osmcount_country":1
 }
 
-var databaseType = "postgres";
 
-var postgresDB = {
-  createTableString:
-  "CREATE TABLE osmdata ( id bigserial NOT NULL,data hstore, \
-      CONSTRAINT id_osmdata PRIMARY KEY (id) )"
-};
 
-exports.dropTable = function(cb) {
-  debug('exports.dropTable');
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      cb(err);
-      pgdone();
-      return;
-    }
-    client.query("DROP TABLE IF EXISTS osmdata",function(err){
-      debug("OSMData Table Dropped");
-      cb(err)
-    });
 
-    pgdone();
-  })
-}
 
-exports.createTable = function(cb) {
-  debug('exports.createTable');
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      cb(err);
-      pgdone();
-      return;
-    }
-    client.query(postgresDB.createTableString,function(err) {
-      debug('OSMDat Table Created');
-      cb(err);
-    });
-    pgdone();
-  })
-}
 
-exports.initialise = function initialise(dbType,callback) {
-  debug('exports.initialise');
-  if (dbType) {
-    databaseType = dbType;
-  }
-  else {
-    databaseType = config.getDatabaseType();
-  }
-  if (callback) callback();
-}
-
-exports.importCSV =function(filename,defJson,cb) {
-  debug('exports.importCSV');
+OSMData.prototype.importCSV =function(filename,defJson,cb) {
+  debug('OSMData.prototype.importCSV');
   console.log("No importCSV implemented for osmdata, try import JSON");
   cb("No importCSV implemented",null);
 }
@@ -180,25 +154,25 @@ function importPostgresDB(filename,cb) {
 
 }
 
-exports.import = function(filename,cb) {
-  debug('exports.import')
-  should(databaseType).equal('postgres');
+OSMData.prototype.import = function(filename,cb) {
+  debug('OSMData.prototype.import')
+  should(this.databaseType).equal('postgres');
   importPostgresDB(filename,cb);
 }
 
 // Exports all DataCollection Objects to a JSON File
-exports.export = function(filename,cb){
-  debug('exports.export')
-  should(databaseType).equal('mongo');
+OSMData.prototype.export = function(filename,cb){
+  debug('OSMData.prototype.export')
+  should(this.databaseType).equal('mongo');
   exportMongoDB(filename,cb);
 }
 
-exports.insertData = function(data,cb) {
-  debug('exports.insertData');
-  if (databaseType == "mongo") {
+OSMData.prototype.insertData = function(data,cb) {
+  debug('OSMData.prototype.insertData');
+  if (this.databaseType == "mongo") {
     assert.equal("mongodb not implemented yet",null);
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     insertDataToPostgres(data,cb);
   }
 }
@@ -243,12 +217,14 @@ function findPostgresDB(query,cb) {
 
 }
 
-exports.find = function(query,cb) {
-  debug('find');
-  if (databaseType == 'mongo') {
+OSMData.prototype.find = function(query,cb) {
+  debug('OSMData.prototype.find');
+  if (this.databaseType == 'mongo') {
    findMongoDB(query,cb);
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     findPostgresDB (query,cb);
   }
 }
+
+module.exports = new OSMData();

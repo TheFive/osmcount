@@ -11,70 +11,41 @@ var importCSV      = require('../ImportCSV.js');
 var util           = require('../util.js');
 var postgresMapper = require('../model/postgresMapper.js');
 
-var databaseType = "postgres";
 
-var postgresDB = {
-  createTableString :
+function WorkerQueue() {
+  debug('WorkerQueue');
+  this.databaseType = "postgres"; 
+  this.tableName = "workerqueue";
+  this.collectionName = "WorkerQueue";
+  this.createTableString =
     'CREATE TABLE workerqueue (id bigserial primary key,measure text,key text,stamp timestamp with time zone, \
           status text,  exectime timestamp with time zone,type text,query text,source text,prio integer,error hstore) \
         WITH ( \
           OIDS=FALSE \
         ); '
+  this.map= {
+    tableName:"workerqueue",
+    regex:{schluessel:true},
+    keys: {schluessel:"key",
+           source:'source',
+           measure:'measure',
+           status:'status',
+           type:'type',
+           timestamp:'stamp',
+           id:'id'
+         }
+}
 }
 
-exports.initialise = function initialise(dbType,callback) {
-  debug('exports.initialise');
-
-  if (typeof(dbType) != 'function') {
-    databaseType = dbType;
-  }
-  else {
-    databaseType = config.getDatabaseType();
-    callback = dbType;
-  }
-  if (databaseType == 'postgres') {
-    postgresMapper.invertMap(map);
-  }
-  if (callback) callback();
-}
-
-exports.dropTable = function(cb) {
-  debug('exports.dropTable');
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      pgdone();
-      cb(err);
-      return;
-    }
-    client.query("DROP TABLE IF EXISTS workerqueue",function(err){
-      debug("WorkerQueue Table Dropped");
-      pgdone();
-      cb(err)
-    });
-  })
-}
-
-exports.createTable = function(cb) {
-  debug('exports.createTable');
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      cb(err);
-      pgdone();
-      return;
-    }
-    debug('Call Create Table');
-    debug(postgresDB.createTableString);
-    client.query(postgresDB.createTableString,function(err) {
-      debug('WorkerQueue Table Created');
-      pgdone();
-      cb(err);
-    });
-  })
-}
+WorkerQueue.prototype.dropTable = postgresMapper.dropTable;
+WorkerQueue.prototype.createTable = postgresMapper.createTable;
+WorkerQueue.prototype.initialise = postgresMapper.initialise;
+WorkerQueue.prototype.count = postgresMapper.count;
 
 
 
-exports.importCSV =function(filename,defJson,cb) {
+
+WorkerQueue.prototype.importCSV =function(filename,defJson,cb) {
   debug('exports.importCSV');
   console.log("No importCSV implemented for WorkerQueue, try import JSON");
   cb("No importCSV implemented",null);
@@ -177,68 +148,31 @@ function importPostgresDB(filename,cb) {
 
 }
 
-exports.import = function(filename,cb) {
+WorkerQueue.prototype.import = function(filename,cb) {
   debug('exports.import');
   // for now, only postgres import is needed
-  should(databaseType).equal('postgres');
+  should(this.databaseType).equal('postgres');
   importPostgresDB(filename,cb);
 }
 
 // Exports all DataCollection Objects to a JSON File
-exports.export = function(filename,cb){
+WorkerQueue.prototype.export = function(filename,cb){
   debug('exports.export')
   // for now only mongo export is needed
-  should(databaseType).equal('mongo');
+  should(this.databaseType).equal('mongo');
   exportMongoDB(filename,cb);
 }
 
-exports.insertData = function(data,cb) {
+WorkerQueue.prototype.insertData = function(data,cb) {
   debug('exports.insertData');
-  if (databaseType == "mongo") {
+  if (this.databaseType == "mongo") {
     assert.equal("mongodb not implemented yet",null);
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     insertDataToPostgres(data,cb);
   }
 }
 
-function countMongoDB(query,cb) {
-  debug('countMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = 'WorkerQueue';
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.count(query, cb);
-}
-
-
-var map= {
-  tableName:"workerqueue",
-  regex:{schluessel:true},
-  keys: {schluessel:"key",
-         source:'source',
-         measure:'measure',
-         status:'status',
-         type:'type',
-         timestamp:'stamp',
-         id:'id'
-       }
-}
-function countPostgresDB(query,cb) {
-  debug('countPostgresDB');
-  postgresMapper.count(map,query,cb);
-}
-
-exports.count = function(query,cb) {
-  debug('count');
-  if (databaseType == 'mongo') {
-   countMongoDB(query,cb);
-  }
-  if (databaseType == "postgres") {
-    countPostgresDB (query,cb);
-  }
-}
 
 
 function getWorkingTaskMongoDB(cb) {
@@ -290,12 +224,12 @@ function getNextTaskPostgresDB(status,cb) {
     })
   })
 }
-exports.getWorkingTask = function (cb) {
+WorkerQueue.prototype.getWorkingTask = function (cb) {
   debug('getWorkingTask');
-  if (databaseType == "mongo") {
+  if (this.databaseType == "mongo") {
     getWorkingTaskMongoDB(cb);  
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     getNextTaskPostgresDB("working",cb);
   }
   
@@ -317,12 +251,12 @@ function getNextOpenTaskMongoDB(cb) {
               },cb);
 }
 
-exports.getNextOpenTask = function getNextOpenTask(cb) {
+WorkerQueue.prototype.getNextOpenTask = function getNextOpenTask(cb) {
   debug('getNextOpenTask');
-  if (databaseType == "mongo") {
+  if (this.databaseType == "mongo") {
     getNextOpenTaskMongoDB(cb);  
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     getNextTaskPostgresDB("open",cb);
   }
 }
@@ -360,13 +294,13 @@ function saveTaskPostgresDB(task,cb) {
   })
 }
 
-exports.saveTask = function(task,cb) {
+WorkerQueue.prototype.saveTask = function(task,cb) {
   debug('saveTask');
   should.exist(cb);
-  if (databaseType == 'mongo') {
+  if (this.databaseType == 'mongo') {
     saveTaskMongoDB(task,cb);
   }
-  if (databaseType == 'postgres') {
+  if (this.databaseType == 'postgres') {
     saveTaskPostgresDB(task,cb);
   }
 }
@@ -388,12 +322,14 @@ function findPostgresDB(query,options,cb) {
   postgresMapper.find(map,query,options,cb);
 }
 
-exports.find = function(query,options,cb) {
+WorkerQueue.prototype.find = function(query,options,cb) {
   debug('find');
-  if (databaseType == 'mongo') {
+  if (this.databaseType == 'mongo') {
    findMongoDB(query,options,cb);
   }
-  if (databaseType == "postgres") {
+  if (this.databaseType == "postgres") {
     findPostgresDB (query,options,cb);
   }
 }
+
+module.exports = new WorkerQueue();

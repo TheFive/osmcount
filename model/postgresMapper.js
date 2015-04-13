@@ -5,7 +5,7 @@ var should = require('should');
 
 var config = require('../configuration.js');
 
-exports.invertMap= function invertMap(map) {
+exports.invertMap = function invertMap(map) {
 	debug('invertMap');
   map.invertKeys= {};
   for (k in map.keys) {
@@ -31,7 +31,7 @@ function createWhereClause(map,query) {
   return whereClause;
 }
 
-exports.count = function count(map,query,cb) {
+exports.countPostgres = function count(map,query,cb) {
   debug('count');
   var whereClause = createWhereClause(map,query);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
@@ -113,3 +113,59 @@ exports.createTable = function(cb) {
     pgdone();
   }.bind(this))
 } 
+
+exports.dropTable = function(cb) {
+  debug('exports.dropTable');
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
+    var dropString = "DROP TABLE IF EXISTS "+this.tableName;
+    client.query(dropString,function(err){
+      debug("%s Table Dropped",this.tableName);
+      cb(null);
+    });
+    pgdone();
+  }.bind(this))  
+}
+
+exports.initialise = function initialise(dbType,callback) {
+  debug('exports.initialise');
+  config.initialise();
+
+  if (typeof(dbType) != 'function') {
+    this.databaseType = dbType;
+  }
+  else {
+    this.databaseType = config.getDatabaseType();
+    callback = dbType;
+  }
+  if (this.databaseType == 'postgres') {
+    exports.invertMap(this.map);
+  }
+  if (callback) callback();
+}
+
+
+
+function countMongoDB(query,cb) {
+  debug('countMongoDB');
+  var db = config.getMongoDB();
+  var collectionName = this.collectionName;
+
+  // Fetch the collection test
+  var collection = db.collection(collectionName);
+  collection.count(query, cb);
+}
+
+exports.count = function(query,cb) {
+  debug('exports.count');
+  if (this.databaseType == "mongo") {
+    countMongoDB(query,cb).bind(this);
+  }
+  if (this.databaseType == "postgres") {
+    exports.countPostgres(this.map,query,cb);
+  }
+}

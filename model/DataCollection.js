@@ -18,47 +18,25 @@ function DataCollectionClass() {
   debug('DataCollectionClass');
   this.databaseType = "postgres"; 
   this.tableName = "DataCollection";
+  this.collectionName = "DataCollection";
   this.createTableString = 'CREATE TABLE datacollection (measure text,key text,stamp timestamp with time zone, \
                   count integer,  missing hstore,existing hstore,source character(64)) WITH ( OIDS=FALSE ); ';
+  this.map={tableName:'datacollection',
+         regex:{schluessel:true},
+         keys:{
+          schluessel:'key',
+          source:'source',
+          measure:'measure',
+          timestamp:'stamp',
+          count:'count'
+         }}
 }
 
-
-
-DataCollectionClass.prototype.dropTable = function(cb) {
-  debug('DataCollectionClass.prototype.dropTable');
-  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-    if (err) {
-      cb(err);
-      pgdone();
-      return;
-    }
-    client.query("DROP TABLE IF EXISTS DataCollection",function(err){
-      debug("DataCollection Table Dropped");
-      cb(null);
-    });
-
-    pgdone();
-  })  
-}
-
+DataCollectionClass.prototype.dropTable = postgresMapper.dropTable;
 DataCollectionClass.prototype.createTable = postgresMapper.createTable;
+DataCollectionClass.prototype.initialise = postgresMapper.initialise;
+DataCollectionClass.prototype.count = postgresMapper.count;
 
-
-DataCollectionClass.prototype.initialise = function initialise(dbType,callback) {
-  debug('DataCollectionClass.prototype.initialise');
-
-  if (typeof(dbType) != 'function') {
-    this.databaseType = dbType;
-  }
-  else {
-    this.databaseType = config.getDatabaseType();
-    callback = dbType;
-  }
-  if (this.databaseType == 'postgres') {
-    postgresMapper.invertMap(map);
-  }
-  if (callback) callback();
-}
 
 DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
   debug('DataCollectionClass.prototype.importCSV');
@@ -477,41 +455,9 @@ DataCollectionClass.prototype.save = function(data,cb) {
   }
 }
 
-var map={tableName:'datacollection',
-         regex:{schluessel:true},
-         keys:{
-          schluessel:'key',
-          source:'source',
-          measure:'measure',
-          timestamp:'stamp',
-          count:'count'
-         }}
 
-function countPostgresDB(query,cb) {
-  debug('countPostgresDB');
-  postgresMapper.count(map,query,cb);
 
-}
 
-function countMongoDB(query,cb) {
-  debug('countMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = 'DataCollection';
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.count(query, cb);
-}
-
-DataCollectionClass.prototype.count = function(query,cb) {
-  debug('DataCollectionClass.prototype.count');
-  if (this.databaseType == "mongo") {
-    countMongoDB(query,cb);
-  }
-  if (this.databaseType == "postgres") {
-    countPostgresDB(query,cb);
-  }
-}
 
 function findMongoDB(query,options,cb) {
   debug('findMongoDB');

@@ -22,8 +22,8 @@ describe('WorkerQueue', function() {
   describe('import',function(bddone) {
     beforeEach(function(bddone) {
       async.series([
-        WorkerQueue.dropTable,
-        WorkerQueue.createTable
+        WorkerQueue.dropTable.bind(WorkerQueue),
+        WorkerQueue.createTable.bind(WorkerQueue)
       ],function(err) {
         if (err) console.dir(err);
         should.equal(null,err);
@@ -61,8 +61,8 @@ describe('WorkerQueue', function() {
   describe('count',function(bddone){
     before( function(bddone){
        async.series([
-        WorkerQueue.dropTable,
-        WorkerQueue.createTable
+        WorkerQueue.dropTable.bind(WorkerQueue),
+        WorkerQueue.createTable.bind(WorkerQueue)
       ],function(err) {
         if (err) console.dir(err);
         should.not.exist(err);
@@ -162,8 +162,8 @@ describe('WorkerQueue', function() {
   describe('saveTask',function(bddone) {
     beforeEach(function(bddone) {
       async.series([
-        WorkerQueue.dropTable,
-        WorkerQueue.createTable
+        WorkerQueue.dropTable.bind(WorkerQueue),
+        WorkerQueue.createTable.bind(WorkerQueue)
       ],function(err) {
         if (err) console.dir(err);
         should.equal(null,err);

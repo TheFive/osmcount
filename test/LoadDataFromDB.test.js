@@ -13,8 +13,8 @@ describe('LoadDataFromDB', function () {
   before(function(bddone){
     async.series(
       [config.initialisePostgresDB,
-       OSMData.dropTable,
-       OSMData.createTable
+       OSMData.dropTable.bind(OSMData),
+       OSMData.createTable.bind(OSMData)
       ],function(err) {
         should.not.exist(err);
         bddone();
