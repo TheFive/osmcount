@@ -12,16 +12,16 @@ describe('DataTarget', function() {
   beforeEach(function(bddone) {
     DataTarget.initialise('postgres');
     async.series([
+      config.initialise,
       DataTarget.dropTable.bind(DataTarget),
       DataTarget.createTable.bind(DataTarget)
     ],function(err) {
-      if (err) console.dir(err);
       should.equal(null,err);
       bddone();
     });
   });
   describe('import',function(bddone) {
-    it('should import data',function(bddone){
+    it.only('should import data',function(bddone){
       var filename = path.resolve(__dirname, "DataTarget.test.json");
       //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
       DataTarget.import(filename,function(err,data){

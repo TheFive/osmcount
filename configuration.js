@@ -104,6 +104,7 @@ exports.postgresConnectStr;
 
 exports.initialisePostgresDB = function(callback) {
   debug('initialisePostgresDB');
+  console.log("configuration.initialisePostgresDB This Function is unnecessary and will be skipped")
   if (!configurationInitialised) exports.initialise();
 
   // Minimal Behaviour just store One Connect String
@@ -121,10 +122,7 @@ exports.initialisePostgresDB = function(callback) {
 
 
 
-exports.initialiseDB = function(callback) {
-  console.log("Deprecated: configuration.initialiseDB use configuration.initialiseMongoDB instead.");
-  exports.initialiseMongoDB(callback);
-}
+
 
 exports.initialise = function(callback) {
   debug("initialise");
@@ -135,6 +133,7 @@ exports.initialise = function(callback) {
   configurationInitialised = true;
 	console.log("Reading Config from: "+configurationFile);
 	configuration = JSON.parse(fs.readFileSync(configurationFile));
+  exports.postgresConnectStr = getPostgresDBString();
 	if (callback) callback();
 }
 

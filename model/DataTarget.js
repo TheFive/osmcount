@@ -20,7 +20,7 @@ var postgresMapper = require('../model/postgresMapper.js')
 
 
 
-function DataTarget() {
+function DataTargetClass() {
   debug('DataTarget');
   this.databaseType = "postgres"; 
   this.tableName = "datatarget";
@@ -41,22 +41,24 @@ function DataTarget() {
          }}
 }
 
-DataTarget.prototype.dropTable = postgresMapper.dropTable;
-DataTarget.prototype.createTable = postgresMapper.createTable;
-DataTarget.prototype.initialise = postgresMapper.initialise;
-DataTarget.prototype.count = postgresMapper.count;
+DataTargetClass.prototype.dropTable = postgresMapper.dropTable;
+DataTargetClass.prototype.createTable = postgresMapper.createTable;
+DataTargetClass.prototype.initialise = postgresMapper.initialise;
+DataTargetClass.prototype.count = postgresMapper.count;
+DataTargetClass.prototype.import = postgresMapper.import;
 
 
 
 
-DataTarget.prototype.importCSV =function(filename,defJson,cb) {
+DataTargetClass.prototype.importCSV =function(filename,defJson,cb) {
   debug('DataTarget.prototype.importCSV');
   console.log("No importCSV implemented for datatarget, try import JSON");
   cb("No importCSV implemented",null);
 }
 
-function insertStreamToPostgres (internal,stream,cb) {
-  debug('insertDataToPostgres');
+
+DataTargetClass.prototype.insertStreamToPostgres = function insertStreamToPostgres(internal,stream,cb) {
+  debug('insertStreamToPostgres');
   debug('Connect String:'+config.postgresConnectStr);
   pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
     if (err) {
@@ -68,7 +70,7 @@ function insertStreamToPostgres (internal,stream,cb) {
     var bar;
     var versionDefined = false;
 
-    function insertData(item,callback){
+    return function insertData(item,callback){
       debug('insertStreamToPostgres->insertData');
       if (!internal) {
         if (typeof(item.collection) == 'string') {
@@ -94,7 +96,6 @@ function insertStreamToPostgres (internal,stream,cb) {
         debug('Error after Insert'+err);
         err.item = item;
         callback(err);
-        cb(err);
       })
       query.on("end",function(){        
         counter = counter +1;
@@ -105,21 +106,37 @@ function insertStreamToPostgres (internal,stream,cb) {
       // Undocumneted ? 
       // Create Backpressure to reduce write speed...
       return false;
-   }
+   };
+    var ls, mapper;
+    var parser;
+    if (internal) {
+      ls = stream.pipe(es.map(insertData));
+      parser = ls;
+      mapper = ls;
+    }
+    else {
+      parser = JSONStream.parse();
 
-    var pipe = stream.pipe(es.map(insertData));
+      var mapper = es.map(insertData);
+      ls = stream.pipe(parser).pipe(mapper);
+    }
+    parser.on('end',function() {debug("parser.on('end');")})
+    stream.on('end',function() {debug("stream.on('end');")})
+    mapper.on('end',function() {debug("mapper.on('end');")})
+    ls.on('end',function() {
+      debug("ls.on('end')");
 
-    stream.on('end',function() {
-      debug("parser.on('end')")
-      //insertData({"result":result},cb)
-
-      cb(null,"Datensätze: "+counter);
+      // Quickhack  because is called two times
+      if (!this.wasCalled) cb(null,"Datensätze: "+counter);
+      this.wasCalled = true;
     })
-    stream.on('error',function(err) {
-      debug("parser.on('error);")
+    ls.on('error',function(err) {
+      debug("ls.on('error);")
 
       cb(err);
     })
+
+
   })
 
 }
@@ -162,46 +179,16 @@ function exportMongoDB(filename,cb) {
   })
 }
 
-var getStream = function (filename) {
-    var stream = fs.createReadStream(filename, {encoding: 'utf8'});
-        return stream;
-};
 
-
-
-function importPostgresDBStream(filename,cb) {
-  debug('importPostgresDBStream');
-
-  var stream = getStream(filename);
-  var parser = JSONStream.parse();
-  
-
-
-  insertStreamToPostgres(false,stream.pipe(parser),cb);
-}
-
-function importPostgresDB(filename,cb) {
-  debug('importPostgresDB')
-/*  var data = fs.readFileSync(filename);
-  var newData = JSON.parse(data);
-  insertDataToPostgres(newData,cb);*/
-  importPostgresDBStream(filename,cb);
-}
-
-DataTarget.prototype.import = function(filename,cb) {
-  debug('DataTarget.prototype.import')
-  should(this.databaseType).equal('postgres');
-  importPostgresDB(filename,cb);
-}
 
 // Exports all DataCollection Objects to a JSON File
-DataTarget.prototype.export = function(filename,cb){
+DataTargetClass.prototype.export = function(filename,cb){
   debug('DataTarget.prototype.export')
   should(this.databaseType).equal('mongo');
   exportMongoDB(filename,cb);
 }
 
-DataTarget.prototype.insertData = function(data,cb) {
+DataTargetClass.prototype.insertData = function(data,cb) {
   debug('DataTarget.prototype.insertData');
   if (this.databaseType == "mongo") {
     should.exist(null,"mongodb not implemented yet");
@@ -294,7 +281,7 @@ location:     key to filter on,
 measure:      measure to work on,
 */
 
-DataTarget.prototype.aggregate = function(param,cb) {
+DataTargetClass.prototype.aggregate = function(param,cb) {
   debug('DataTarget.prototype.aggregate');
   if (this.databaseType == "mongo") {
     aggregateMongoDB(param,cb);
@@ -324,7 +311,7 @@ function findPostgresDB(query,options,cb) {
   postgresMapper.find(map,query,options,cb);
 }
 
-DataTarget.prototype.find = function(query,options,cb) {
+DataTargetClass.prototype.find = function(query,options,cb) {
   debug('DataTarget.prototype.find');
   if (this.databaseType == 'mongo') {
    findMongoDB(query,options,cb);
@@ -334,6 +321,6 @@ DataTarget.prototype.find = function(query,options,cb) {
   }
 }
 
-module.exports = new DataTarget();
+module.exports = new DataTargetClass();
 
 

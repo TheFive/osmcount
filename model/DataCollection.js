@@ -36,6 +36,7 @@ DataCollectionClass.prototype.dropTable = postgresMapper.dropTable;
 DataCollectionClass.prototype.createTable = postgresMapper.createTable;
 DataCollectionClass.prototype.initialise = postgresMapper.initialise;
 DataCollectionClass.prototype.count = postgresMapper.count;
+DataCollectionClass.prototype.import = postgresMapper.import;
 
 
 DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
@@ -67,16 +68,12 @@ DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
   );
 }
 
-function insertStreamToPostgres (internal,stream,cb) {
+DataCollectionClass.prototype.insertStreamToPostgres = function insertStreamToPostgres(internal,stream,cb) {
   debug('insertStreamToPostgres');
   debug('Connect String:'+config.postgresConnectStr);
   pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
     if (err) {
-      if (cb) {
-        cb(err);
-      } else {
-        throw (err);
-      }
+      cb(err);
       return;
     }
 
@@ -383,36 +380,8 @@ function exportMongoDB(filename,cb) {
 
  
 
-var getStream = function (filename) {
-    var stream = fs.createReadStream(filename, {encoding: 'utf8'});
-        return stream;
-};
 
 
-
-function importPostgresDBStream(filename,cb) {
-  debug('importPostgresDBStream');
-
-
-  var stream = getStream(filename);
-
-
-  insertStreamToPostgres(false,stream,cb);
-}
-
-function importPostgresDB(filename,cb) {
-  debug('importPostgresDB')
-/*  var data = fs.readFileSync(filename);
-  var newData = JSON.parse(data);
-  insertDataToPostgres(newData,cb);*/
-  importPostgresDBStream(filename,cb);
-}
-
-DataCollectionClass.prototype.import = function(filename,cb) {
-  debug('DataCollectionClass.prototype.import')
-  should(this.databaseType).equal('postgres');
-  importPostgresDB(filename,cb);
-}
 
 // Exports all DataCollection Objects to a JSON File
 DataCollectionClass.prototype.export = function(filename,cb){
@@ -432,7 +401,7 @@ DataCollectionClass.prototype.insertData = function(data,cb) {
     var reader = es.readArray(data);
 
     // use Stream Function to put data to Postgres
-    insertStreamToPostgres(true,reader,cb);
+    this.insertStreamToPostgres(true,reader,cb);
   }
 }
 DataCollectionClass.prototype.saveMongoDB =function(data,cb) {

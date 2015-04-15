@@ -1,6 +1,7 @@
 var pg     = require('pg');
 var debug  = require('debug')('postgresMapper');
 var should = require('should');
+var fs = require('fs');
 
 
 var config = require('../configuration.js');
@@ -146,6 +147,22 @@ exports.initialise = function initialise(dbType,callback) {
     exports.invertMap(this.map);
   }
   if (callback) callback();
+}
+
+
+var getStream = function (filename) {
+    var stream = fs.createReadStream(filename, {encoding: 'utf8'});
+        return stream;
+};
+
+
+
+
+exports.import = function(filename,cb) {
+  debug('exports.import')
+  should(this.databaseType).equal('postgres');
+  var stream = getStream(filename);
+  this.insertStreamToPostgres(false,stream,cb);
 }
 
 
