@@ -21,7 +21,7 @@ describe('DataTarget', function() {
     });
   });
   describe('import',function(bddone) {
-    it.only('should import data',function(bddone){
+    it('should import data',function(bddone){
       var filename = path.resolve(__dirname, "DataTarget.test.json");
       //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
       DataTarget.import(filename,function(err,data){

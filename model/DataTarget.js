@@ -70,7 +70,7 @@ DataTargetClass.prototype.insertStreamToPostgres = function insertStreamToPostgr
     var bar;
     var versionDefined = false;
 
-    return function insertData(item,callback){
+    function insertData(item,callback){
       debug('insertStreamToPostgres->insertData');
       if (!internal) {
         if (typeof(item.collection) == 'string') {
