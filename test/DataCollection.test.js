@@ -11,7 +11,6 @@ describe('DataCollection', function() {
   // Create one pgclient for all tests, and release it afterwards
   var pgclient;
   before(function(bddone) {
-    config.initialisePostgresDB();
     pgclient = new pg.Client(config.postgresConnectStr);
     pgclient.connect(bddone);
   });

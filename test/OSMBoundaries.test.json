@@ -1,4 +1,8 @@
-[
+{
+    "version":1,
+    "collection":"OSMData",
+    "count":6
+}
 {
         "ISO3166-2": "DE-NW",
         "TMC:cid_58:tabcd_1:Class": "Area",
@@ -94,7 +98,7 @@
         "wikidata": "Q1198",
         "wikipedia": "de:Nordrhein-Westfalen",
         "osmcount_country":"DE"
-      },
+      }
       {
         "ISO3166-2": "DE-HH",
         "TMC:cid_58:tabcd_1:Class": "Area",
@@ -134,7 +138,7 @@
         "wikipedia:lv": "Hamburga",
         "wikipedia:ru": "Гамбург",
         "osmcount_country":"DE"
-      },
+      }
       {
         "ISO3166-1": "AT",
         "ISO3166-1:alpha2": "AT",
@@ -382,7 +386,7 @@
         "wikidata": "Q40",
         "wikipedia": "en:Austria",
         "osmcount_country":"AT"
-      },
+      }
       {
         "TMC:cid_58:tabcd_1:Class": "Area",
         "TMC:cid_58:tabcd_1:LCLversion": "8.00",
@@ -399,7 +403,7 @@
         "wikidata": "Q1718",
         "wikipedia": "de:Düsseldorf",
         "osmcount_country":"DE"
-      },
+      }
       {
         "TMC:cid_58:tabcd_1:Class": "Area",
         "TMC:cid_58:tabcd_1:LCLversion": "9.00",
@@ -415,7 +419,7 @@
         "wikidata": "Q200208",
         "wikipedia": "de:Reken",
         "osmcount_country":"DE"
-      },
+      }
       {
     "admin_level" : "8",
     "boundary" : "administrative",
@@ -431,4 +435,3 @@
     "osm_type" : "relation",
     "osmcount_country" : "AT"
 }
-]

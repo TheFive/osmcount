@@ -3,7 +3,6 @@ var pg          = require('pg');
 var fs          = require('fs');
 var async       = require('async');
 var should      = require('should');
-var ProgressBar = require('progress');
   
 var JSONStream  = require('JSONStream');
 var  es         = require('event-stream');
@@ -37,6 +36,10 @@ DataCollectionClass.prototype.createTable = postgresMapper.createTable;
 DataCollectionClass.prototype.initialise = postgresMapper.initialise;
 DataCollectionClass.prototype.count = postgresMapper.count;
 DataCollectionClass.prototype.import = postgresMapper.import;
+DataCollectionClass.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
+DataCollectionClass.prototype.insertData = postgresMapper.insertData;
+DataCollectionClass.prototype.export = postgresMapper.export;
+
 
 
 DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
@@ -68,93 +71,25 @@ DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
   );
 }
 
-DataCollectionClass.prototype.insertStreamToPostgres = function insertStreamToPostgres(internal,stream,cb) {
-  debug('insertStreamToPostgres');
-  debug('Connect String:'+config.postgresConnectStr);
-  pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
-    if (err) {
-      cb(err);
-      return;
-    }
-
-    var counter = 0;
-    var bar;
-    var versionDefined = false;
-
-    function insertData(item,callback){
-      debug('insertStreamToPostgres->insertData');
-      if (!internal) {
-        if (typeof(item.collection) == 'string') {
-          if (item.collection == "DataCollection") {
-            should(item.version).equal(1,"Import Version is not equal 1");
-            versionDefined = true;
-            bar = new ProgressBar('Importing DataCollection: [:bar] :percent :current :total :etas', { total: item.count });
-            callback();
-            return;
-          }
-        }
-        should.ok(versionDefined,"No Version Number and FileType in File");    
-      }
-      var key = item.schluessel;
-      var timestamp = item.timestamp;
-      var measure = item.measure;
-      var count = item.count;
-      var missing  = util.toHStore(item.missing);
-      var existing = util.toHStore(item.existing);
-      for (var k in item.existing) {
-        if (existing != "" ) existing += ",";
-        existing += '"' + k + '"=>"' +item.existing[k] + '"';
-      }
-      var query = client.query("INSERT into datacollection (key,stamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)",
-                          [key,timestamp,measure,count,missing,existing]);
-      query.on("error",function(err){
-        debug('Error after Insert'+err);
-        err.item = item;
-        callback(err);
-      })
-      query.on("end",function(){        
-        counter = counter +1;
-        debug("query.end was called");
-        if (bar) bar.tick();
-        callback();
-      })
-      // Undocumneted ? 
-      // Create Backpressure to reduce write speed...
-      return false;
-    }
-    var ls, mapper;
-    var parser;
-    if (internal) {
-      ls = stream.pipe(es.map(insertData));
-      parser = ls;
-      mapper = ls;
-    }
-    else {
-      parser = JSONStream.parse();
-
-      var mapper = es.map(insertData);
-      ls = stream.pipe(parser).pipe(mapper);
-    }
-    parser.on('end',function() {debug("parser.on('end');")})
-    stream.on('end',function() {debug("stream.on('end');")})
-    mapper.on('end',function() {debug("mapper.on('end');")})
-    ls.on('end',function() {
-      debug("ls.on('end')");
-
-      // Quickhack  because is called two times
-      if (!this.wasCalled) cb(null,"Datensätze: "+counter);
-      this.wasCalled = true;
-    })
-    ls.on('error',function(err) {
-      debug("ls.on('error);")
-
-      cb(err);
-    })
-
-
-  })
-
+DataCollectionClass.prototype.getInsertQueryString = function getInsertQueryString() {
+  return "INSERT into datacollection (key,stamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)";
 }
+
+DataCollectionClass.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
+  var key = item.schluessel;
+  var timestamp = item.timestamp;
+  var measure = item.measure;
+  var count = item.count;
+  var missing  = util.toHStore(item.missing);
+  var existing = util.toHStore(item.existing);
+  for (var k in item.existing) {
+    if (existing != "" ) existing += ",";
+    existing += '"' + k + '"=>"' +item.existing[k] + '"';
+  }
+  return  [key,timestamp,measure,count,missing,existing];
+}
+
+
 
 function aggregatePostgresDB(param,cb) {
   debug('aggregatePostgresDB');
@@ -383,27 +318,8 @@ function exportMongoDB(filename,cb) {
 
 
 
-// Exports all DataCollection Objects to a JSON File
-DataCollectionClass.prototype.export = function(filename,cb){
-  debug('DataCollectionClass.prototype.export')
-  should(this.databaseType).equal('mongo');
-  exportMongoDB(filename,cb);
-}
 
-DataCollectionClass.prototype.insertData = function(data,cb) {
-  debug('DataCollectionClass.prototype.insertData');
-  if (this.databaseType == "mongo") {
-    should.exist(null,"mongodb not implemented yet");
-  }
-  if (this.databaseType == "postgres") {
 
-    // Turn Data into a stream
-    var reader = es.readArray(data);
-
-    // use Stream Function to put data to Postgres
-    this.insertStreamToPostgres(true,reader,cb);
-  }
-}
 DataCollectionClass.prototype.saveMongoDB =function(data,cb) {
   var db = config.getMongoDB();
   db.collection("DataCollection").save(data,{w:1}, cb);

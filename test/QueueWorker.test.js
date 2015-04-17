@@ -13,7 +13,6 @@ var wochenaufgabe  = require('../wochenaufgabe.js');
 
 describe('QueueWorker',function(){
   beforeEach(function(bddone) {
-    config.initialisePostgresDB();
     async.series([
       WorkerQueue.dropTable.bind(WorkerQueue),
       WorkerQueue.createTable.bind(WorkerQueue),
@@ -118,7 +117,7 @@ describe('QueueWorker',function(){
          {id:2,measure:"test",type:"console",status:"open",exectime: new Date()},
          {id:3,measure:"test",type:"console",status:"open",exectime: new Date()}];
       var waiter = util.createWaiter(1);
-      QueueWorker.processExit = function() {};
+      QueueWorker.processExit = function() {console.log('Simulated Process Exit');};
       WorkerQueue.insertData(valueList,function(err,data) {
         async.auto(
           {  runNextJobs:QueueWorker.startQueue,

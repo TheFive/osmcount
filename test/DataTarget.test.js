@@ -9,10 +9,12 @@ var DataTarget = require('../model/DataTarget.js')
 
 
 describe('DataTarget', function() {
+  before(function(bddone){
+      config.initialise(bddone);    
+  })
   beforeEach(function(bddone) {
     DataTarget.initialise('postgres');
     async.series([
-      config.initialise,
       DataTarget.dropTable.bind(DataTarget),
       DataTarget.createTable.bind(DataTarget)
     ],function(err) {

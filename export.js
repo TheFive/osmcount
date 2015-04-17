@@ -143,25 +143,21 @@ function exportData(cb) {
   	},
    	function(callback) {
 		  if (program.datacollection || program.all) {
-        console.log("Start Export DataCollection (MongoDB)");
 			  DataCollection.export(program.dcFilename,callback);
 		  } else callback();  		
   	},
   	function(callback) {
 		  if (program.datatarget || program.all) {
-        console.log("Start Export DataTarget (MongoDB)");
 			  DataTarget.export(program.dtFilename,callback);
 		  } else callback(); 
   	},
     function(callback) {
       if (program.workerqueue || program.all) {
-        console.log("Start Export WorkerQueue (MongoDB)");
         WorkerQueue.export(program.wqFilename,callback);
       } else callback(); 
     },
     function(callback) {
       if (program.osmdata || program.all) {
-        console.log("Start Export OSMData (MongoDB)");
         OSMData.export(program.odFilename,callback);
       } else callback(); 
     }
@@ -184,8 +180,7 @@ console.log("Start Data Export / Import");
 async.auto( {
     config: config.initialise,
     mongodb: ["config",config.initialiseMongoDB],
-    postgresdb: ["config",config.initialisePostgresDB],
-    handleImportExport: ["mongodb","postgresdb",handleImportExport]
+    handleImportExport: ["mongodb",handleImportExport]
   },
   function (err) {
     if (err) {

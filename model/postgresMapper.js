@@ -3,6 +3,13 @@ var debug  = require('debug')('postgresMapper');
 var should = require('should');
 var fs = require('fs');
 
+var JSONStream  = require('JSONStream');
+var es          = require('event-stream');
+var ProgressBar = require('progress');
+var async       = require('async');
+var should      = require('should');
+
+
 
 var config = require('../configuration.js');
 
@@ -42,7 +49,6 @@ exports.countPostgres = function count(map,query,cb) {
       return;
     }
     var queryStr = "select count(*) from "+map.tableName+ ' '+whereClause;
-    console.log(queryStr);
     client.query(queryStr,function(err,result) {
       should.not.exist(err);
       var count = result.rows[0].count;
@@ -110,25 +116,28 @@ exports.createTable = function(cb) {
     client.query(this.createTableString,function(err) {
       debug('%s Table Created',this.tableName);
       cb(err);
+      pgdone();
     });
-    pgdone();
   }.bind(this))
 } 
 
 exports.dropTable = function(cb) {
   debug('exports.dropTable');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+     debug('exports.dropTable->connected');
     if (err) {
       cb(err);
       pgdone();
       return;
     }
     var dropString = "DROP TABLE IF EXISTS "+this.tableName;
-    client.query(dropString,function(err){
+    var query = client.query(dropString);
+    query.on('error',function(err){
       debug("%s Table Dropped",this.tableName);
-      cb(null);
+      cb(err);
+      pgdone();
     });
-    pgdone();
+    query.on('end',function(){cb(null);pgdone();})
   }.bind(this))  
 }
 
@@ -161,8 +170,15 @@ var getStream = function (filename) {
 exports.import = function(filename,cb) {
   debug('exports.import')
   should(this.databaseType).equal('postgres');
-  var stream = getStream(filename);
-  this.insertStreamToPostgres(false,stream,cb);
+  var me = this;
+
+  async.auto(
+    {checkFile:function (cb) {fs.exists(filename,function(result){var error;if (!result) error ="File Not Exist"; cb(error)});},
+     import:["checkFile",function (cb) {  var stream = getStream(filename);;
+      me.insertStreamToPostgres(false,stream,cb);}]},
+      function (error,result) {cb(error,result.import);}
+    );
+  
 }
 
 
@@ -185,4 +201,159 @@ exports.count = function(query,cb) {
   if (this.databaseType == "postgres") {
     exports.countPostgres(this.map,query,cb);
   }
+}
+
+exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream,cb) {
+  debug('insertStreamToPostgres');
+  pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
+    if (err) {
+      cb(err);
+      pgdone();
+      return;
+    }
+
+    var counter = 0;
+    var bar;
+    var versionDefined = false;
+
+
+    function insertData(item,callback) {
+      debug('insertStreamToPostgres->insertData');
+      if (!internal) {
+   
+        if (typeof(item.collection) == 'string') {
+          if (item.collection == this.tableName) {
+            should(item.version).equal(1,"Import Version is not equal 1");
+            versionDefined = true;
+            bar = new ProgressBar('Importing "+this.tableName+": [:bar] :percent :current :total :etas', { total: item.count });
+            callback();
+            return;
+          }
+        }
+        should.ok(versionDefined,"No Version Number and FileType in File");    
+      }
+      var valueList = this.getInsertQueryValueList(item);
+      var queryString = this.getInsertQueryString();
+      var query = client.query(this.getInsertQueryString(),valueList);
+      query.on("error",function(err){
+        debug('Error after Insert'+err);
+        err.item = item;
+        callback(err);
+      });
+      query.on("end",function(){        
+        counter = counter +1;
+        debug("query.end was called");
+        if (bar) bar.tick();
+        callback();
+      });
+      // Undocumneted Feature 
+      // Create Backpressure to reduce write speed...
+      return false;
+    }
+
+    var ls, mapper;
+    var parser;
+    if (internal) {
+      ls = stream.pipe(es.map(insertData.bind(this)));
+      parser = ls;
+      mapper = ls;
+    }
+    else {
+      parser = JSONStream.parse();
+      var mapper = es.map(insertData.bind(this));
+      ls = stream.pipe(parser).pipe(mapper);
+    }
+    ls.wasCalled = false;
+    parser.on('end',function() {debug("parser.on('end');")})
+    stream.on('end',function() {debug("stream.on('end');")})
+    mapper.on('end',function() {debug("mapper.on('end');")})
+    ls.on('end',function() {
+      debug("ls.on('end')");
+
+      // Quickhack  because is called two times
+      if (!this.wasCalled) {
+        var result = "Datensätze: "+counter;
+        cb(null,result);
+        pgdone();
+      }
+      this.wasCalled = true;
+    })
+    ls.on('error',function(err) {
+      debug("ls.on('error);")
+
+      cb(err);
+    })
+  }.bind(this))
+}
+
+
+exports.insertData = function insertData(data,cb) {
+  debug('exports.insertData');
+  if (this.databaseType == "mongo") {
+    should.exist(null,"mongodb not implemented yet");
+  }
+  if (this.databaseType == "postgres") {
+
+    // Turn Data into a stream
+    var reader = es.readArray(data);
+
+    // use Stream Function to put data to Postgres
+    this.insertStreamToPostgres(true,reader,cb);
+  }
+}
+
+function exportCollection(callback,result)
+{
+  debug('export');
+  var db = config.getMongoDB();
+  var collection = db.collection(this.collectionName);
+  collection.find({},function exportsMongoDBCB1(err,data) {
+    debug('export->DB');
+    if (err) {
+      console.log("exportMongoDB Error: "+err);
+      if (cb) cb(err);
+      return;
+    }
+    var countCollection = result.count;
+    var version = {"version":1,"collection":this.collectionName,count:countCollection};
+    var filename = result.filename;
+    fs.writeFileSync(filename,JSON.stringify(version)+"\n");
+    var bar = new ProgressBar('Exporting '+this.collectionName+': [:bar] :percent :current :total :etas', { total: countCollection });
+
+    var count=0;
+    data.each(function (err,doc) {
+      if (err) {
+        callback(err);
+        return;
+      }
+      if (doc) {
+        count++;
+        bar.tick();
+        delete doc.data;
+        fs.appendFileSync(filename,JSON.stringify(doc)+'\n');
+      } else {
+        //console.log(filename +" is exported with "+count+" datasets.");
+        callback();
+        should(count).equal(countCollection);
+      }
+    })
+  }.bind(this))
+}
+
+// Exports all DataCollection Objects to a JSON File
+exports.export = function(filename,cb){
+  debug('exports.export')
+  should(this.databaseType).equal('mongo');
+  var db = config.getMongoDB();
+  should.exist(db);
+  var collection = db.collection(this.collectionName);
+  async.auto(
+  {
+    count: function(callback,result) {
+      result.filename = filename;
+      collection.count({},function(err,count){callback(err,count);})},
+
+ /*   b : ["count",function(cb,result){console.log(result),cb()}],*/
+    export: ["count",exportCollection.bind(this)]
+  },function(err,result){cb(err);})
 }

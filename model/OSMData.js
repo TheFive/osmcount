@@ -30,6 +30,9 @@ OSMData.prototype.dropTable = postgresMapper.dropTable;
 OSMData.prototype.createTable = postgresMapper.createTable;
 OSMData.prototype.initialise = postgresMapper.initialise;
 OSMData.prototype.count = postgresMapper.count;
+OSMData.prototype.import = postgresMapper.import;
+OSMData.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
+OSMData.prototype.export = postgresMapper.export;
 
 var dataFilter =
 {
@@ -55,89 +58,27 @@ OSMData.prototype.importCSV =function(filename,defJson,cb) {
   cb("No importCSV implemented",null);
 }
 
-function insertDataToPostgres (data,cb) {
-  debug('insertDataToPostgres');
-  debug('Connect String:'+config.postgresConnectStr);
-  pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
-    if (err) {
-      if (cb) {
-        cb(err);
-      } else {
-        throw (err);
-      }
-      return;
-    }
-    var result = "Datensätze: "+data.length;
-    debug("Start insert "+ data.length + " datasets");
-    var bar;
-    if (data.length>100) {
-      bar = new ProgressBar('Importing OSMData: [:bar] :percent :total :etas', { total: data.length });
-    }
-    function insertData(item,callback){
-      debug('insertDataToPostgres->insertData');
-      // only store data in Database from dataFilter
-      var reducedItem = {};
-      for (var k in dataFilter) {
-        reducedItem[k]=item[k];
-      }
 
-      var data = util.toHStore(reducedItem);
-      client.query("INSERT into osmdata (data) VALUES($1)",
-                          [data], function(err,result) {
-        if (err) {
-          err.item = item;
-          err.data = data;
-        }
-        if (bar) bar.tick();
-        callback(err);
-        debug('Error after Insert'+err);
-      })
-    }
-    async.each(data,insertData,function(err) {
-      pgdone();
-      cb(err,result);
-    })
-  })
+OSMData.prototype.getInsertQueryString = function getInsertQueryString() {
+  return "INSERT into osmdata (data) VALUES($1)";
+}
 
+OSMData.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
+  var reducedItem = {};
+
+  // Only Store Data that is in the DataFilter
+  for (var k in dataFilter) {
+    reducedItem[k]=item[k];
+  }
+  var data = util.toHStore(reducedItem);
+  return  [data];
 }
 
 
 
-function exportMongoDB(filename,cb) {
-  debug("exportMongoDB("+filename+")");
-  var db = config.getMongoDB();
-  var collection = db.collection('OSMBoundaries');
-  collection.find({},function exportsMongoDBCB1(err,data) {
-    debug('exportsMongoDBCB1');
-    if (err) {
-      console.log("exportMongoDB Error: "+err);
-      if (cb) cb(err);
-      return;
-    }
 
-    fs.writeFileSync(filename,"[");
-    var delimiter="";
-    var count=0;
-    data.each(function (err,doc) {
-      if (err) {
-        cb(err);
-        return
-      }
-      if (doc) {
-        fs.appendFileSync(filename,delimiter);
-        delimiter=",";
-        count++;
-        delete doc.data;
-        fs.appendFileSync(filename,JSON.stringify(doc)+'\n');
-      } else {
-        fs.appendFileSync(filename,"]");
-        console.log("DataLength to Export: "+count);
-        console.log(filename +" is exported");
-        if (cb) cb();
-      }
-    })
-  })
-}
+
+
 
 function importPostgresDB(filename,cb) {
   debug('importPostgresDB')
@@ -154,18 +95,8 @@ function importPostgresDB(filename,cb) {
 
 }
 
-OSMData.prototype.import = function(filename,cb) {
-  debug('OSMData.prototype.import')
-  should(this.databaseType).equal('postgres');
-  importPostgresDB(filename,cb);
-}
 
-// Exports all DataCollection Objects to a JSON File
-OSMData.prototype.export = function(filename,cb){
-  debug('OSMData.prototype.export')
-  should(this.databaseType).equal('mongo');
-  exportMongoDB(filename,cb);
-}
+
 
 OSMData.prototype.insertData = function(data,cb) {
   debug('OSMData.prototype.insertData');

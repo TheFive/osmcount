@@ -23,7 +23,7 @@ var postgresMapper = require('../model/postgresMapper.js')
 function DataTargetClass() {
   debug('DataTarget');
   this.databaseType = "postgres"; 
-  this.tableName = "datatarget";
+  this.tableName = "DataTarget";
   this.collectionName = "DataTarget";
   this.createTableString = "CREATE TABLE datatarget ( key text, measure text, target double precision, \
       name text, sourceText text, sourceLink text, id bigserial NOT NULL, \
@@ -46,6 +46,9 @@ DataTargetClass.prototype.createTable = postgresMapper.createTable;
 DataTargetClass.prototype.initialise = postgresMapper.initialise;
 DataTargetClass.prototype.count = postgresMapper.count;
 DataTargetClass.prototype.import = postgresMapper.import;
+DataTargetClass.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
+DataTargetClass.prototype.export = postgresMapper.export;
+
 
 
 
@@ -57,136 +60,24 @@ DataTargetClass.prototype.importCSV =function(filename,defJson,cb) {
 }
 
 
-DataTargetClass.prototype.insertStreamToPostgres = function insertStreamToPostgres(internal,stream,cb) {
-  debug('insertStreamToPostgres');
-  debug('Connect String:'+config.postgresConnectStr);
-  pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
-    if (err) {
-      cb(err);
-      return;
-    }
 
-    var counter = 0;
-    var bar;
-    var versionDefined = false;
+DataTargetClass.prototype.getInsertQueryString = function getInsertQueryString() {
+  return "INSERT into datatarget (key,measure,target,name,sourceText,sourceLink) VALUES($1,$2,$3,$4,$5,$6)";
+}
 
-    function insertData(item,callback){
-      debug('insertStreamToPostgres->insertData');
-      if (!internal) {
-        if (typeof(item.collection) == 'string') {
-          if (item.collection == "DataTarget") {
-            should(item.version).equal(1,"Import Version is not equal 1");
-            versionDefined = true;
-            bar = new ProgressBar('Importing DataTarget: [:bar] :percent :current :total :etas', { total: item.count });
-            callback();
-            return;
-          }
-        }
-        should.ok(versionDefined,"No Version Number and FileType in File");     
-      }
-      var key = item.schluessel;
-      var measure = item.measure;
-      var target = item.apothekenVorgabe;
-      var name = item.name;
-      var sourceText = item.source;
-      var sourceLink = item.linkSource;
-      var query = client.query("INSERT into datatarget (key,measure,target,name,sourceText,sourceLink) VALUES($1,$2,$3,$4,$5,$6)",
-                          [key,measure,target,name,sourceText,sourceLink,]);
-      query.on("error",function(err){
-        debug('Error after Insert'+err);
-        err.item = item;
-        callback(err);
-      })
-      query.on("end",function(){        
-        counter = counter +1;
-        debug("query.end was called");
-        if (bar) bar.tick();
-        callback();
-      })
-      // Undocumneted ? 
-      // Create Backpressure to reduce write speed...
-      return false;
-   };
-    var ls, mapper;
-    var parser;
-    if (internal) {
-      ls = stream.pipe(es.map(insertData));
-      parser = ls;
-      mapper = ls;
-    }
-    else {
-      parser = JSONStream.parse();
-
-      var mapper = es.map(insertData);
-      ls = stream.pipe(parser).pipe(mapper);
-    }
-    parser.on('end',function() {debug("parser.on('end');")})
-    stream.on('end',function() {debug("stream.on('end');")})
-    mapper.on('end',function() {debug("mapper.on('end');")})
-    ls.on('end',function() {
-      debug("ls.on('end')");
-
-      // Quickhack  because is called two times
-      if (!this.wasCalled) cb(null,"Datensätze: "+counter);
-      this.wasCalled = true;
-    })
-    ls.on('error',function(err) {
-      debug("ls.on('error);")
-
-      cb(err);
-    })
-
-
-  })
-
+DataTargetClass.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
+  var key = item.schluessel;
+  var measure = item.measure;
+  var target = item.apothekenVorgabe;
+  var name = item.name;
+  var sourceText = item.source;
+  var sourceLink = item.linkSource;
+  return  [key,measure,target,name,sourceText,sourceLink];
 }
 
 
 
-function exportMongoDB(filename,cb) {
-  debug("exportMongoDB("+filename+")");
-  var db = config.getMongoDB();
-  var collection = db.collection('DataTarget');
-  collection.find({},function exportsMongoDBCB1(err,data) {
-    debug('exportsMongoDBCB1');
-    if (err) {
-      console.log("exportMongoDB Error: "+err);
-      if (cb) cb(err);
-      return;
-    }
 
-    fs.writeFileSync(filename,"[");
-    var delimiter="";
-    var count=0;
-    data.each(function (err,doc) {
-      if (err) {
-        cb(err);
-        return
-      }
-      if (doc) {
-        fs.appendFileSync(filename,delimiter);
-        delimiter=",";
-        count++;
-        delete doc.data;
-        fs.appendFileSync(filename,JSON.stringify(doc)+'\n');
-      } else {
-        fs.appendFileSync(filename,"]");
-        console.log("DataLength to Export: "+count);
-        console.log(filename +" is exported");
-        if (cb) cb();
-      }
-    })
-  })
-}
-
-
-
-// Exports all DataCollection Objects to a JSON File
-DataTargetClass.prototype.export = function(filename,cb){
-  debug('DataTarget.prototype.export')
-  should(this.databaseType).equal('mongo');
-  exportMongoDB(filename,cb);
-}
 
 DataTargetClass.prototype.insertData = function(data,cb) {
   debug('DataTarget.prototype.insertData');

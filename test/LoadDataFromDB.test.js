@@ -11,8 +11,7 @@ var OSMData       = require('../model/OSMData.js');
 
 describe('LoadDataFromDB', function () {
   before(function(bddone){
-    async.series(
-      [config.initialisePostgresDB,
+    async.series([
        OSMData.dropTable.bind(OSMData),
        OSMData.createTable.bind(OSMData)
       ],function(err) {

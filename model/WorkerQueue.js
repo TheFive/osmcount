@@ -15,7 +15,7 @@ var postgresMapper = require('../model/postgresMapper.js');
 function WorkerQueue() {
   debug('WorkerQueue');
   this.databaseType = "postgres"; 
-  this.tableName = "workerqueue";
+  this.tableName = "WorkerQueue";
   this.collectionName = "WorkerQueue";
   this.createTableString =
     'CREATE TABLE workerqueue (id bigserial primary key,measure text,key text,stamp timestamp with time zone, \
@@ -41,7 +41,10 @@ WorkerQueue.prototype.dropTable = postgresMapper.dropTable;
 WorkerQueue.prototype.createTable = postgresMapper.createTable;
 WorkerQueue.prototype.initialise = postgresMapper.initialise;
 WorkerQueue.prototype.count = postgresMapper.count;
-
+WorkerQueue.prototype.import = postgresMapper.import;
+WorkerQueue.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
+WorkerQueue.prototype.insertData = postgresMapper.insertData;
+WorkerQueue.prototype.export = postgresMapper.export;
 
 
 
@@ -51,88 +54,26 @@ WorkerQueue.prototype.importCSV =function(filename,defJson,cb) {
   cb("No importCSV implemented",null);
 }
 
-function insertDataToPostgres (data,cb) {
-  debug('insertDataToPostgres');
-  should.exist(cb);
-  debug('Connect String:'+config.postgresConnectStr);
-  pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
-    if (err) {
-      cb(err);
-      return;
-    }
-    var result = "Datensätze: "+data.length;
-    var bar;
-    if (data.length>100) {
-      bar = new ProgressBar('Importing WorkerQueue: [:bar] :percent :total :etas', { total: data.length });
-    }
-
-    debug("Start insert "+ data.length + " datasets");
-    function insertData(item,callback){
-      debug('insertDataToPostgres->insertData');
-      var key = item.schluessel;
-      var stamp = item.timestamp;
-      var measure = item.measure;
-      var status = item.status;
-      var exectime = item.exectime;
-      var type = item.type;
-      var query = item.query;
-      var source = item._id;
-      var error = util.toHStore(item.error)
-
-
-      client.query("INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source,error) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)",
-                          [key,stamp,measure,status,exectime,type,query,source,error], function(err,result) {
-        if (err) {
-          err.item = JSON.stringify(item);
-          err.itemError = error;
-        }
-        if (bar) bar.tick();
-
-        callback(err);
-
-        if (err) debug('Error after Insert'+err);
-      })
-    }
-    async.each(data,insertData,function(err) {pgdone();cb(err,result);})
-  })
-
+WorkerQueue.prototype.getInsertQueryString = function getInsertQueryString() {
+  return "INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source,error) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)";
 }
 
-function exportMongoDB(filename,cb) {
-  debug("exportMongoDB("+filename+")");
-  should.exist(cb);
-  var db = config.getMongoDB();
-  var collection = db.collection('WorkerQueue');
-  collection.find({},function exportsMongoDBCB1(err,data) {
-    debug('exportsMongoDBCB1');
-    if (err) {
-      console.log("exportMongoDB Error: "+err);
-      cb(err);
-      return;
-    }
-    fs.writeFileSync(filename,"[");
-    var delimiter="";
-    var count=0;
-    data.each(function (err,doc) {
-      if (err) {
-        cb(err);
-        return
-      }
-      if (doc) {
-        fs.appendFileSync(filename,delimiter);
-        delimiter=",";
-        count++;
-        delete doc.data;
-        fs.appendFileSync(filename,JSON.stringify(doc)+'\n');
-      } else {
-        fs.appendFileSync(filename,"]");
-        console.log("DataLength to Export: "+count);
-        console.log(filename +" is exported");
-        cb();
-      }
-    })
-  })
+WorkerQueue.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
+  var key = item.schluessel;
+  var stamp = item.timestamp;
+  var measure = item.measure;
+  var status = item.status;
+  var exectime = item.exectime;
+  var type = item.type;
+  var query = item.query;
+  var source = item._id;
+  var error = util.toHStore(item.error);
+  return  [key,stamp,measure,status,exectime,type,query,source,error];
 }
+
+
+
+
 
 function importPostgresDB(filename,cb) {
   debug('importPostgresDB')
@@ -148,30 +89,8 @@ function importPostgresDB(filename,cb) {
 
 }
 
-WorkerQueue.prototype.import = function(filename,cb) {
-  debug('exports.import');
-  // for now, only postgres import is needed
-  should(this.databaseType).equal('postgres');
-  importPostgresDB(filename,cb);
-}
 
-// Exports all DataCollection Objects to a JSON File
-WorkerQueue.prototype.export = function(filename,cb){
-  debug('exports.export')
-  // for now only mongo export is needed
-  should(this.databaseType).equal('mongo');
-  exportMongoDB(filename,cb);
-}
 
-WorkerQueue.prototype.insertData = function(data,cb) {
-  debug('exports.insertData');
-  if (this.databaseType == "mongo") {
-    assert.equal("mongodb not implemented yet",null);
-  }
-  if (this.databaseType == "postgres") {
-    insertDataToPostgres(data,cb);
-  }
-}
 
 
 

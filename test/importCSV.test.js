@@ -173,7 +173,6 @@ describe('importCSV', function() {
     });
     describe('readCSVpostgres',function() {
       before(function(bddone) {
-        configuration.initialisePostgresDB();
         pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
           should.equal(err,null);
           async.series([

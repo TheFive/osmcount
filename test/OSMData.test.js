@@ -13,7 +13,6 @@ describe('OSMData', function() {
 
     beforeEach(function(bddone) {
       async.series([
-        config.initialisePostgresDB,
         OSMData.dropTable.bind(OSMData),
         OSMData.createTable.bind(OSMData)
       ],function(err) {

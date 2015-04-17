@@ -339,7 +339,7 @@ function runNextJobs(callback) {
         console.log("Error occured in function: QueueWorker.doNextJob");
         console.log(err);
       }
-      if (exports.processSignal=='SIGINT') {
+     if (exports.processSignal=='SIGINT') {
         console.log( "\nExiting OSMCount" );
         exports.processExit();
       } else {

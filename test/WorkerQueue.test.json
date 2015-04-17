@@ -1,4 +1,8 @@
-[
+{
+    "version":1,
+    "collection":"WorkerQueue",
+    "count":3
+}
 {
     "_id" : "5496e6bbf98718ef4a297575",
     "measure" : "AddrWOStreet",
@@ -8,7 +12,7 @@
     "type" : "overpass",
     "query" : "area[type=boundary][\"de:regionalschluessel\"=\"010010000000\"]->.boundaryarea; rel(area.boundaryarea)[type=associatedStreet]->.associatedStreet;  way(area.boundaryarea)[\"addr:housenumber\"][\"addr:street\"!~\".\"][\"addr:place\"!~\".\"]->.allHousesWay; way(r.associatedStreet:\"house\")->.asHouseWay; (.allHousesWay; - .asHouseWay); out ids;  node(area.boundaryarea)[\"addr:housenumber\"][\"addr:street\"!~\".\"][\"addr:place\"!~\".\"]->.allHousesNode; node(r.associatedStreet:\"house\")->.asHouseNode; (.allHousesNode; - .asHouseNode);out ids;  rel(area.boundaryarea)[\"addr:housenumber\"][\"addr:street\"!~\".\"][\"addr:place\"!~\".\"]->.allHousesRel; rel(r.associatedStreet:\"house\")->.asHouseRel; (.allHousesRel; - .asHouseRel);out ids;",
     "timestamp" : "2014-12-21T16:26:53.424+01:00"
-},
+}
 {
     "_id" : "5496e6bbf98718ef4a297576",
     "measure" : "AddrWOStreet",
@@ -20,8 +24,6 @@
     "timestamp" : "2014-12-21T16:26:54.814+01:00",
     "error": {"name":"test","status":"found it"}
 }	
-,
-
 {"_id":"54d28b5b50bcd2b1211340ad",
 "measure":"Apotheke",
 "schluessel":"07314000",
@@ -35,4 +37,3 @@
 "overpassTime":5937,
 "error":{"message":"Request failed: HTTP 429","statusCode":429,"body":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n<head>\n  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" lang=\"en\"/>\n  <title>OSM3S Response</title>\n</head>\n<body>\n\n<p>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</p>\n<p><strong style=\"color:#FF0000\">Error</strong>: runtime error: open64: 0 Success /osm3s_v0.7.51_osm_base Dispatcher_Client::request_read_and_idx::rate_limited. Another request from your IP is still running.\n </p>\n\n</body>\n</html>\n"}}
 
-]
