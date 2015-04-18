@@ -100,7 +100,8 @@ function aggregatePostgresDB(param,cb) {
   if (typeof(paramLocation)=='undefined') {
     paramLocation = '';
   }
-  var paramLocationLength = paramLocation.length;
+  paramLocation += '%';
+/*  var paramLocationLength = paramLocation.length;*/
   if (param.since != '' && typeof(param.since)!='undefined') {
     paramSinceDate = new Date(param.since);
   }
@@ -130,8 +131,8 @@ function aggregatePostgresDB(param,cb) {
                 param.measure,
                 paramSinceDate,
                 paramUpToDate,
-                paramLocationLength,
-                paramLocation];
+              /*  paramLocationLength,
+                paramLocation*/];
     if (typeof(param.sub)=='undefined') param.sub ='';
     if (typeof(param.subPercent)=='undefined') param.subPercent = "no";
     if (param.sub.match(/missing*/)) {
@@ -156,7 +157,7 @@ function aggregatePostgresDB(param,cb) {
                  and stamp <= $5 \
                  and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
                                datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
-                 and substr(key,1,$6) = $7 \
+                 and key like '"+paramLocation+"' \
               group by k,t;"
 
     var query = client.query(queryStr,bindParam);
