@@ -345,7 +345,7 @@ exports.export = function(filename,cb){
   debug('exports.export')
   should(this.databaseType).equal('mongo');
   var db = config.getMongoDB();
-  should.exist(db);
+  should.exist(db,"MondoDB does not exist, not started ?");
   var collection = db.collection(this.collectionName);
   async.auto(
   {
