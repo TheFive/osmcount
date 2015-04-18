@@ -30,6 +30,10 @@ program
 
 var dirname = path.join(__dirname);
 
+if (!program.export && ! program.import) {
+  console.log("You better tell me, what is should do with -e or -i. Try --help");
+  process.exit();
+}
 
 if (program.F=='') {
   console.log("Please enter a Filename");
