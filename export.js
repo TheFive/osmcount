@@ -96,7 +96,7 @@ function importData(cb) {
       } else callback(); 
     },
     function(callback) {
-      if (program.osdmata || program.all) {
+      if (program.osmdata || program.all) {
         console.log("Start Import OSMData (PostgresDB)");
         OSMData.import(program.odFilename,callback);
       } else callback(); 
@@ -110,14 +110,14 @@ function createTables(callback) {
 		return;
 	} 
 	async.series([
-		DataCollection.dropTable,
-		DataCollection.createTable,
-		DataTarget.dropTable,
-		DataTarget.createTable,
-		WorkerQueue.dropTable,
-		WorkerQueue.createTable,
-    OSMData.dropTable,
-    OSMData.createTable
+		DataCollection.dropTable.bind(DataCollection),
+		DataCollection.createTable.bind(DataCollection),
+		DataTarget.dropTable.bind(DataTarget),
+		DataTarget.createTable.bind(DataTarget),
+		WorkerQueue.dropTable.bind(WorkerQueue),
+		WorkerQueue.createTable.bind(WorkerQueue),
+    OSMData.dropTable.bind(OSMData),
+    OSMData.createTable.bind(OSMData)
 		],function(err) {callback(err);});
 }
 

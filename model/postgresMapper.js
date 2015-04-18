@@ -225,7 +225,7 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream
           if (item.collection == this.tableName) {
             should(item.version).equal(1,"Import Version is not equal 1");
             versionDefined = true;
-            bar = new ProgressBar('Importing "+this.tableName+": [:bar] :percent :current :total :etas', { total: item.count });
+            bar = new ProgressBar('Importing '+this.tableName+': [:bar] :percent :current :total :etas', { total: item.count });
             callback();
             return;
           }
@@ -315,7 +315,7 @@ function exportCollection(callback,result)
       return;
     }
     var countCollection = result.count;
-    var version = {"version":1,"collection":this.collectionName,count:countCollection};
+    var version = {"version":1,"collection":this.tableName,count:countCollection};
     var filename = result.filename;
     fs.writeFileSync(filename,JSON.stringify(version)+"\n");
     var bar = new ProgressBar('Exporting '+this.collectionName+': [:bar] :percent :current :total :etas', { total: countCollection });
