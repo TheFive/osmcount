@@ -20,6 +20,12 @@ function DataCollectionClass() {
   this.collectionName = "DataCollection";
   this.createTableString = 'CREATE TABLE datacollection (measure text,key text,stamp timestamp with time zone, \
                   count integer,  missing hstore,existing hstore,source character(64)) WITH ( OIDS=FALSE ); ';
+  this.createIndexString = 'CREATE INDEX datacollection_stamp_idx ON datacollection  \
+                              USING btree (stamp); \
+                            CREATE INDEX datacollection_measure_key_idx ON datacollection  \
+                               USING btree (measure COLLATE pg_catalog."default", key COLLATE pg_catalog."default");'
+
+                            
   this.map={tableName:'datacollection',
          regex:{schluessel:true},
          keys:{
@@ -153,10 +159,9 @@ function aggregatePostgresDB(param,cb) {
               to_char(stamp,$2) as t," 
               + cellCalculation + 
               " from datacollection where measure = $3 \
-                 and stamp >= $4 \
-                 and stamp <= $5 \
                  and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
-                               datacollection where measure = $3 order by to_char(stamp,$2),stamp desc) \
+                               datacollection where measure = $3 and stamp >= $4  and stamp <= $5\
+                                order by to_char(stamp,$2),stamp desc) \
                  and key like '"+paramLocation+"' \
               group by k,t;"
 

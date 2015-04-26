@@ -115,9 +115,18 @@ exports.createTable = function(cb) {
     }
     client.query(this.createTableString,function(err) {
       debug('%s Table Created',this.tableName);
-      cb(err);
-      pgdone();
-    });
+      if (typeof(this.createIndexString)!='undefined') {
+        client.query(this.createIndexString,function(err){
+          debug('%s Index Created',this.tableName);
+          cb(err);
+          pgdone();
+        })
+      } else {
+        // No Index to be defined, close Function correct
+        cb(err);
+        pgdone();
+      }
+    }.bind(this));
   }.bind(this))
 } 
 

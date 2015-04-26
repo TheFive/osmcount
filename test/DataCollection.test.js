@@ -105,7 +105,7 @@ describe('DataCollection', function() {
           bddone);
 
       });
-      it ('should group 2 keys', function(bddone) {
+      it('should group 2 keys', function(bddone) {
         param = {
               lengthOfKey:2,
               lengthOfTime:10,
@@ -113,13 +113,10 @@ describe('DataCollection', function() {
         };
         DataCollection.aggregate(param,function done(err,data) {
           should.equal(err,null);
+          console.log(data);
+          data.should.containEql({cell:45,_id:{col:'2012-10-01',row:'10'}});
+          data.should.containEql({cell:48,_id:{col:'2012-11-01',row:'10'}});
           should.equal(data.length,2);
-          should.equal(data[0].cell,45);
-          should.equal(data[0]._id.col,'2012-10-01');
-          should.equal(data[0]._id.row,'10');
-          should.equal(data[1].cell,48);
-          should.equal(data[1]._id.col,'2012-11-01');
-          should.equal(data[1]._id.row,'10');
           bddone();
         })
       })
