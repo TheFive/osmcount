@@ -45,6 +45,7 @@ WorkerQueue.prototype.import = postgresMapper.import;
 WorkerQueue.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
 WorkerQueue.prototype.insertData = postgresMapper.insertData;
 WorkerQueue.prototype.export = postgresMapper.export;
+WorkerQueue.prototype.find = postgresMapper.find;
 
 
 
@@ -224,31 +225,6 @@ WorkerQueue.prototype.saveTask = function(task,cb) {
   }
 }
 
-function findMongoDB(query,options,cb) {
-  debug('findMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = 'WorkerQueue';
 
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.find(query,options).toArray(cb);
-}
-
-
-
-function findPostgresDB(query,options,cb) {
-  debug('findPostgresDB');
-  postgresMapper.find(map,query,options,cb);
-}
-
-WorkerQueue.prototype.find = function(query,options,cb) {
-  debug('find');
-  if (this.databaseType == 'mongo') {
-   findMongoDB(query,options,cb);
-  }
-  if (this.databaseType == "postgres") {
-    findPostgresDB (query,options,cb);
-  }
-}
 
 module.exports = new WorkerQueue();

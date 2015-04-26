@@ -55,6 +55,7 @@ describe('DataTarget', function() {
       });
     });
   })
+
   describe('aggregate',function(bddone) {
     it('aggretate two values',function(bddone){
       var filename = path.resolve(__dirname, "DataTarget.test.json");
@@ -72,4 +73,23 @@ describe('DataTarget', function() {
       });
     });
   });
+  describe('find',function(bddone) {
+    it('find some objects',function(bddone){
+      var filename = path.resolve(__dirname, "DataTarget.test.json");
+      //var filestring = fs.readFileSync(filename,{encoding:'UTF8'});
+      DataTarget.import(filename,function(err,data){
+        should.not.exist(err);
+        should.equal(data,"Datensätze: 2");
+        var query = {schluessel : "01053080"};
+        DataTarget.find(query,function(err,data){
+          console.log(data);
+          should.not.exist(err);
+          should(data.length).equal(1);
+          should(data[0].apothekenVorgabe).equal(0.043);
+          bddone();
+        })
+      });
+    });
+  });
+
 })

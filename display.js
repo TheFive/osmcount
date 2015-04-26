@@ -18,132 +18,6 @@ var WorkerQueue    = require('./model/WorkerQueue.js');
 
 
 
-exports.count = function(req,res){
-	debug("exports.count");
-    var container;
-    var collectionName = req.param("collection");
-    switch(collectionName) {
-        case "DataCollection":container = DataCollection;break;
-        case "DataTarget":    container = DataTarget;break;
-        case "WorkerQueue":   container = WorkerQueue;break;
-        default: container = DataCollection;collectionName = "DataCollection";
-    }
-
-    // Fetch the collection test
-    container.count({},function handleCollectionCount(err, count) {
-    	debug("handleCollectionCount");
-    	res.set('Content-Type', 'text/html');
-    	if(err) {
-    		res.end(JSON.stringify(err));
-    	} else {
-    		res.end("There are " + count + " records in Collection "+ collectionName);
-    	}
-    });
-}
-
-
-exports.main = function(req,res){
-	var page = htmlPage.create();
-	page.content = fs.readFileSync(path.resolve(__dirname, "html","index.html"));
-	page.menu = fs.readFileSync(path.resolve(__dirname, "html","menu.html"));
-	page.footer = "OSM Count...";
- 	res.set('Content-Type', 'text/html');
-	res.end(page.generatePage());
-}
-
-
-exports.wochenaufgabe = function(req,res) {
-	var aufgabe = req.param("aufgabe");
-	var page = htmlPage.create();
-
-	page.title = wochenaufgabe.map[aufgabe].title;
-
-	page.content = fs.readFileSync(path.resolve(__dirname, "html",aufgabe+".html"));
-	page.menu = fs.readFileSync(path.resolve(__dirname, "html","menu.html"));
- 	res.set('Content-Type', 'text/html');
-	res.end(page.generatePage());
-}
-
-
-function listValuesTable(keyname,key,object) {
-    if (key == '_id') return "";
-    if (key == 'id') return "";
-	if (object instanceof Date) {
-		return "<tr><td>"+keyname+"</td><td>"+object.toString()+"</td></tr>";
-	}
-/*	if (object instanceof ObjectID) {
-		return "<tr><td>"+keyname+"</td><td>"+object+"</td></tr>";
-	}*/
-	if (typeof(object) == 'object') {
-		var result = "";
-		for (k in object) {
-			if (key) {
-			  result += listValuesTable(key+"."+k,k,object[k]);
-			} else {
-			  result += listValuesTable(k,k,object[k]);
-			}
-
-		}
-		return result;
-    }
-    return "<tr><td>"+keyname+"</td><td>"+object+"</td></tr>";
-
-}
-
-exports.object = function(req,res) {
-	debug("exports.object");
-	var db = res.db;
-
-	var collectionName = req.params["collection"];
-	var objid = req.params["id"];
-	//console.log(objid);
-	var collection;
-    switch(collectionName) {
-        case "DataTarget": collection=DataTarget;break;
-        case "DataCollection": collection = DataCollection;break;
-        case "WorkerQueue": collection = WorkerQueue;break;
-    }
-
-	collection.find ({id:objid},{},function handleFindOneObject(err, obj) {
-		debug("handleFindOneObject");
-		if (err) {
-			var text = "Display Object "+ objid + " in Collection "+collectionName;
-			text += "Error: "+JSON.stringify(err);
-			res.set('Content-Type', 'text/html');
-			res.end(text);
-		} else {
-			text = "<tr><th>Key</th><th>Value</th><tr>";
-			text+= listValuesTable("",null,obj);
-
-			page =new htmlPage.create("table");
-			page.title = "Data Inspector";
-			page.menu ="";
-			page.content = '<h1>'+collectionName+'</h1><p><table>'+text+'</table></p>';
-			res.set('Content-Type', 'text/html');
-
-			if (collectionName == "WorkerQueue") {
-				db.collection("DataCollection").findOne ({schluessel:obj.schluessel,
-				                                          source: obj.source},
-				                                        function handleFindOneObject(err, obj2) {
-					debug("handleFindOneObject2");
-					if (err) {
-						console.log(JSON.stringify(err));
-						res.end(page.generatePage());
-					} else {
-
-						var text = "<tr><th>Key</th><th>Value</th><tr>";
-						text+= listValuesTable("",null,obj2);
-
-
-						page.content += '<h1>Zugehörige Daten</h1><p><table>'+text+'</table></p>';
-						res.end(page.generatePage());
-					}
-
-
-
-			})} else res.end(page.generatePage());
-		}
-	})}
 
 
 
@@ -152,38 +26,9 @@ exports.object = function(req,res) {
 
 
 
-	exports.overpass = function(req,res) {
-		debug("exports.overpass");
-		var db = res.db;
-
-		var measure = req.params["measure"];
-		var schluessel = req.params["schluessel"];
 
 
-		var sub = req.query.sub;
-		if (typeof(sub) == 'undefined') sub = "";
-	    var query = generateQuery(measure,schluessel,sub);
 
-		if (!query) query = "Für die Aufgabe "+measure+" ist keine Query definiert";
-
-		var text = "<h1>Overpass Abfrage</h1>"
-		text += "<table><tr><td>Aufgabe</td><td>"+measure+"</td></tr> \
-							<tr><td>Schl&uuml;ssel</td><td>"+schluessel+"</td></tr></table>";
-
-		text += "<pre>"+query+"</pre>"
-
-		text += '<p>Bitte die Query in die Zwischenablage kopieren und in <a href=http://overpass-turbo.eu>Overpass Turbo</a> einf&uuml;gen</p>';
-
-		text += '<p> Oder <a href=http://overpass-turbo.eu/?Q='+encodeURIComponent(query)+'&R>hier</a> klicken';
-		if (measure=="AddrWOStreet") {
-			text += '<p>Achtung, die Overpass Abfrage und die Abfrage von User:Gehrke unterschieden sich etwas. Siehe <a href="http://wiki.openstreetmap.org/wiki/DE:Overpass_API/Beispielsammlung#Hausnummern_ohne_Stra.C3.9Fe_finden">wiki</a>.</p>';
-		}
-		var page = htmlPage.create();
-		page.content = text;
-
-		res.set('Content-Type', 'text/html');
-	    res.end(page.generatePage());
-	}
 
 exports.importApotheken = function(req,res) {
 	debug("importApotheken");
@@ -451,3 +296,6 @@ exports.query=function(req,res) {
 
 
 }
+
+
+ 

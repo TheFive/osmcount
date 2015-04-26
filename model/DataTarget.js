@@ -48,6 +48,7 @@ DataTargetClass.prototype.count = postgresMapper.count;
 DataTargetClass.prototype.import = postgresMapper.import;
 DataTargetClass.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
 DataTargetClass.prototype.export = postgresMapper.export;
+DataTargetClass.prototype.find = postgresMapper.find;
 
 
 
@@ -185,32 +186,10 @@ DataTargetClass.prototype.aggregate = function(param,cb) {
 
 
 
-function findMongoDB(query,options,cb) {
-  debug('findMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = 'DataTarget';
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.find(query,options).toArray(cb);
-}
 
 
 
-function findPostgresDB(query,options,cb) {
-  debug('findPostgresDB');
-  postgresMapper.find(map,query,options,cb);
-}
 
-DataTargetClass.prototype.find = function(query,options,cb) {
-  debug('DataTarget.prototype.find');
-  if (this.databaseType == 'mongo') {
-   findMongoDB(query,options,cb);
-  }
-  if (this.databaseType == "postgres") {
-    findPostgresDB (query,options,cb);
-  }
-}
 
 module.exports = new DataTargetClass();
 

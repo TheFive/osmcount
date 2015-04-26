@@ -793,6 +793,7 @@ exports.table = function(req,res){
             openQueries = "#Error#";
           } else {
             openQueries = count;
+            console.log(query);
           }
           // Ignore Count Error, and
           callback();
@@ -1005,14 +1006,14 @@ exports.table = function(req,res){
 
           var pageFooter = "";
           var separator = "";
-          if (openQueries > 0) {
+          if (openQueries != 0) {
             pageFooter += '<a href="/list/WorkerQueue.html?'
                            +'measure='+ param.measure
                            +'&type=overpass&status=open'+
                            '"><b>Offene Queries: '+openQueries+'.</b></a> ';
             separator = "<br>";
           }
-          if (errorQueries > 0) {
+          if (errorQueries != 0) {
               separator = "<br>";
               pageFooter += '<a href="/list/WorkerQueue.html?'
                            +'measure='+ param.measure
@@ -1047,10 +1048,10 @@ exports.table = function(req,res){
         if (param.csv) {
           var table = generateCSVTable(param,header,firstColumn,table,";");
 
-          if (openQueries > 0 ) {
+          if (openQueries != 0 ) {
             table = "Achtung: Es laufen noch "+openQueries+" Overpass Abfragen, das Ergebnis ist eventuell unvollständig\n"+table;
           }
-          if (errorQueries > 0 ) {
+          if (errorQueries != 0 ) {
             table = "Achtung: Es liegen "+errorQueries+" Overpass Fehler vor, das Ergebnis ist eventuell unvollständig\n"+table;
           }
 
@@ -1068,3 +1069,37 @@ exports.table = function(req,res){
       })
 
 }
+
+
+ exports.overpass = function(req,res) {
+    debug("exports.overpass");
+    var db = res.db;
+
+    var measure = req.params["measure"];
+    var schluessel = req.params["schluessel"];
+
+
+    var sub = req.query.sub;
+    if (typeof(sub) == 'undefined') sub = "";
+      var query = generateQuery(measure,schluessel,sub);
+
+    if (!query) query = "Für die Aufgabe "+measure+" ist keine Query definiert";
+
+    var text = "<h1>Overpass Abfrage</h1>"
+    text += "<table><tr><td>Aufgabe</td><td>"+measure+"</td></tr> \
+              <tr><td>Schl&uuml;ssel</td><td>"+schluessel+"</td></tr></table>";
+
+    text += "<pre>"+query+"</pre>"
+
+    text += '<p>Bitte die Query in die Zwischenablage kopieren und in <a href=http://overpass-turbo.eu>Overpass Turbo</a> einf&uuml;gen</p>';
+
+    text += '<p> Oder <a href=http://overpass-turbo.eu/?Q='+encodeURIComponent(query)+'&R>hier</a> klicken';
+    if (measure=="AddrWOStreet") {
+      text += '<p>Achtung, die Overpass Abfrage und die Abfrage von User:Gehrke unterschieden sich etwas. Siehe <a href="http://wiki.openstreetmap.org/wiki/DE:Overpass_API/Beispielsammlung#Hausnummern_ohne_Stra.C3.9Fe_finden">wiki</a>.</p>';
+    }
+    var page = htmlPage.create();
+    page.content = text;
+
+    res.set('Content-Type', 'text/html');
+      res.end(page.generatePage());
+  }

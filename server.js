@@ -16,8 +16,10 @@ var display          = require('./display.js');
 var util             = require('./util.js');
 var plotlyexport     = require('./plotlyexport.js');
 
-var importDataCollection = require('./controller/ImportDataCollection.js');
+var importDataCollection    = require('./controller/ImportDataCollection.js');
 var displayAggregationTable = require('./controller/displayAggregationTable.js')
+var displayText             = require('./controller/displayText.js')
+var displayObject           = require('./controller/displayObject.js')
 
 var app = express();
 
@@ -32,11 +34,11 @@ debug("Start Async Configuration");
 async.auto( {
 		config: config.initialise,
 		mongodb: ["config",config.initialiseMongoDB],
-        datatarget: ["config",DataTarget.initialise],
-        workerqueue: ["postgresdb",WorkerQueue.initialise],
-        datacollection: ["postgresdb",DataCollection.initialise],
+        datatarget: ["config",DataTarget.initialise.bind(DataTarget)],
+        workerqueue: ["config",WorkerQueue.initialise.bind(WorkerQueue)],
+        datacollection: ["config",DataCollection.initialise.bind(DataCollection)],
 		dbdata:  ["mongodb", loadDataFromDB.initialise],
-		startQueue: ["dbdata",queue.startQueue]
+		startQueue: ["dbdata","workerqueue","datacollection","datatarget",queue.startQueue]
 
 
 		//	,insertJobs: ["startQueue",queue.insertJobs]
@@ -66,16 +68,15 @@ app.use(function(req, res, next){
     next();
 });
 
-app.use('/count.html', display.count);
-app.use('/index.html', display.main);
+app.use('/index.html', displayText.main);
 app.use('/waplot/:measure.html', plotlyexport.plot);
 app.use('/wavplot/:measure.html', plotlyexport.plotValues);
 app.use('/import/csvimport.html', importDataCollection.showPage);
 app.use('/import/:measure.html', display.importApotheken);
 app.use('/table/:measure.:type', displayAggregationTable.table);
-app.use('/object/:collection/:id.html', display.object);
-app.use('/overpass/:measure/:schluessel.html', display.overpass);
-app.use('/wa/:aufgabe.html',display.wochenaufgabe);
+app.use('/object/:collection/:id.html', displayObject.object);
+app.use('/overpass/:measure/:schluessel.html', displayAggregationTable.overpass);
+app.use('/wa/:aufgabe.html',displayText.wochenaufgabe);
 app.use('/list/:query.html',display.query);
 app.use('/', express.static(path.resolve(__dirname, "html")));
 

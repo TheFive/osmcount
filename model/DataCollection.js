@@ -45,6 +45,7 @@ DataCollectionClass.prototype.import = postgresMapper.import;
 DataCollectionClass.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
 DataCollectionClass.prototype.insertData = postgresMapper.insertData;
 DataCollectionClass.prototype.export = postgresMapper.export;
+DataCollectionClass.prototype.find = postgresMapper.find;
 
 
 
@@ -350,32 +351,6 @@ DataCollectionClass.prototype.save = function(data,cb) {
 
 
 
-function findMongoDB(query,options,cb) {
-  debug('findMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = 'DataCollection';
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.find(query,options).toArray(cb);
-}
-
-
-
-function findPostgresDB(query,options,cb) {
-  debug('findPostgresDB');
-  postgresMapper.find(map,query,options,cb);
-}
-
-DataCollectionClass.prototype.find = function(query,options,cb) {
-  debug('find');
-  if (this.databaseType == 'mongo') {
-   findMongoDB(query,options,cb);
-  }
-  if (this.databaseType == "postgres") {
-    findPostgresDB (query,options,cb);
-  }
-}
 
 
 module.exports  = new DataCollectionClass();

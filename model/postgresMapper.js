@@ -31,7 +31,11 @@ function createWhereClause(map,query) {
       var op = '=';
       if (map.regex[k] == true) op = '~';
       if (whereClause != '') whereClause += " and ";
-      whereClause += map.keys[k]+' '+op+" '"+query[k]+"'";
+      var value = query[k];
+      if (value instanceof Date) {
+        value = value.toISOString();
+      }
+      whereClause += map.keys[k]+' '+op+" '"+value+"'";
     }
   }
   debug("generated where clause: %s",whereClause);
@@ -71,8 +75,30 @@ function createFieldList(map) {
   return fieldList;
 }
 
-exports.find = function find(map,query,options,cb) {
-  debug('find');
+function findMongoDB(query,options,cb) {
+  debug('findMongoDB');
+  var db = config.getMongoDB();
+  var collectionName = this.collectionName;
+
+  // Fetch the collection test
+  var collection = db.collection(collectionName);
+  collection.find(query,options).toArray(cb);
+}
+
+exports.find = function find(query,options,cb) {
+  debug('%s.find',this.tableName);
+
+  if (this.databaseType == 'mongo') {
+   findMongoDB(query,options,cb);
+   return;
+  }
+  should(this.databaseType).equal("postgres");
+  var map = this.map;
+  if (typeof(options) == 'function') {
+    cb = options;
+    options = null;
+  }
+
   var whereClause = createWhereClause(map,query);
   var fieldList = createFieldList(map);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
@@ -88,10 +114,6 @@ exports.find = function find(map,query,options,cb) {
       for (k in map.invertKeys) {
         json[map.invertKeys[k]] = row[k];
       }
-      console.log("convertet JSON:");
-      console.dir(json);
-      console.log("Original Row");
-      console.dir(row);
       result.push(json);
     })
     query.on('end',function(){
@@ -106,7 +128,7 @@ exports.find = function find(map,query,options,cb) {
 }
 
 exports.createTable = function(cb) {
-  debug('exports.createTable');
+  debug('%s.createTable',this.tableName);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
       cb(err);
@@ -131,7 +153,7 @@ exports.createTable = function(cb) {
 } 
 
 exports.dropTable = function(cb) {
-  debug('exports.dropTable');
+  debug('%s.dropTable',this.tableName);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
      debug('exports.dropTable->connected');
     if (err) {
@@ -151,7 +173,7 @@ exports.dropTable = function(cb) {
 }
 
 exports.initialise = function initialise(dbType,callback) {
-  debug('exports.initialise');
+  debug('%s.initialise',this.tableName);
   config.initialise();
 
   if (typeof(dbType) != 'function') {
@@ -177,7 +199,7 @@ var getStream = function (filename) {
 
 
 exports.import = function(filename,cb) {
-  debug('exports.import')
+  debug('%s.import',this.tableName);
   should(this.databaseType).equal('postgres');
   var me = this;
 
@@ -203,7 +225,7 @@ function countMongoDB(query,cb) {
 }
 
 exports.count = function(query,cb) {
-  debug('exports.count');
+  debug('%s.count',this.tableName);
   if (this.databaseType == "mongo") {
     countMongoDB(query,cb).bind(this);
   }
@@ -297,7 +319,7 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream
 
 
 exports.insertData = function insertData(data,cb) {
-  debug('exports.insertData');
+  debug('%s.insertData',this.tableName);
   if (this.databaseType == "mongo") {
     should.exist(null,"mongodb not implemented yet");
   }
@@ -351,7 +373,7 @@ function exportCollection(callback,result)
 
 // Exports all DataCollection Objects to a JSON File
 exports.export = function(filename,cb){
-  debug('exports.export')
+  debug('%s.export',this.tableName);
   should(this.databaseType).equal('mongo');
   var db = config.getMongoDB();
   should.exist(db,"MondoDB does not exist, not started ?");
