@@ -36,6 +36,7 @@ function WorkerQueue() {
   this.map= {
     tableName:"workerqueue",
     regex:{schluessel:true},
+    hstore:["error"],
     keys: {schluessel:"key",
            source:'source',
            measure:'measure',

@@ -34,6 +34,7 @@ function DataCollectionClass() {
                             
   this.map={tableName:'datacollection',
          regex:{schluessel:true},
+         hstore: ["missing","existing"],
          keys:{
           schluessel:'key',
           source:'source',

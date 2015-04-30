@@ -148,7 +148,6 @@ exports.find = function find(query,options,cb) {
       }
       for (var i = 0;i<map.hstore.length;i++) {
         var k = map.hstore[i];
-        console.log(k+row[k]);
         json[k]=row[k];
       }
       result.push(json);
