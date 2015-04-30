@@ -661,9 +661,9 @@ exports.table = function(req,res){
   debug("exports.table");
   var db = res.db;
   // To be Improved with Query or Aggregation Statments
-  var timeAggregate;
-  var timeVorgabe;
-  var timeTableGeneration;
+  var timeAggregate = 0;
+  var timeVorgabe = 0;
+  var timeTableGeneration = 0;
 
   var param = {};
   setParams(req,param);
@@ -755,11 +755,12 @@ exports.table = function(req,res){
       }))},
       function getVorgabe(callback) {
         debug("getVorgabe");
-        timeVorgabe = new Date().getTime();
+
         if (   ((param.measure=="Apotheke" ) ||
                 (param.measure=="ApothekePLZ_DE" ) ||
                 (param.measure == "Apotheke_AT"))
             && param.sub =="") {
+          timeVorgabe = new Date().getTime();
           DataTarget.aggregate(param,function getVorgabeCB(err, data) {
             debug("getVorgabeCB");
             timeVorgabe = new Date().getTime() - timeVorgabe;
@@ -784,10 +785,9 @@ exports.table = function(req,res){
         debug("getWorkerQueueCount");
         var date = new Date();
         var query = {status:"open",
-                          exectime: {$lte: date},
-                          schluessel: {$regex: "^"+param.location},
+                    schluessel: param.location,
                           measure:param.measure};
-        WorkerQueue.count(query,function getWorkerQueueCountCB(err, count) {
+        WorkerQueue.countUntilNow(query,function getWorkerQueueCountCB(err, count) {
           debug("getWorkerQueueCount");
           if (err)  {
             openQueries = "#Error#";
@@ -803,10 +803,10 @@ exports.table = function(req,res){
         debug("getErrorQueueCount");
         var date = new Date();
         var query = {status:"error",
-                          exectime: {$lte: date},
-                          schluessel: {$regex: "^"+param.location},
+                        
+                          schluessel: param.location,
                           measure:param.measure};
-        WorkerQueue.count(query,function getWorkerQueueCountCB(err, count) {
+        WorkerQueue.countUntilNow(query,function getWorkerQueueCountCB(err, count) {
           debug("getWorkerQueueCount");
           if (err) {
             errorQueries = "#Error#"

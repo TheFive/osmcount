@@ -1,6 +1,47 @@
 var should = require('should');
+var async = require('async')
 
 var postgresMapper = require('../model/postgresMapper.js');
+var util = require('../util.js');
+
+function ClassAClass() {
+  this.databaseType = "postgres"; 
+  this.tableName = "ClassA";
+  this.collectionName = "ClassA";
+  this.createTableString = 'CREATE TABLE ClassA \
+              (field_1 text, \
+               field_2 text, \
+               field_hs hstore) \
+                WITH ( OIDS=FALSE ); ';
+                            
+  this.map={tableName:'ClassA',
+         regex:{},
+         hstore:["field_hs"],
+         keys:{
+          field_1:'field_1',
+          field_2:'field_2',
+         }}
+}
+ClassAClass.prototype.createTable = postgresMapper.createTable;
+ClassAClass.prototype.dropTable = postgresMapper.dropTable;
+ClassAClass.prototype.insertData = postgresMapper.insertData;
+ClassAClass.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
+ClassAClass.prototype.find = postgresMapper.find;
+ClassAClass.prototype.initialise = postgresMapper.initialise;
+
+ClassAClass.prototype.getInsertQueryString = function getInsertQueryString() {
+  return "INSERT into classa (field_1,field_2,field_hs) VALUES($1,$2,$3)";
+}
+
+ClassAClass.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
+  var field_1 = item.field_1;
+  var field_2 = item.field_2;
+  var field_hs  = util.toHStore(item.field_hs)
+  return  [field_1,field_2,field_hs];
+}
+classA = new ClassAClass();
+
+
 
 describe('postgresMapper',function(){
   describe('invertMap',function() {
@@ -28,5 +69,33 @@ describe('postgresMapper',function(){
       (function() {postgresMapper.invertMap(map)}).should.throw(Error);
       bddone();
     })
+  })
+  describe('invoke methods with classA', function () {
+    before(function(bddone) {
+      async.series([
+        function(done) {classA.initialise("postgres",done)},
+        function(done) {classA.dropTable(done)},
+        function(done) {classA.createTable(done)}
+      ],function(err) {
+        if (err) console.dir(err);
+        should.not.exist(err);
+        bddone();
+      });
+    });
+    it('should insert an object', function(bddone) {
+      var testData = {field_1:"1",field_2:"2",field_hs:{f1:"1",f2:"2"}};
+      var result;
+      async.series([
+        function(done) {classA.insertData([testData],done);},
+        function(done) {classA.find({},function(err,r){result = r,done(err)})}
+      ],function(err) {
+        should.not.exist(err);
+        should(result.length).equal(1);
+        should(testData).eql(result[0]);
+        bddone();
+      })
+      
+    })
+
   })
 })

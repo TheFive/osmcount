@@ -29,12 +29,13 @@ function createWhereClause(map,query) {
   for (var k in map.keys) {
     if (typeof(query[k])!='undefined'){
       var op = '=';
-      if (map.regex[k] == true) op = '~';
-      if (whereClause != '') whereClause += " and ";
       var value = query[k];
       if (value instanceof Date) {
         value = value.toISOString();
       }
+      
+      if (map.regex[k] == true) op = '~';
+      if (whereClause != '') whereClause += " and ";
       whereClause += map.keys[k]+' '+op+" '"+value+"'";
     }
   }
@@ -53,6 +54,31 @@ exports.countPostgres = function count(map,query,cb) {
       return;
     }
     var queryStr = "select count(*) from "+map.tableName+ ' '+whereClause;
+    console.log(queryStr);
+    client.query(queryStr,function(err,result) {
+      should.not.exist(err);
+      var count = result.rows[0].count;
+      cb (null,count);
+      pgdone();
+      return;
+    })
+  })
+}
+
+exports.countUntilNowPostgres = function countUntilNow(map,query,cb) {
+  debug('count');
+  var whereClause = createWhereClause(map,query);
+  var now = new Date();
+  whereClause += " and exectime <= '"+now.toISOString() +"'";
+
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (err) {
+      cb(err,null);
+      pgdone();
+      return;
+    }
+    var queryStr = "select count(*) from "+map.tableName+ ' '+whereClause;
+    console.log(queryStr);
     client.query(queryStr,function(err,result) {
       should.not.exist(err);
       var count = result.rows[0].count;
@@ -71,6 +97,11 @@ function createFieldList(map) {
     if (fieldList !='') fieldList += ",";
     fieldList += k;
   } 
+  for (var i =0;i<map.hstore.length;i++) {
+    var k = map.hstore[i];
+    if (fieldList !='') fieldList += ",";
+    fieldList += "hstore_to_json("+k+") as "+k;
+  }
   debug('FieldList %s',fieldList);
   return fieldList;
 }
@@ -108,11 +139,17 @@ exports.find = function find(query,options,cb) {
       return;
     }
     var result = [];
-    var query = client.query("select "+fieldList+" from "+map.tableName+ ' '+whereClause);
+    var queryStr = "select "+fieldList+" from "+map.tableName+ ' '+whereClause;
+    var query = client.query(queryStr);
     query.on('row',function(row){
       var json = {};
       for (k in map.invertKeys) {
         json[map.invertKeys[k]] = row[k];
+      }
+      for (var i = 0;i<map.hstore.length;i++) {
+        var k = map.hstore[i];
+        console.log(k+row[k]);
+        json[k]=row[k];
       }
       result.push(json);
     })
@@ -185,6 +222,9 @@ exports.initialise = function initialise(dbType,callback) {
   }
   if (this.databaseType == 'postgres') {
     exports.invertMap(this.map);
+    if (typeof(this.map.hstore)=='undefined') {
+      this.map.hstore = [];
+    }
   }
   if (callback) callback();
 }
@@ -231,6 +271,18 @@ exports.count = function(query,cb) {
   }
   if (this.databaseType == "postgres") {
     exports.countPostgres(this.map,query,cb);
+  }
+}
+
+exports.countUntilNow = function(query,cb) {                          
+  debug('%s.countUntilNow',this.tableName);
+  if (this.databaseType == "mongo") {
+    query.exectime =  {$lte: date};
+    query.schluessel = {$regex: "^"+query.schluessel};
+    countMongoDB(query,cb).bind(this);
+  }
+  if (this.databaseType == "postgres") {
+    exports.countUntilNowPostgres(this.map,query,cb);
   }
 }
 

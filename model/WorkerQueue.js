@@ -18,8 +18,18 @@ function WorkerQueue() {
   this.tableName = "WorkerQueue";
   this.collectionName = "WorkerQueue";
   this.createTableString =
-    'CREATE TABLE workerqueue (id bigserial primary key,measure text,key text,stamp timestamp with time zone, \
-          status text,  exectime timestamp with time zone,type text,query text,source text,prio integer,error hstore) \
+    'CREATE TABLE workerqueue  \
+      (id bigserial primary key, \
+       measure text, \
+       key text, \
+       stamp timestamp with time zone, \
+        status text, \
+        exectime timestamp with time zone, \
+        type text, \
+        query text, \
+        source text, \
+        prio integer, \
+        error hstore) \
         WITH ( \
           OIDS=FALSE \
         ); '
@@ -32,15 +42,20 @@ function WorkerQueue() {
            status:'status',
            type:'type',
            timestamp:'stamp',
-           id:'id'
+           exectime:'exectime',
+           id:'id',
+           query:'query',
+           source:'source',
+           prio:'prio'
          }
-}
+  }
 }
 
 WorkerQueue.prototype.dropTable = postgresMapper.dropTable;
 WorkerQueue.prototype.createTable = postgresMapper.createTable;
 WorkerQueue.prototype.initialise = postgresMapper.initialise;
 WorkerQueue.prototype.count = postgresMapper.count;
+WorkerQueue.prototype.countUntilNow = postgresMapper.countUntilNow;
 WorkerQueue.prototype.import = postgresMapper.import;
 WorkerQueue.prototype.insertStreamToPostgres = postgresMapper.insertStreamToPostgres;
 WorkerQueue.prototype.insertData = postgresMapper.insertData;

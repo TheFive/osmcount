@@ -25,9 +25,15 @@ function DataTargetClass() {
   this.databaseType = "postgres"; 
   this.tableName = "DataTarget";
   this.collectionName = "DataTarget";
-  this.createTableString = "CREATE TABLE datatarget ( key text, measure text, target double precision, \
-      name text, sourceText text, sourceLink text, id bigserial NOT NULL, \
-      CONSTRAINT id_datatarget PRIMARY KEY (id) )"
+  this.createTableString = "CREATE TABLE datatarget \
+      ( key text, \
+        measure text,  \
+        target double precision, \
+        name text, \
+        sourceText text,  \
+        sourceLink text,  \
+        id bigserial NOT NULL, \
+        CONSTRAINT id_datatarget PRIMARY KEY (id) )"
   this.map= {
     tableName:"datatarget",
     regex:{schluessel:true},

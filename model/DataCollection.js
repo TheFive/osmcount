@@ -18,8 +18,14 @@ function DataCollectionClass() {
   this.databaseType = "postgres"; 
   this.tableName = "DataCollection";
   this.collectionName = "DataCollection";
-  this.createTableString = 'CREATE TABLE datacollection (measure text,key text,stamp timestamp with time zone, \
-                  count integer,  missing hstore,existing hstore,source character(64)) WITH ( OIDS=FALSE ); ';
+  this.createTableString = 'CREATE TABLE datacollection \
+              (measure text, \
+               key text, \
+               stamp timestamp with time zone, \
+               count integer,  \
+               missing hstore, \
+               existing hstore, \
+               source character(64)) WITH ( OIDS=FALSE ); ';
   this.createIndexString = 'CREATE INDEX datacollection_stamp_idx ON datacollection  \
                               USING btree (stamp); \
                             CREATE INDEX datacollection_measure_key_idx ON datacollection  \
