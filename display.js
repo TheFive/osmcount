@@ -146,9 +146,12 @@ exports.query=function(req,res) {
     	               if (typeof(req.query.status) != 'undefined'){
     	               	query.status = req.query.status;
     	               }
-    	               if (typeof(req.query.measure) != 'undefined'){
-    	               	query.measure = req.query.measure;
-    	               }
+                       if (typeof(req.query.measure) != 'undefined'){
+                        query.measure = req.query.measure;
+                       }
+                       if (typeof(req.query.schluessel) != 'undefined'){
+                        query.schluessel = req.query.schluessel;
+                       }
 
      	               options={"sort":"exectime"}
     	               break;

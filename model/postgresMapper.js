@@ -54,7 +54,6 @@ exports.countPostgres = function count(map,query,cb) {
       return;
     }
     var queryStr = "select count(*) from "+map.tableName+ ' '+whereClause;
-    console.log(queryStr);
     client.query(queryStr,function(err,result) {
       should.not.exist(err);
       var count = result.rows[0].count;
@@ -78,7 +77,6 @@ exports.countUntilNowPostgres = function countUntilNow(map,query,cb) {
       return;
     }
     var queryStr = "select count(*) from "+map.tableName+ ' '+whereClause;
-    console.log(queryStr);
     client.query(queryStr,function(err,result) {
       should.not.exist(err);
       var count = result.rows[0].count;

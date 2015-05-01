@@ -21,7 +21,7 @@ exports.wochenaufgabe = function(req,res) {
 
 	page.title = wochenaufgabe.map[aufgabe].title;
 
-	page.content = fs.readFileSync(path.resolve(__dirname, "html",aufgabe+".html"));
+	page.content = fs.readFileSync(path.resolve(__dirname, "..","html",aufgabe+".html"));
 	page.menu = fs.readFileSync(path.resolve(__dirname, "html","menu.html"));
  	res.set('Content-Type', 'text/html');
 	res.end(page.generatePage());

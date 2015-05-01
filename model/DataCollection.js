@@ -153,14 +153,14 @@ function aggregatePostgresDB(param,cb) {
       var value = param.sub.substr(8,99);
       cellCalculation = "sum((missing->'"+value+"')::int) as cell"
       if (param.subPercent == "Yes") {
-        cellCalculation = "(sum((missing->'"+value+"')::float))/sum(count) as cell";
+        cellCalculation = "case when sum(count)=0 then 1 else (sum((missing->'"+value+"')::float))/sum(count) end as cell";
       }
     }
      if (param.sub.match(/existing*/)) {
       var value = param.sub.substr(9,99);
       cellCalculation =  "sum((existing->'"+value+"')::int) as cell";
       if (param.subPercent == "Yes") {
-        cellCalculation = "(sum((existing->'"+value+"')::float))/sum(count) as cell";
+        cellCalculation = "case when sum(count)=0 then 1 else (sum((existing->'"+value+"')::float))/sum(count) end as cell";
       }
     }
     var queryStr = "SELECT substr(key,1,$1) as k,\
@@ -171,7 +171,7 @@ function aggregatePostgresDB(param,cb) {
                                datacollection where measure = $3 and stamp >= $4  and stamp <= $5\
                                 order by to_char(stamp,$2),stamp desc) \
                  and key like '"+paramLocation+"' \
-              group by k,t;"
+              group by k,t order by t;"
 
     var query = client.query(queryStr,bindParam);
     query.on('error', function(err){
@@ -179,7 +179,7 @@ function aggregatePostgresDB(param,cb) {
       pgdone();
       cb(err,null);
     });
-    query.on('row',function(row){
+    query.on('row',function aggregatePostgresDBQueryOnRow(row){
       var r = {};
       r._id = {};
       r._id.row = row.k;
@@ -190,7 +190,7 @@ function aggregatePostgresDB(param,cb) {
 
       result.push(r);
     });
-    query.on('end',function() {
+    query.on('end',function aggregatePostgresDBQueryOnEnd () {
       pgdone();
       cb(null,result);
     })

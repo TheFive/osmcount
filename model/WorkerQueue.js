@@ -214,13 +214,15 @@ function saveTaskPostgresDB(task,cb) {
     var type = task.type;
     var query = task.query;
     var source = task._id;
+    var error = util.toHStore(task.error);
     var id = task.id;
 
 
-    client.query("update workerqueue SET (key,stamp,measure,status,exectime,type,query,source)  \
-                                         = ($1,$2,$3,$4,$5,$6,$7,$8) \
-                                         WHERE id = $9",
-                        [key,stamp,measure,status,exectime,type,query,source,id], function(err,result) {
+    client.query("update workerqueue SET (key,stamp,measure,status,exectime,type,query,source,error)  \
+                                         = ($1,$2,$3,$4,$5,$6,$7,$8,$9) \
+                                         WHERE id = $10",
+                        [key,stamp,measure,status,exectime,type,query,source,error,id], function(err,result) {
+
       should.not.exist(err);
       debug('Saved Rows %s with id %s status %s',result.rowCount,id,status);
       pgdone();

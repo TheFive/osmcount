@@ -54,6 +54,10 @@ async.auto( {
 process.on( 'SIGINT', function() {
   console.log( "\nRequest for Shutdown OSMCount, Please wait for OverpassQuery. SIGINT (Ctrl-C)" );
   queue.processSignal = 'SIGINT';
+  console.log("Overpass Running:"+queue.overpassRunning);
+  console.log("Overpass Running since:"+(new Date(queue.overpassStartTime)).toLocaleString());
+  console.log('Overpass Measure:'+queue.overpassMeasure);
+  console.log('Overpass Location:'+queue.overpassLocation);
   queue.processExit = function() {process.exit();}
 })
 
@@ -70,10 +74,10 @@ app.use(function(req, res, next){
 
 app.use('/index.html', displayText.main);
 app.use('/waplot/:measure.html', plotlyexport.plot);
-app.use('/wavplot/:measure.html', plotlyexport.plotValues);
 app.use('/import/csvimport.html', importDataCollection.showPage);
 app.use('/import/:measure.html', display.importApotheken);
 app.use('/table/:measure.:type', displayAggregationTable.table);
+app.use('/object/WorkerQueue/IgnoreError', displayObject.ignoreError);
 app.use('/object/:collection/:id.html', displayObject.object);
 app.use('/overpass/:measure/:schluessel.html', displayAggregationTable.overpass);
 app.use('/wa/:aufgabe.html',displayText.wochenaufgabe);

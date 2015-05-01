@@ -308,7 +308,7 @@ function generateFilterTable(param,header) {
   // Plotly Integration
   filterTableLH += '<th class = "menu">Graphen</th>';
   filterTableL1 += '<td class = "menu">'+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige Anzahl als Grafik</a>'+'</td>';
-  filterTableL2 += '<td class = "menu">'+'<a href="/wavplot/'+param.measure+'.html?location='+param.location+'">Zeige Tags als Grafik</a>'+'</td>';
+  filterTableL2 += '<td class = "menu">--</a>'+'</td>';
   // CSV Export
   filterTableLH += '<th class = "menu">sonstiges</th>';
   filterTableL1 += '<td class = "menu">'+gl("Als CSV Downloaden",{csv:true},param)+'</td>';
@@ -748,9 +748,11 @@ exports.table = function(req,res){
           res.end("Error in Aggregate: "+JSON.stringify(err));
           console.log("Table Function, Error occured:");
           console.log(err);
+          return;
           ;
+        } else {
+          items = data;
         }
-        items = data;
         callback(err);
       }))},
       function getVorgabe(callback) {
@@ -1009,7 +1011,7 @@ exports.table = function(req,res){
           if (openQueries != 0) {
             pageFooter += '<a href="/list/WorkerQueue.html?'
                            +'measure='+ param.measure
-                           +'&type=overpass&status=open'+
+                           +'&type=overpass&status=open&schluessel='+param.location+
                            '"><b>Offene Queries: '+openQueries+'.</b></a> ';
             separator = "<br>";
           }

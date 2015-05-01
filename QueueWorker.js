@@ -16,13 +16,15 @@ exports.processSignal = '';
 exports.processExit;
 
 
-function getWorkingJob(cb) {
-  debug("getWorkingJob(cb)");
+function getHangingJob(cb) {
+  debug("getHangingJob(cb)");
+
+  // First check to find an working Job for Correction
   WorkerQueue.getWorkingTask(function(err, obj)
   {
-    debug("getWorkingJob->CB("+err+","+obj+")");
+    debug("getHangingJob->CB("+err+","+obj+")");
     if (err) {
-      console.log("Error occured in function: QueueWorker.getWorkingJob");
+      console.log("Error occured in function: QueueWorker.getHangingJob");
       console.log(err);
     }
 
@@ -126,12 +128,15 @@ function doConsole(cb,results) {
   cb(null,job);
 }
 
+exports.overpassRunning = false;
+exports.overpassStartTime= 0;
+exports.overpassLocation= "Not Defined";
+exports.overpassMeasure = "Not Defined";
 
 function doOverpass(cb,results) {
   debug("doOverpass(cb,"+results+")");
   var job=results.readjob;
   var startTime = new Date().getTime();
-  var startOverpass;
   var startSave;
   var endSave;
   //debug(JSON.stringify(job));
@@ -144,10 +149,15 @@ function doOverpass(cb,results) {
       result.source = job.source;
       async.series( [
         function (cb) {
-          startOverpass =new Date().getTime();
+          should(exports.overpassRunning).isFalse;
+          exports.overpassRunning = true;
+          exports.overpassMeasure = measure;
+          exports.overpassLocation = job.schluessel;
+          exports.overpassStartTime =new Date().getTime();
           lod.runOverpass(query,job,result,cb);
         },
         function (cb) {
+          exports.overpassRunning = false;
           startSave = new Date().getTime();
           saveMeasure(result,cb);
 
@@ -164,8 +174,8 @@ function doOverpass(cb,results) {
           } else {
             job.status="done";
           }
-          var time1 = startOverpass - startTime;
-          var time2 = startSave - startOverpass;
+          var time1 = exports.overpassStartTime - startTime;
+          var time2 = startSave - exports.overpassStartTime;
           var time3 = endSave - startSave;
           var cvsLine =   '"'+job.exectime+'",'
                          +'"'+job.timestamp+'",'
@@ -334,7 +344,8 @@ function runNextJobs(callback) {
   async.auto({
     doNextJob: doNextJob
   },
-    function(err,results) {
+    function runNextJobsCB(err,results) {
+      debug('runNextJobsCB');
       if (err) {
         console.log("Error occured in function: QueueWorker.doNextJob");
         console.log(err);
@@ -360,7 +371,7 @@ exports.runNextJobs = runNextJobs;
 
 function correctData(callback) {
   debug("correctData(cb)");
-  async.auto( {readjob:     getWorkingJob,
+  async.auto( {readjob:     getHangingJob,
              correctData: ["readjob",checkState],
             saveDone:    ["correctData", saveJobState]
     },

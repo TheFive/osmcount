@@ -101,7 +101,8 @@ describe('DataCollection', function() {
                                 ('test','1022',to_date('2012-10-01','YYYY-MM-DD'),23,'1','A=>3','fixme=>1022'),\
                                 ('test','101',to_date('2012-11-01','YYYY-MM-DD'),11,'2','B=>1','fixme=>1'),\
                                 ('test','1021',to_date('2012-11-01','YYYY-MM-DD'),13,'2','A=>0','fixme=>2'),\
-                                ('test','1022',to_date('2012-11-01','YYYY-MM-DD'),24,'2','B=>1','fixme=>3');",
+                                ('test','1022',to_date('2012-11-01','YYYY-MM-DD'),24,'2','B=>1','fixme=>3'), \
+                                ('test','105',to_date('2012-11-01','YYYY-MM-DD'),0,'3','B=>0','fixme=>0');",
           bddone);
 
       });
@@ -146,12 +147,13 @@ describe('DataCollection', function() {
         DataCollection.aggregate(param,function done(err,data) {
           should.equal(err,null);
           should(data).match([ { _id: { row: '101', col: '2012' }, cell: 11 },
+                               { _id: { row: '1021', col: '2012' }, cell: 13 },
                                { _id: { row: '1022', col: '2012' }, cell: 24 },
-                               { _id: { row: '1021', col: '2012' }, cell: 13 } ]);
+                               { _id: { col: '2012', row: '105' }, cell: 0 } ]);
           bddone();
         })
       })
-      it('should group 2 timeline with last Values with percentage calculation', function(bddone) {
+      it('should group 2 timeline with last Values with percentage calculation missing', function(bddone) {
         param = {
               lengthOfKey:4,
               lengthOfTime:4,
@@ -162,8 +164,44 @@ describe('DataCollection', function() {
         DataCollection.aggregate(param,function done(err,data) {
           should.equal(err,null);
           should(data).match([ { _id: { row: '101', col: '2012' }, cell: 0.0909090909090909 },
+                               { _id: { row: '1021', col: '2012' }, cell: 0 },
                                { _id: { row: '1022', col: '2012' }, cell: 0.0416666666666667 },
-                               { _id: { row: '1021', col: '2012' }, cell: 0 } ]);
+                               { _id: { col: '2012', row: '105' }, cell: 1 } ]);
+          bddone();
+        })
+      })
+      it('should group 2 timeline with last Values with percentage calculation existing', function(bddone) {
+        param = {
+              lengthOfKey:4,
+              lengthOfTime:4,
+              measure:'test',
+              sub : "existing.fixme",
+              subPercent : "Yes"
+        };
+        DataCollection.aggregate(param,function done(err,data) {
+          should.equal(err,null);
+          should(data).match([ { _id: { row: '101', col: '2012' }, cell: 0.0909090909090909 },
+                               { _id: { row: '1021', col: '2012' }, cell: 0.153846153846154 },
+                               { _id: { row: '1022', col: '2012' }, cell: 0.125 },
+                               { _id: { col: '2012', row: '105' }, cell: 1 } ]);
+          bddone();
+        })
+      })
+      it('should group 2 timeline with last Values calculation existing', function(bddone) {
+        param = {
+              lengthOfKey:3,
+              lengthOfTime:4,
+              measure:'test',
+              sub : "existing.fixme",
+              subPercent : "no"
+        };
+        DataCollection.aggregate(param,function done(err,data) {
+          should.equal(err,null);
+          should.exist(data);
+          should(data.length).equal(3);
+          should(data).match([ { _id: { row: '101', col: '2012' }, cell: 1 },
+                                { _id: { row: '102', col: '2012' }, cell: 5 },
+                                { _id: { row: '105', col: '2012' }, cell: 0 }  ]);
           bddone();
         })
       })
