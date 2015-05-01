@@ -23,7 +23,7 @@ exports.invertMap = function invertMap(map) {
   }
 }
 
-function createWhereClause(map,query) {
+function createWhereClause(map,query,options) {
   debug('createWhereClause');
   var whereClause = ""
   for (var k in map.keys) {
@@ -37,6 +37,11 @@ function createWhereClause(map,query) {
       if (map.regex[k] == true) op = '~';
       if (whereClause != '') whereClause += " and ";
       whereClause += map.keys[k]+' '+op+" '"+value+"'";
+    }
+  }
+  if (options) {
+    if (typeof(options.sort)!='undefined' ) {
+      whereClause += 'order by '+map.keys[options.sort];
     }
   }
   debug("generated where clause: %s",whereClause);
@@ -128,7 +133,7 @@ exports.find = function find(query,options,cb) {
     options = null;
   }
 
-  var whereClause = createWhereClause(map,query);
+  var whereClause = createWhereClause(map,query,options);
   var fieldList = createFieldList(map);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
