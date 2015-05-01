@@ -1,0 +1,30 @@
+{
+    "version":1,
+    "collection":"DataCollection",
+    "count":3
+}
+{
+    "measure" : "Apotheke",
+    "schluessel" : "01053079",
+    "timestamp":"2014-12-12",
+    "count":1,
+    "missing":{"name":1},
+    "existing":{"fixme":1}
+}
+
+{
+    "measure" : "AnotherMeasure",
+    "schluessel" : "01053079",
+    "timestamp":"2014-12-12",
+    "count":1,
+    "missing":{"unknownField":1},
+    "existing":{"fixme":1}
+}
+{
+    "measure" : "AnotherMeasure",
+    "schluessel" : "01053080",
+    "timestamp":"2014-12-12",
+    "count":2,
+    "missing":{"unknownField":1},
+    "existing":{"fixme":1}
+}

@@ -3,20 +3,28 @@ var express = require('express');
 var async   = require('async');
 var path    = require('path');
 var debug   = require('debug')('server');
- debug.entry   = require('debug')('server:entry');
- debug.data    = require('debug')('server:data');
 
 // require own modules
 var config           = require('./configuration.js');
 var queue            = require('./QueueWorker.js');
-var loadDataFromDB   = require('./LoadDataFromDB.js');
-var loadOverpassData = require('./LoadOverpassData.js')
+var loadDataFromDB   = require('./model/LoadDataFromDB.js');
+var loadOverpassData = require('./model/LoadOverpassData.js')
+var DataTarget       = require('./model/DataTarget.js')
+var DataCollection   = require('./model/DataCollection.js')
+var WorkerQueue      = require('./model/WorkerQueue.js')
 var display          = require('./display.js');
 var util             = require('./util.js');
-var plotlyexport        = require('./plotlyexport.js');
+var plotlyexport     = require('./plotlyexport.js');
 
+var importDataCollection    = require('./controller/ImportDataCollection.js');
+var displayAggregationTable = require('./controller/displayAggregationTable.js')
+var displayText             = require('./controller/displayText.js')
+var displayObject           = require('./controller/displayObject.js')
 
 var app = express();
+
+
+exports.dirname = __dirname;
 
 util.initialise();
 
@@ -25,16 +33,19 @@ util.initialise();
 debug("Start Async Configuration");
 async.auto( {
 		config: config.initialise,
-		mongodb: ["config",config.initialiseDB],
+		mongodb: ["config",config.initialiseMongoDB],
+        datatarget: ["config",DataTarget.initialise.bind(DataTarget)],
+        workerqueue: ["config",WorkerQueue.initialise.bind(WorkerQueue)],
+        datacollection: ["config",DataCollection.initialise.bind(DataCollection)],
 		dbdata:  ["mongodb", loadDataFromDB.initialise],
-		startQueue: ["dbdata",queue.startQueue]
-		
-		
+		startQueue: ["dbdata","workerqueue","datacollection","datatarget",queue.startQueue]
+
+
 		//	,insertJobs: ["startQueue",queue.insertJobs]
-	}, 
+	},
 	function (err) {
 		if (err) throw(err);
-		
+
 		debug("Async Configuration Ready");
 	}
 )
@@ -43,6 +54,11 @@ async.auto( {
 process.on( 'SIGINT', function() {
   console.log( "\nRequest for Shutdown OSMCount, Please wait for OverpassQuery. SIGINT (Ctrl-C)" );
   queue.processSignal = 'SIGINT';
+  console.log("Overpass Running:"+queue.overpassRunning);
+  console.log("Overpass Running since:"+(new Date(queue.overpassStartTime)).toLocaleString());
+  console.log('Overpass Measure:'+queue.overpassMeasure);
+  console.log('Overpass Location:'+queue.overpassLocation);
+  queue.processExit = function() {process.exit();}
 })
 
 
@@ -52,21 +68,19 @@ debug("Initialising HTML Routes");
 // and publish Mongo DB to all functions via res
 app.use(function(req, res, next){
     debug("Url Called: %s",req.url);
-    res.db= config.getDB();
+    res.db= config.getMongoDB();
     next();
 });
 
-app.use('/count.html', display.count);
-app.use('/index.html', display.main);
+app.use('/index.html', displayText.main);
 app.use('/waplot/:measure.html', plotlyexport.plot);
-app.use('/wavplot/:measure.html', plotlyexport.plotValues);
-app.use('/import/csvimport.html', display.importCSV);
+app.use('/import/csvimport.html', importDataCollection.showPage);
 app.use('/import/:measure.html', display.importApotheken);
-app.use('/table.html', display.table);
-app.use('/table/:measure.:type', display.table);
-app.use('/object/:collection/:id.html', display.object);
-app.use('/overpass/:measure/:schluessel.html', display.overpass);
-app.use('/wa/:aufgabe.html',display.wochenaufgabe);
+app.use('/table/:measure.:type', displayAggregationTable.table);
+app.use('/object/WorkerQueue/IgnoreError', displayObject.ignoreError);
+app.use('/object/:collection/:id.html', displayObject.object);
+app.use('/overpass/:measure/:schluessel.html', displayAggregationTable.overpass);
+app.use('/wa/:aufgabe.html',displayText.wochenaufgabe);
 app.use('/list/:query.html',display.query);
 app.use('/', express.static(path.resolve(__dirname, "html")));
 
@@ -84,5 +98,3 @@ app.listen(config.getServerPort());
 
 
 console.log("Server has started and is listening to localhost:"+config.getServerPort());
-	
-

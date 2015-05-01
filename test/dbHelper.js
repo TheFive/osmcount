@@ -1,11 +1,12 @@
 var path = require('path');
 var fs   = require("fs");
 var async = require('async');
-var assert = require('assert');
+var should = require('should');
 
 
 
 exports.dropCollection = function dropCollection(db, collectionName, cb) {
+  should.exist(db,"Mongodb not initialised");
   var c = (db.collection(collectionName)); 
   if (!c) {
     cb();
@@ -29,6 +30,7 @@ exports.dropCollection = function dropCollection(db, collectionName, cb) {
 }
 
 exports.createCollection = function createCollection(db, collectionName, cb) {
+  should.exist(db,"Mongodb not initialised");
   db.createCollection(collectionName,function(err,data) {
     if (err) {
       err.occurs = "createCollection";
@@ -51,8 +53,8 @@ exports.fillCollection = function fillCollection(db,collectionName,filename,cb) 
       throw(err);
     }
   }
-  assert.notEqual(typeof(data),'undefined');
-  assert.notEqual(0,data.length);
+  should.exist(data);
+  should.exist(db,"Mongodb not initialised");
   db.collection(collectionName).insert(data,{w:1}, function(err,data) {
     if (err) {
       err.occurs = "fillCollection";

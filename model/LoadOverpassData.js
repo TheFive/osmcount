@@ -1,9 +1,11 @@
-var loadDataFromDB = require('./LoadDataFromDB.js');
-var configuration  = require('./configuration.js');
 var async          = require('async');
 var debug          = require('debug')('LoadOverpassData');
-var wochenaufgabe  = require('./wochenaufgabe.js');
+var should         = require('should');
 
+var configuration  = require('../configuration.js');
+var wochenaufgabe  = require('../wochenaufgabe.js');
+
+var loadDataFromDB = require('./LoadDataFromDB.js');
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
 
@@ -11,9 +13,9 @@ var wochenaufgabe  = require('./wochenaufgabe.js');
 
 
 queryBoundaries_DE='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"]->.a;\
-                     (rel(area.a)[admin_level];rel(area.a)[postal_code]);out;' 
-queryBoundaries_AT='[out:json][timeout:900];area[type=boundary]["int_name"="Österreich"]["admin_level"="2"];rel(area)[admin_level];out;' 
-queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="Schweiz"]["admin_level"="2"];rel(area)[admin_level];out;' 
+                     (rel(area.a)[admin_level];rel(area.a)[postal_code]);out;'
+queryBoundaries_AT='[out:json][timeout:900];area[type=boundary]["int_name"="Österreich"]["admin_level"="2"];rel(area)[admin_level];out;'
+queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="Schweiz"]["admin_level"="2"];rel(area)[admin_level];out;'
 
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
@@ -24,10 +26,11 @@ var request = require('request');
 
 function overpassQuery(query, cb, options) {
 	debug("overpassQuery");
-	
-    options = options || {};
-    request.post(options.overpassUrl || overpassApiLinkDE, function (error, response, body) {
-    	debug("overpassQuery->CB");
+	options = options || {};
+  var start = (new Date()).getTime();
+  request.post(options.overpassUrl || overpassApiLinkDE, function (error, response, body) {
+    var end = (new Date()).getTime();
+    	debug("overpassQuery->CB after %s seconds",(end-start)/1000);
 
         if (!error && response.statusCode === 200) {
             cb(undefined, body);
@@ -73,7 +76,7 @@ function loadBoundariesCH(cb,result) {
 
 function removeBoundariesData (cb,result) {
 	debug("removeBoundariesData");
-	var db = configuration.getDB();
+	var db = configuration.getMongoDB();
 	db.collection("OSMBoundaries").remove({},{w:1}, function (err,count) {
 		debug("removeBoundariesData->CB count = "+count);
 		cb(err,count);
@@ -95,19 +98,19 @@ function copyBoundaries(overpassStr,countryStr,boundaries) {
 		b.osm_type = boundariesOverpass[i].type;
 		b.osmcount_country=countryStr;
 		boundaries.push(b);
-	}	
+	}
 }
 
 function insertBoundariesData (cb,result) {
 	debug("insertBoundariesData");
-	var db = configuration.getDB();
-	
+	var db = configuration.getMongoDB();
+
 	var boundaries = [];
 
 	copyBoundaries(result.overpassCH,"CH",boundaries);
 	copyBoundaries(result.overpassDE,"DE",boundaries);
 	copyBoundaries(result.overpassAT,"AT",boundaries);
-	
+
 	db.collection("OSMBoundaries").insert(boundaries,{w:1},function(err,result){
 		debug("insertBoundariesData->CB");
 		cb(err,null);
@@ -117,7 +120,7 @@ function insertBoundariesData (cb,result) {
 
 exports.importBoundaries = function(job,cb)  {
 	debug("importBoundaries");
-	
+
 	// Start Overpass Query to load data
 	async.auto ({ overpassDE:    loadBoundariesDE,
 				  overpassAT:  ["overpassDE", loadBoundariesAT],
@@ -129,7 +132,7 @@ exports.importBoundaries = function(job,cb)  {
 				  	if (err) {
 				  		job.error = err;
 				  		job.status="error";
-				  		
+
 				  	}
 				  	else {
 				  		console.log("Loading Boundaries Done");
@@ -137,7 +140,7 @@ exports.importBoundaries = function(job,cb)  {
 				  	}
 				  	if (cb) cb(err);
 				  });
-				   
+
 }
 
 
@@ -147,7 +150,7 @@ exports.runOverpass= function(query, job,result, cb) {
 	var measure=job.measure;
 	var overpassStartTime = new Date().getTime();
 	overpassQuery(query,function(error, data) {
-		debug("runOverpass->CB(");	
+		debug("runOverpass->CB(");
 		var overpassEndTime = new Date().getTime();
 		var overpassTime = overpassEndTime - overpassStartTime;
 		job.overpassTime = overpassTime;
@@ -162,7 +165,7 @@ exports.runOverpass= function(query, job,result, cb) {
 			var jsonResult=JSON.parse(data).elements;
 			result.measure=measure;
 			result.count = jsonResult.length;
-			
+
 			// Berechne weitere Zahlen e.g. Missung und Existing Tags
 			var tagCounter = wochenaufgabe.map[measure].tagCounter;
 			if (tagCounter) tagCounter(jsonResult,result);
@@ -173,21 +176,24 @@ exports.runOverpass= function(query, job,result, cb) {
 
 
 
-exports.createQuery = function(aufgabe,exectime,referenceJob)
+exports.createQuery = function(referenceJob)
 {
-	debug("createQuery("+aufgabe+","+exectime+","+referenceJob+")");
+	debug("createQuery");
+	should.exist(referenceJob);
+  var jobs = [];
+	var aufgabe = referenceJob.measure;
+	var exectime = referenceJob.exectime;
 	var wa = wochenaufgabe.map[aufgabe];
 	if (typeof(wa) == 'undefined')  {
 	  referenceJob.error = "Wochenaufgabe nicht definiert";
-	  return;
+	  return jobs;
 	}
-	var jobs = [];
  	var blaetter = wa.map.list;
 
 	if (typeof(blaetter)!='undefined') {
 		keys = blaetter;
-		for (i =0;i<keys.length;i++) {	
-			debug(keys[i]);	
+		for (i =0;i<keys.length;i++) {
+			debug(keys[i]);
 			var job = {};
 			job.measure=aufgabe;
 			job.schluessel=keys[i];
@@ -196,9 +202,15 @@ exports.createQuery = function(aufgabe,exectime,referenceJob)
 			job.type = "overpass";
 			job.query = wochenaufgabe.map[aufgabe].overpass.query.replace(':schluessel:',job.schluessel);
 			job.query = job.query.replace(':timestamp:',exectime.toISOString());
-			job.source = referenceJob._id;
-			jobs.push(job);
+			if (typeof(referenceJob._id)!='undefined') {
+			  job.source = referenceJob._id;	
+			}
+			if (typeof(referenceJob.id)!='undefined') {
+			  job.source = referenceJob.id;	
+			}
 			
+			jobs.push(job);
+
 		}
 		return jobs;
 	}
@@ -220,8 +232,7 @@ exports.getBoundariesDumpFromOverpass = function(callback) {
 				console.log(err);
 				if (callback) callback();
 			}
-			
+
 		})
 
 }
-   
