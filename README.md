@@ -17,7 +17,7 @@ comparing the results numbers with a target number.
 
 On Top - of course - the vision is that the developers will learn about
 
-a) a nosql store (choosen: mongodb) or other databases
+a) dbms (choosen postgres)
 
 b) a server implemented with node.js
 
@@ -29,3 +29,4 @@ c) list can be extended...
 
 OSMCount managed it first "Wochenaufgabe" in February 2015.
 On the choosen server, there occured trouble with memory need, and so i have opened a branch to migrate everything to postgres, hoping, that the topic is better configurable there.
+In Mai 2015 the underlaying database was switched from mongodb to postgres.
