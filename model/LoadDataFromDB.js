@@ -9,7 +9,6 @@
 //
 
 var async    = require('async');
-var mc       = require('mongodb').MongoClient;
 var debug    = require('debug')('LoadDataFromDB');
 
 var config   = require('../configuration.js');
@@ -137,7 +136,6 @@ exports.sortAndReduce = function sortAndReduce(list) {
 
 exports.initialise = function (cb) {
   debug("initialise");
-  mongodb = config.getMongoDB();
 	if (!dataLoaded) {
 		async.series([
 			function(callback) {
