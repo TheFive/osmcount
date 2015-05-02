@@ -26,6 +26,7 @@ program
   .option('--mongo','Use MongoDB')
   .option('--postgres','Use PostgresDB')
   .option('--all')
+  .option('--createTable','drop and create Table before import')
   .parse(process.argv);
 
 var dirname = path.join(__dirname);
@@ -81,18 +82,55 @@ function importData(cb) {
   OSMData.initialise("postgres");
   debug('postgres initialised');
   async.series([
-  	function(callback) {
-		  if (program.datacollection || program.all) {
+    function(callback) {
+      if (program.datacollection && program.createTable) {
+        console.log("Create Table DataCollection (PostgresDB)");
+        async.series([
+          DataCollection.dropTable.bind(DataCollection),
+          DataCollection.createTable.bind(DataCollection),
+        ],function(err) {callback(err);});        
+      } else callback();    
+    },
+    function(callback) {
+      if (program.datatarget && program.createTable) {
+        console.log("Create Table DataTarget (PostgresDB)");
+        async.series([
+          DataTarget.dropTable.bind(DataTarget),
+          DataTarget.createTable.bind(DataTarget),
+        ],function(err) {callback(err);});        
+      } else callback();    
+    },
+    function(callback) {
+      if (program.osmdata && program.createTable) {
+        console.log("Create Table OSMData (PostgresDB)");
+        async.series([
+          OSMData.dropTable.bind(OSMData),
+          OSMData.createTable.bind(OSMData),
+        ],function(err) {callback(err);});        
+      } else callback();    
+    },
+    function(callback) {
+      if (program.workerqueue && program.createTable) {
+        console.log("Create Table WorkerQueue (PostgresDB)");
+        async.series([
+          WorkerQueue.dropTable.bind(WorkerQueue),
+          WorkerQueue.createTable.bind(WorkerQueue),
+        ],function(err) {callback(err);});        
+      } else callback();    
+    },
+
+    function(callback) {
+      if (program.datacollection || program.all) {
         console.log("Start Import DataCollection (PostgresDB)");
-			  DataCollection.import(program.dcFilename,callback);
-		  } else callback(); 		
-  	},
-  	function(callback) {
-		  if (program.datatarget || program.all) {
+        DataCollection.import(program.dcFilename,callback);
+      } else callback();    
+    },
+    function(callback) {
+      if (program.datatarget || program.all) {
         console.log("Start Import DataTarget (PostgresDB)");
-			  DataTarget.import(program.dtFilename,callback);
-		  } else callback(); 
-  	},
+        DataTarget.import(program.dtFilename,callback);
+      } else callback(); 
+    },
     function(callback) {
       if (program.workerqueue || program.all) {
         console.log("Start Import WorkerQueue (PostgresDB)");

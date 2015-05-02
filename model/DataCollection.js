@@ -288,56 +288,6 @@ DataCollectionClass.prototype.aggregate = function(param,cb) {
   }
 }
 
-function exportMongoDB(filename,cb) {
-  debug("exportMongoDB("+filename+")");
-  var db = config.getMongoDB();
-  var collection = db.collection('DataCollection');
-  collection.find({},function exportsMongoDBCB1(err,data) {
-    debug('exportsMongoDBCB1');
-    if (err) {
-      console.log("exportMongoDB Error: "+err);
-      if (cb) cb(err);
-      return;
-    }
-
-    fs.writeFileSync(filename,"[");
-    var delimiter="";
-    var count=0;
-    data.each(function (err,doc) {
-      if (err) {
-        cb(err);
-        return;
-      }
-      if (doc) {
-        fs.appendFileSync(filename,delimiter);
-        delimiter=",";
-        count++;
-        delete doc.data;
-        fs.appendFileSync(filename,JSON.stringify(doc)+'\n');
-      } else {
-        fs.appendFileSync(filename,"]");
-        console.log(filename +" is exported with "+count+" datasets.");
-        if (cb) cb();
-      }
-    })
-  })
-}
-
- 
- 
-
-
- 
-
-
-
-
-
-
-DataCollectionClass.prototype.saveMongoDB =function(data,cb) {
-  var db = config.getMongoDB();
-  db.collection("DataCollection").save(data,{w:1}, cb);
-}
 
 DataCollectionClass.prototype.savePostgresDB = function(data,cb) {
   debug('savePostgresDB');
@@ -346,9 +296,6 @@ DataCollectionClass.prototype.savePostgresDB = function(data,cb) {
 }
 DataCollectionClass.prototype.save = function(data,cb) {
   debug('DataCollectionClass.prototype.save');
-  if (this.databaseType == "mongo") {
-    this.saveMongoDB(data,cb);
-  }
   if (this.databaseType == "postgres") {
     this.savePostgresDB(data,cb);
   }

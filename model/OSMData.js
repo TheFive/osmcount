@@ -68,7 +68,9 @@ OSMData.prototype.getInsertQueryValueList = function getInsertQueryValueList(ite
 
   // Only Store Data that is in the DataFilter
   for (var k in dataFilter) {
-    reducedItem[k]=item[k];
+    if (typeof(item[k])!='undefined') {
+      reducedItem[k]=item[k];
+    }
   }
   var data = util.toHStore(reducedItem);
   return  [data];
