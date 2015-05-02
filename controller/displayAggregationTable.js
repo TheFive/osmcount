@@ -429,9 +429,16 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
     firstColumn.sort( function(a,b) {
       var va = table[a][param.sort];
       var vb = table[b][param.sort];
-      if (typeof(va)!='number') va = 0;
-      if (typeof(vb)!='number') vb = 0;
-      return (vb-va)*param.sortAscending});
+      if (typeof(va)=='number' || typeof(vb)=='number' ) {      
+        if (typeof(va)!='number') va = 0;
+        if (typeof(vb)!='number') vb = 0;
+        return (vb-va)*param.sortAscending;
+      }
+      // both values are not numbers, try this
+      if (va>vb) return param.sortAscending;
+      if (va==vb) return 0;
+      return -param.sortAscending;
+    })
   }
   for (i=0;i<firstColumn.length;i++)
   {
