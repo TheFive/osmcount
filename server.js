@@ -20,6 +20,7 @@ var importDataCollection    = require('./controller/ImportDataCollection.js');
 var displayAggregationTable = require('./controller/displayAggregationTable.js')
 var displayText             = require('./controller/displayText.js')
 var displayObject           = require('./controller/displayObject.js')
+var displayStatus           = require('./controller/displayStatus.js')
 
 var app = express();
 
@@ -73,6 +74,7 @@ app.use(function(req, res, next){
 });
 
 app.use('/index.html', displayText.main);
+app.use('/status.html', displayStatus.status);
 app.use('/waplot/:measure.html', plotlyexport.plot);
 app.use('/import/csvimport.html', importDataCollection.showPage);
 app.use('/import/:measure.html', display.importApotheken);

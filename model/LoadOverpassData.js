@@ -197,6 +197,7 @@ exports.createQuery = function(referenceJob)
 			var job = {};
 			job.measure=aufgabe;
 			job.schluessel=keys[i];
+			should(job.schluessel).not.equal('undefined');
 			job.status='open';
 			job.exectime = exectime;
 			job.type = "overpass";

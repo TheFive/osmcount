@@ -3,6 +3,7 @@ var pg          = require('pg');
 var fs          = require('fs');
 var async       = require('async');
 var should      = require('should');
+var LRU         = require('lru-cache');
   
 var JSONStream  = require('JSONStream');
 var  es         = require('event-stream');
@@ -18,6 +19,11 @@ function DataCollectionClass() {
   this.databaseType = "postgres"; 
   this.tableName = "DataCollection";
   this.collectionName = "DataCollection";
+  var lruOptions = { max: 10000
+                     , length: function (n) { return n.length }};
+  this.aggregateCache=LRU(lruOptions);
+  this.aggregateCacheKeys = {};
+
   this.createTableString = 'CREATE TABLE datacollection \
               (measure text, \
                key text, \
@@ -105,16 +111,23 @@ DataCollectionClass.prototype.getInsertQueryValueList = function getInsertQueryV
   return  [key,timestamp,measure,count,missing,existing];
 }
 
-var aggregateCache={};
+
 
 DataCollectionClass.prototype.invalidateCache =function invalidateCache(item) {
   debug('DataCollection.invalidateCache');
   debug('Invalidating: %s',item.measure);
-  aggregateCache[item.measure]={};
 
+  // Deleta all Keys belonging to measure from cache;
+  var list = this.aggregateCacheKeys[item.measure];
+  if (typeof(list)!='undefined') {
+    for (var i=0;i<list.length;i++) {
+      this.aggregateCache.del(list[i]);
+    }
+    this.aggregateCacheKeys[item.measure]=[];
+  }
 }
 
-function aggregatePostgresDB(param,cb) {
+function aggregatePostgresDB(object,param,cb) {
   debug('aggregatePostgresDB');
 
   // is there somwhatin cache ?
@@ -176,14 +189,10 @@ function aggregatePostgresDB(param,cb) {
   var cacheKey = JSON.stringify(bindParam);
   cacheKey += cellCalculation;
   cacheKey += paramLocation;
-  
-  if (typeof(aggregateCache[param.measure])!='undefined') {
-    if (typeof(aggregateCache[param.measure][cacheKey])!='undefined') {
-      cb(null,aggregateCache[param.measure][cacheKey]);
-      return;
-    }
-  } else {
-    aggregateCache[param.measure] = {};
+  var cachedResult = object.aggregateCache.get(cacheKey);
+  if (typeof(cachedResult)!='undefined') {
+    cb(null,cachedResult);
+    return;
   }
 
 
@@ -215,7 +224,11 @@ function aggregatePostgresDB(param,cb) {
     });
     query.on('end',function aggregatePostgresDBQueryOnEnd () {
       pgdone();
-      aggregateCache[param.measure][cacheKey] = result;
+      if (typeof(object.aggregateCacheKeys[param.measure])=='undefined') {
+        object.aggregateCacheKeys[param.measure] = [];
+      }
+      object.aggregateCache.set(cacheKey, result);
+      object.aggregateCacheKeys[param.measure].push(cacheKey);
       cb(null,result);
     })
   });
@@ -308,7 +321,7 @@ DataCollectionClass.prototype.aggregate = function(param,cb) {
     return;
   }
   if (this.databaseType == "postgres") {
-    aggregatePostgresDB(param,cb);
+    aggregatePostgresDB(this,param,cb);
   }
 }
 

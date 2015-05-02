@@ -253,14 +253,14 @@ function generateFilterTable(param,header) {
   var date14 = new Date();
 
   var date2 = date.getDate();
-  date7.setDate(date2-7);
-  date10.setDate(date2-10);
-  date14.setDate(date2-14);
+  date7.setDate(date2-15);
+  date10.setDate(date2-30);
+  date14.setDate(date2-60);
 
   var since = '';
   var since7 = date7.toISOString().substr(0,10);
   var since10 = date10.toISOString().substr(0,10);
-  var sincex = "Wochenaufgabe";
+  var sincex = date14.toISOString().substr(0,10);
 
   if ((param.since != since7) && (param.since != since) && (param.since!= since10)&& (param.since!= sincex)) {
     sincex = param.since;

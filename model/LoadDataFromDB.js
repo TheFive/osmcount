@@ -9,6 +9,7 @@
 //
 
 var async    = require('async');
+var should   = require('should');
 var debug    = require('debug')('LoadDataFromDB');
 
 var config   = require('../configuration.js');
@@ -113,6 +114,7 @@ exports.insertValue = function insertValue(map,key,osmdoc) {
     }
     debug('map.map[key]=value; --> key: %s, Value: %s',key,value);
     map.map[key]=value;
+    should(key).not.equal('undefined');
     if (pushOnList) map.list.push(key);
     while (key.length>1 && key.charAt(key.length-1)=='0') {
     	key = key.slice(0,key.length-1);
