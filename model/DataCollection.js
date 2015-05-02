@@ -56,6 +56,8 @@ DataCollectionClass.prototype.find = postgresMapper.find;
 
 
 
+
+
 DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
   debug('DataCollectionClass.prototype.importCSV');
   var me = this;
@@ -103,10 +105,19 @@ DataCollectionClass.prototype.getInsertQueryValueList = function getInsertQueryV
   return  [key,timestamp,measure,count,missing,existing];
 }
 
+var aggregateCache={};
 
+DataCollectionClass.prototype.invalidateCache =function invalidateCache(item) {
+  debug('DataCollection.invalidateCache');
+  debug('Invalidating: %s',item.measure);
+  aggregateCache[item.measure]={};
+
+}
 
 function aggregatePostgresDB(param,cb) {
   debug('aggregatePostgresDB');
+
+  // is there somwhatin cache ?
   var result = [];
   var paramSinceDate = new Date(2000,0,1);
   var paramUpToDate  = new Date(2999,0,1);
@@ -129,6 +140,51 @@ function aggregatePostgresDB(param,cb) {
   if (param.lengthOfTime == 7) {
     paramTimeFormat = 'YYYY-MM';
   }
+  var cellCalculation = "sum(count) as cell";
+  var bindParam = [param.lengthOfKey,
+              paramTimeFormat,
+              param.measure,
+              paramSinceDate,
+              paramUpToDate,
+            /*  paramLocationLength,
+              paramLocation*/];
+  if (typeof(param.sub)=='undefined') param.sub ='';
+  if (typeof(param.subPercent)=='undefined') param.subPercent = "no";
+  if (param.sub.match(/missing*/)) {
+    var value = param.sub.substr(8,99);
+    cellCalculation = "sum((missing->'"+value+"')::int) as cell"
+    if (param.subPercent == "Yes") {
+      cellCalculation = "case when sum(count)=0 then 1 else (sum((missing->'"+value+"')::float))/sum(count) end as cell";
+    }
+  }
+   if (param.sub.match(/existing*/)) {
+    var value = param.sub.substr(9,99);
+    cellCalculation =  "sum((existing->'"+value+"')::int) as cell";
+    if (param.subPercent == "Yes") {
+      cellCalculation = "case when sum(count)=0 then 1 else (sum((existing->'"+value+"')::float))/sum(count) end as cell";
+    }
+  }
+  var queryStr = "SELECT substr(key,1,$1) as k,\
+            to_char(stamp,$2) as t," 
+            + cellCalculation + 
+            " from datacollection where measure = $3 \
+               and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
+                             datacollection where measure = $3 and stamp >= $4  and stamp <= $5\
+                              order by to_char(stamp,$2),stamp desc) \
+               and key like '"+paramLocation+"' \
+            group by k,t order by t;"
+  var cacheKey = JSON.stringify(bindParam);
+  cacheKey += cellCalculation;
+  cacheKey += paramLocation;
+  
+  if (typeof(aggregateCache[param.measure])!='undefined') {
+    if (typeof(aggregateCache[param.measure][cacheKey])!='undefined') {
+      cb(null,aggregateCache[param.measure][cacheKey]);
+      return;
+    }
+  } else {
+    aggregateCache[param.measure] = {};
+  }
 
 
   pg.connect(config.postgresConnectStr,function(err,client,pgdone){
@@ -139,39 +195,6 @@ function aggregatePostgresDB(param,cb) {
       pgdone();
       return;
     }
-    var cellCalculation = "sum(count) as cell";
-    var bindParam = [param.lengthOfKey,
-                paramTimeFormat,
-                param.measure,
-                paramSinceDate,
-                paramUpToDate,
-              /*  paramLocationLength,
-                paramLocation*/];
-    if (typeof(param.sub)=='undefined') param.sub ='';
-    if (typeof(param.subPercent)=='undefined') param.subPercent = "no";
-    if (param.sub.match(/missing*/)) {
-      var value = param.sub.substr(8,99);
-      cellCalculation = "sum((missing->'"+value+"')::int) as cell"
-      if (param.subPercent == "Yes") {
-        cellCalculation = "case when sum(count)=0 then 1 else (sum((missing->'"+value+"')::float))/sum(count) end as cell";
-      }
-    }
-     if (param.sub.match(/existing*/)) {
-      var value = param.sub.substr(9,99);
-      cellCalculation =  "sum((existing->'"+value+"')::int) as cell";
-      if (param.subPercent == "Yes") {
-        cellCalculation = "case when sum(count)=0 then 1 else (sum((existing->'"+value+"')::float))/sum(count) end as cell";
-      }
-    }
-    var queryStr = "SELECT substr(key,1,$1) as k,\
-              to_char(stamp,$2) as t," 
-              + cellCalculation + 
-              " from datacollection where measure = $3 \
-                 and stamp in (select distinct on (to_char(stamp,$2)) stamp from \
-                               datacollection where measure = $3 and stamp >= $4  and stamp <= $5\
-                                order by to_char(stamp,$2),stamp desc) \
-                 and key like '"+paramLocation+"' \
-              group by k,t order by t;"
 
     var query = client.query(queryStr,bindParam);
     query.on('error', function(err){
@@ -192,6 +215,7 @@ function aggregatePostgresDB(param,cb) {
     });
     query.on('end',function aggregatePostgresDBQueryOnEnd () {
       pgdone();
+      aggregateCache[param.measure][cacheKey] = result;
       cb(null,result);
     })
   });
@@ -297,6 +321,8 @@ DataCollectionClass.prototype.savePostgresDB = function(data,cb) {
 DataCollectionClass.prototype.save = function(data,cb) {
   debug('DataCollectionClass.prototype.save');
   if (this.databaseType == "postgres") {
+    // invalidate Cache
+    this.invalidateCache[data];
     this.savePostgresDB(data,cb);
   }
 }

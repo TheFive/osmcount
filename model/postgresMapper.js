@@ -304,6 +304,12 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream
 
     function insertData(item,callback) {
       debug('insertStreamToPostgres->insertData');
+
+      //write some Date, so invalidate Cache before
+      if (typeof(this.invalidateCache)=='function') {
+        this.invalidateCache(item);
+      }
+
       if (!internal) {
    
         if (typeof(item.collection) == 'string') {
