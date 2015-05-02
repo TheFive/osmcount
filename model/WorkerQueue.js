@@ -33,6 +33,11 @@ function WorkerQueue() {
         WITH ( \
           OIDS=FALSE \
         ); '
+  this.createIndexString = 
+     'CREATE INDEX workerqueue_status_prio_idx \
+      ON workerqueue \
+      USING btree \
+      (status COLLATE pg_catalog."default", prio);'
   this.map= {
     tableName:"workerqueue",
     regex:{schluessel:true},
