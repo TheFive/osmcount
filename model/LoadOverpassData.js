@@ -35,7 +35,6 @@ function overpassQuery(query, cb, options) {
   if (typeof(options.timeout) == 'undefined') {
     options.timeout = 1000 * 60 * 10; // Timeout after 10 minutes
   }
-  console.dir(options);
   var start = (new Date()).getTime();
   request.post(options, function (error, response, body) {
     var end = (new Date()).getTime();

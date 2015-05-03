@@ -802,7 +802,6 @@ exports.table = function(req,res){
             openQueries = "#Error#";
           } else {
             openQueries = count;
-            console.log(query);
           }
           // Ignore Count Error, and
           callback();

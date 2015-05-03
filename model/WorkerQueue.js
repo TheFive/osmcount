@@ -139,7 +139,7 @@ function getNextTaskPostgresDB(status,cb) {
                          from workerqueue \
                          where status = $1 \
                            and exectime <= now() \
-                          order by prio desc limit 1",
+                          order by exectime, prio desc limit 1",
                         [status]);
     query.on('row',function(row) {
       var result = {};

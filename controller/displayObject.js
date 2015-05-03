@@ -116,7 +116,6 @@ exports.ignoreError = function(req,res) {
 	var objid = req.query["object"];
 	var reason = req.query["reason"];
 
-	console.log(objid+" "+reason);
 
 
 	WorkerQueue.find ({id:objid},{},function handleFindOneObject(err, obj) {
