@@ -2,8 +2,32 @@ var path = require('path');
 var fs   = require("fs");
 var async = require('async');
 var should = require('should');
+var debug = require('debug');
 
 
+exports.initialiseTablePostgres = function initialiseTable(collection,importfile,cb) {
+  debug('initialiseTablePostgres');
+
+  // shift Parameter if importfile is not used
+  var doImport = true;
+  if (typeof importfile == 'function') {
+    cb = importfile;
+    doImport = false;
+  }
+  async.series([
+    collection.dropTable.bind(collection),
+    collection.createTable.bind(collection),
+    function(callback) { 
+      collection.initialise('postgres');
+      if (doImport) {
+        var filename = path.resolve(__dirname,importfile);
+        collection.import(filename,callback);        
+      } else callback();
+    }
+  ],function(err) {
+    cb(err);
+  });        
+}
 
 exports.dropCollection = function dropCollection(db, collectionName, cb) {
   should.exist(db,"Mongodb not initialised");
