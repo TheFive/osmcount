@@ -19,7 +19,7 @@ function DataCollectionClass() {
   this.databaseType = "postgres"; 
   this.tableName = "DataCollection";
   this.collectionName = "DataCollection";
-  var lruOptions = { max: 10000
+  var lruOptions = { max: 1000000
                      , length: function (n) { return n.length }};
   this.aggregateCache=LRU(lruOptions);
   this.aggregateCacheKeys = {};
