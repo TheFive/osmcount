@@ -11,6 +11,7 @@ var WorkerQueue = require('./model/WorkerQueue.js');
 var util        = require('./util.js')
 
 var DataCollection = require('./model/DataCollection.js')
+var wochenaufgabe = require('./wochenaufgabe.js');
 
 exports.processSignal = '';
 exports.processExit;
@@ -260,8 +261,26 @@ function doInsertJobs(cb,results) {
       if (cb) cb(null,job);
       return;
     }
-    WorkerQueue.insertData(jobs,cb);
-    job.status = "done";
+    WorkerQueue.count({measure:job.measure,status:"open",type:"insert"},function(err,count){
+      if (count && count =="0") {
+        var extend = wochenaufgabe.map[job.measure].overpassEveryDays;
+        if (typeof extend != 'undefined') {
+          console.log("old time:" +job.exectime);
+          var time = job.exectime.getTime();
+          var newExectime = new Date();
+          console.log(extend);
+          time += (1000 * 60 * 60 * 24)*extend;
+          newExectime.setTime(time);
+          console.log("Neues Datum:"+newExectime);
+
+          var newJob = {measure:job.measure,status:"open",type:"insert",exectime:newExectime};
+          jobs.push(newJob);
+
+        }
+      }   
+      job.status = "done";
+      WorkerQueue.insertData(jobs,cb);
+    })
   }
   else if (cb) cb(null,job);
 }

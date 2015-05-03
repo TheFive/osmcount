@@ -2,6 +2,7 @@ var should= require('should');
 var fs    = require('fs');
 var pg    = require('pg');
 var async = require('async');
+var path  = require('path');
 
 var dbHelper = require('./dbHelper.js');
 var importCSV = require('../ImportCSV.js');
@@ -101,7 +102,8 @@ describe('importCSV', function() {
     });
   });
   context('readCSV',function() {
-    var filename = "testfile.csv";
+
+    var filename = path.resolve(__dirname, "testfile.csv");
     afterEach(function(bddone) {
       fs.exists(filename, function(err) {
         if (err) {

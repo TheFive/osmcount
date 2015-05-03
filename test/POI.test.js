@@ -9,7 +9,7 @@ var POI = require('../model/POI.js');
 var dbHelper = require('./dbHelper.js');
 
 
-describe.only('POI', function() {
+describe('POI', function() {
   describe('import',function(bddone) {
     describe('should find data',function(){
       before(function(bddone){

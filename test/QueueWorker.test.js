@@ -39,8 +39,8 @@ describe('QueueWorker',function(){
         })
       });
     })
-    it('should trigger insert Values',function(bddone) {
-      wochenaufgabe.map["test"]={map:{list:['1','2']},overpass:{query:"TEST :schluessel: TEST"}};
+    it('should trigger insert Values and create new insert',function(bddone) {
+      wochenaufgabe.map["test"]={map:{list:['1','2']},overpass:{query:"TEST :schluessel: TEST"},overpassEveryDays:7};
       var valueList = [{id:1,measure:"test",type:"insert",status:"open",exectime: new Date()}];
 
       WorkerQueue.insertData(valueList,function(err,data) {
@@ -58,7 +58,40 @@ describe('QueueWorker',function(){
             function (done) {
               WorkerQueue.count({status:"open"},function(err,data){
                 should.not.exist(err);
-                should(data).equal('2');
+                should(data).equal('3');
+                done();   
+              })        
+            }
+            ],function(err) {
+              should.not.exist(err);
+              bddone();
+            }
+          );
+        })
+      })
+    })
+    it('should trigger insert Values without new insert',function(bddone) {
+      wochenaufgabe.map["test"]={map:{list:['1','2']},overpass:{query:"TEST :schluessel: TEST"},overpassEveryDays:7};
+      var valueList = [{id:1,measure:"test",type:"insert",status:"open",exectime: new Date()},
+                       {id:2,measure:"test",type:"insert",status:"open",exectime: new Date("2999-02-02")}
+      ];
+
+      WorkerQueue.insertData(valueList,function(err,data) {
+        should.not.exist(err);
+        QueueWorker.doNextJob(function(err,data){
+          should.not.exist(err);
+          async.parallel([
+            function (done) {
+              WorkerQueue.count({id:1,status:"done"},function(err,data){
+                should.not.exist(err);
+                should(data).equal('1');
+                done(); 
+              })          
+            },
+            function (done) {
+              WorkerQueue.count({status:"open"},function(err,data){
+                should.not.exist(err);
+                should(data).equal('3');
                 done();   
               })        
             }
