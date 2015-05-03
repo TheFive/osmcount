@@ -1,0 +1,163 @@
+{
+    "version":1,
+    "collection":"POI",
+    "count":7
+}
+{
+  "type": "node",
+  "id": 27288765,
+  "lat": 47.5065605,
+  "lon": 12.0848805,
+  "timestamp": "2014-08-07T17:32:24Z",
+  "version": 4,
+  "changeset": 24600395,
+  "user": "AndiG88",
+  "uid": 1869781,
+  "tags": {
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "wheelchair": "yes"
+  },
+  "overpass": {"country":"AT"}
+}
+{
+  "type": "node",
+  "id": 31238736,
+  "lat": 46.8371835,
+  "lon": 13.3723167,
+  "timestamp": "2012-11-20T11:08:20Z",
+  "version": 4,
+  "changeset": 13943800,
+  "user": "rurseekatze",
+  "uid": 81244,
+  "tags": {
+    "addr:country": "AT",
+    "addr:housenumber": "37",
+    "addr:postcode": "9813",
+    "addr:street": "Mölltalstraße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "name": "Teurnia Apotheke",
+    "website": "www.teurnia-apotheke.at"
+  },
+  "overpass": {"country":"AT"}
+}
+{
+  "type": "node",
+  "id": 31797495,
+  "lat": 47.0405234,
+  "lon": 15.4635983,
+  "timestamp": "2014-10-09T12:31:10Z",
+  "version": 15,
+  "changeset": 25960025,
+  "user": "species",
+  "uid": 321042,
+  "tags": {
+    "addr:city": "Graz",
+    "addr:country": "AT",
+    "addr:housenumber": "3",
+    "addr:postcode": "8041",
+    "addr:street": "Ostbahnstraße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "level": "0",
+    "name": "Apotheke Liebenau",
+    "phone": "+43 316 472324",
+    "wheelchair": "yes"
+  },
+  "overpass": {"country":"AT"}
+}
+{
+  "type": "node",
+  "id": 36700086,
+  "lat": 47.8722412,
+  "lon": 16.1295167,
+  "timestamp": "2011-03-14T17:53:55Z",
+  "version": 5,
+  "changeset": 7558951,
+  "user": "Soldier Boy",
+  "uid": 289334,
+  "tags": {
+    "addr:city": "Markt Piesting",
+    "addr:country": "AT",
+    "addr:housenumber": "14",
+    "addr:postcode": "2753",
+    "addr:street": "Wöllersdorfer Straße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "name": "Apotheke Zum heiligen Leonhard",
+    "opening_hours": "Mo-Fr 08:00-12:00,14:00-18:00;Sa 08:00-12:00",
+    "phone": "+43 2633 42269"
+  },
+  "overpass": {"country":"AT"}
+}
+{
+  "type": "node",
+  "id": 39663360,
+  "lat": 47.0701507,
+  "lon": 15.4399625,
+  "timestamp": "2015-02-16T16:04:27Z",
+  "version": 10,
+  "changeset": 28889133,
+  "user": "emacsen_dwg",
+  "uid": 1782960,
+  "tags": {
+    "addr:city": "Graz",
+    "addr:country": "AT",
+    "addr:housenumber": "11",
+    "addr:postcode": "8010",
+    "addr:street": "Herrengasse",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "name": "Bärenapotheke",
+    "phone": "+43 316 830267",
+    "shop": "pharmacy",
+    "wheelchair": "yes"
+  },
+  "overpass": {"country":"AT"}
+}
+{
+  "type": "node",
+  "id": 39663366,
+  "lat": 47.0785075,
+  "lon": 15.4274803,
+  "timestamp": "2014-03-31T08:00:01Z",
+  "version": 6,
+  "changeset": 21412948,
+  "user": "wheelmap_visitor",
+  "uid": 290680,
+  "tags": {
+    "addr:city": "Graz",
+    "addr:country": "AT",
+    "addr:housenumber": "19",
+    "addr:postcode": "8020",
+    "addr:street": "Wiener Straße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "name": "Löwen-Apotheke",
+    "phone": "+43 316 714691",
+    "wheelchair": "no"
+  },
+  "overpass": {"country":"DE"}
+}
+{
+  "type": "node",
+  "id": 46160960,
+  "lat": 47.9207027,
+  "lon": 16.1837502,
+  "timestamp": "2014-01-09T18:22:06Z",
+  "version": 5,
+  "changeset": 19904914,
+  "user": "wne_at",
+  "uid": 1875505,
+  "tags": {
+    "addr:city": "Enzesfeld-Lindabrunn",
+    "addr:housenumber": "2",
+    "addr:postcode": "2551",
+    "addr:street": "Schimmelgasse",
+    "amenity": "pharmacy",
+    "name": "Paracelsus-Apotheke",
+    "source": "survey"
+  },
+  "overpass": {"country":"AT"}
+}
