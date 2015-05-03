@@ -26,9 +26,18 @@ var request = require('request');
 
 function overpassQuery(query, cb, options) {
 	debug("overpassQuery");
-	options = options || {};
+  options = options || {};
+  if (typeof(options.overpassUrl)!= 'undefined') {
+    options.uri = options.overpassUrl;
+  } else {
+    options.uri = overpassApiLinkDE;
+  }
+  if (typeof(options.timeout) == 'undefined') {
+    options.timeout = 1000 * 60 * 10; // Timeout after 10 minutes
+  }
+  console.dir(options);
   var start = (new Date()).getTime();
-  request.post(options.overpassUrl || overpassApiLinkDE, function (error, response, body) {
+  request.post(options, function (error, response, body) {
     var end = (new Date()).getTime();
     	debug("overpassQuery->CB after %s seconds",(end-start)/1000);
 
