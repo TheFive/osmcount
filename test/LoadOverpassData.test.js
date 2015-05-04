@@ -87,6 +87,18 @@ describe('LoadOverpassData',function() {
         bddone();
       })
     })
+    it('should handle a timeout',function(bddone) {
+      var scope = nock('http://overpass-api.de/api/interpreter')
+                  .post('',"data=This%20is%20an%20overpass%20query")
+                  .socketDelay(5*1000)
+                  
+                  .reply(504, "Server Overcrowded");
+      lod.overpassQuery("This is an overpass query",function(error,body) {
+        should.exist(error);
+        should(error.code).equal('ESOCKETTIMEDOUT');
+        bddone();
+      },{timeout:500})
+    })
   });
   describe('runOverpass',function() {
     it ('should load and parse overpassdata',function(bddone){
