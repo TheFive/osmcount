@@ -22,7 +22,7 @@ function listValuesTable(keyname,key,object) {
 	}*/
 	if (typeof(object) == 'object') {
 		var result = "";
-		for (k in object) {
+		for (var k in object) {
 			if (key) {
 			  result += listValuesTable(key+"."+k,k,object[k]);
 			} else {

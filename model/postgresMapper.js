@@ -1,6 +1,5 @@
 var pg     = require('pg');
 var debug  = require('debug')('postgresMapper');
-var should = require('should');
 var fs = require('fs');
 
 var JSONStream  = require('JSONStream');
@@ -14,9 +13,9 @@ var should      = require('should');
 var config = require('../configuration.js');
 
 exports.invertMap = function invertMap(map) {
-	debug('invertMap');
+  debug('invertMap');
   map.invertKeys= {};
-  for (k in map.keys) {
+  for (var k in map.keys) {
     var pgkey = map.keys[k].toLowerCase();
     should.not.exist(map.invertKeys[pgkey]);
     map.invertKeys[pgkey]=k;
@@ -146,7 +145,7 @@ exports.find = function find(query,options,cb) {
     var query = client.query(queryStr);
     query.on('row',function(row){
       var json = {};
-      for (k in map.invertKeys) {
+      for (var k in map.invertKeys) {
         json[map.invertKeys[k]] = row[k];
       }
       for (var i = 0;i<map.hstore.length;i++) {
@@ -194,13 +193,14 @@ exports.createTable = function(cb) {
 exports.dropTable = function(cb) {
   debug('%s.dropTable',this.tableName);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-     debug('exports.dropTable->connected');
+    debug('exports.dropTable->connected');
     if (err) {
       cb(err);
       pgdone();
       return;
     }
     var dropString = "DROP TABLE IF EXISTS "+this.tableName;
+  
     var query = client.query(dropString);
     query.on('error',function(err){
       debug("%s Table Dropped",this.tableName);

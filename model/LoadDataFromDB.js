@@ -78,7 +78,7 @@ exports.insertValue = function insertValue(map,key,osmdoc) {
 
   // check Type of Object
   var allTypeCorrect = true;
-  for (k in map.matchKey) {
+  for (var k in map.matchKey) {
     var v = map.matchKey[k];
     var typeCorrect = false;
     if (Array.isArray(v)) {

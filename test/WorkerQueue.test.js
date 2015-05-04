@@ -9,6 +9,7 @@ var WorkerQueue = require('../model/WorkerQueue.js')
 
 
 describe('WorkerQueue', function() {
+  var pgclient;
   before(function(bddone) {
     pgclient = new pg.Client(config.postgresConnectStr);
     pgclient.connect(bddone);
