@@ -65,6 +65,7 @@ function getValue(columns,object,d) {
   //console.log("d:"+d);
   if (typeof(object)=='string') return object;
   if (typeof(object)=='undefined') return "";
+  if (object == null) return "";
 
   if (typeof(columns) == 'object') {
 
