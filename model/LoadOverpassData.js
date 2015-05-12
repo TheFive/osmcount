@@ -1,6 +1,7 @@
-var async          = require('async');
-var debug          = require('debug')('LoadOverpassData');
-var should         = require('should');
+var async     = require('async');
+var debug     = require('debug')('LoadOverpassData');
+var should    = require('should');
+var request   = require('request');
 
 var configuration  = require('../configuration.js');
 var wochenaufgabe  = require('../wochenaufgabe.js');
@@ -22,12 +23,11 @@ var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
 
 
 
-var request = require('request');
 
 function overpassQuery(query, cb, options) {
 	debug("overpassQuery");
   options = options || {};
-  if (typeof(options.overpassUrl)!= 'undefined') {
+  if (typeof(options.uri)!= 'undefined') {
     options.uri = options.overpassUrl;
   } else {
     options.uri = overpassApiLinkDE;
@@ -38,29 +38,29 @@ function overpassQuery(query, cb, options) {
   var start = (new Date()).getTime();
   request.post(options, function (error, response, body) {
     var end = (new Date()).getTime();
-    	debug("overpassQuery->CB after %s seconds",(end-start)/1000);
+    debug("overpassQuery->CB after %s seconds",(end-start)/1000);
 
-        if (!error && response.statusCode === 200) {
-            cb(undefined, body);
-        } else if (error) {
-        	console.log("Error occured in function: LoadOverpassData.overpassQuery");
-        	console.log(error);
-        	console.log(body);
-            cb(error);
-        } else if (response) {
-            cb({
-                message: 'Request failed: HTTP ' + response.statusCode,
-                statusCode: response.statusCode,
-                body: body
-            });
-        } else {
-            cb({
-                message: 'Unknown error.',
-            });
-        }
-    }).form({
+    if (!error && response.statusCode === 200) {
+        cb(undefined, body);
+    } else if (error) {
+    	console.log("Error occured in function: LoadOverpassData.overpassQuery");
+    	console.log(error);
+    	console.log(body);
+        cb(error);
+    } else if (response) {
+        cb({
+            message: 'Request failed: HTTP ' + response.statusCode,
+            statusCode: response.statusCode,
+            body: body
+        });
+    } else {
+        cb({
+            message: 'Unknown error.',
+        });
+    }
+  }).form({
         data: query
-    });
+  });
 };
 
 exports.overpassQuery = overpassQuery;

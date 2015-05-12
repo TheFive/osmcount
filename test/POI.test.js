@@ -60,6 +60,30 @@ describe('POI', function() {
     })
 
   })
+  describe.only('insertData',function() {
+    before(function(bddone) {
+      dbHelper.initialiseTablePostgres(POI,bddone);
+    })
+    it('should insert 4 JSON Objects',function (bddone) {
+      POI.insertData([{type: "node","id": 39663366},
+                     {type:"node","id": 1,a:1},
+                     {type:"node","id": 2,a:1},
+                     {type:"way","id": 3,a:3}],
+                     function(err,data) {
+        should.not.exist(err);
+        POI.find({},function(err,data){
+          should.not.exist(err);
+          should(data.length).equal(4);
+          should(data).containDeep([{type: "node","id": 39663366},
+                     {type:"node","id": 1,a:1},
+                     {type:"node","id": 2,a:1},
+                     {type:"way","id": 3,a:3}]);
+          bddone();
+        })
+      })
+    })
+
+  })
   describe('save',function() {
     before(function(bddone) {
       dbHelper.initialiseTablePostgres(POI,"POI.test.json",bddone);

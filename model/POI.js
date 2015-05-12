@@ -62,12 +62,6 @@ POI.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {
 
 
 
-POI.prototype.insertData = function(data,cb) {
-  debug('POI.prototype.insertData');
-  if (this.databaseType == "postgres") {
-    insertDataToPostgres(data,cb);
-  }
-}
 
 function isBasisType(object) {
   var a= typeof(object);

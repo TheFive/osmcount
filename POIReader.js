@@ -7,6 +7,8 @@ var config           = require('./configuration.js');
 var loadDataFromDB   = require('./model/LoadDataFromDB.js');
 var loadOverpassData = require('./model/LoadOverpassData.js');
 
+var POI = require('./model/POI.js');
+
 
 var async    = require('async');
 
@@ -185,9 +187,11 @@ function updatePOIFromPostgres(cb,result) {
   debug("updatePOIFromPostgres");
   var update = result.mongo.update;
   if (update.length==0) {
+    debug("nothing to do");
   	cb(null,null);
   	return;
   }
+   debug("updatePOIFromPostgres.1");
   cleanTags(update);
   debug("To Be Updated: "+update.length + " DataSets");
 
@@ -325,9 +329,9 @@ function nominatim(cb,result) {
              country: function(cb,result) {cb(null,"CH")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromMongo],
-             insert: ["mongo",insertPOIFromMongo],
-             remove: ["mongo",removePOIFromMongo],
+             update: ["mongo",updatePOIFromPostgres],
+             insert: ["mongo",insertPOIFromPostgres],
+             remove: ["mongo",removePOIFromPostgres],
              nominatim: ["update","insert","remove",nominatim]},
              function(err,results) {
              	debug("READY with CH");
@@ -340,9 +344,9 @@ function nominatim(cb,result) {
              country: function(cb,result) {cb(null,"DE")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromMongo],
-             insert: ["mongo",insertPOIFromMongo],
-             remove: ["mongo",removePOIFromMongo],
+             update: ["mongo",updatePOIFromPostgres],
+             insert: ["mongo",insertPOIFromPostgres],
+             remove: ["mongo",removePOIFromPostgres],
              nominatim: ["update","insert","remove",nominatim]},
              function(err,results) {
              	debug("READY with AT");
@@ -357,9 +361,9 @@ function nominatim(cb,result) {
              country: function(cb,result) {cb(null,"AT")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromMongo],
-             insert: ["mongo",insertPOIFromMongo],
-             remove: ["mongo",removePOIFromMongo],
+             update: ["mongo",updatePOIFromPostgres],
+             insert: ["mongo",insertPOIFromPostgres],
+             remove: ["mongo",removePOIFromPostgres],
              nominatim: ["update","insert","remove",nominatim]},
              function(err,results) {
              	debug("READY with DE");
