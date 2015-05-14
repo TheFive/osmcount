@@ -182,15 +182,13 @@ function doOverpass(cb,results) {
             if (error.statusCode = "429") {
               overpassWaitTime += overpassWaitTimeSteps;
               overpassNo429erFor = 0;
-              job.status = "open";
-              job.error.fix = "Was HTTP 429 Fixed automated for reason NotExcecuted, actual overpass slow down: "+overpassWaitTime+"ms";
             }
           } else {
             job.status="done";
             overpassNo429erFor += 1;
             if (overpassNo429erFor >100) {
                overpassWaitTime -= overpassWaitTimeSteps;
-               if (overpassTime <=0)  overpassWaitTime = 0;
+               if (overpassWaitTime <=0)  overpassWaitTime = 0;
                overpassNo429erFor = 0;
             }
           }
