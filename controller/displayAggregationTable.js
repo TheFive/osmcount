@@ -8,7 +8,7 @@ var wochenaufgabe  = require('../wochenaufgabe.js');
 var DataCollection = require('../model/DataCollection.js');
 var WorkerQueue    = require('../model/WorkerQueue.js');
 var DataTarget     = require('../model/DataTarget.js');
-var DataTarget     = require('../model/QueueWorker.js');
+var DataTarget     = require('../QueueWorker.js');
 
 
 
