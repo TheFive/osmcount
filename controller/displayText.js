@@ -8,7 +8,7 @@ var htmlPage       = require('../htmlPage.js');
 exports.main = function(req,res){
 	var page = htmlPage.create();
 	page.content = fs.readFileSync(path.resolve(__dirname,"..", "html","index.html"));
-	page.menu = fs.readFileSync(path.resolve(__dirname,"..", "html","menu.html"));
+	page.menu = fs.readFileSync(path.resolve(__dirname,"..", "html","menu2.html"));
 	page.footer = "OSM Count...";
  	res.set('Content-Type', 'text/html');
 	res.end(page.generatePage());
