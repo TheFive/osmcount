@@ -152,7 +152,7 @@ function doOverpass(cb,results) {
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpass") {
     debug("Start: doOverpass(cb,"+results+")");
       measure=job.measure;
-      query=job.query;
+      var query=job.query;
       var result= {};
       result.schluessel = job.schluessel;
       result.source = job.source;
@@ -228,7 +228,7 @@ function doOverpassPOIPLZ(cb,results) {
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpassPOIPLZ") {
     debug("Start: doOverpassPOIPLZ(cb,"+results+")");
       plz=job.plz;
-      query=job.query;
+      var query=job.query;
       var result= {};
       result.plz = job.plz;
       result.source = job.source;

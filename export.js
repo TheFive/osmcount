@@ -30,7 +30,7 @@ program
 var dirname = path.join(__dirname);
 
 if (!program.export && ! program.import) {
-  console.log("You better tell me, what is should do with -e or -i. Try --help");
+  console.log("You better tell me, what I should do with -e or -i. Try --help");
   process.exit();
 }
 

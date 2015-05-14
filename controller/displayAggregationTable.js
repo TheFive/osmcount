@@ -496,6 +496,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
     }
     if (serviceLink) {
       var sub = "";
+      var query;
       if (param.sub != "") sub = "?sub="+param.sub;
       tablerow += "<td><a href=/overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
       query= generateQuery(param.measure,row,param.sub);
@@ -711,26 +712,10 @@ exports.table = function(req,res){
       ranktype = "down";
     }
 
-    var paramSinceDate = new Date();
-    paramSinceDate.setDate(paramSinceDate.getDate()-10*365);
 
+ 
 
-
-  var preFilterVorgabe = {$match: {
-                              measure: param.measure,
-                              schluessel: {$regex: "^"+param.location}}};
-
-
-
-  var queryVorgabe = [
-        preFilterVorgabe,
-        {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
-                        vorgabe: "$apothekenVorgabe"
-                        }},
-          {$group: { _id:  "$schluessel",
-                 vorgabe  : {$sum: "$vorgabe" },
-                      }}];
-
+ 
 
 
   var openQueries=0;
@@ -1048,8 +1033,6 @@ exports.table = function(req,res){
                   <b>#</b> Öffne Overpass Turbo mit CSV Abfrage";
           pageFooter += "<br>Dauer Aggregate Funktion: "+(timeAggregate/1000)+ "s. Dauer Vorgaben: "+(timeVorgabe/1000)+"s. Dauer Aufbereitung: "+(timeTableGeneration/1000)+"s.";
           page.footer = pageFooter;
-
-          debug(JSON.stringify(query,null,' '));
 
           res.set('Content-Type', 'text/html');
           res.end(page.generatePage());

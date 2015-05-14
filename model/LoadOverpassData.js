@@ -166,7 +166,18 @@ exports.runOverpass= function(query, job,result, cb) {
 			date = new Date();
 			result.timestamp=job.exectime;
 			result.count=0;
-			var jsonResult=JSON.parse(data).elements;
+			try {
+				var jsonResult=JSON.parse(data).elements;
+			} catch (err) {
+				console.log("Query;")
+				console.log(query)
+				console.log("Result");
+				console.log(data);
+				console.log("job");
+				console.dir(job);
+				throw err;
+			}
+			
 			result.measure=measure;
 			result.count = jsonResult.length;
 
