@@ -1039,7 +1039,7 @@ exports.table = function(req,res){
                            +'measure='+ param.measure
                            +'&type=insert&'+
                            '">(Zeitplan)</a> ';
-              pageFooter += " "+QueueWorker.overpassWaitTimeInfo;
+              pageFooter += " "+QueueWorker.overpassWaitTimeInfo();
           }
           pageFooter += separator;
           pageFooter += "Die Service Links bedeuten: \
