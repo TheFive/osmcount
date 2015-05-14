@@ -15,9 +15,6 @@ addons:
 
 
 before_script:
-  - echo 'sleep 15 and create db user'
-  - sleep 15
-  - mongo test --eval 'db.addUser("test", "test");'
   - psql -c 'create database testdb;' -U postgres
   - psql -c "CREATE USER test WITH UNENCRYPTED PASSWORD 'test' " -U postgres
   - psql testdb -c "CREATE EXTENSION hstore SCHEMA public;" -U postgres
