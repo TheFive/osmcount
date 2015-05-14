@@ -23,5 +23,6 @@ before_script:
 
 
 script:
+  - export CODECOV_TOKEN="da541dee-74f2-45e3-9d3f-4962fa9e15d0"
   - npm test
 
