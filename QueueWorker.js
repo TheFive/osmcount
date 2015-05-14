@@ -16,7 +16,7 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 exports.processSignal = '';
 exports.processExit;
 
-var overpassWaitTime = 2200; // Wait before another Overpass Query
+var overpassWaitTime = 3500; // Wait before another Overpass Query
 var overpassWaitTimeSteps = 50;
 var overpassNo429erFor = 0;
 
