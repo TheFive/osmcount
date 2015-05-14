@@ -104,6 +104,9 @@ describe('QueueWorker',function(){
       })
     })
     it('should work on overpass Queries',function(bddone) {
+      // Adjust Timeout, as Overpass is Waiting a little bit
+
+      this.timeout(1000*60*2+100);
       wochenaufgabe.map["test"]={map:{list:['1','2']},overpass:{query:"TEST :schluessel: TEST"}};
       var singleStep = {id:"1",schluessel:"102",measure:"test",type:"overpass",query:"This is an overpassquery",status:"open",exectime: new Date()};
       var valueList = [singleStep];

@@ -5,7 +5,6 @@ var debug   = require('debug')('configuration');
 var env = process.env.NODE_ENV || 'development';
 var pg = require('pg');
 
-var MongoClient = require('mongodb').MongoClient;
 
 
 
@@ -14,24 +13,11 @@ var MongoClient = require('mongodb').MongoClient;
 var configurationFile = path.resolve(__dirname, 'config.'+env+'.json');
 var configuration;
 
-var mongodb ;
 
 var configurationInitialised = false;
 
 
-function getMongoDBString() {
-  debug('getMongoDBString');
-  configuration=exports.getConfiguration();
-  var userString = "";
-  if (configuration.mongodb.username != "") {
-    userString = configuration.mongodb.username + ':'
-                 + configuration.mongodb.password +'@';
-  }
-  var mongodbConnectStr ='mongodb://'
-             + userString
-             + configuration.mongodb.database;
-  return mongodbConnectStr;
-}
+
 
 function getPostgresDBString() {
   debug('getPostgresDBString');
@@ -51,53 +37,7 @@ function getPostgresDBString() {
   return connectStr;
 }
 
-var initialisedDB = 0;
-var initialiseCB = [];
 
-exports.initialiseMongoDB = function(callback) {
-  debug('initialiseMongoDB');
-  if (!configurationInitialised) exports.initialise();
-
-  if (configuration.mongodb.initialise == false) {
-    callback();
-    return;
-  }
-  // Implement a run one behaviour
-  if (initialisedDB == 2) {
-    // nothing to do
-    if (callback) callback();
-    return;
-  }
-  if (initialisedDB ==1) {
-    // Initialising in Progress, extend Callback List
-    if (callback) initialiseCB.push(callback);
-    return;
-  }
-  if (callback) initialiseCB.push(callback);
-  configuration=exports.getConfiguration();
-	initialisedDB=1;
-	var mongodbConnectStr = getMongoDBString();
-	debug("Connect to mongo db with string: %",mongodbConnectStr);
-	MongoClient.connect(mongodbConnectStr, function(err, db) {
-		debug("initialiseMongoDB->CB");
-		var returnerr;
-		if (err) {
-			console.log("Failed to connect to MongoDB");
-			console.log("Connect String: "+mongodbConnectStr);
-			console.log(err);
-			initialiseDB = 0;
-			returnerr = err;
-		} else {
-			initialisedDB=2;
-			mongodb = db;
-		}
-		debug("Connected to Database "+mongodbConnectStr);
-		while (initialiseCB.length>0) {
-			initialiseCB[0](returnerr);
-			initialiseCB.shift();
-		}
-	})
-}
 
 
 exports.postgresConnectStr;
@@ -162,14 +102,9 @@ exports.getValue = function(key,defValue) {
 }
 
 
-exports.getDB = function() {
-  console.log('configuration.getDB deprecated, use configuration.getMongoDB instead.')
-	return mongodb;
-}
 
-exports.getMongoDB = function() {
-  return mongodb;
-}
+
+
 
 
 exports.getServerPort = function() {

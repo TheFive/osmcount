@@ -84,11 +84,8 @@ function loadBoundariesCH(cb,result) {
 
 function removeBoundariesData (cb,result) {
 	debug("removeBoundariesData");
-	var db = configuration.getMongoDB();
-	db.collection("OSMBoundaries").remove({},{w:1}, function (err,count) {
-		debug("removeBoundariesData->CB count = "+count);
-		cb(err,count);
-	})
+	should(false,"Remove Boundaries / alle Boudnaries löschen to be implemented");
+
 }
 function copyRelevantTags(boundary,osmData) {
   for (var k in wochenaufgabe.boundaryPrototype) {
@@ -111,7 +108,6 @@ function copyBoundaries(overpassStr,countryStr,boundaries) {
 
 function insertBoundariesData (cb,result) {
 	debug("insertBoundariesData");
-	var db = configuration.getMongoDB();
 
 	var boundaries = [];
 

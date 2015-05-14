@@ -6,7 +6,6 @@ var util = require('../util.js');
 var dbHelper = require ('./dbHelper.js');
 
 function ClassAClass() {
-  this.databaseType = "postgres"; 
   this.tableName = "ClassA";
   this.collectionName = "ClassA";
   this.createTableString = 'CREATE TABLE ClassA \

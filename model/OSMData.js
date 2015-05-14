@@ -14,7 +14,6 @@ var postgresMapper = require('../model/postgresMapper.js')
 
 function OSMData() {
   debug('OSMData');
-  this.databaseType = "postgres"; 
   this.tableName = "OSMData";
   this.collectionName = "OSMBoundaries";
   this.createTableString = "CREATE TABLE osmdata ( id bigserial NOT NULL,data hstore, \
@@ -102,23 +101,9 @@ function importPostgresDB(filename,cb) {
 
 OSMData.prototype.insertData = function(data,cb) {
   debug('OSMData.prototype.insertData');
-  if (this.databaseType == "mongo") {
-    assert.equal("mongodb not implemented yet",null);
-  }
-  if (this.databaseType == "postgres") {
-    insertDataToPostgres(data,cb);
-  }
+  insertDataToPostgres(data,cb);
 }
 
-function findMongoDB(query,cb) {
-  debug('findMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = 'OSMBoundaries';
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.find(query).toArray(cb);
-}
 
 function findPostgresDB(query,cb) {
   debug('findPostgresDB');
@@ -152,12 +137,7 @@ function findPostgresDB(query,cb) {
 
 OSMData.prototype.find = function(query,cb) {
   debug('OSMData.prototype.find');
-  if (this.databaseType == 'mongo') {
-   findMongoDB(query,cb);
-  }
-  if (this.databaseType == "postgres") {
-    findPostgresDB (query,cb);
-  }
+  findPostgresDB (query,cb);
 }
 
 module.exports = new OSMData();

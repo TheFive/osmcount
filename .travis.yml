@@ -9,7 +9,6 @@ install:
  - npm install
 
 services:
- - mongodb
 
 addons:
  postgresql: "9.3"
