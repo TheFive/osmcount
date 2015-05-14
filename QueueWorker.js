@@ -16,7 +16,7 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 exports.processSignal = '';
 exports.processExit;
 
-var overpassWaitTime = 500; // Wait before another Overpass Query
+var overpassWaitTime = 2200; // Wait before another Overpass Query
 var overpassWaitTimeSteps = 50;
 var overpassNo429erFor = 0;
 
@@ -182,6 +182,8 @@ function doOverpass(cb,results) {
             if (err.statusCode = "429") {
               overpassWaitTime += overpassWaitTimeSteps;
               overpassNo429erFor = 0;
+              job.status = "open";
+              job.error.fix = "Was HTTP 429 Fixed automated for reason NotExcecuted, actual overpass slow down: "+overpassWaitTime+"ms";
             }
           } else {
             job.status="done";
