@@ -16,6 +16,9 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 exports.processSignal = '';
 exports.processExit;
 
+var overpassWaitTime = 500; // Wait before another Overpass Query
+var overpassWaitTimeSteps = 50;
+var overpassNo429erFor = 0;
 
 function getHangingJob(cb) {
   debug("getHangingJob(cb)");
@@ -149,6 +152,7 @@ function doOverpass(cb,results) {
       result.schluessel = job.schluessel;
       result.source = job.source;
       async.series( [
+        function (cb) {setTimeout(cb,overpassWaitTime);},
         function (cb) {
           should(exports.overpassRunning).isFalse;
           exports.overpassRunning = true;
@@ -172,8 +176,20 @@ function doOverpass(cb,results) {
             job.status = "error";
             job.error = err;
             // error is handled, so put null as error to save
+            if (error.statusCode = "429") {
+              overpassWaitTime += overpassWaitTimeSteps;
+              overpassNo429erFor = 0;
+              job.status = "open";
+              job.error.fix = "Was HTTP 429 Fixed automated for reason NotExcecuted, actual overpass slow down: "+overpassWaitTime+"ms";
+            }
           } else {
             job.status="done";
+            overpassNo429erFor += 1;
+            if (overpassNo429erFor >100) {
+               overpassWaitTime -= overpassWaitTimeSteps;
+               if (overpassTime <=0)  overpassWaitTime = 0;
+               overpassNo429erFor = 0;
+            }
           }
           var time1 = exports.overpassStartTime - startTime;
           var time2 = startSave - exports.overpassStartTime;

@@ -60,7 +60,7 @@ describe('POI', function() {
     })
 
   })
-  describe.only('insertData',function() {
+  describe('insertData',function() {
     before(function(bddone) {
       dbHelper.initialiseTablePostgres(POI,bddone);
     })
