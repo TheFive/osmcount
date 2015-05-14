@@ -179,7 +179,7 @@ function doOverpass(cb,results) {
             job.status = "error";
             job.error = err;
             // error is handled, so put null as error to save
-            if (error.statusCode = "429") {
+            if (err.statusCode = "429") {
               overpassWaitTime += overpassWaitTimeSteps;
               overpassNo429erFor = 0;
             }
