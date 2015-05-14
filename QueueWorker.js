@@ -20,6 +20,9 @@ var overpassWaitTime = 500; // Wait before another Overpass Query
 var overpassWaitTimeSteps = 50;
 var overpassNo429erFor = 0;
 
+exports.overpassWaitTimeInfo = function() 
+{ return "[OWT:"+overpassWaitTime+",no429:"+overpassNo429erFor+"]";}
+
 function getHangingJob(cb) {
   debug("getHangingJob(cb)");
 

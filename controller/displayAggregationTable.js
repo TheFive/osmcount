@@ -8,6 +8,7 @@ var wochenaufgabe  = require('../wochenaufgabe.js');
 var DataCollection = require('../model/DataCollection.js');
 var WorkerQueue    = require('../model/WorkerQueue.js');
 var DataTarget     = require('../model/DataTarget.js');
+var DataTarget     = require('../model/QueueWorker.js');
 
 
 
@@ -1038,6 +1039,7 @@ exports.table = function(req,res){
                            +'measure='+ param.measure
                            +'&type=insert&'+
                            '">(Zeitplan)</a> ';
+              pageFooter += " "+QueueWorker.overpassWaitTimeInfo;
           }
           pageFooter += separator;
           pageFooter += "Die Service Links bedeuten: \
