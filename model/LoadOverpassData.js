@@ -21,6 +21,7 @@ var queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
 
+exports.timeout = 1000 * 60 * 10; // Timeout after 10 minutes;
 
 
 
@@ -33,12 +34,13 @@ function overpassQuery(query, cb, options) {
     options.uri = overpassApiLinkDE;
   }
   if (typeof(options.timeout) == 'undefined') {
-    options.timeout = 1000 * 60 * 10; // Timeout after 10 minutes
+    options.timeout = exports.timeout; // Timeout after 10 minutes
   }
   var start = (new Date()).getTime();
   request.post(options, function (error, response, body) {
     var end = (new Date()).getTime();
     debug("overpassQuery->CB after %s seconds",(end-start)/1000);
+
 
     if (!error && response.statusCode === 200) {
         cb(undefined, body);
