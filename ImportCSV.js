@@ -22,9 +22,9 @@ function parseCSV(str,delimiter) {
 
     var arr = [];
     var quote = false;  // true means we're inside a quoted field
-
+    var row,col,c;
     // iterate over each character, keep track of current row and column (of the returned array)
-    for (var row = col = c = 0; c < str.length; c++) {
+    for (row = col = c = 0; c < str.length; c++) {
         var cc = str[c], nc = str[c+1];        // current character, next character
         arr[row] = arr[row] || [];             // create a new row if necessary
         arr[row][col] = arr[row][col] || '';   // create a new column (start with empty string) if necessary
@@ -63,14 +63,14 @@ exports.parseCSV = parseCSV;
 
 exports.convertArrToJSON = function(array,defJson) {
 	debug("convertArrToJSON");
-	numeral = util.numeral;
+	var numeral = util.numeral;
 	var newData = [];
 	debug("Structure "+JSON.stringify(array[0]));
-	for (i=1;i<array.length;i++) {
+	for (var i=1;i<array.length;i++) {
 		debug("Convert Line "+i);
 		newData[i-1] = util.clone(defJson);
 
-		for (z=0;z<array[0].length;z++) {
+		for (var z=0;z<array[0].length;z++) {
 			debug("Convert Column "+z);
 			var key = array[0][z];
 			var value = array[i][z];
@@ -114,7 +114,7 @@ function importCSVFileToJSON(filename,defJson,cb) {
 		}
 
 		// convert the content of the file to an JSON array
-		array = parseCSV(data,";");
+		var array = parseCSV(data,";");
 
 		if(array.length<2) {
 			// CSV File is empty, log an error
@@ -128,7 +128,7 @@ function importCSVFileToJSON(filename,defJson,cb) {
 		}
 
 		// Quality Check, does all rows has the same count of columns ?
-		for (i=1;i<array.length;i++) {
+		for (var i=1;i<array.length;i++) {
 			if (array[0].length!=array[i].length) {
 				var error = "Invalid CSV File, Number of Columns differs "+filename +" Zeile "+i
 				if (cb) cb(error,null);

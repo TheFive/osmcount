@@ -12,6 +12,14 @@ var DataCollection = require('../model/DataCollection.js')
 
 
 describe('importCSV', function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   describe('parseCSV', function() {
     it ('should handle empty files', function() {
       var array = importCSV.parseCSV('',';');
@@ -19,7 +27,7 @@ describe('importCSV', function() {
       should.equal(0,array.length);
     });
     it ('should handle header', function() {
-      array = importCSV.parseCSV('name;count',';');
+      var array = importCSV.parseCSV('name;count',';');
       should.exist(array);
       should.equal(1,array.length);
       should(array[0]).match(['name','count']);
@@ -112,7 +120,7 @@ describe('importCSV', function() {
         bddone();
       })
     })
-    describe('readCSVMongoDB',function() {
+    describe.skip('readCSVMongoDB',function() {
       var db;
       before(function(bddone) {
         configuration.initialiseMongoDB( function () {

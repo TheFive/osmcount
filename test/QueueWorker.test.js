@@ -19,6 +19,14 @@ result =  "not used";
 var helper = require('./helper.js');
 
 describe('QueueWorker',function(){
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   beforeEach(function(bddone) {
     async.series([
       WorkerQueue.dropTable.bind(WorkerQueue),

@@ -5,12 +5,20 @@ var nock   = require('nock');
 
 var lod           =require('../model/LoadOverpassData.js');
 var wochenaufgabe = require('../wochenaufgabe.js');
-
+var helper = require('./helper.js');
 
 
 
 
 describe('LoadOverpassData',function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   describe('createQuery',function() {
     it ('should put an error for wrong Wochenaufgaben', function (bddone) {
       var referenceJob = {};

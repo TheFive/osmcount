@@ -3,8 +3,17 @@ var numeral = require('numeral');
 var util    = require('../util');
 
 var config  = require('../configuration.js');
+var helper = require('./helper.js');
 
 describe('util',function(){
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
 
   describe('copy', function(){
     

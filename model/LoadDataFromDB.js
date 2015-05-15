@@ -92,7 +92,7 @@ exports.insertValue = function insertValue(map,key,osmdoc) {
   }
 
   if (  keyDefined && nameDefined && allTypeCorrect ) {
-    value = {};
+    var value = {};
     value.name = osmdoc.name;
     value.typ = "-";
     if (typeof(osmdoc[map.secondInfoKey])!= 'undefined') {

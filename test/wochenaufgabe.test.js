@@ -1,7 +1,16 @@
 var should =require('should');
 var wochenaufgabe = require('../wochenaufgabe.js');
+var helper = require('./helper.js')
 
 describe('Wochenaufgabe', function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   describe('tagCounter', function() {
     it('should count different OSM Objects', function() {
 		var result = {};

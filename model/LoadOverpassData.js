@@ -169,7 +169,7 @@ exports.runOverpass= function(query, job,result, cb) {
 			console.log(error);
 			cb(error);
 		} else {
-			date = new Date();
+			var date = new Date();
 			result.timestamp=job.exectime;
 			result.count=0;
 			try {
@@ -201,7 +201,7 @@ exports.createQuery = function(referenceJob)
 {
 	debug("createQuery");
 	should.exist(referenceJob);
-  var jobs = [];
+    var jobs = [];
 	var aufgabe = referenceJob.measure;
 	var exectime = referenceJob.exectime;
 	var wa = wochenaufgabe.map[aufgabe];
@@ -212,8 +212,8 @@ exports.createQuery = function(referenceJob)
  	var blaetter = wa.map.list;
 
 	if (typeof(blaetter)!='undefined') {
-		keys = blaetter;
-		for (i =0;i<keys.length;i++) {
+		var keys = blaetter;
+		for (var i =0;i<keys.length;i++) {
 			debug(keys[i]);
 			var job = {};
 			job.measure=aufgabe;

@@ -45,6 +45,14 @@ var classA = new ClassAClass();
 
 
 describe('postgresMapper',function(){
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   beforeEach(function(bddone) {
     //helper.storeGlobals();
     bddone();

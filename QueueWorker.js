@@ -149,7 +149,7 @@ function doOverpass(cb,results) {
   //debug(JSON.stringify(job));
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpass") {
     debug("Start: doOverpass(cb,"+results+")");
-      measure=job.measure;
+      var measure=job.measure;
       var query=job.query;
       var result= {};
       result.schluessel = job.schluessel;
@@ -221,7 +221,7 @@ function doOverpass(cb,results) {
 
 function doOverpassPOIPLZ(cb,results) {
   debug("doOverpassPOIPLZ(cb,"+results+")");
-  job=results.readjob;
+  var job=results.readjob;
   //debug(JSON.stringify(job));
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpassPOIPLZ") {
     debug("Start: doOverpassPOIPLZ(cb,"+results+")");
@@ -303,7 +303,7 @@ function doInsertJobs(cb,results) {
 
 function doLoadBoundaries(cb,results) {
   debug("doLoadBoundaries(cb,"+results+")");
-  job=results.readjob;
+  var job=results.readjob;
 
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="loadBoundaries") {
     debug("Start: doLoadBoudnaries(cb,"+results+")");

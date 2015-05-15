@@ -77,7 +77,7 @@ function generateWhereClause(query) {
     if (isBasisType(query[k])) {
       whereClause += "data ->>'"+k + "' = '" +query[k]+"'";
     } else {
-      for (k2 in query[k]) {
+      for (var k2 in query[k]) {
         should(isBasisType(query[k][k2])).equal(true);
         whereClause += "data ->'"+k +"'->>'"+k2 +"' = '" +query[k][k2]+"'";
       }      

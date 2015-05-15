@@ -85,7 +85,7 @@ exports.initialiseMongoDB = function(callback) {
 			console.log("Failed to connect to MongoDB");
 			console.log("Connect String: "+mongodbConnectStr);
 			console.log(err);
-			initialiseDB = 0;
+			initialisedDB = 0;
 			returnerr = err;
 		} else {
 			initialisedDB=2;

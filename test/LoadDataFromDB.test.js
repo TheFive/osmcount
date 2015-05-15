@@ -7,9 +7,17 @@ var async  = require('async');
 var config = require('../configuration.js');
 var lod           = require('../model/LoadDataFromDB.js');
 var OSMData       = require('../model/OSMData.js');
-
+var helper = require('./helper.js');
 
 describe('LoadDataFromDB', function () {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   before(function(bddone){
     async.series([
        OSMData.dropTable.bind(OSMData),

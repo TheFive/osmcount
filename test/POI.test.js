@@ -10,6 +10,14 @@ var helper = require('./helper.js');
 
 
 describe('POI', function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   describe('import',function(bddone) {
     describe('should find data',function(){
       before(function(bddone){
