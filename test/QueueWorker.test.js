@@ -26,14 +26,14 @@ describe('QueueWorker',function(){
       DataCollection.createTable.bind(DataCollection)
     ],function(err) {
       should.not.exist(err);
-      dbHelper.storeGlobals();
+    //  dbHelper.storeGlobals();
       bddone();
     });
   });
   afterEach(function(bddone){
     should(query).equal("not used");
     should(result).equal("not used");
-    dbHelper.allowedGlobals([]);
+   // dbHelper.allowedGlobals([]);
     bddone();
   })
   describe('doNextJob',function() {   
@@ -154,6 +154,45 @@ describe('QueueWorker',function(){
         })
       })
     })
+    it.only('should work handle not parsable results',function(bddone) {
+      this.timeout(1000*60*2+100);
+      wochenaufgabe.map["test"]={map:{list:['1','2']},overpass:{query:"TEST :schluessel: TEST"}};
+      var singleStep = {id:"1",schluessel:"102",measure:"test",type:"overpass",query:"This is an overpassquery",status:"open",exectime: new Date()};
+      var valueList = [singleStep];
+      var scope = nock('http://overpass-api.de/api/interpreter')
+                  .post('',"data=This%20is%20an%20overpassquery")             
+                  .reply(200, "Not parsable JSON");
+      WorkerQueue.insertData(valueList,function(err,data) {
+        should.not.exist(err);
+        should(data).equal('Datensätze: 1');
+        QueueWorker.doNextJob(function(err,data){
+          should.not.exist(err);
+          singleStep.status = "error";
+          should(data).match(singleStep);
+          async.parallel([
+            function (done) {
+              WorkerQueue.count({id:1,status:"error"},function(err,data){
+                should.not.exist(err);
+                should(data).equal('1');
+                done(); 
+              })          
+            },
+            function(done) {
+              DataCollection.count({measure:"test",schluessel:"102",count:12},function(err,data){
+                should.not.exist(err);
+                should(data).equal('0');
+                done();
+              });
+            }
+            ],function(err) {
+              should.not.exist(err);
+              bddone();
+            }
+          );
+        })
+      })
+    })
+
 
   })
   describe('runNextJobs',function(){

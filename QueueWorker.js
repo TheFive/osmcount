@@ -150,7 +150,7 @@ function doOverpass(cb,results) {
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpass") {
     debug("Start: doOverpass(cb,"+results+")");
       measure=job.measure;
-      query=job.query;
+      var query=job.query;
       var result= {};
       result.schluessel = job.schluessel;
       result.source = job.source;
@@ -179,7 +179,7 @@ function doOverpass(cb,results) {
             job.status = "error";
             job.error = err;
             // error is handled, so put null as error to save
-            if (err.statusCode = "429") {
+            if (err.statusCode == "429") {
               overpassWaitTime += overpassWaitTimeSteps;
               overpassNo429erFor = 0;
               job.status = "open";
