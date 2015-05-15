@@ -14,7 +14,6 @@ var postgresMapper = require('../model/postgresMapper.js');
 
 function WorkerQueue() {
   debug('WorkerQueue');
-  this.databaseType = "postgres"; 
   this.tableName = "WorkerQueue";
   this.collectionName = "WorkerQueue";
   this.createTableString =
@@ -116,15 +115,6 @@ function importPostgresDB(filename,cb) {
 
 
 
-function getWorkingTaskMongoDB(cb) {
-  debug('getWorkingTaskMongoDB');
-  var db=config.getMongoDB();
-  var collectionName = 'WorkerQueue';
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.findOne({status:"working"},cb);
-}
 
 function getNextTaskPostgresDB(status,cb) {
   debug('getNextOpenTaskPostgresDB');
@@ -167,46 +157,15 @@ function getNextTaskPostgresDB(status,cb) {
 }
 WorkerQueue.prototype.getWorkingTask = function (cb) {
   debug('getWorkingTask');
-  if (this.databaseType == "mongo") {
-    getWorkingTaskMongoDB(cb);  
-  }
-  if (this.databaseType == "postgres") {
-    getNextTaskPostgresDB("working",cb);
-  }
-  
-
+  getNextTaskPostgresDB("working",cb);
 }
 
-function getNextOpenTaskMongoDB(cb) {
-  debug('getWorkingTaskMongoDB');
-  var db=config.getMongoDB();
-  var collectionName = 'WorkerQueue';
-  var date= new Date();
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.findOne({ status : "open" ,
-               exectime: {$lte: date}
-              },
-              {
-                "sort": [['prio','desc']]
-              },cb);
-}
 
 WorkerQueue.prototype.getNextOpenTask = function getNextOpenTask(cb) {
   debug('getNextOpenTask');
-  if (this.databaseType == "mongo") {
-    getNextOpenTaskMongoDB(cb);  
-  }
-  if (this.databaseType == "postgres") {
-    getNextTaskPostgresDB("open",cb);
-  }
+  getNextTaskPostgresDB("open",cb);
 }
 
-function saveTaskMongoDB(task,cb) {
-  debug('saveTaskMongoDB');
-  var db=config.getMongoDB();
-  db.collection("WorkerQueue").save(task,{w:1}, cb);
-}
 
 function saveTaskPostgresDB(task,cb) {
   debug('saveTaskPostgresDB');
@@ -240,12 +199,7 @@ function saveTaskPostgresDB(task,cb) {
 WorkerQueue.prototype.saveTask = function(task,cb) {
   debug('saveTask');
   should.exist(cb);
-  if (this.databaseType == 'mongo') {
-    saveTaskMongoDB(task,cb);
-  }
-  if (this.databaseType == 'postgres') {
-    saveTaskPostgresDB(task,cb);
-  }
+  saveTaskPostgresDB(task,cb);
 }
 
 

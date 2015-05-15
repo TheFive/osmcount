@@ -121,6 +121,8 @@ function saveJobState(cb,result) {
 // (should be done in server in future)
 var q= async.queue(function (task,cb) {
   debug("async.queue Start Next Task");
+  debug(task);
+  debug(cb);
   task(cb);
 },1);
 
@@ -226,7 +228,7 @@ function doOverpassPOIPLZ(cb,results) {
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpassPOIPLZ") {
     debug("Start: doOverpassPOIPLZ(cb,"+results+")");
       plz=job.plz;
-      query=job.query;
+      var query=job.query;
       var result= {};
       result.plz = job.plz;
       result.source = job.source;
@@ -430,7 +432,6 @@ function correctData(callback) {
 exports.startQueue =function(cb) {
   debug("startQueue(cb)");
   q.drain = function () {cb();}
-  q.push(config.initialiseMongoDB);
   q.push(correctData);
   q.push(runNextJobs);
 }

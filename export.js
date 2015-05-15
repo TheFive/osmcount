@@ -23,8 +23,6 @@ program
   .option('--workerqueue', 'Use WorkerQueue Container')
   .option('--datatarget', 'Use DataTarget Container')
   .option('--osmdata', 'Use OSMData Container')
-  .option('--mongo','Use MongoDB')
-  .option('--postgres','Use PostgresDB')
   .option('--all')
   .option('--createTable','drop and create Table before import')
   .parse(process.argv);
@@ -32,7 +30,7 @@ program
 var dirname = path.join(__dirname);
 
 if (!program.export && ! program.import) {
-  console.log("You better tell me, what is should do with -e or -i. Try --help");
+  console.log("You better tell me, what I should do with -e or -i. Try --help");
   process.exit();
 }
 
@@ -56,12 +54,6 @@ if (program.F=='') {
   }
 }
 
-if ((program.mongo!= true) && !(program.postrges != true)) {
-  console.log("Please Enter a Database");
-  console.log(program.mongo);
-  console.log(program.postgres);
-  process.exit();
-}
 
 debug('initialising util');
 util.initialise();
@@ -72,10 +64,6 @@ function importData(cb) {
     cb();
     return;
   };
-  if (program.mongo) {
-  	cb("Import MongoDB not supported yet");
-  	return;
-  }
   DataCollection.initialise("postgres");
   DataTarget.initialise("postgres");
   WorkerQueue.initialise("postgres");
@@ -170,15 +158,6 @@ function exportData(cb) {
     cb();
     return;
   };
-  if (program.postgres) {
-  	cb("Import PosgresDB not supported yet");
-  	return;
-  }
-  DataCollection.initialise("mongo");
-  DataTarget.initialise("mongo");
-  WorkerQueue.initialise("mongo");
-  OSMData.initialise('mongo');
-  debug('mongo initialised');
   async.series([
   	function(callback) {
   		mkdirp(dirname,callback);
@@ -221,8 +200,7 @@ console.log("Start Data Export / Import");
 
 async.auto( {
     config: config.initialise,
-    mongodb: ["config",config.initialiseMongoDB],
-    handleImportExport: ["mongodb",handleImportExport]
+    handleImportExport: ["config",handleImportExport]
   },
   function (err) {
     if (err) {

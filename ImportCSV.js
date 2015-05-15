@@ -1,4 +1,3 @@
-var debug   = require('debug')('importCSV');
 var fs      = require("fs");
 var path    = require('path');
 var pg      = require('pg');

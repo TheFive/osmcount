@@ -22,7 +22,6 @@ var postgresMapper = require('../model/postgresMapper.js')
 
 function DataTargetClass() {
   debug('DataTarget');
-  this.databaseType = "postgres"; 
   this.tableName = "DataTarget";
   this.collectionName = "DataTarget";
   this.createTableString = "CREATE TABLE datatarget \
@@ -88,17 +87,11 @@ DataTargetClass.prototype.getInsertQueryValueList = function getInsertQueryValue
 
 DataTargetClass.prototype.insertData = function(data,cb) {
   debug('DataTarget.prototype.insertData');
-  if (this.databaseType == "mongo") {
-    should.exist(null,"mongodb not implemented yet");
-  }
-  if (this.databaseType == "postgres") {
+  // Turn Data into a stream
+  var reader = es.readArray(data);
 
-    // Turn Data into a stream
-    var reader = es.readArray(data);
-
-    // use Stream Function to put data to Postgres
-    insertStreamToPostgres(true,reader,cb);
-  }
+  // use Stream Function to put data to Postgres
+  insertStreamToPostgres(true,reader,cb);
 }
 
 
@@ -150,28 +143,6 @@ function aggregatePostgresDB(param,cb) {
   });
 }
 
-function aggregateMongoDB(param,cb) {
-  debug('aggregateMongoDB');
-
-  var db = config.getMongoDB();
-  var collection = db.collection('DataTarget');
-  var preFilterVorgabe = {$match: {
-                              measure: param.measure,
-                              schluessel: {$regex: "^"+param.location}}};
-
-
-
-  var queryVorgabe = [
-        preFilterVorgabe,
-        {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
-                        vorgabe: "$apothekenVorgabe"
-                        }},
-          {$group: { _id:  "$schluessel",
-                 vorgabe  : {$sum: "$vorgabe" },
-                      }}];
-  collection.aggregate(query,cb);
-
-}
 /*
 the aggregate Function accepts the following parameters
 lengthOfKey:  lenghtOfKey for group clause,
@@ -181,13 +152,7 @@ measure:      measure to work on,
 
 DataTargetClass.prototype.aggregate = function(param,cb) {
   debug('DataTarget.prototype.aggregate');
-  if (this.databaseType == "mongo") {
-    aggregateMongoDB(param,cb);
-    return;
-  }
-  if (this.databaseType == "postgres") {
-    aggregatePostgresDB(param,cb);
-  }
+  aggregatePostgresDB(param,cb);
 }
 
 

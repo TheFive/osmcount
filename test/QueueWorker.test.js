@@ -12,10 +12,6 @@ var QueueWorker    = require('../QueueWorker.js');
 var wochenaufgabe  = require('../wochenaufgabe.js');
 var LoadOverpassData  = require('../model/LoadOverpassData.js');
 
-// Define some global variables to test, wether they are used
-// or not. 
-query = "not used";
-result =  "not used";
 var helper = require('./helper.js');
 
 describe('QueueWorker',function(){
@@ -35,14 +31,12 @@ describe('QueueWorker',function(){
       DataCollection.createTable.bind(DataCollection)
     ],function(err) {
       should.not.exist(err);
-    //  helper.storeGlobals();
       bddone();
     });
   });
   afterEach(function(bddone){
     should(query).equal("not used");
     should(result).equal("not used");
-   // helper.allowedGlobals([]);
     bddone();
   })
   describe('doNextJob',function() {   
@@ -126,6 +120,7 @@ describe('QueueWorker',function(){
       })
     })
     it('should work on overpass Queries',function(bddone) {
+      // Adjust Timeout, as Overpass is Waiting a little bit
       this.timeout(1000*60*2+100);
       wochenaufgabe.map["test"]={map:{list:['1','2']},overpass:{query:"TEST :schluessel: TEST"}};
       var singleStep = {id:"1",schluessel:"102",measure:"test",type:"overpass",query:"This is an overpassquery",status:"open",exectime: new Date()};

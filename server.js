@@ -34,11 +34,10 @@ util.initialise();
 debug("Start Async Configuration");
 async.auto( {
 		config: config.initialise,
-		mongodb: ["config",config.initialiseMongoDB],
         datatarget: ["config",DataTarget.initialise.bind(DataTarget)],
         workerqueue: ["config",WorkerQueue.initialise.bind(WorkerQueue)],
         datacollection: ["config",DataCollection.initialise.bind(DataCollection)],
-		dbdata:  ["mongodb", loadDataFromDB.initialise],
+		dbdata:  ["config", loadDataFromDB.initialise],
 		startQueue: ["dbdata","workerqueue","datacollection","datatarget",queue.startQueue]
 
 
@@ -66,10 +65,8 @@ process.on( 'SIGINT', function() {
 
 debug("Initialising HTML Routes");
 // log every call and then call more detailled
-// and publish Mongo DB to all functions via res
 app.use(function(req, res, next){
     debug("Url Called: %s",req.url);
-    res.db= config.getMongoDB();
     next();
 });
 

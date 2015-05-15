@@ -120,67 +120,6 @@ describe('importCSV', function() {
         bddone();
       })
     })
-    describe.skip('readCSVMongoDB',function() {
-      var db;
-      before(function(bddone) {
-        configuration.initialiseMongoDB( function () {
-          var db=configuration.getMongoDB();
-          DataCollection.initialise("mongo");
-          should.exist(db);
-          async.series(
-            [function(done) {
-              helper.dropCollection(db,"DataCollection",done);
-            }, function(done) {
-                helper.createCollection(db,"DataCollection",done);
-              }
-            ],
-            function(err){bddone(err)}
-          );
-        });
-      });
-      after(function(bddone) {
-        DataCollection.initialise("postgres",bddone);
-      })
-      it('should fail with no filename' , function(done) {
-        db = configuration.getMongoDB();
-        DataCollection.importCSV('NonExistingFile.csv',{},function(err,data) {
-           should.equal(err.errno,34);
-           done();
-        })
-      });
-      it('should load 2 datasets' , function(done) {
-        fs.writeFileSync(filename,"name;count\na;2\nb;10");
-        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
-          should.equal(err,null);
-          should.equal(data,"Datensätze: 2");
-          db.collection("DataCollection").find({}).toArray(function(err,data) {
-            should.equal(data.length,2);
-            should.equal(data[0].name,'a');
-            should.equal(data[0].count,'2');
-            should.equal(data[1].name,'b');
-            should.equal(data[1].count,'10');
-          })
-          done();
-        })
-      });
-      it('should handle empty Files' ,function (done) {
-        fs.writeFileSync(filename,"Write Something, nothing fails @travis");
-        fs.writeFileSync(filename,"");
-        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
-          should.equal(err,"empty file");
-          done();
-        });
-      })
-      it('should generate an error on column numbers differs',function(bddone){
-        fs.writeFileSync(filename,"name;count\na;2\nb;10\c;4;5");
-        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
-          should.exist(err);
-          should(err).match(/^Invalid CSV File, Number of Columns differs/);
-          bddone();
-        })
-      })
-
-    });
     describe('readCSVpostgres',function() {
       before(function(bddone) {
         pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
