@@ -3,7 +3,7 @@ var async = require('async')
 
 var postgresMapper = require('../model/postgresMapper.js');
 var util = require('../util.js');
-var dbHelper = require ('./dbHelper.js');
+var helper = require ('./helper.js');
 
 function ClassAClass() {
   this.databaseType = "postgres"; 
@@ -46,11 +46,11 @@ var classA = new ClassAClass();
 
 describe('postgresMapper',function(){
   beforeEach(function(bddone) {
-    //dbHelper.storeGlobals();
+    //helper.storeGlobals();
     bddone();
   })
   afterEach(function(bddone) {
-    //dbHelper.allowedGlobals([]);
+    //helper.allowedGlobals([]);
     bddone();
   })
   describe('invoke methods with classA', function () {

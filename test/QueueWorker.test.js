@@ -16,7 +16,7 @@ var LoadOverpassData  = require('../model/LoadOverpassData.js');
 // or not. 
 query = "not used";
 result =  "not used";
-var dbHelper = require('./dbHelper.js');
+var helper = require('./helper.js');
 
 describe('QueueWorker',function(){
   beforeEach(function(bddone) {
@@ -27,14 +27,14 @@ describe('QueueWorker',function(){
       DataCollection.createTable.bind(DataCollection)
     ],function(err) {
       should.not.exist(err);
-    //  dbHelper.storeGlobals();
+    //  helper.storeGlobals();
       bddone();
     });
   });
   afterEach(function(bddone){
     should(query).equal("not used");
     should(result).equal("not used");
-   // dbHelper.allowedGlobals([]);
+   // helper.allowedGlobals([]);
     bddone();
   })
   describe('doNextJob',function() {   

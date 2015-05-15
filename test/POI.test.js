@@ -6,14 +6,14 @@ var should = require('should');
 
 var config = require('../configuration.js');
 var POI = require('../model/POI.js');
-var dbHelper = require('./dbHelper.js');
+var helper = require('./helper.js');
 
 
 describe('POI', function() {
   describe('import',function(bddone) {
     describe('should find data',function(){
       before(function(bddone){
-        dbHelper.initialiseTablePostgres(POI,"POI.test.json",bddone);
+        helper.initialiseTablePostgres(POI,"POI.test.json",bddone);
       });
       it('should import POI.test.json',function(bddone){
         POI.find({},function(err,data){
@@ -46,7 +46,7 @@ describe('POI', function() {
   });
   describe('remove',function() {
     before(function(bddone) {
-      dbHelper.initialiseTablePostgres(POI,"POI.test.json",bddone);
+      helper.initialiseTablePostgres(POI,"POI.test.json",bddone);
     })
     it('should remove a node',function (bddone) {
       POI.remove({type: "node","id": 39663366},function(err,data) {
@@ -62,7 +62,7 @@ describe('POI', function() {
   })
   describe('insertData',function() {
     before(function(bddone) {
-      dbHelper.initialiseTablePostgres(POI,bddone);
+      helper.initialiseTablePostgres(POI,bddone);
     })
     it('should insert 4 JSON Objects',function (bddone) {
       POI.insertData([{type: "node","id": 39663366},
@@ -86,7 +86,7 @@ describe('POI', function() {
   })
   describe('save',function() {
     before(function(bddone) {
-      dbHelper.initialiseTablePostgres(POI,"POI.test.json",bddone);
+      helper.initialiseTablePostgres(POI,"POI.test.json",bddone);
     })
     it('should save a node',function (bddone) {
       POI.find({overpass:{country:"DE"}},function(err,data) {

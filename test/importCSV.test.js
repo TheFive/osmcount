@@ -4,7 +4,7 @@ var pg    = require('pg');
 var async = require('async');
 var path  = require('path');
 
-var dbHelper = require('./dbHelper.js');
+var helper = require('./helper.js');
 var importCSV = require('../ImportCSV.js');
 
 var configuration  = require('../configuration.js');
@@ -121,9 +121,9 @@ describe('importCSV', function() {
           should.exist(db);
           async.series(
             [function(done) {
-              dbHelper.dropCollection(db,"DataCollection",done);
+              helper.dropCollection(db,"DataCollection",done);
             }, function(done) {
-                dbHelper.createCollection(db,"DataCollection",done);
+                helper.createCollection(db,"DataCollection",done);
               }
             ],
             function(err){bddone(err)}
