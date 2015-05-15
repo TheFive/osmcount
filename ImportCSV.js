@@ -3,7 +3,7 @@ var fs      = require("fs");
 var path    = require('path');
 var pg      = require('pg');
 var async   = require('async');
-
+var debug   = require('debug')('ImportCSV');
 var config  = require('./configuration.js');
 var util    = require('./util.js');
 

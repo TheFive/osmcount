@@ -32,7 +32,7 @@ describe('LoadDataFromDB', function () {
       CC_Type.blaetterIgnore = undef;
 		});
     it ('should ignore undefined Key', function() {
-      osmdoc = {boundary:"postal_code"}
+      var osmdoc = {boundary:"postal_code"}
       var key;
       should.not.exist (key);
       lod.insertValue(CC_Type,key,osmdoc);
@@ -40,7 +40,7 @@ describe('LoadDataFromDB', function () {
       should.equal(CC_Type.list.length,0);
     });
     it ('should ignore undefined osmdoc.name', function() {
-      osmdoc = {boundary:"postal_code"}
+      var osmdoc = {boundary:"postal_code"}
       var key="23";
       should.not.exist (osmdoc.name);
       lod.insertValue(CC_Type,key,osmdoc);
@@ -48,7 +48,7 @@ describe('LoadDataFromDB', function () {
       should.equal(CC_Type.list.length,0);
     });
     it ('should ignore wrong osmtype (List of Values)', function() {
-      osmdoc = {boundary:"something special",name:"halöle"}
+      var osmdoc = {boundary:"something special",name:"halöle"}
       var key="23";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1});
@@ -56,7 +56,7 @@ describe('LoadDataFromDB', function () {
     });
     it ('should ignore wrong osmtype (values)', function() {
       CC_Type.matchKey = {bounday:"administrative"};
-      osmdoc = {boundary:"something special",name:"halöle"}
+      var osmdoc = {boundary:"something special",name:"halöle"}
       var key="23";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1});
@@ -65,7 +65,7 @@ describe('LoadDataFromDB', function () {
     it('should insert osmtype (List of Values)', function() {
       CC_Type.secondInfoKey = "admin_level";
       CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
-      osmdoc = {boundary:"administrative",name:"New Border"}
+      var osmdoc = {boundary:"administrative",name:"New Border"}
       var key="23";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1,"23":{name:"New Border",typ:"-"}});
@@ -74,7 +74,7 @@ describe('LoadDataFromDB', function () {
     it ('should insert osmtype (values)', function() {
       CC_Type.secondInfoKey = "admin_level";
       CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
-      osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
+      var osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
       var key="23";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1,"23":{name:"New Border",typ:"country"}});
@@ -84,7 +84,7 @@ describe('LoadDataFromDB', function () {
       CC_Type.matchKey = {boundary:"administrative"};
       CC_Type.secondInfoKey = "admin_level";
       CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
-      osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
+      var osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
       var key="230000";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1,
@@ -100,7 +100,7 @@ describe('LoadDataFromDB', function () {
       CC_Type.secondInfoKey = "admin_level";
       CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
       CC_Type.blaetterIgnore = [{admin_level:2}]
-      osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
+      var osmdoc = {boundary:"administrative",name:"New Border",admin_level:"2"}
       var key="0";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1,
@@ -112,7 +112,7 @@ describe('LoadDataFromDB', function () {
       CC_Type.secondInfoKey = "admin_level";
       CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
       CC_Type.blaetterIgnore = [{admin_level:2}]
-      osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3"}
+      var osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3"}
       var key="0";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1,
@@ -124,7 +124,7 @@ describe('LoadDataFromDB', function () {
       CC_Type.secondInfoKey = "admin_level";
       CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
       CC_Type.blaetterIgnore = [{admin_level:2}]
-      osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3",osmcount_country:"DE"}
+      var osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3",osmcount_country:"DE"}
       var key="0";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1,
@@ -136,7 +136,7 @@ describe('LoadDataFromDB', function () {
       CC_Type.secondInfoKey = "admin_level";
       CC_Type.secondInfoValueMap = {"1":"world","2":"country","3":"state"};
       CC_Type.blaetterIgnore = [{admin_level:2}]
-      osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3",osmcount_country:"AT"}
+      var osmdoc = {boundary:"administrative",name:"New Border",admin_level:"3",osmcount_country:"AT"}
       var key="0";
       lod.insertValue(CC_Type,key,osmdoc);
       should(CC_Type.map).match({"123":1});
