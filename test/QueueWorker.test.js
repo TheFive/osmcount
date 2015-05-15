@@ -11,6 +11,12 @@ var DataCollection = require('../model/DataCollection.js');
 var QueueWorker    = require('../QueueWorker.js');
 var wochenaufgabe  = require('../wochenaufgabe.js');
 
+// Define some global variables to test, wether they are used
+// or not. 
+query = "not used";
+result =  "not used";
+var dbHelper = require('./dbHelper.js');
+
 describe('QueueWorker',function(){
   beforeEach(function(bddone) {
     async.series([
@@ -20,9 +26,16 @@ describe('QueueWorker',function(){
       DataCollection.createTable.bind(DataCollection)
     ],function(err) {
       should.not.exist(err);
+      dbHelper.storeGlobals();
       bddone();
     });
   });
+  afterEach(function(bddone){
+    should(query).equal("not used");
+    should(result).equal("not used");
+    dbHelper.allowedGlobals([]);
+    bddone();
+  })
   describe('doNextJob',function() {   
     it('should generate an Error with insert Values',function(bddone) {
       var valueList = [{id:1,measure:"notexistm",type:"insert",status:"open",exectime: new Date()}];

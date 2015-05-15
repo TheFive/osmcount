@@ -269,7 +269,7 @@ exports.query=function(req,res) {
     	    link2 = '<a href="https://www.openstreetmap.org/'+d.type+'/'+d.id+'">OSM</a>';
     	     tablerow = '<td>'+link1+"  "+ link2+'</td>';
     	  }
-    	  key = columns[j];
+    	  var key = columns[j];
     	  for (j=1;j<columns.length;j++) {
       		tablerow += "<td>"+getValue(columns[j],d,1);+"</td>";
     	  }

@@ -769,7 +769,7 @@ exports.table = function(req,res){
             for (var i = 0;i<data.length;i++)
             {
               schluessel = data[i]._id;
-              value = data[i].vorgabe;
+              var value = data[i].vorgabe;
               vorgabe [schluessel]=value;
             }
             callback(err);
