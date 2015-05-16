@@ -8,6 +8,7 @@ var wochenaufgabe  = require('../wochenaufgabe.js');
 var DataCollection = require('../model/DataCollection.js');
 var WorkerQueue    = require('../model/WorkerQueue.js');
 var DataTarget     = require('../model/DataTarget.js');
+var QueueWorker     = require('../QueueWorker.js');
 
 
 
@@ -204,7 +205,7 @@ function generateFilterTable(param,header) {
        lokMax = 5;
       }
 
-    for (i=lokMin;i<=lokMax;i++) {
+    for (var i=lokMin;i<=lokMax;i++) {
       if (i == param.lengthOfKey) {
         lokSelector += '<option value="'+i+'" selected>'+i+'</option>';
       } else {
@@ -220,7 +221,7 @@ function generateFilterTable(param,header) {
 
       filterText+= param.locationName+" ("+param.location+")";
       filterSelector += optionValue(param.location,filterText,param.location);
-      for (i=param.location.length-1;i>=lokMin;i--) {
+      for ( i=param.location.length-1;i>=lokMin;i--) {
         location = param.location.substr(0,i);
         if (typeof(kreisnamen[location])=='undefined') {
           continue;
@@ -350,7 +351,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 
 
 
-  for (i=0;i<header.length;i++) {
+  for (var i=0;i<header.length;i++) {
     var cell = header[i];
     var celltext = cell;
     if (format[cell] && typeof(format[cell].title) != 'undefined') {
@@ -370,7 +371,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
   if (serviceLink) tableheader += "<th> Service </th>";
   tableheader = "<tr>"+tableheader + "</tr>";
 
-  for (i=0;i<firstColumn.length;i++) {
+  for (var i=0;i<firstColumn.length;i++) {
     var row = firstColumn[i];
 
     for (z=0;z<header.length;z++) {
@@ -401,7 +402,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
     if (typeof(rank[col])!='undefined' && table[firstColumn[0]]) {
       var value = table[firstColumn[0]][col];
       first[col] = second[col] = last[col] = lastButOne[col] = value;
-      for (i=1;i<firstColumn.length;i++)
+      for ( i=1;i<firstColumn.length;i++)
       {
         value = table[firstColumn[i]][col];
         if (value>first[col]) {
@@ -440,7 +441,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
       return -param.sortAscending;
     })
   }
-  for (i=0;i<firstColumn.length;i++)
+  for (var i=0;i<firstColumn.length;i++)
   {
     var row = firstColumn[i];
     var tablerow = "";
@@ -495,6 +496,7 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
     }
     if (serviceLink) {
       var sub = "";
+      var query;
       if (param.sub != "") sub = "?sub="+param.sub;
       tablerow += "<td><a href=/overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
       query= generateQuery(param.measure,row,param.sub);
@@ -551,7 +553,7 @@ function generateCSVTable(param,header,firstColumn,table,delimiter) {
   var tablebody="";
 
 
-  for (i=0;i<header.length;i++) {
+  for (var i=0;i<header.length;i++) {
     var cell = header[i];
     if (i>0) tableheader += delimiter;
     tableheader += cell;
@@ -559,7 +561,7 @@ function generateCSVTable(param,header,firstColumn,table,delimiter) {
   tableheader += "\n";
 
 
-  for (i=0;i<firstColumn.length;i++)
+  for ( i=0;i<firstColumn.length;i++)
   {
     row = firstColumn[i];
     tablerow = "";
@@ -710,26 +712,10 @@ exports.table = function(req,res){
       ranktype = "down";
     }
 
-    var paramSinceDate = new Date();
-    paramSinceDate.setDate(paramSinceDate.getDate()-10*365);
 
+ 
 
-
-  var preFilterVorgabe = {$match: {
-                              measure: param.measure,
-                              schluessel: {$regex: "^"+param.location}}};
-
-
-
-  var queryVorgabe = [
-        preFilterVorgabe,
-        {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
-                        vorgabe: "$apothekenVorgabe"
-                        }},
-          {$group: { _id:  "$schluessel",
-                 vorgabe  : {$sum: "$vorgabe" },
-                      }}];
-
+ 
 
 
   var openQueries=0;
@@ -783,7 +769,7 @@ exports.table = function(req,res){
             for (var i = 0;i<data.length;i++)
             {
               schluessel = data[i]._id;
-              value = data[i].vorgabe;
+              var value = data[i].vorgabe;
               vorgabe [schluessel]=value;
             }
             callback(err);
@@ -802,7 +788,6 @@ exports.table = function(req,res){
             openQueries = "#Error#";
           } else {
             openQueries = count;
-            console.log(query);
           }
           // Ignore Count Error, and
           callback();
@@ -865,7 +850,7 @@ exports.table = function(req,res){
 
         //iterate total result array
         // and generate 2 Dimensional Table
-        for (i=0;i < items.length;i++) {
+        for (var i=0;i < items.length;i++) {
 
 
           var measure = items[i];
@@ -977,7 +962,7 @@ exports.table = function(req,res){
 
           }
         }
-        for (i=0;i<firstColumn.length;i++) {
+        for ( i=0;i<firstColumn.length;i++) {
           schluessel = firstColumn[i];
           schluesselText=schluessel;
           schluesselTyp="-";
@@ -1039,6 +1024,7 @@ exports.table = function(req,res){
                            +'measure='+ param.measure
                            +'&type=insert&'+
                            '">(Zeitplan)</a> ';
+              pageFooter += " "+QueueWorker.overpassWaitTimeInfo();
           }
           pageFooter += separator;
           pageFooter += "Die Service Links bedeuten: \
@@ -1047,8 +1033,6 @@ exports.table = function(req,res){
                   <b>#</b> Öffne Overpass Turbo mit CSV Abfrage";
           pageFooter += "<br>Dauer Aggregate Funktion: "+(timeAggregate/1000)+ "s. Dauer Vorgaben: "+(timeVorgabe/1000)+"s. Dauer Aufbereitung: "+(timeTableGeneration/1000)+"s.";
           page.footer = pageFooter;
-
-          debug(JSON.stringify(query,null,' '));
 
           res.set('Content-Type', 'text/html');
           res.end(page.generatePage());

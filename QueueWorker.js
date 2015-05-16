@@ -11,10 +11,17 @@ var WorkerQueue = require('./model/WorkerQueue.js');
 var util        = require('./util.js')
 
 var DataCollection = require('./model/DataCollection.js')
+var wochenaufgabe = require('./wochenaufgabe.js');
 
 exports.processSignal = '';
 exports.processExit;
 
+var overpassWaitTime = 3500; // Wait before another Overpass Query
+var overpassWaitTimeSteps = 50;
+var overpassNo429erFor = 0;
+
+exports.overpassWaitTimeInfo = function() 
+{ return "[OWT:"+overpassWaitTime+",no429:"+overpassNo429erFor+"]";}
 
 function getHangingJob(cb) {
   debug("getHangingJob(cb)");
@@ -114,6 +121,8 @@ function saveJobState(cb,result) {
 // (should be done in server in future)
 var q= async.queue(function (task,cb) {
   debug("async.queue Start Next Task");
+  debug(task);
+  debug(cb);
   task(cb);
 },1);
 
@@ -142,12 +151,13 @@ function doOverpass(cb,results) {
   //debug(JSON.stringify(job));
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpass") {
     debug("Start: doOverpass(cb,"+results+")");
-      measure=job.measure;
-      query=job.query;
+      var measure=job.measure;
+      var query=job.query;
       var result= {};
       result.schluessel = job.schluessel;
       result.source = job.source;
       async.series( [
+        function (cb) {setTimeout(cb,overpassWaitTime);},
         function (cb) {
           should(exports.overpassRunning).isFalse;
           exports.overpassRunning = true;
@@ -171,8 +181,20 @@ function doOverpass(cb,results) {
             job.status = "error";
             job.error = err;
             // error is handled, so put null as error to save
+            if (err.statusCode == "429") {
+              overpassWaitTime += overpassWaitTimeSteps;
+              overpassNo429erFor = 0;
+              job.status = "open";
+              job.error.fix = "Was HTTP 429 Fixed automated for reason NotExcecuted, actual overpass slow down: "+overpassWaitTime+"ms";
+            }
           } else {
             job.status="done";
+            overpassNo429erFor += 1;
+            if (overpassNo429erFor >100) {
+               overpassWaitTime -= overpassWaitTimeSteps;
+               if (overpassWaitTime <=0)  overpassWaitTime = 0;
+               overpassNo429erFor = 0;
+            }
           }
           var time1 = exports.overpassStartTime - startTime;
           var time2 = startSave - exports.overpassStartTime;
@@ -201,12 +223,12 @@ function doOverpass(cb,results) {
 
 function doOverpassPOIPLZ(cb,results) {
   debug("doOverpassPOIPLZ(cb,"+results+")");
-  job=results.readjob;
+  var job=results.readjob;
   //debug(JSON.stringify(job));
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="overpassPOIPLZ") {
     debug("Start: doOverpassPOIPLZ(cb,"+results+")");
       plz=job.plz;
-      query=job.query;
+      var query=job.query;
       var result= {};
       result.plz = job.plz;
       result.source = job.source;
@@ -260,15 +282,30 @@ function doInsertJobs(cb,results) {
       if (cb) cb(null,job);
       return;
     }
-    WorkerQueue.insertData(jobs,cb);
-    job.status = "done";
+    WorkerQueue.count({measure:job.measure,status:"open",type:"insert"},function(err,count){
+      if (count && count =="0") {
+        var extend = wochenaufgabe.map[job.measure].overpassEveryDays;
+        if (typeof extend != 'undefined') {
+          var time = job.exectime.getTime();
+          var newExectime = new Date();
+          time += (1000 * 60 * 60 * 24)*extend;
+          newExectime.setTime(time);
+
+          var newJob = {measure:job.measure,status:"open",type:"insert",exectime:newExectime};
+          jobs.push(newJob);
+
+        }
+      }   
+      job.status = "done";
+      WorkerQueue.insertData(jobs,cb);
+    })
   }
   else if (cb) cb(null,job);
 }
 
 function doLoadBoundaries(cb,results) {
   debug("doLoadBoundaries(cb,"+results+")");
-  job=results.readjob;
+  var job=results.readjob;
 
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type=="loadBoundaries") {
     debug("Start: doLoadBoudnaries(cb,"+results+")");
@@ -395,7 +432,6 @@ function correctData(callback) {
 exports.startQueue =function(cb) {
   debug("startQueue(cb)");
   q.drain = function () {cb();}
-  q.push(config.initialiseMongoDB);
   q.push(correctData);
   q.push(runNextJobs);
 }

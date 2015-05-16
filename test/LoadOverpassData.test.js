@@ -5,11 +5,21 @@ var nock   = require('nock');
 
 var lod           =require('../model/LoadOverpassData.js');
 var wochenaufgabe = require('../wochenaufgabe.js');
+var helper = require('./helper.js');
+
 
 
 
 
 describe('LoadOverpassData',function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   describe('createQuery',function() {
     it ('should put an error for wrong Wochenaufgaben', function (bddone) {
       var referenceJob = {};
@@ -86,6 +96,18 @@ describe('LoadOverpassData',function() {
         should(error.statusCode).equal(504);
         bddone();
       })
+    })
+    it('should handle a timeout',function(bddone) {
+      var scope = nock('http://overpass-api.de/api/interpreter')
+                  .post('',"data=This%20is%20an%20overpass%20query")
+                  .socketDelay(5*1000)
+                  
+                  .reply(504, "Server Overcrowded");
+      lod.overpassQuery("This is an overpass query",function(error,body) {
+        should.exist(error);
+        should(error.code).equal('ESOCKETTIMEDOUT');
+        bddone();
+      },{timeout:500})
     })
   });
   describe('runOverpass',function() {

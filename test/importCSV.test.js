@@ -2,8 +2,9 @@ var should= require('should');
 var fs    = require('fs');
 var pg    = require('pg');
 var async = require('async');
+var path  = require('path');
 
-var dbHelper = require('./dbHelper.js');
+var helper = require('./helper.js');
 var importCSV = require('../ImportCSV.js');
 
 var configuration  = require('../configuration.js');
@@ -11,6 +12,14 @@ var DataCollection = require('../model/DataCollection.js')
 
 
 describe('importCSV', function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   describe('parseCSV', function() {
     it ('should handle empty files', function() {
       var array = importCSV.parseCSV('',';');
@@ -18,7 +27,7 @@ describe('importCSV', function() {
       should.equal(0,array.length);
     });
     it ('should handle header', function() {
-      array = importCSV.parseCSV('name;count',';');
+      var array = importCSV.parseCSV('name;count',';');
       should.exist(array);
       should.equal(1,array.length);
       should(array[0]).match(['name','count']);
@@ -101,7 +110,8 @@ describe('importCSV', function() {
     });
   });
   context('readCSV',function() {
-    var filename = "testfile.csv";
+
+    var filename = path.resolve(__dirname, "testfile.csv");
     afterEach(function(bddone) {
       fs.exists(filename, function(err) {
         if (err) {
@@ -110,67 +120,6 @@ describe('importCSV', function() {
         bddone();
       })
     })
-    describe('readCSVMongoDB',function() {
-      var db;
-      before(function(bddone) {
-        configuration.initialiseMongoDB( function () {
-          var db=configuration.getMongoDB();
-          DataCollection.initialise("mongo");
-          should.exist(db);
-          async.series(
-            [function(done) {
-              dbHelper.dropCollection(db,"DataCollection",done);
-            }, function(done) {
-                dbHelper.createCollection(db,"DataCollection",done);
-              }
-            ],
-            function(err){bddone(err)}
-          );
-        });
-      });
-      after(function(bddone) {
-        DataCollection.initialise("postgres",bddone);
-      })
-      it('should fail with no filename' , function(done) {
-        db = configuration.getMongoDB();
-        DataCollection.importCSV('NonExistingFile.csv',{},function(err,data) {
-           should.equal(err.errno,34);
-           done();
-        })
-      });
-      it('should load 2 datasets' , function(done) {
-        fs.writeFileSync(filename,"name;count\na;2\nb;10");
-        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
-          should.equal(err,null);
-          should.equal(data,"Datensätze: 2");
-          db.collection("DataCollection").find({}).toArray(function(err,data) {
-            should.equal(data.length,2);
-            should.equal(data[0].name,'a');
-            should.equal(data[0].count,'2');
-            should.equal(data[1].name,'b');
-            should.equal(data[1].count,'10');
-          })
-          done();
-        })
-      });
-      it('should handle empty Files' ,function (done) {
-        fs.writeFileSync(filename,"Write Something, nothing fails @travis");
-        fs.writeFileSync(filename,"");
-        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
-          should.equal(err,"empty file");
-          done();
-        });
-      })
-      it('should generate an error on column numbers differs',function(bddone){
-        fs.writeFileSync(filename,"name;count\na;2\nb;10\c;4;5");
-        DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
-          should.exist(err);
-          should(err).match(/^Invalid CSV File, Number of Columns differs/);
-          bddone();
-        })
-      })
-
-    });
     describe('readCSVpostgres',function() {
       before(function(bddone) {
         pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){

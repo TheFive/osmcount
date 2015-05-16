@@ -5,10 +5,19 @@ var async = require('async');
 var should = require('should');
 
 var config = require('../configuration.js');
-var OSMData = require('../model/OSMData.js')
+var OSMData = require('../model/OSMData.js');
+var helper = require('./helper.js')
 
 
 describe('OSMData', function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   describe('import',function(bddone) {
 
     beforeEach(function(bddone) {

@@ -1,6 +1,5 @@
 var pg     = require('pg');
 var debug  = require('debug')('postgresMapper');
-var should = require('should');
 var fs = require('fs');
 
 var JSONStream  = require('JSONStream');
@@ -14,9 +13,9 @@ var should      = require('should');
 var config = require('../configuration.js');
 
 exports.invertMap = function invertMap(map) {
-	debug('invertMap');
+  debug('invertMap');
   map.invertKeys= {};
-  for (k in map.keys) {
+  for (var k in map.keys) {
     var pgkey = map.keys[k].toLowerCase();
     should.not.exist(map.invertKeys[pgkey]);
     map.invertKeys[pgkey]=k;
@@ -109,24 +108,10 @@ function createFieldList(map) {
   return fieldList;
 }
 
-function findMongoDB(query,options,cb) {
-  debug('findMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = this.collectionName;
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.find(query,options).toArray(cb);
-}
 
 exports.find = function find(query,options,cb) {
   debug('%s.find',this.tableName);
 
-  if (this.databaseType == 'mongo') {
-   findMongoDB(query,options,cb);
-   return;
-  }
-  should(this.databaseType).equal("postgres");
   var map = this.map;
   if (typeof(options) == 'function') {
     cb = options;
@@ -146,7 +131,7 @@ exports.find = function find(query,options,cb) {
     var query = client.query(queryStr);
     query.on('row',function(row){
       var json = {};
-      for (k in map.invertKeys) {
+      for (var k in map.invertKeys) {
         json[map.invertKeys[k]] = row[k];
       }
       for (var i = 0;i<map.hstore.length;i++) {
@@ -194,13 +179,14 @@ exports.createTable = function(cb) {
 exports.dropTable = function(cb) {
   debug('%s.dropTable',this.tableName);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
-     debug('exports.dropTable->connected');
+    debug('exports.dropTable->connected');
     if (err) {
       cb(err);
       pgdone();
       return;
     }
     var dropString = "DROP TABLE IF EXISTS "+this.tableName;
+  
     var query = client.query(dropString);
     query.on('error',function(err){
       debug("%s Table Dropped",this.tableName);
@@ -216,17 +202,14 @@ exports.initialise = function initialise(dbType,callback) {
   config.initialise();
 
   if (typeof(dbType) != 'function') {
-    this.databaseType = dbType;
+    should(dbType).equal("postgres");
   }
   else {
-    this.databaseType = config.getDatabaseType();
     callback = dbType;
   }
-  if (this.databaseType == 'postgres') {
-    exports.invertMap(this.map);
-    if (typeof(this.map.hstore)=='undefined') {
-      this.map.hstore = [];
-    }
+  exports.invertMap(this.map);
+  if (typeof(this.map.hstore)=='undefined') {
+    this.map.hstore = [];
   }
   if (callback) callback();
 }
@@ -242,7 +225,6 @@ var getStream = function (filename) {
 
 exports.import = function(filename,cb) {
   debug('%s.import',this.tableName);
-  should(this.databaseType).equal('postgres');
   var me = this;
 
   async.auto(
@@ -256,36 +238,15 @@ exports.import = function(filename,cb) {
 
 
 
-function countMongoDB(query,cb) {
-  debug('countMongoDB');
-  var db = config.getMongoDB();
-  var collectionName = this.collectionName;
-
-  // Fetch the collection test
-  var collection = db.collection(collectionName);
-  collection.count(query, cb);
-}
 
 exports.count = function(query,cb) {
   debug('%s.count',this.tableName);
-  if (this.databaseType == "mongo") {
-    countMongoDB(query,cb).bind(this);
-  }
-  if (this.databaseType == "postgres") {
-    exports.countPostgres(this.map,query,cb);
-  }
+  exports.countPostgres(this.map,query,cb);
 }
 
 exports.countUntilNow = function(query,cb) {                          
   debug('%s.countUntilNow',this.tableName);
-  if (this.databaseType == "mongo") {
-    query.exectime =  {$lte: date};
-    query.schluessel = {$regex: "^"+query.schluessel};
-    countMongoDB(query,cb).bind(this);
-  }
-  if (this.databaseType == "postgres") {
-    exports.countUntilNowPostgres(this.map,query,cb);
-  }
+  exports.countUntilNowPostgres(this.map,query,cb);
 }
 
 exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream,cb) {
@@ -380,23 +341,19 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream
 
 exports.insertData = function insertData(data,cb) {
   debug('%s.insertData',this.tableName);
-  if (this.databaseType == "mongo") {
-    should.exist(null,"mongodb not implemented yet");
-  }
-  if (this.databaseType == "postgres") {
 
-    // Turn Data into a stream
-    var reader = es.readArray(data);
+  // Turn Data into a stream
+  var reader = es.readArray(data);
 
-    // use Stream Function to put data to Postgres
-    this.insertStreamToPostgres(true,reader,cb);
-  }
+  // use Stream Function to put data to Postgres
+  this.insertStreamToPostgres(true,reader,cb);
 }
 
 function exportCollection(callback,result)
 {
   debug('export');
-  var db = config.getMongoDB();
+  should(false,"To be impleemented");
+/*  var db = config.getMongoDB();
   var collection = db.collection(this.collectionName);
   collection.find({},function exportsMongoDBCB1(err,data) {
     debug('export->DB');
@@ -428,23 +385,11 @@ function exportCollection(callback,result)
         should(count).equal(countCollection);
       }
     })
-  }.bind(this))
+  }.bind(this))*/
 }
 
 // Exports all DataCollection Objects to a JSON File
 exports.export = function(filename,cb){
   debug('%s.export',this.tableName);
-  should(this.databaseType).equal('mongo');
-  var db = config.getMongoDB();
-  should.exist(db,"MondoDB does not exist, not started ?");
-  var collection = db.collection(this.collectionName);
-  async.auto(
-  {
-    count: function(callback,result) {
-      result.filename = filename;
-      collection.count({},function(err,count){callback(err,count);})},
-
- /*   b : ["count",function(cb,result){console.log(result),cb()}],*/
-    export: ["count",exportCollection.bind(this)]
-  },function(err,result){cb(err);})
+  should(false,"not implemented yet");
 }

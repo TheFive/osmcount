@@ -7,6 +7,8 @@ var config           = require('./configuration.js');
 var loadDataFromDB   = require('./model/LoadDataFromDB.js');
 var loadOverpassData = require('./model/LoadOverpassData.js');
 
+var POI = require('./model/POI.js');
+
 
 var async    = require('async');
 
@@ -88,7 +90,6 @@ function getPOIByPLZMongo(cb,result) {
 	debug("getPOIByPLZMongo");
 
 	var country = result.country;
-	var db = config.getMongoDB();
 	var data = result.overpass;
 	list = {};
 	debug("Elemente geladen: "+data.elements.length+" für "+country);
@@ -101,10 +102,10 @@ function getPOIByPLZMongo(cb,result) {
 		element.overpass["loadBy"] = country;
 		list[keyIntern] = element;
 	}
-	var mongoQuery = { "overpass.loadBy":country, "tags.amenity": "pharmacy"}
+	var query = { "overpass.loadBy":country, "tags.amenity": "pharmacy"}
 
-	db.collection("POI").find(mongoQuery).toArray( function(err,result) {
-	    debug("getPOIByPLZMongo->CB");
+	POI.find(query,function(err,result) {
+	  debug("getPOIByPLZMongo->CB");
 		if (err) {
 			console.log("Fehler "+err);
 			cb(err,null);
@@ -147,19 +148,18 @@ function getPOIByPLZMongo(cb,result) {
 	})
 }
 
-function removePOIFromMongo(cb,result) {
-  debug("removePOIFromMongo");
+function removePOIFromPostgres(cb,result) {
+  debug("removePOIFromPostgres");
   var remove = result.mongo.remove;
   if (remove.length==0) {
   	cb(null,null);
   	return;
   }
   debug("To Be Removed: "+remove.length + " DataSets");
-  var db = config.getMongoDB();
 
   var q = async.queue(function (task, cb) {
     debug("removePOIFromMongo->Queue");
-    db.collection("POI").remove({_id:task.data._id}, function(err,result) {
+    POI.remove({type:task.data.type,id:task.data.id}, function(err,result) {
       debug("removePOIFromMongo->MongoCB");
       if (err) {
     	console.log("Error "+err);
@@ -183,21 +183,22 @@ function removePOIFromMongo(cb,result) {
 }
 
 
-function updatePOIFromMongo(cb,result) {
-  debug("updatePOIFromMongo");
+function updatePOIFromPostgres(cb,result) {
+  debug("updatePOIFromPostgres");
   var update = result.mongo.update;
   if (update.length==0) {
+    debug("nothing to do");
   	cb(null,null);
   	return;
   }
+   debug("updatePOIFromPostgres.1");
   cleanTags(update);
   debug("To Be Updated: "+update.length + " DataSets");
-  db = config.getMongoDB();
 
   var q = async.queue(function (task, cb) {
     debug("updatePOIFromMongo->Queue");
 
-    db.collection("POI").save(task.data, function(err,result) {
+    POI.save(task.data, function(err,result) {
       debug("updatePOIFromMongo->MongoCB");
     if (err) {
     	console.log("Error: "+err);
@@ -220,16 +221,15 @@ function updatePOIFromMongo(cb,result) {
   q.resume();
 }
 
-function insertPOIFromMongo(cb,result) {
+function insertPOIFromPostgres(cb,result) {
   debug("insertPOIFromMongo");
   var insert = result.mongo.insert;
   debug("To Be Inserted: "+insert.length + " DataSets");
-  db = config.getMongoDB();
   if (insert.length == 0) {
   	cb(null,null);
   	return;
   }
-  db.collection("POI").insert(insert, function(err,result) {
+  POI.insertData(insert, function(err,result) {
     debug("insertPOIFromMongo->CB");
     if (err) {
     	console.log("Error "+ err);
@@ -251,8 +251,7 @@ var nominatimUrl = nominatimMapQuestUrl;
 function nominatim(cb,result) {
   debug("nominatim");
   q = async.queue(function(task,cb) {
-    db = config.getMongoDB();
-    db.collection("POI").findOne(
+    POI.findOne(
                            {$or:[
                            {"nominatim.timestamp":{$exists:0}},
                            { "nominatim.timestamp":{$gte:"$timestamp"}}
@@ -330,9 +329,9 @@ function nominatim(cb,result) {
              country: function(cb,result) {cb(null,"CH")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromMongo],
-             insert: ["mongo",insertPOIFromMongo],
-             remove: ["mongo",removePOIFromMongo],
+             update: ["mongo",updatePOIFromPostgres],
+             insert: ["mongo",insertPOIFromPostgres],
+             remove: ["mongo",removePOIFromPostgres],
              nominatim: ["update","insert","remove",nominatim]},
              function(err,results) {
              	debug("READY with CH");
@@ -345,9 +344,9 @@ function nominatim(cb,result) {
              country: function(cb,result) {cb(null,"DE")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromMongo],
-             insert: ["mongo",insertPOIFromMongo],
-             remove: ["mongo",removePOIFromMongo],
+             update: ["mongo",updatePOIFromPostgres],
+             insert: ["mongo",insertPOIFromPostgres],
+             remove: ["mongo",removePOIFromPostgres],
              nominatim: ["update","insert","remove",nominatim]},
              function(err,results) {
              	debug("READY with AT");
@@ -362,9 +361,9 @@ function nominatim(cb,result) {
              country: function(cb,result) {cb(null,"AT")},
              overpass: ["country",getPOIOverpass],
              mongo:["config","overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromMongo],
-             insert: ["mongo",insertPOIFromMongo],
-             remove: ["mongo",removePOIFromMongo],
+             update: ["mongo",updatePOIFromPostgres],
+             insert: ["mongo",insertPOIFromPostgres],
+             remove: ["mongo",removePOIFromPostgres],
              nominatim: ["update","insert","remove",nominatim]},
              function(err,results) {
              	debug("READY with DE");

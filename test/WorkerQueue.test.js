@@ -5,10 +5,20 @@ var async  = require('async');
 var should = require('should');
 
 var config      = require('../configuration.js');
-var WorkerQueue = require('../model/WorkerQueue.js')
+var WorkerQueue = require('../model/WorkerQueue.js');
+var helper = require('./helper.js');
 
 
 describe('WorkerQueue', function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
+  var pgclient;
   before(function(bddone) {
     pgclient = new pg.Client(config.postgresConnectStr);
     pgclient.connect(bddone);

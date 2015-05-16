@@ -39,7 +39,8 @@ var WAApotheke = {
   map : loadDataFromDB.DE_AGS,
   key: "de:amtlicher_gemeindeschluessel",
   ranktype:"UP",
-  tagCounter : exports.tagCounter
+  tagCounter : exports.tagCounter,
+  overpassEveryDays:7
 }
 
 var WAApotheke_AT = {
@@ -53,7 +54,8 @@ var WAApotheke_AT = {
   map: loadDataFromDB.AT_AGS,
   key: "ref:at:gkz",
   ranktype:"UP",
-  tagCounter:exports.tagCounter
+  tagCounter:exports.tagCounter,
+  overpassEveryDays:14
 }
 
 var WAApotheke_CH = {
@@ -69,7 +71,8 @@ var WAApotheke_CH = {
   map: loadDataFromDB.CH_AGS,
   key: "XXX",
   ranktype:"UP",
-  tagCounter:exports.tagCounter
+  tagCounter:exports.tagCounter,
+  overpassEveryDays:14
 }
 
 var WAApothekePLZ_DE= {
@@ -85,7 +88,8 @@ var WAApothekePLZ_DE= {
   map: loadDataFromDB.DE_PLZ,
   key: "postal_code",
   ranktype:"UP",
-  tagCounter:null
+  tagCounter:null,
+  overpassEveryDays:28
 }
 
 

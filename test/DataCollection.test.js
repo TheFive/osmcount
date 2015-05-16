@@ -5,9 +5,17 @@ var path   = require('path');
 
 var config = require('../configuration.js');
 var DataCollection = require('../model/DataCollection.js')
-
+var helper = require('./helper.js');
 
 describe('DataCollection', function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   // Create one pgclient for all tests, and release it afterwards
   var pgclient;
   before(function(bddone) {
@@ -70,7 +78,7 @@ describe('DataCollection', function() {
     it('should handle connection errors', function(bddone) {
       var conStr = config.postgresConnectStr;
       config.postgresConnectStr = "no connection with this string";
-      param = {
+      var param = {
             lengthOfKey:2,
             lengthOfTime:10,
             measure:'test',
@@ -107,7 +115,7 @@ describe('DataCollection', function() {
 
       });
       it('should group 2 keys', function(bddone) {
-        param = {
+        var param = {
               lengthOfKey:2,
               lengthOfTime:10,
               measure:'test',
@@ -122,7 +130,7 @@ describe('DataCollection', function() {
         })
       })
       it ('should group filter Timeframe', function(bddone) {
-        param = {
+       var  param = {
               lengthOfKey:2,
               lengthOfTime:10,
               since : '2012-10-30',
@@ -139,7 +147,7 @@ describe('DataCollection', function() {
         })
       })
       it('should group 2 timeline with last Values', function(bddone) {
-        param = {
+       var param = {
               lengthOfKey:4,
               lengthOfTime:4,
               measure:'test',
@@ -154,7 +162,7 @@ describe('DataCollection', function() {
         })
       })
       it('should group 2 timeline with last Values with percentage calculation missing', function(bddone) {
-        param = {
+       var param = {
               lengthOfKey:4,
               lengthOfTime:4,
               measure:'test',
@@ -171,7 +179,7 @@ describe('DataCollection', function() {
         })
       })
       it('should group 2 timeline with last Values with percentage calculation existing', function(bddone) {
-        param = {
+       var param = {
               lengthOfKey:4,
               lengthOfTime:4,
               measure:'test',
@@ -188,7 +196,7 @@ describe('DataCollection', function() {
         })
       })
       it('should group 2 timeline with last Values calculation existing', function(bddone) {
-        param = {
+       var param = {
               lengthOfKey:3,
               lengthOfTime:4,
               measure:'test',
@@ -206,7 +214,7 @@ describe('DataCollection', function() {
         })
       })
       it('should sum up missing Values', function(bddone) {
-        param = {
+       var param = {
               lengthOfKey:4,
               lengthOfTime:7,
               measure:'test',
@@ -224,7 +232,7 @@ describe('DataCollection', function() {
         })
       })
       it('should sum up existing Values', function(bddone) {
-        param = {
+       var param = {
               lengthOfKey:2,
               lengthOfTime:7,
               measure:'test',

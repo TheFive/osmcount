@@ -16,10 +16,9 @@ var postgresMapper = require('../model/postgresMapper.js');
 
 function DataCollectionClass() {
   debug('DataCollectionClass');
-  this.databaseType = "postgres"; 
   this.tableName = "DataCollection";
   this.collectionName = "DataCollection";
-  var lruOptions = { max: 10000
+  var lruOptions = { max: 1000000
                      , length: function (n) { return n.length }};
   this.aggregateCache=LRU(lruOptions);
   this.aggregateCacheKeys = {};
@@ -71,23 +70,13 @@ DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
     loadData: function(callback) {
       importCSV.importCSVFileToJSON(filename,defJson,callback);
     },
-    mongo: ["loadData",function(callback,asyncresult) {
-      if (me.databaseType !="mongo") return callback(null,null);
-      var newData = asyncresult.loadData;
-      var db = config.getMongoDB();
-      var collection = db.collection('DataCollection');
-      result = "Datensätze: "+newData.length;
-      collection.insert(newData,{w:1},function (err,data){callback(err,result);});
-    }],
     postgres: ["loadData",function(callback,asyncresult) {
-      if (me.databaseType != "postgres") return callback(null,null);
       var newData = asyncresult.loadData;
       me.insertData(newData,callback);
     }]},
     function(err,asyncresult) {
       var result;
-      if (asyncresult.mongo!=null) result = asyncresult.mongo;
-      if (asyncresult.postgres!=null) result = asyncresult.postgres;
+      result = asyncresult.postgres;
       cb(err,result);
     }
   );
@@ -234,74 +223,7 @@ function aggregatePostgresDB(object,param,cb) {
   });
 }
 
-function aggregateMongoDB(param,cb) {
-  debug('aggregateMongoDB');
 
-  var db = config.getMongoDB();
-  var collection = db.collection('DataCollection');
-  var valueToCount = param.valueToCount;
-  var valueToDisplay = "$count";
-  var paramSinceDate = new Date(1900,0,1);
-  var paramUpToDate  = new Date(2999,0,1);
-
-  if (param.subPercent == "Yes") {
-    valueToDisplay = { $cond : [ {$eq : ["$count",0]},0,{$divide: [ "$count","$total"]}]};
-    ranktype = "up";
-  }
-  if (param.since != '') paramSinceDate = new Date(param.since);
-  if (param.upTo != '')  paramUpToDate = new Date(param.upTo);
-
-  var preFilter = {$match: { $and: [{timestamp: {$gte: paramSinceDate}},
-                                    {timestamp: {$lte: paramUpToDate}}],
-                             measure: param.measure,
-                             schluessel: {$regex: "^"+param.location}}};
-
-var projection = {$project:{measure:1,
-                            timestamp:1,
-                            schluessel:1,
-                            count:1,
-                            source:1,
-                            "missing.name":1,
-                            "missing.wheelchair":1,
-                            "missing.phone":1,
-                            "missing.opening_hours":1,
-                            "existing.fixme":1}};
-
-var aggregateMeasuresProj = {$project: {  schluessel: { $substr: ["$schluessel",0,param.lengthOfKey]},
-                     timestamp: "$timestamp",
-                     timestampShort: {$substr: ["$timestamp",0,param.lengthOfTime]},
-                     count: valueToCount,
-                     total: "$count",
-                     source: "$source"
-                     }};
- var aggregateMeasuresGroup = {$group: { _id: { row: "$schluessel",source:"$source"},
-                     count	: {$sum: "$count" },
-                     total	: {$sum: "$total" },
-                     timestamp:{$last:"$timestamp"},
-                     schluessel: {$last:"$schluessel"},
-                     timestampShort: {$last:"$timestampShort"}}};
-
-var presort = {$sort: { timestamp:1}};
-
-var aggregateTimeAxisStep2 = {$group: { _id: { row: "$schluessel",col:"$timestampShort"},
-                     cell	: {$last: valueToDisplay }}};
-
-
-
-
-  var sort = {$sort: { _id:1}};
-
-  var query = [projection,
-               preFilter,
-         aggregateMeasuresProj,
-         aggregateMeasuresGroup,
-         presort,
-         aggregateTimeAxisStep2,
-         sort];
-  console.dir(JSON.stringify(preFilter));
-   collection.aggregate(query,cb);
-
-}
 /*
 the aggregate Function accepts the following parameters
 valueToCount: String can be every field, that was collected by
@@ -316,13 +238,7 @@ location:     key to filter on
 
 DataCollectionClass.prototype.aggregate = function(param,cb) {
   debug('DataCollectionClass.prototype.aggregate');
-  if (this.databaseType == "mongo") {
-    aggregateMongoDB(param,cb);
-    return;
-  }
-  if (this.databaseType == "postgres") {
-    aggregatePostgresDB(this,param,cb);
-  }
+  aggregatePostgresDB(this,param,cb);
 }
 
 
@@ -333,11 +249,9 @@ DataCollectionClass.prototype.savePostgresDB = function(data,cb) {
 }
 DataCollectionClass.prototype.save = function(data,cb) {
   debug('DataCollectionClass.prototype.save');
-  if (this.databaseType == "postgres") {
     // invalidate Cache
-    this.invalidateCache[data];
-    this.savePostgresDB(data,cb);
-  }
+  this.invalidateCache[data];
+  this.savePostgresDB(data,cb);
 }
 
 

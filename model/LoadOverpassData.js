@@ -1,6 +1,7 @@
-var async          = require('async');
-var debug          = require('debug')('LoadOverpassData');
-var should         = require('should');
+var async     = require('async');
+var debug     = require('debug')('LoadOverpassData');
+var should    = require('should');
+var request   = require('request');
 
 var configuration  = require('../configuration.js');
 var wochenaufgabe  = require('../wochenaufgabe.js');
@@ -12,47 +13,56 @@ var loadDataFromDB = require('./LoadDataFromDB.js');
 // To be changed to a more readable import routine
 
 
-queryBoundaries_DE='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"]->.a;\
+var queryBoundaries_DE='[out:json][timeout:900];area[type=boundary]["int_name"="Deutschland"]["admin_level"="2"]->.a;\
                      (rel(area.a)[admin_level];rel(area.a)[postal_code]);out;'
-queryBoundaries_AT='[out:json][timeout:900];area[type=boundary]["int_name"="Österreich"]["admin_level"="2"];rel(area)[admin_level];out;'
-queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="Schweiz"]["admin_level"="2"];rel(area)[admin_level];out;'
+var queryBoundaries_AT='[out:json][timeout:900];area[type=boundary]["int_name"="Österreich"]["admin_level"="2"];rel(area)[admin_level];out;'
+var queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="Schweiz"]["admin_level"="2"];rel(area)[admin_level];out;'
 
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
 
+exports.timeout = 1000 * 60 * 10; // Timeout after 10 minutes;
 
 
-var request = require('request');
 
 function overpassQuery(query, cb, options) {
 	debug("overpassQuery");
-	options = options || {};
+  options = options || {};
+  if (typeof(options.uri)!= 'undefined') {
+    options.uri = options.overpassUrl;
+  } else {
+    options.uri = overpassApiLinkDE;
+  }
+  if (typeof(options.timeout) == 'undefined') {
+    options.timeout = exports.timeout; // Timeout after 10 minutes
+  }
   var start = (new Date()).getTime();
-  request.post(options.overpassUrl || overpassApiLinkDE, function (error, response, body) {
+  request.post(options, function (error, response, body) {
     var end = (new Date()).getTime();
-    	debug("overpassQuery->CB after %s seconds",(end-start)/1000);
+    debug("overpassQuery->CB after %s seconds",(end-start)/1000);
 
-        if (!error && response.statusCode === 200) {
-            cb(undefined, body);
-        } else if (error) {
-        	console.log("Error occured in function: LoadOverpassData.overpassQuery");
-        	console.log(error);
-        	console.log(body);
-            cb(error);
-        } else if (response) {
-            cb({
-                message: 'Request failed: HTTP ' + response.statusCode,
-                statusCode: response.statusCode,
-                body: body
-            });
-        } else {
-            cb({
-                message: 'Unknown error.',
-            });
-        }
-    }).form({
+
+    if (!error && response.statusCode === 200) {
+        cb(undefined, body);
+    } else if (error) {
+    	console.log("Error occured in function: LoadOverpassData.overpassQuery");
+    	console.log(error);
+    	console.log(body);
+        cb(error);
+    } else if (response) {
+        cb({
+            message: 'Request failed: HTTP ' + response.statusCode,
+            statusCode: response.statusCode,
+            body: body
+        });
+    } else {
+        cb({
+            message: 'Unknown error.',
+        });
+    }
+  }).form({
         data: query
-    });
+  });
 };
 
 exports.overpassQuery = overpassQuery;
@@ -76,11 +86,8 @@ function loadBoundariesCH(cb,result) {
 
 function removeBoundariesData (cb,result) {
 	debug("removeBoundariesData");
-	var db = configuration.getMongoDB();
-	db.collection("OSMBoundaries").remove({},{w:1}, function (err,count) {
-		debug("removeBoundariesData->CB count = "+count);
-		cb(err,count);
-	})
+	should(false,"Remove Boundaries / alle Boudnaries löschen to be implemented");
+
 }
 function copyRelevantTags(boundary,osmData) {
   for (var k in wochenaufgabe.boundaryPrototype) {
@@ -103,7 +110,6 @@ function copyBoundaries(overpassStr,countryStr,boundaries) {
 
 function insertBoundariesData (cb,result) {
 	debug("insertBoundariesData");
-	var db = configuration.getMongoDB();
 
 	var boundaries = [];
 
@@ -159,10 +165,21 @@ exports.runOverpass= function(query, job,result, cb) {
 			console.log(error);
 			cb(error);
 		} else {
-			date = new Date();
+			var date = new Date();
 			result.timestamp=job.exectime;
 			result.count=0;
-			var jsonResult=JSON.parse(data).elements;
+			try {
+				var jsonResult=JSON.parse(data).elements;
+			} catch (err) {
+				console.log("Query;")
+				console.log(query)
+				console.log("Result");
+				console.log(data);
+				console.log("job");
+				console.dir(job);
+				cb(err);
+				return;
+			}
 			result.measure=measure;
 			result.count = jsonResult.length;
 
@@ -180,7 +197,7 @@ exports.createQuery = function(referenceJob)
 {
 	debug("createQuery");
 	should.exist(referenceJob);
-  var jobs = [];
+    var jobs = [];
 	var aufgabe = referenceJob.measure;
 	var exectime = referenceJob.exectime;
 	var wa = wochenaufgabe.map[aufgabe];
@@ -191,8 +208,8 @@ exports.createQuery = function(referenceJob)
  	var blaetter = wa.map.list;
 
 	if (typeof(blaetter)!='undefined') {
-		keys = blaetter;
-		for (i =0;i<keys.length;i++) {
+		var keys = blaetter;
+		for (var i =0;i<keys.length;i++) {
 			debug(keys[i]);
 			var job = {};
 			job.measure=aufgabe;

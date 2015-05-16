@@ -3,9 +3,9 @@ var async = require('async')
 
 var postgresMapper = require('../model/postgresMapper.js');
 var util = require('../util.js');
+var helper = require ('./helper.js');
 
 function ClassAClass() {
-  this.databaseType = "postgres"; 
   this.tableName = "ClassA";
   this.collectionName = "ClassA";
   this.createTableString = 'CREATE TABLE ClassA \
@@ -39,11 +39,56 @@ ClassAClass.prototype.getInsertQueryValueList = function getInsertQueryValueList
   var field_hs  = util.toHStore(item.field_hs)
   return  [field_1,field_2,field_hs];
 }
-classA = new ClassAClass();
+var classA = new ClassAClass();
 
 
 
 describe('postgresMapper',function(){
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
+  beforeEach(function(bddone) {
+    //helper.storeGlobals();
+    bddone();
+  })
+  afterEach(function(bddone) {
+    //helper.allowedGlobals([]);
+    bddone();
+  })
+  describe('invoke methods with classA', function () {
+    before(function(bddone) {  
+      async.series([
+
+        function(done) {classA.initialise("postgres",done)},
+        function(done) {classA.dropTable(done)},
+        function(done) {classA.createTable(done)}
+      ],function(err) {
+        if (err) console.dir(err);
+        should.not.exist(err);
+        bddone();
+      });
+    });
+    it('should insert an object', function(bddone) {
+      var testData = {field_1:"1",field_2:"2",field_hs:{f1:"1",f2:"2"}};
+      var result;
+      async.series([
+        function(done) {classA.insertData([testData],done);},
+        function(done) {classA.find({},function(err,r){result = r,done(err)})}
+      ],function(err) {
+        should.not.exist(err);
+        should(result.length).equal(1);
+        should(testData).eql(result[0]);
+        bddone();
+      })
+      
+    })
+
+  })
   describe('invertMap',function() {
     it('should invert a map',function(bddone){
       var map = {keys:{a:'b',b:'c'}};
@@ -69,33 +114,5 @@ describe('postgresMapper',function(){
       (function() {postgresMapper.invertMap(map)}).should.throw(Error);
       bddone();
     })
-  })
-  describe('invoke methods with classA', function () {
-    before(function(bddone) {
-      async.series([
-        function(done) {classA.initialise("postgres",done)},
-        function(done) {classA.dropTable(done)},
-        function(done) {classA.createTable(done)}
-      ],function(err) {
-        if (err) console.dir(err);
-        should.not.exist(err);
-        bddone();
-      });
-    });
-    it('should insert an object', function(bddone) {
-      var testData = {field_1:"1",field_2:"2",field_hs:{f1:"1",f2:"2"}};
-      var result;
-      async.series([
-        function(done) {classA.insertData([testData],done);},
-        function(done) {classA.find({},function(err,r){result = r,done(err)})}
-      ],function(err) {
-        should.not.exist(err);
-        should(result.length).equal(1);
-        should(testData).eql(result[0]);
-        bddone();
-      })
-      
-    })
-
   })
 })

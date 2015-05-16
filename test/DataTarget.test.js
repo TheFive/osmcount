@@ -6,9 +6,17 @@ var should = require('should');
 
 var config     = require('../configuration.js');
 var DataTarget = require('../model/DataTarget.js')
-
+var helper = require('./helper.js');
 
 describe('DataTarget', function() {
+  beforeEach(function(bddone){
+    helper.initUnallowedGlobals();
+    bddone();
+  })
+  afterEach(function(bddone){
+    helper.checkUnallowedGlobals();
+    bddone();
+  })
   before(function(bddone){
       config.initialise(bddone);    
   })

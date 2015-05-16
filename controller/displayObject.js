@@ -22,7 +22,7 @@ function listValuesTable(keyname,key,object) {
 	}*/
 	if (typeof(object) == 'object') {
 		var result = "";
-		for (k in object) {
+		for (var k in object) {
 			if (key) {
 			  result += listValuesTable(key+"."+k,k,object[k]);
 			} else {
@@ -116,7 +116,6 @@ exports.ignoreError = function(req,res) {
 	var objid = req.query["object"];
 	var reason = req.query["reason"];
 
-	console.log(objid+" "+reason);
 
 
 	WorkerQueue.find ({id:objid},{},function handleFindOneObject(err, obj) {
