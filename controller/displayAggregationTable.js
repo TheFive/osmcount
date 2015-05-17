@@ -150,63 +150,49 @@ function setParams(req,param) {
 
 }
 
-function generateFilterTable(param,page) {
+function generateFilterTable(param,header) {
   debug("generateFilterTable");
 
     var filterSub = "-"
     var filterSubPercent = "-";
     var subSelector = '';
     var subPercentSelector = "";
-
-    // Unter
     if (  (param.measure == "Apotheke")
         ||(param.measure == "Apotheke_AT")
         ||(param.measure == "ApothekePLZ_DE")) {
-      filterSub =  '<li'+((param.sub=="missing.name")?' class="active">':'>')+gl("Name", {sub:"missing.name"},param)+'</li>';
-      filterSub += '<li'+((param.sub=="missing.opening_hours")?' class="active">':'>')+gl("Öffnungszeiten", {sub:"missing.opening_hours"},param)+'</li>';
-      filterSub += '<li'+((param.sub=="existing.fixme")?' class="active">':'>')+gl("fixme", {sub:"existing.fixme"},param)+'</li>';
-      filterSub += '<li'+((param.sub=="missing.phone")?' class="active">':'>')+gl("phone", {sub:"missing.phone"},param)+'</li>';
-      filterSub += '<li'+((param.sub=="missing.wheelchair")?' class="active">':'>')+gl("wheelchair", {sub:"missing.wheelchair"},param)+'</li>';
-      filterSub += '<li'+((param.sub=="")?' class="active">':'>')+gl("ALLES", {sub:""},param)+'</li>';
+      filterSub =  gl("[Name]", {sub:"missing.name"},param);
+      filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
+      filterSub += gl("[fixme]", {sub:"existing.fixme"},param);
+      filterSub += gl("[phone]", {sub:"missing.phone"},param);
+      filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
+      filterSub += gl("[ALLES]", {sub:""},param);
 
-      filterSubPercent =  '<li'+((param.subPercent=="Yes")?' class="active">':'>')+gl("Prozentanzeige", {subPercent:"Yes"},param)+'</li>';
-      filterSubPercent += '<li'+((param.subPercent=="No")?' class="active">':'>')+gl("Anzahl", {subPercent:"No"},param)+'</li>';
+      subSelector += optionValue("missing.name","Name",param.sub);
+      subSelector += optionValue("missing.opening_hours","Öffnungszeiten",param.sub);
+      subSelector += optionValue("existing.fixme","fixme",param.sub);
+      subSelector += optionValue("missing.phone","Telefon",param.sub);
+      subSelector += optionValue("missing.wheelchair","wheelchair",param.sub);
+      subSelector += optionValue("","Alle Apotheken",param.sub);
+
+      subSelector = '<label for="Feldwahl">Anzeige des Feldes:</label><select class="form-control" name ="sub">'+subSelector+'</select>';
+
+      filterSubPercent =  gl("[Prozentanzeige]", {subPercent:"Yes"},param);
+      filterSubPercent += gl("[Anzahl]", {subPercent:"No"},param);
       subPercentSelector = "";
       if (param.subPercent == "Yes") {
-        subPercentSelector = '<select name="subPercent"> \
+        subPercentSelector = '<label for="Prozentanzeige">>Anzeige in Prozent/Anzahl:</label><select class="form-control" name="subPercent"> \
         <option value="Yes" selected>Prozentanzeige</option> \
         <option value="No">Anzahl</option> </select>'
-      } else {
-        subPercentSelector = '<select name="subPercent"> \
+    } else {
+        subPercentSelector = '<label for="Prozentanzeige">Anzeige in Prozent/Anzahl:</label><select class="form-control" name="subPercent"> \
         <option value="Yes">Prozentanzeige</option> \
         <option value="No" selected>Anzahl</option> </select>'
-      }
-
-      var title= "";
-      if (param.sub == "") title = "Alles";
-      if (param.sub == "missing.opening_hours") title = "Öffnungszeiten";
-      if (param.sub == "existing.fixme") title = "Fixme";
-      if (param.sub == "missing.phone") title = "Telefon";
-      if (param.sub == "missing.wheelchair") title = "Wheelchair";
-      if (param.sub == "missing.name") title = "Name";
-
-      if (param.subPercent == "Yes") title += "%";
-
-      var selector = '<li class="dropdown"><a  class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">'+title+'<span class="caret"></span></a>\n'
-      selector += '<ul class="dropdown-menu" role="menu">\n' 
-      selector += filterSubPercent;
-      selector +=  '<li class="divider"></li>';
-      selector += filterSub;
-      selector += '</ul>\n';
-      selector += '</li>\n';
-      page.addNavbarItem(selector);
+    }
     }
 
 
 
-
-
-    var lokSelector = '';
+    var lokSelector = '<label for="Detailtiefe">Anzahl der Stellen für den Schlüssel:</label><select class="form-control" name="lok"> ';
 
     var lokMin = 2;
     var lokMax = 11;
@@ -221,22 +207,11 @@ function generateFilterTable(param,page) {
 
     for (var i=lokMin;i<=lokMax;i++) {
       if (i == param.lengthOfKey) {
-        lokSelector += '<li class="active">'+gl(i,{lok:i},param)+'</li>';
+        lokSelector += '<option value="'+i+'" selected>'+i+'</option>';
       } else {
-        lokSelector += '<li>'+gl(i,{lok:i},param)+'</li>';
+        lokSelector += '<option value="'+i+'">'+i+'</option>';
       }
     }
-    var periodenSwitch = '<li'+((param.period=="Jahr")?' class = "active">':'>')+gl("Jahr",{period:"Jahr"},param)+'</li>';
-    periodenSwitch+= '<li'+((param.period=="Monat")?' class = "active">':'>')+gl("Monat",{period:"Monat"},param)+'</li>';
-    periodenSwitch+= '<li'+((param.period=="Tag")?' class = "active">':'>')+gl("Tag",{period:"Tag"},param)+'</li>';
-      var selector = '<li class="dropdown"><a  class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">...<span class="caret"></span></a>\n'
-      selector += '<ul class="dropdown-menu" role="menu">\n' 
-      selector += lokSelector;
-      selector +=  '<li class="divider"></li>';
-      selector += periodenSwitch;
-      selector += '</ul>\n';
-      selector += '</li>\n';
-      page.addNavbarItem(selector);
 
 
   var filterSelector = "";
@@ -260,9 +235,19 @@ function generateFilterTable(param,page) {
       filterText +="kein Filter";
     }
     filterSelector += optionValue("","Alle Orte",param.location);
-    filterSelector = '<select name ="location">'+filterSelector+'</select>';
+    filterSelector = '<label for="Ortsfilter">Welcher Ort:</label><select class="form-control" name ="location">'+filterSelector+'</select>';
 
 
+
+    var periodenSwitch = gl("[Jahr]",{period:"Jahr"},param);
+    periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
+    periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
+
+    periodenSelector = '<label for="Periodenwahl">Welche Zeitperiode:</label><select class="form-control" name="period"> \
+      <option value="Jahr"' +((param.period == "Jahr") ? " selected":"")+ '>Jahr</option> \
+      <option value="Monat"' +((param.period == "Monat") ? " selected":"")+ '>Monat</option> \
+      <option value="Tag"' +((param.period == "Tag") ? " selected":"")+ '>Tag</option> \
+      </select>';
   var date = new Date();
   var date7 = new Date();
   var date10 = new Date();
@@ -283,7 +268,7 @@ function generateFilterTable(param,page) {
   }
 
 
-    var sinceSelector = '<select name="since"> \
+    var sinceSelector = '<label for="SeitWann">Anzeige seit:</label><select class="form-control" name="since"> \
       <option value="'+since+'"' +((param.since == since) ? " selected":"")+ '>'+since+'</option> \
       <option value="'+since7+'"' +((param.since == since7) ? " selected":"")+ '>'+since7+'</option> \
       <option value="'+since10+'"' +((param.since == since10) ? " selected":"")+ '>'+since10+'</option> \
@@ -294,52 +279,56 @@ function generateFilterTable(param,page) {
   var filterTableL1, filterTableL2;
 
   // Filter on Location
-  var filterTableLH = '<th class = "menu" > Ort </th>';
-  var filterTableL1 = '<td class = "menu" >'+filterText+'</td>';
-  var filterTableL2 = '<td class = "menu">'+filterSelector+'</td>';
+  //var filterTableLH = '<th class = "menu" > Ort </th>';
+  //var filterTableL1 = '<td class = "menu" >'+filterText+'</td>';
+  var filterTableL2 = filterSelector;
   // Filter on Key
-  filterTableLH += '<th class = "menu"> Anzahl / Tags</th>';
-  filterTableL1 += '<td class = "menu">'+param.sub+'</td>';
-  filterTableL2 += '<td class = "menu">'+subSelector+'</td>';
+  //filterTableLH += '<th class = "menu"> Anzahl / Tags</th>';
+  //filterTableL1 += '<td class = "menu">'+param.sub+'</td>';
+  filterTableL2 += subSelector;
   // Filter on Percent
-  filterTableLH += '<th class = "menu"> Anzahl / % Angabe</th>';
-  filterTableL1 += '<td class = "menu">'+((param.subPercent!="Yes")?'Anzahl':'%')+'</td>';
-  filterTableL2 += '<td class = "menu">'+subPercentSelector+'</td>';
+  //filterTableLH += '<th class = "menu"> Anzahl / % Angabe</th>';
+  //filterTableL1 += '<td class = "menu">'+((param.subPercent!="Yes")?'Anzahl':'%')+'</td>';
+  filterTableL2 += subPercentSelector;
   // Filter on Period
-  filterTableLH += '<th class = "menu">Zeitachse</th>';
-  filterTableL1 += '<td class = "menu">'+param.period+'</td>';
-  filterTableL2 += '<td class = "menu">'+periodenSelector+'</td>';
+  //filterTableLH += '<th class = "menu">Zeitachse</th>';
+  //filterTableL1 += '<td class = "menu">'+param.period+'</td>';
+  filterTableL2 += periodenSelector;
   // Filter on since
-  filterTableLH += '<th class = "menu">Seit</th>';
-  filterTableL1 += '<td class = "menu">'+param.since+'</td>';
-  filterTableL2 += '<td class = "menu">'+sinceSelector+'</td>';
+  //filterTableLH += '<th class = "menu">Seit</th>';
+  //filterTableL1 += '<td class = "menu">'+param.since+'</td>';
+  filterTableL2 += sinceSelector;
   // Filter on length Of Key
-  filterTableLH += '<th class = "menu"> Schlüssellänge</th>';
-  filterTableL1 += '<td class = "menu">'+param.lengthOfKey+'</td>';
-  filterTableL2 += '<td class = "menu">'+lokSelector+'</td>';
+  //filterTableLH += '<th class = "menu"> Schlüssellänge</th>';
+  //filterTableL1 += '<td class = "menu">'+param.lengthOfKey+'</td>';
+  filterTableL2 += lokSelector;
   // Aktion
-  filterTableLH += '<th class = "menu"></th>';
-  filterTableL1 += '<td class = "menu">'+''+'</td>';
-  filterTableL2 += '<td class = "menu">'+'<input type="submit" value="Parameter Umstellen">'+'</td>';
+  //filterTableLH += '<th class = "menu"></th>';
+  //filterTableL1 += '<td class = "menu">'+''+'</td>';
+ // filterTableL2 += '<input class="form-control" type="submit" value="Parameter Umstellen">';
   // Plotly Integration
-  filterTableLH += '<th class = "menu">Graphen</th>';
-  filterTableL1 += '<td class = "menu">'+'<a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'">Zeige Anzahl als Grafik</a>'+'</td>';
-  filterTableL2 += '<td class = "menu">--</a>'+'</td>';
+  //filterTableLH += '<th class = "menu">Graphen</th>';
+  var plotlyLink = '<li><a href="/waplot/'+param.measure+'.html?location='+param.location+'&lok='+param.lengthOfKey+'" ><span class="glyphicon glyphicon-stats" ></span></a></li>'
+  page.addNavbarItem(plotlyLink);
+  //filterTableL2 += '<td class = "menu">--</a>'+'</td>';
   // CSV Export
-  filterTableLH += '<th class = "menu">sonstiges</th>';
-  filterTableL1 += '<td class = "menu">'+gl("Als CSV Downloaden",{csv:true},param)+'</td>';
-  filterTableL2 += '<td class = "menu">'+'<a href="/wa/'+param.measure+'.html">Hilfe / Informationen</a>'+'</td>';
+  //filterTableLH += '<th class = "menu">sonstiges</th>';
+  var csvDownloadLink = gl("",{csv:true},param);
+  var csvDownload = '<li><a href="'+csvDownloadLink+'" ><span class="glyphicon glyphicon-export" ></span></a></li>'
+  page.addNavbarItem(csvDownload);
+
+  var infoLink = '<li><a href="/wa/'+param.measure+'.html" ><span class="glyphicon glyphicon-info-sign" ></span></a></li>'
+  page.addNavbarItem(infoLink);
 
 
-
-  var filterTable = '<table class="menu"><tr>'+filterTableLH+'</tr> \
+ /* var filterTable = '<table class="menu"><tr>'+filterTableLH+'</tr> \
                     <tr>'+filterTableL1+'</tr> \
-                    <tr>'+filterTableL2+'</tr></table>';
+                    <tr>'+filterTableL2+'</tr></table>';*/
 
 
   //filterTable = "<tr><td>"+filterText+
   //filterTable = "<b>Gefiltert Auf:"+filterText + "</b> "+ filterSelector+ subSelector + subPercentSelector + periodenSelector + lokSelector + '<input type="submit" value="Parameter Umstellen">';
-  filterTable = "<form>"+filterTable+"</form>";
+  var filterTable = filterTableL2;
 
   return filterTable;
 
@@ -382,9 +371,9 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
     if (format[cell] && typeof(format[cell].headerLink) != 'undefined') {
       celltext = '<a href="'+format[cell].headerLink+'">' + celltext + '</a>';
     }
-  /*  if (format[cell] && typeof(format[cell].toolTip) != "undefined") {
+   /* if (format[cell] && typeof(format[cell].toolTip) != "undefined") {
       celltext = '<p title="'+ format[header[i]].toolTip+ '">'+celltext+'</p>';
-    }*/
+    } */
     tableheader +="<th class=header>"+celltext+"</th>";
   }
   if (serviceLink) tableheader += "<th> Service </th>";
@@ -1009,7 +998,7 @@ exports.table = function(req,res){
         if (param.html) {
           page =new htmlPage.create("table");
           page.title = "Wochenaufgabe "+param.measure;
-          page.menu = generateFilterTable(param,page);
+          page.modal = generateFilterTable(param,header);
 
           generateSortHeader(param,header,format);
           var table = generateTable(param,header,firstColumn,table,format, rank);
