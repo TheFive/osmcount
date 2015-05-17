@@ -2,43 +2,7 @@ var fs = require('fs');
 var path = require('path');
 
 
-var htmlStart = ' \
-<!DOCTYPE html> \n \
-<html lang="en"> \n \
-  <head> \n \
-    <meta charset="utf-8"> \n \
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"> \n \
-    <meta name="viewport" content="width=device-width, initial-scale=1"> \n \
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->\n \
-    <title>OSMCOUNT</title> \n \
-\n \
-    <!-- Bootstrap --> \n \
-    <link href="css/bootstrap.min.css" rel="stylesheet"> \n \
- \n \
-    <!-- Custom CSS -->  \n \
-    <link href="css/simple-sidebar.css" rel="stylesheet"> \n \
-\n \
-\n \
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries --> \n \
-    <!-- WARNING: Respond.js doesnt work if you view the page via file:// -->  \n \
-    <!--[if lt IE 9]> \n \
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script> \n \
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script> \n \
-    <![endif]--> \n \
-  </head> \n \
-  <body>  \n \
-  <div id="wrapper">'
-
-var htmlEnd = '\
- </div> \
-        <!-- /#page-content-wrapper --> \
-    <!-- jQuery (necessary for Bootstraps JavaScript plugins) -->\
-   <script src="js/jquery.js"></script>\
-    <!-- Include all compiled plugins (below), or include individual files as needed -->\
-    <script src="js/bootstrap.min.js"></script>\
-  </body> \
-</html>'
-
+var osmCountBrand = '<div class="navbar-header"><a class="navbar-brand" style="font-family:comic sans ms;font-size: 21px; color: #555" href="#">OSM Count</a></div>';
 
 function HtmlPage(type) {
 	this.type = type;
@@ -48,14 +12,13 @@ function HtmlPage(type) {
 	this.menu = "";
 	this.content = "";
 	if (type == "table") {
-		this.design = "design2.css";
+		this.design = "pageTableTemplate.html";
 	} else {
-		this.design = "design.css";
+		this.design = "pageTableTemplate.html";
 	}
+  this.navbar = [osmCountBrand];
 }
-function  getCssStyle(style) {
-  	return '<link rel="stylesheet" type="text/css" href="/'+style+'" />'
-  }
+
 
 
 exports.create = function(type) {
@@ -64,31 +27,35 @@ exports.create = function(type) {
 
 HtmlPage.prototype = {
   generatePage: function() {
-  	
-  	cssStyle =   getCssStyle(this.design);
-  	titlePageFile = path.resolve(__dirname, 'html','PageTitle.html');
-  	var titlePage = "";
-  	titlePage += fs.readFileSync(titlePageFile);
-  	titlePage = titlePage.replace('##########',this.title);
-  	head = '<head>'+cssStyle+'</head>';
-  	pageTitle = '<div id="kopfbereich">'+titlePage+'</div>';
-    pageTitle = "";
-  	pageMenu = '<div id="sidebar-wrapper">'+this.menu+'</div>';
-	pageContent = '<div id="page-content-wrapper"><div class="container-fluid"><div class="row"><div class="col-lg-12">'+this.content+'</div></div></div></div>';
-	pageFooter = '<div id="fussbereich">'+this.footer+'</div>';
-	odblLicense = 'Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
+    var navbar = this.navbar[0];
+    navbar += '<div id="navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav">'
+    for (var i = 1;i<this.navbar.length;i++) {
+      navbar += this.navbar[i];
+    }
+    navbar += '</ul></div>';
 
+    var content = this.content;
+    if (typeof (this.menu) != 'undefined' && this.menu != "") {
+      content = this.menu +"<br>"+this.content;
+    }
+
+  	
+  	var pageFile = path.resolve(__dirname, 'html',this.design);
+  	var page = "";
+  	page += fs.readFileSync(pageFile);
+  	page = page.replace('###NAVBAR###',navbar);
+    page = page.replace('###CONTENT###',content);
+    page = page.replace('###FOOTER###',this.footer);
+    var odblLicense = 'Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
+    page = page.replace('###ODBLLICENSE###',odblLicense);
+  
     // head unused yet
 
-
-	page = htmlStart	+pageTitle
-						+pageMenu
-						+pageContent+
-					//	pageFooter+
-					//	odblLicense+
-					htmlEnd;
-	return page;
-  } 
+	  return page;
+  },
+  addNavbarItem : function addNavbarItem(item) {
+    this.navbar.push(item);
+  }
   
   
 }

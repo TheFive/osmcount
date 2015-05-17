@@ -150,49 +150,63 @@ function setParams(req,param) {
 
 }
 
-function generateFilterTable(param,header) {
+function generateFilterTable(param,page) {
   debug("generateFilterTable");
 
     var filterSub = "-"
     var filterSubPercent = "-";
     var subSelector = '';
     var subPercentSelector = "";
+
+    // Unter
     if (  (param.measure == "Apotheke")
         ||(param.measure == "Apotheke_AT")
         ||(param.measure == "ApothekePLZ_DE")) {
-      filterSub =  gl("[Name]", {sub:"missing.name"},param);
-      filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
-      filterSub += gl("[fixme]", {sub:"existing.fixme"},param);
-      filterSub += gl("[phone]", {sub:"missing.phone"},param);
-      filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
-      filterSub += gl("[ALLES]", {sub:""},param);
+      filterSub =  '<li'+((param.sub=="missing.name")?' class="active">':'>')+gl("Name", {sub:"missing.name"},param)+'</li>';
+      filterSub += '<li'+((param.sub=="missing.opening_hours")?' class="active">':'>')+gl("Öffnungszeiten", {sub:"missing.opening_hours"},param)+'</li>';
+      filterSub += '<li'+((param.sub=="existing.fixme")?' class="active">':'>')+gl("fixme", {sub:"existing.fixme"},param)+'</li>';
+      filterSub += '<li'+((param.sub=="missing.phone")?' class="active">':'>')+gl("phone", {sub:"missing.phone"},param)+'</li>';
+      filterSub += '<li'+((param.sub=="missing.wheelchair")?' class="active">':'>')+gl("wheelchair", {sub:"missing.wheelchair"},param)+'</li>';
+      filterSub += '<li'+((param.sub=="")?' class="active">':'>')+gl("ALLES", {sub:""},param)+'</li>';
 
-      subSelector += optionValue("missing.name","Name",param.sub);
-      subSelector += optionValue("missing.opening_hours","Öffnungszeiten",param.sub);
-      subSelector += optionValue("existing.fixme","fixme",param.sub);
-      subSelector += optionValue("missing.phone","Telefon",param.sub);
-      subSelector += optionValue("missing.wheelchair","wheelchair",param.sub);
-      subSelector += optionValue("","Alle Apotheken",param.sub);
-
-      subSelector = '<select name ="sub">'+subSelector+'</select>';
-
-      filterSubPercent =  gl("[Prozentanzeige]", {subPercent:"Yes"},param);
-      filterSubPercent += gl("[Anzahl]", {subPercent:"No"},param);
+      filterSubPercent =  '<li'+((param.subPercent=="Yes")?' class="active">':'>')+gl("Prozentanzeige", {subPercent:"Yes"},param)+'</li>';
+      filterSubPercent += '<li'+((param.subPercent=="No")?' class="active">':'>')+gl("Anzahl", {subPercent:"No"},param)+'</li>';
       subPercentSelector = "";
       if (param.subPercent == "Yes") {
         subPercentSelector = '<select name="subPercent"> \
         <option value="Yes" selected>Prozentanzeige</option> \
         <option value="No">Anzahl</option> </select>'
-    } else {
+      } else {
         subPercentSelector = '<select name="subPercent"> \
         <option value="Yes">Prozentanzeige</option> \
         <option value="No" selected>Anzahl</option> </select>'
+      }
+
+      var title= "";
+      if (param.sub == "") title = "Alles";
+      if (param.sub == "missing.opening_hours") title = "Öffnungszeiten";
+      if (param.sub == "existing.fixme") title = "Fixme";
+      if (param.sub == "missing.phone") title = "Telefon";
+      if (param.sub == "missing.wheelchair") title = "Wheelchair";
+      if (param.sub == "missing.name") title = "Name";
+
+      if (param.subPercent == "Yes") title += "%";
+
+      var selector = '<li class="dropdown"><a  class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">'+title+'<span class="caret"></span></a>\n'
+      selector += '<ul class="dropdown-menu" role="menu">\n' 
+      selector += filterSubPercent;
+      selector +=  '<li class="divider"></li>';
+      selector += filterSub;
+      selector += '</ul>\n';
+      selector += '</li>\n';
+      page.addNavbarItem(selector);
     }
-    }
 
 
 
-    var lokSelector = '<select name="lok"> ';
+
+
+    var lokSelector = '';
 
     var lokMin = 2;
     var lokMax = 11;
@@ -207,11 +221,22 @@ function generateFilterTable(param,header) {
 
     for (var i=lokMin;i<=lokMax;i++) {
       if (i == param.lengthOfKey) {
-        lokSelector += '<option value="'+i+'" selected>'+i+'</option>';
+        lokSelector += '<li class="active">'+gl(i,{lok:i},param)+'</li>';
       } else {
-        lokSelector += '<option value="'+i+'">'+i+'</option>';
+        lokSelector += '<li>'+gl(i,{lok:i},param)+'</li>';
       }
     }
+    var periodenSwitch = '<li'+((param.period=="Jahr")?' class = "active">':'>')+gl("Jahr",{period:"Jahr"},param)+'</li>';
+    periodenSwitch+= '<li'+((param.period=="Monat")?' class = "active">':'>')+gl("Monat",{period:"Monat"},param)+'</li>';
+    periodenSwitch+= '<li'+((param.period=="Tag")?' class = "active">':'>')+gl("Tag",{period:"Tag"},param)+'</li>';
+      var selector = '<li class="dropdown"><a  class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">...<span class="caret"></span></a>\n'
+      selector += '<ul class="dropdown-menu" role="menu">\n' 
+      selector += lokSelector;
+      selector +=  '<li class="divider"></li>';
+      selector += periodenSwitch;
+      selector += '</ul>\n';
+      selector += '</li>\n';
+      page.addNavbarItem(selector);
 
 
   var filterSelector = "";
@@ -238,16 +263,6 @@ function generateFilterTable(param,header) {
     filterSelector = '<select name ="location">'+filterSelector+'</select>';
 
 
-
-    var periodenSwitch = gl("[Jahr]",{period:"Jahr"},param);
-    periodenSwitch+= gl("[Monat]",{period:"Monat"},param);
-    periodenSwitch+= gl("[Tag]",{period:"Tag"},param);
-
-    periodenSelector = '<select name="period"> \
-      <option value="Jahr"' +((param.period == "Jahr") ? " selected":"")+ '>Jahr</option> \
-      <option value="Monat"' +((param.period == "Monat") ? " selected":"")+ '>Monat</option> \
-      <option value="Tag"' +((param.period == "Tag") ? " selected":"")+ '>Tag</option> \
-      </select>';
   var date = new Date();
   var date7 = new Date();
   var date10 = new Date();
@@ -358,14 +373,18 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
       celltext = format[cell].title;
     }
     if (cell == param.sort) {
-      celltext = "#"+celltext+"#";
+      if (param.sortAscending== -1) {
+        celltext = celltext+'<span class="glyphicon glyphicon-arrow-down"></span>';
+      } else {
+        celltext = celltext+'<span class="glyphicon glyphicon-arrow-up"></span>';
+      }
     }
     if (format[cell] && typeof(format[cell].headerLink) != 'undefined') {
       celltext = '<a href="'+format[cell].headerLink+'">' + celltext + '</a>';
     }
-    if (format[cell] && typeof(format[cell].toolTip) != "undefined") {
+  /*  if (format[cell] && typeof(format[cell].toolTip) != "undefined") {
       celltext = '<p title="'+ format[header[i]].toolTip+ '">'+celltext+'</p>';
-    }
+    }*/
     tableheader +="<th class=header>"+celltext+"</th>";
   }
   if (serviceLink) tableheader += "<th> Service </th>";
@@ -990,13 +1009,13 @@ exports.table = function(req,res){
         if (param.html) {
           page =new htmlPage.create("table");
           page.title = "Wochenaufgabe "+param.measure;
-          page.menu = generateFilterTable(param,header);
+          page.menu = generateFilterTable(param,page);
 
           generateSortHeader(param,header,format);
           var table = generateTable(param,header,firstColumn,table,format, rank);
           timeTableGeneration = new Date().getTime() - timeTableGeneration;
 
-          page.content = '<p><table>'+table+'</table></p>';
+          page.content = '<p><table class="table-condensed table-bordered table-hover">'+table+'</table></p>';
 
           var pageFooter = "";
           var separator = "";

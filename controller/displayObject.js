@@ -64,7 +64,7 @@ exports.object = function(req,res) {
 			var page =new htmlPage.create("table");
 			page.title = "Data Inspector";
 			page.menu ="";
-			page.content = '<h1>'+collectionName+'</h1><p><table>'+text+'</table></p>';
+			page.content = '<h1>'+collectionName+'</h1><p><table class="table-condensed table-bordered table-hover">'+text+'</table></p>';
 			res.set('Content-Type', 'text/html');
 
 			if (collectionName == "WorkerQueue") {
@@ -98,7 +98,7 @@ exports.object = function(req,res) {
 						page.menu = menuString;
 
 
-						page.content += '<h1>Zugehörige Daten</h1><p><table>'+text+'</table></p>';
+						page.content += '<h1>Zugehörige Daten</h1><p><table class="table-condensed table-bordered table-hover">'+text+'</table></p>';
 						res.end(page.generatePage());
 					}
 

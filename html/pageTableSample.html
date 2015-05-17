@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>OSM Count Test Page</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css"           rel = "stylesheet">
+    
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom styles for this template -->
+    <link href="navbar-fixed-top.css" rel="stylesheet">
+     <link href="sticky-footer-navbar.css" rel="stylesheet">
+
+
+  </head>
+  <body>
+   <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+         
+          <a class="navbar-brand" style="font-family:comic sans ms;font-size: 21px; color: #555" href="#">OSM Count</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+             <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Apotheke <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="./pageTabelle.html">Apotheke</a></li>
+                <li><a href="#">Apotheke AT</a></li>
+                <li><a href="#">Apotheke PLZ</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Äldere Tabellen</li>
+                <li><a href="#">Adressen Ohne Strasse</a></li>
+                <li><a href="#">Und noch mehr altes Zeug</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Alle Orte<span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Alle Orte</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Nordrhein Westfalen</a></li>
+                <li><a href="#">Hessen</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Anzahl<span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Anzahl</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Fehlende</li>
+                <li><a href="#">Namen</a></li>
+                <li><a href="#">Telefonnummer</a></li>
+                <li class="dropdown-header">Vorhanden</li>
+                <li><a href="#">Fixme</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">...<span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="/wa/Apotheke.html">Hilfe / Informationen</a></li>
+                <li><a href=/table/Apotheke.csv?sub=&location=&lok=2&period=Monat&since=&sort=&subPercent=>Als CSV Downloaden</a></li>
+                <li><a href="/waplot/Apotheke.html?location=&lok=2">Zeige Anzahl als Grafik</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Äldere Tabellen</li>
+                <li><a href="#">Adressen Ohne Strasse</a></li>
+                <li><a href="#">Und noch mehr altes Zeug</a></li>
+              </ul>
+            </li>
+          </ul>
+         
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+
+
+    <div class="container">
+
+<!-- Copy Text of other files to be deleted or inserted automatic -->    
+
+<div id="steuerung">
+</div>
+<div id="inhalt"><p>
+  <table class="table-condensed table-bordered table-hover">
+    <tr>
+      <th class=header><a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=Schl%C3%BCssel&subPercent=">Schlüssel</a></th>
+      <th class=header>Name</th>
+      <th class=header>Admin Level</th>
+      <th class=header>
+
+        <a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=Vorgabe&subPercent=">Schätzung</a>
+      </th>
+      <th class=header><a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=2015-01&subPercent=">2015-01</a></th>
+      <th class=header><a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=2015-02&subPercent=">2015-02</a></th>
+      <th class=header><a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=2015-03&subPercent=">2015-03</a></th>
+      <th class=header><a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=2015-04&subPercent=">2015-04</a></th>
+      <th class=header><a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=2015-05&subPercent=">2015-05</a></th>
+      <th class=header><a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=Diff&subPercent=">Diff</a></th>
+      <th class=header><a href="/table/Apotheke.html?sub=&location=&lok=2&period=Monat&since=&sort=%25%20in%20OSM&subPercent=">% in OSM</a></th>
+      <th> Service </th>
+    </tr><tr><td ><a href="/table/Apotheke.html?sub=&location=09&lok=3&period=Monat&since=&sort=&subPercent=">09</a></td><td >Bayern</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=09">3.304,0</a></td><td >2.890</td><td >2.920</td><td >2.927</td><td >2.931</td><td >2.929</td><td class = "lastButOne">-2</td><td >89%</td><td><a href=/overpass/Apotheke/09.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E09%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E09%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=01&lok=3&period=Monat&since=&sort=&subPercent=">01</a></td><td >Schleswig-Holstein</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=01">706,0</a></td><td >634</td><td >654</td><td >657</td><td >655</td><td >656</td><td >1</td><td >93%</td><td><a href=/overpass/Apotheke/01.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E01%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E01%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=03&lok=3&period=Monat&since=&sort=&subPercent=">03</a></td><td >Niedersachsen</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=03">2.014,0</a></td><td >1.711</td><td >1.784</td><td >1.793</td><td >1.798</td><td >1.795</td><td class = "last">-3</td><td >89%</td><td><a href=/overpass/Apotheke/03.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E03%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E03%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=04&lok=3&period=Monat&since=&sort=&subPercent=">04</a></td><td >Bremen</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=04">152,0</a></td><td >151</td><td >144</td><td >146</td><td >146</td><td >146</td><td >0</td><td >96%</td><td><a href=/overpass/Apotheke/04.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E04%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E04%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=05&lok=3&period=Monat&since=&sort=&subPercent=">05</a></td><td >Nordrhein-Westfalen</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=05">4.407,5</a></td><td >3.769</td><td >4.175</td><td >4.182</td><td >4.215</td><td >4.217</td><td >2</td><td >96%</td><td><a href=/overpass/Apotheke/05.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E05%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E05%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=06&lok=3&period=Monat&since=&sort=&subPercent=">06</a></td><td >Hessen</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=06">1.546,0</a></td><td >1.344</td><td >1.360</td><td >1.369</td><td >1.373</td><td >1.379</td><td class = "first">6</td><td >89%</td><td><a href=/overpass/Apotheke/06.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E06%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E06%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=07&lok=3&period=Monat&since=&sort=&subPercent=">07</a></td><td >Rheinland-Pfalz</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=07">1.065,0</a></td><td >836</td><td >888</td><td >891</td><td >894</td><td >895</td><td >1</td><td class = "lastButOne">84%</td><td><a href=/overpass/Apotheke/07.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E07%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E07%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=08&lok=3&period=Monat&since=&sort=&subPercent=">08</a></td><td >Baden-Württemberg</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=08">2.604,0</a></td><td >2.338</td><td >2.464</td><td >2.465</td><td >2.476</td><td >2.474</td><td class = "lastButOne">-2</td><td >95%</td><td><a href=/overpass/Apotheke/08.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E08%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E08%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=02&lok=3&period=Monat&since=&sort=&subPercent=">02</a></td><td >Hamburg</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=02">432,0</a></td><td >400</td><td >404</td><td >406</td><td >407</td><td >410</td><td class = "second">3</td><td >95%</td><td><a href=/overpass/Apotheke/02.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E02%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E02%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=10&lok=3&period=Monat&since=&sort=&subPercent=">10</a></td><td >Saarland</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=10">316,0</a></td><td >243</td><td >268</td><td >267</td><td >269</td><td >269</td><td >0</td><td >85%</td><td><a href=/overpass/Apotheke/10.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E10%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E10%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=11&lok=3&period=Monat&since=&sort=&subPercent=">11</a></td><td >Berlin</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=11">858,0</a></td><td >752</td><td >765</td><td >767</td><td >769</td><td >770</td><td >1</td><td >90%</td><td><a href=/overpass/Apotheke/11.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E11%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E11%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=12&lok=3&period=Monat&since=&sort=&subPercent=">12</a></td><td >Brandenburg</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=12">576,0</a></td><td >450</td><td >498</td><td >500</td><td >504</td><td >505</td><td >1</td><td >88%</td><td><a href=/overpass/Apotheke/12.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E12%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E12%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=13&lok=3&period=Monat&since=&sort=&subPercent=">13</a></td><td >Mecklenburg-Vorpommern</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=13">410,0</a></td><td >329</td><td >417</td><td >414</td><td >413</td><td >413</td><td >0</td><td class = "first">101%</td><td><a href=/overpass/Apotheke/13.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E13%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E13%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=14&lok=3&period=Monat&since=&sort=&subPercent=">14</a></td><td >Sachsen</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=14">996,0</a></td><td >817</td><td >822</td><td >836</td><td >840</td><td >840</td><td >0</td><td >84%</td><td><a href=/overpass/Apotheke/14.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E14%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E14%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=15&lok=3&period=Monat&since=&sort=&subPercent=">15</a></td><td >Sachsen-Anhalt</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=15">615,0</a></td><td >433</td><td >473</td><td >475</td><td >477</td><td >477</td><td >0</td><td class = "last">78%</td><td><a href=/overpass/Apotheke/15.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E15%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E15%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td ><a href="/table/Apotheke.html?sub=&location=16&lok=3&period=Monat&since=&sort=&subPercent=">16</a></td><td >Thüringen</td><td >Bundesland</td><td ><a href="/list/DataTarget.html?measure=Apotheke&schluessel=16">561,0</a></td><td >421</td><td >563</td><td >562</td><td >560</td><td >560</td><td >0</td><td class = "second">100%</td><td><a href=/overpass/Apotheke/16.html>O</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Ajson%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E16%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B&R>R</a> <a href=http://overpass-turbo.eu/?Q=%5Bout%3Acsv(%3A%3Aid%2C%3A%3Atype%2C%3A%3Alat%2C%3A%3Alon%2C%3A%3Aversion%2C%3A%3Atimestamp%2C%3A%3Auser%2Cname%2Cfixme%2Cphone%2C%22contact%3Aphone%22%2Cwheelchair%3Btrue%3B%22%3B%22)%5D%3Barea%5B%22de%3Aamtlicher_gemeindeschluessel%22~%22%5E16%22%5D-%3E.a%3B%0A(node(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Away(area.a)%5Bamenity%3Dpharmacy%5D%3B%0Arel(area.a)%5Bamenity%3Dpharmacy%5D)%3B%0Aout%20center%3B>#</a></td></tr><tr><td><b>Summe</b></td><td><b></b></td><td><b></b></td><td><b>20.562,6</b></td><td><b>17.518</b></td><td><b>18.599</b></td><td><b>18.657</b></td><td><b>18.727</b></td><td><b>18.735</b></td><td><b>8</b></td><td><b>91%</b></td></tr></table></p></div><div id="fussbereich">Lade:  (Apotheke_AT: 31713) seit 858,01 Minuten<a href="/list/WorkerQueue.html?measure=Apotheke&type=insert&">(Zeitplan)</a>  [OWT:3550,no429:46]<br>Die Service Links bedeuten:                   <b>O</b> Zeige die Overpass Query                   <b>R</b> Starte die Overpass Query                   <b>#</b> Öffne Overpass Turbo mit CSV Abfrage<br>Dauer Aggregate Funktion: 0s. Dauer Vorgaben: 0.19s. Dauer Aufbereitung: 0.007s.</div>
+
+
+<!-- END: Copy Text of other files to be deleted or inserted automatic -->    
+
+
+   <footer class="footer">
+      <div class="container">
+        <p class="text-muted">Place sticky footer content here.</p>
+      </div>
+    </footer>
+
+    </div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+  </body>
+</html>
