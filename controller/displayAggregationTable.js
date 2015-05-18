@@ -363,9 +363,9 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
     }
     if (cell == param.sort) {
       if (param.sortAscending== -1) {
-        celltext = celltext+'<span class="glyphicon glyphicon-arrow-down"></span>';
+        celltext = celltext+'<span class="glyphicon glyphicon-sort-by-attributes"></span>';
       } else {
-        celltext = celltext+'<span class="glyphicon glyphicon-arrow-up"></span>';
+        celltext = celltext+'<span class="glyphicon glyphicon-sort-by-attributes-alt"></span>';
       }
     }
     if (format[cell] && typeof(format[cell].headerLink) != 'undefined') {
@@ -435,18 +435,22 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
 
   // Sort the table by the parameter
   if (header.indexOf(param.sort>=0)) {
-    firstColumn.sort( function(a,b) {
+    firstColumn.sort( function sortCompare2Values(a,b) {
+      debug("sortCompare2Values");
       var va = table[a][param.sort];
       var vb = table[b][param.sort];
+      debug("va %s %s vb %s %s ",va,typeof(va),vb,typeof(vb));
+
       if (typeof(va)=='number' || typeof(vb)=='number' ) {      
-        if (typeof(va)!='number') va = 0;
-        if (typeof(vb)!='number') vb = 0;
-        return (vb-va)*param.sortAscending;
+        debug("Number Case: va %s vb %s",va,vb);
+        var result = ( (isNaN(vb)?0:vb)-(isNaN(va)?0:va))*param.sortAscending;
+        debug("result %s",result);
+        return result;
       }
       // both values are not numbers, try this
-      if (va>vb) return param.sortAscending;
+      if (va>vb) return -param.sortAscending;
       if (va==vb) return 0;
-      return -param.sortAscending;
+      return +param.sortAscending;
     })
   }
   for (var i=0;i<firstColumn.length;i++)

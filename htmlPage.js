@@ -68,12 +68,16 @@ function HtmlPage(type) {
 	this.footer = "OSM Count ...";
 	this.menu = "";
   this.modal = "";
+  this.modalActionString = '';
 	this.content = "";
 	if (type == "table") {
 		this.design = "pageTableTemplate.html";
 	} else {
 		this.design = "pageTableTemplate.html";
 	}
+  var osmCountBrandFile = path.resolve(__dirname,"html","osmCountBrand.html");
+  osmCountBrand = fs.readFileSync(osmCountBrandFile);
+
   this.navbar = [osmCountBrand];
 }
 
@@ -104,6 +108,7 @@ HtmlPage.prototype = {
       modalWindow = "";
       modalWindow += fs.readFileSync(modalWindowFile);
       modalWindow = modalWindow.replace('###MODALMENU###',this.modal);
+      modalWindow = modalWindow.replace('###MODALWINDOWACTIONSTRING###',this.modalActionString)
 
 
 
