@@ -105,7 +105,6 @@ HtmlPage.prototype = {
       modalWindow += fs.readFileSync(modalWindowFile);
       modalWindow = modalWindow.replace('###MODALMENU###',this.modal);
 
-      
 
 
       navbar += '<li><a href="#" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></a></li>'
