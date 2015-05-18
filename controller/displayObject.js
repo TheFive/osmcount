@@ -62,9 +62,9 @@ exports.object = function(req,res) {
 			text+= listValuesTable("",null,obj);
 
 			var page =new htmlPage.create("table");
-			page.title = "Data Inspector";
+			page.title = collectionName;
 			page.menu ="";
-			page.content = '<h1>'+collectionName+'</h1><p><table>'+text+'</table></p>';
+			page.content = '<p><table class="table-condensed table-bordered table-hover">'+text+'</table></p>';
 			res.set('Content-Type', 'text/html');
 
 			if (collectionName == "WorkerQueue") {
@@ -84,21 +84,22 @@ exports.object = function(req,res) {
 
 						var menuString = "";
 						if (obj2.length ==0 && obj[0].status == 'error') {
-							menuString = '<form action ="IgnoreError" > \
-							Fehler Ignorieren, Grund: \
-							<select name="reason"> \
+							menuString = ' \
+							<label for "IgnoreError">Fehler Ignorieren, Grund:</label> \
+							<select class="form-control" name="reason"> \
 							<option value="NotExcecuted" selected>Nicht Ausgeführt</option> \
 								</select> \
-							<select name="object"> \
-							<option value="'+obj[0].id+'" selected>Object ID</option> \
+							<label for "ObjectID">Interal Object ID:</label> \
+							<select class="form-control" name="object"> \
+							<option value="'+obj[0].id+'" selected>'+obj[0].id+'</option> \
 								</select> \
-  										<input type="submit" value="Ignore Error"> \
-										</form> '
+							<div class="alert alert-danger" role="alert">Bitte OK drücken, um den Fehler zurückzusetzen.</div>'
 						}
-						page.menu = menuString;
+						page.modal = menuString;
+						page.modalActionString = 'action ="IgnoreError"';
 
 
-						page.content += '<h1>Zugehörige Daten</h1><p><table>'+text+'</table></p>';
+						page.content += '<h1>Zugehörige Daten</h1><p><table class="table-condensed table-bordered table-hover">'+text+'</table></p>';
 						res.end(page.generatePage());
 					}
 

@@ -148,6 +148,6 @@ exports.checkUnallowedGlobals = function() {
   should(key).equal("not used", "global var key is used");
   should(measure).equal("not used", "global var measure is used");
   should(array).equal("not used", "global var array is used");
-  exports.allowedGlobals([]);
+  //exports.allowedGlobals([]);
 }
 
