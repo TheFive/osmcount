@@ -87,7 +87,7 @@ function generateWhereClause(query) {
   return whereClause; 
 }
 
-POI.prototype.find = function(query,cb) {
+POI.prototype.find = function(query,options,cb) {
   debug('POI.prototype.find');
   var whereClause = generateWhereClause(query);
   

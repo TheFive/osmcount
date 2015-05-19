@@ -131,7 +131,7 @@ HtmlPage.prototype = {
     page = page.replace('###CONTENT###',content);
     page = page.replace('###MODALWINDOW###',modalWindow);
     page = page.replace('###FOOTER###',this.footer);
-    var odblLicense = 'Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
+    var odblLicense = 'OSM Count 0.3.1. Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
     page = page.replace('###ODBLLICENSE###',odblLicense);
   
     // head unused yet
