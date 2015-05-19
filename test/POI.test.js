@@ -24,14 +24,14 @@ describe('POI', function() {
         helper.initialiseTablePostgres(POI,"POI.test.json",bddone);
       });
       it('should import POI.test.json',function(bddone){
-        POI.find({},function(err,data){
+        POI.find({},{},function(err,data){
           should.not.exist(err);
           should(data.length).equal(7);
           bddone();
         })        
       })
       it('should find pharmacies in AT',function(bddone){
-        POI.find({tags:{amenity:"pharmacy"},overpass:{country:"DE"}},function(err,data){
+        POI.find({tags:{amenity:"pharmacy"},overpass:{country:"DE"}},{},function(err,data){
           should.not.exist(err);
           should(data.length).equal(1);
           should(data[0].tags).eql({
@@ -59,7 +59,7 @@ describe('POI', function() {
     it('should remove a node',function (bddone) {
       POI.remove({type: "node","id": 39663366},function(err,data) {
         should.not.exist(err);
-        POI.find({overpass:{country:"DE"}},function(err,data){
+        POI.find({overpass:{country:"DE"}},{},function(err,data){
           should.not.exist(err);
           should(data.length).equal(0);
           bddone();
@@ -79,7 +79,7 @@ describe('POI', function() {
                      {type:"way","id": 3,a:3}],
                      function(err,data) {
         should.not.exist(err);
-        POI.find({},function(err,data){
+        POI.find({},{},function(err,data){
           should.not.exist(err);
           should(data.length).equal(4);
           should(data).containDeep([{type: "node","id": 39663366},
@@ -97,17 +97,17 @@ describe('POI', function() {
       helper.initialiseTablePostgres(POI,"POI.test.json",bddone);
     })
     it('should save a node',function (bddone) {
-      POI.find({overpass:{country:"DE"}},function(err,data) {
+      POI.find({overpass:{country:"DE"}},{},function(err,data) {
         should.not.exist(err);
         should(data.length).equal(1);
         var poi = data[0];
         poi.overpass.country = "TEST";
         POI.save(poi,function(err,cb){
           should.not.exist(err);
-          POI.find({overpass:{country:"DE"}},function(err,data) {
+          POI.find({overpass:{country:"DE"}},{},function(err,data) {
             should.not.exist(err);
             should(data.length).equal(0);
-            POI.find({overpass:{country:"TEST"}},function(err,data) {
+            POI.find({overpass:{country:"TEST"}},{},function(err,data) {
               should.not.exist(err);
               should(data.length).equal(1);
               bddone();
