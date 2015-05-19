@@ -13,6 +13,7 @@ var wochenaufgabe = require('./wochenaufgabe.js');
 var DataCollection = require('./model/DataCollection.js');
 var DataTarget     = require('./model/DataTarget.js');
 var WorkerQueue    = require('./model/WorkerQueue.js');
+var POI    = require('./model/POI.js');
 
 
 
@@ -156,7 +157,7 @@ exports.query=function(req,res) {
 
      	               options={"sort":"exectime"}
     	               break;
-    	case "pharmacy": //collection = POI;
+    	case "pharmacy": collection = POI;
     	                 collectionName = "POI";
     	                  columns = ["Links",
     	                             ["name","tags","name"],
@@ -181,26 +182,26 @@ exports.query=function(req,res) {
     	                  if (typeof(req.query.state)!='undefined' && req.query.state != "") {
     	                    queryDefined = true;
     	                    query["nominatim.state"] =req.query.state;
-    	                    queryMenu += 'state:<input type="text" name="state" value="'+req.query.state+'">';
-    	                  } else queryMenu += 'state:<input type="text" name="state">';
+    	                    queryMenu += '<label for="state">state:</label><input type="text" name="state" value="'+req.query.state+'">';
+    	                  } else queryMenu += '<label for="state">state:</label><input class="form-control" type="text" name="state">';
 
    	                      if (typeof(req.query.state_district)!='undefined' && req.query.state_district != "") {
     	                    queryDefined = true;
     	                    query["nominatim.state_district"] =req.query.state_district;
-    	                    queryMenu += 'state_district:<input type="text" name="state_district" value="'+req.query.state_district+'">';
-    	                  } else queryMenu += 'state_district:<input type="text" name="state_district">';
+    	                    queryMenu += '<label for="state_district">state_district:</label><input type="text" name="state_district" value="'+req.query.state_district+'">';
+    	                  } else queryMenu += '<label for="state_district">state_district:</label>:<input class="form-control" type="text" name="state_district">';
 
    	                      if (typeof(req.query.county)!='undefined' && req.query.county != "") {
     	                    queryDefined = true;
     	                    query["nominatim.county"] =req.query.county;
-    	                    queryMenu += 'county:<input type="text" name="county" value="'+req.query.county+'">';
-    	                  } else queryMenu += 'county:<input type="text" name="county">';
+    	                    queryMenu += '<label for="country">country:</label><input type="text" name="county" value="'+req.query.county+'">';
+    	                  } else queryMenu += '<label for="country">country:</label><input class="form-control" type="text" name="county">';
 
     	                  if (typeof(req.query.postcode)!='undefined' && req.query.postcode != "") {
     	                    queryDefined = true;
     	                    query["nominatim.postcode"] =req.query.postcode;
-    	                    queryMenu += 'postcode:<input type="text" name="postcode" value="'+req.query.postcode+'">';
-    	                  } else queryMenu += 'postcode:<input type="text" name="postcode">';
+    	                    queryMenu += '<label for="postcode">postcode:</label><input type="text" name="postcode" value="'+req.query.postcode+'">';
+    	                  } else queryMenu += '<label for="country">country:</label><input class="form-control" type="text" name="postcode">';
 
 
      	                  if (typeof(req.query.city)!='undefined' && req.query.city != "") {
@@ -209,21 +210,21 @@ exports.query=function(req,res) {
     	                             {"nominatim.city":req.query.city},
     	                             {"nominatim.village":req.query.city}];
     	                    query["$or"] =q;
-    	                    queryMenu += 'town:<input type="text" name="city" value="'+req.query.city+'">';
-    	                  } else queryMenu += 'town:<input type="text" name="city">';
+    	                    queryMenu += '<label for="town">town:</label><input type="text" name="city" value="'+req.query.city+'">';
+    	                  } else queryMenu += '<label for="town">town:</label><input class="form-control" type="text" name="city">';
 
     	                  if (typeof(req.query.country)!='undefined' && req.query.country != "") {
     	                    queryDefined = true;
     	                    query["nominatim.country"] =req.query.country;
-    	                    queryMenu += 'country:<input type="text" name="country" value="'+req.query.country+'">';
-    	                  } else queryMenu += 'country:<input type="text" name="country">';
+    	                    queryMenu += '<label for="country">country:</label><input type="text" name="country" value="'+req.query.country+'">';
+    	                  } else queryMenu += '<label for="country">country:</label><input class="form-control" type="text" name="country">';
 
     	                  if (typeof(req.query.missing)!='undefined' && req.query.missing != "") {
     	                    queryDefined = true;
     	                    query["nominatim.timestamp"] ={$exists:0};
     	                    query["overpass.loadBy"] = req.query.missing;
      	                  }
-     	                  queryMenu += 'missing nominatim: <select name="missing"> \
+     	                  queryMenu += '<label for="missing nominatim">missing nominatim</label> <select class="form-control" name="missing"> \
     	                                   <option value="">none</option> \
     	                                  <option value="DE">DE</option> \
     	                                  <option value="AT">AT</option> \
@@ -231,10 +232,6 @@ exports.query=function(req,res) {
     	                                  </select>';
 
 
-
-
-
-    	                  queryMenu = '<form>'+queryMenu+'<input type="submit"></form>';
     	                  break;
     	 default:collection = WorkerQueue;
     	               columns = ["_id","type","status","measure"];
@@ -278,8 +275,8 @@ exports.query=function(req,res) {
     	}
     	page =new htmlPage.create("table");
 		page.title = "Abfrage "+req.params.query;
-		page.menu =queryMenu;
-		page.content = '<p><table>'+table+'</table></p>';
+		page.modal =queryMenu;
+		page.content = '<p><table class="table-condensed table-bordered table-hover">'+table+'</table></p>';
 		page.footer = "Ergebnisse: " + data.length + " Abfrage: "+JSON.stringify(query)+"<br>Aktuelle Zeit: "+new Date();
  		res.set('Content-Type', 'text/html');
  		res.end(page.generatePage());
@@ -289,7 +286,7 @@ exports.query=function(req,res) {
     } else {
     	page =new htmlPage.create("table");
 		page.title = "Abfrage "+req.params.query;
-		page.menu =queryMenu;
+		page.modal =queryMenu;
 		page.content = '<p>Bitte die POIs durch eine Query Einschränken</p>';
 		page.footer = JSON.stringify(query);
  		res.set('Content-Type', 'text/html');
