@@ -66,11 +66,11 @@ function getPOIOverpass(cb,result) {
 		cb(null, data);
 		return;
 	}
-	debug("Overpass Abfrage Starten für "+country);
+	console.log("Overpass Abfrage Starten für "+country);
 
 	loadOverpassData.overpassQuery(query[country], function(err,result) {
 		debug("getPOIByPLZOverpass->CB");
-		debug("Overpass Abfrage Beendet für "+country);
+		console.log("Overpass Abfrage Beendet für "+country);
 		if (err) {
 			console.log("Fehler: "+JSON.stringify(err));
 			console.log(JSON.stringify(result));
@@ -104,7 +104,7 @@ function getPOIByPLZMongo(cb,result) {
 	}
 	var query = { "overpass.loadBy":country, "tags.amenity": "pharmacy"}
 
-	POI.find(query,function(err,result) {
+	POI.find(query,{},function(err,result) {
 	  debug("getPOIByPLZMongo->CB");
 		if (err) {
 			console.log("Fehler "+err);
@@ -325,10 +325,10 @@ function nominatim(cb,result) {
   debug("storePOI");
 
   async.series([ function(cb) {
-       async.auto( {config: config.initialiseMongoDB,
+       async.auto( {
              country: function(cb,result) {cb(null,"CH")},
              overpass: ["country",getPOIOverpass],
-             mongo:["config","overpass",getPOIByPLZMongo],
+             mongo:["overpass",getPOIByPLZMongo],
              update: ["mongo",updatePOIFromPostgres],
              insert: ["mongo",insertPOIFromPostgres],
              remove: ["mongo",removePOIFromPostgres],
@@ -340,10 +340,10 @@ function nominatim(cb,result) {
              }
 
              )},function(cb) {
-          async.auto( {config: config.initialiseMongoDB,
+          async.auto( {
              country: function(cb,result) {cb(null,"DE")},
              overpass: ["country",getPOIOverpass],
-             mongo:["config","overpass",getPOIByPLZMongo],
+             mongo:["overpass",getPOIByPLZMongo],
              update: ["mongo",updatePOIFromPostgres],
              insert: ["mongo",insertPOIFromPostgres],
              remove: ["mongo",removePOIFromPostgres],
@@ -357,10 +357,10 @@ function nominatim(cb,result) {
              )},
 
              function(cb) {
-          async.auto( {config: config.initialiseMongoDB,
+          async.auto( {
              country: function(cb,result) {cb(null,"AT")},
              overpass: ["country",getPOIOverpass],
-             mongo:["config","overpass",getPOIByPLZMongo],
+             mongo:["overpass",getPOIByPLZMongo],
              update: ["mongo",updatePOIFromPostgres],
              insert: ["mongo",insertPOIFromPostgres],
              remove: ["mongo",removePOIFromPostgres],
