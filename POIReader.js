@@ -2,6 +2,7 @@ var debug    = require('debug')('POIReader');
 var fs       = require("fs");
 var path     = require('path');
 var request  = require('request');
+var es          = require('event-stream');
 
 var config           = require('./configuration.js');
 var loadDataFromDB   = require('./model/LoadDataFromDB.js');
@@ -34,7 +35,7 @@ out center meta;'
 }
 
 function cleanObject(obj) {
-  for (k in obj) {
+  for (var k in obj) {
     if (typeof (obj[k]) =='object') {
       cleanObject(obj[k]);
     }
@@ -59,8 +60,8 @@ function getPOIOverpass(cb,result) {
 	filename = path.resolve(__dirname, filename);
 	if (fs.existsSync(filename)) {
 		debug("Loading Data from "+filename);
-		var result = fs.readFileSync(filename);
-		data = JSON.parse(result);
+		result = fs.readFileSync(filename);
+		var data = JSON.parse(result);
 		debug("Loaded Elemnts:"+data.elements.length);
 		cleanTags(data.elements);
 		cb(null, data);
@@ -77,7 +78,7 @@ function getPOIOverpass(cb,result) {
 			cb(err,null);
 		} else {
 			fs.writeFileSync(filename,result);
-			data = JSON.parse(result);
+			var data = JSON.parse(result);
 			debug("Loaded Elements:"+data.elements.length);
      		cleanTags(data.elements);
 			cb(null,data);
@@ -86,18 +87,20 @@ function getPOIOverpass(cb,result) {
 }
 
 
+
 function getPOIByPLZMongo(cb,result) {
 	debug("getPOIByPLZMongo");
 
 	var country = result.country;
 	var data = result.overpass;
-	list = {};
+ 
+	var list = {};
 	debug("Elemente geladen: "+data.elements.length+" für "+country);
-
+/*
 
 	for (i =0;i<data.elements.length;i++) {
-		element = data.elements[i];
-		keyIntern = element.type + element.id;
+		var element = data.elements[i];
+		var keyIntern = element.type + element.id;
 		element.overpass = {};
 		element.overpass["loadBy"] = country;
 		list[keyIntern] = element;
@@ -114,7 +117,7 @@ function getPOIByPLZMongo(cb,result) {
 			var update = [];
 			var insert = [];
 			debug("Found "+result.length+ " POIs in DB");
-			for (i=0;i<result.length;i++ ) {
+			for (var i=0;i<result.length;i++ ) {
 				element = result[i];
 				key = element.type + element.id;
 				if (typeof(list[key])=='undefined') {
@@ -131,21 +134,26 @@ function getPOIByPLZMongo(cb,result) {
 				}
 			}
 			// Check all not handled overpass result for insert
-			for (k in list) {
+			for (var k in list) {
 				if (typeof(list[k]._id) == 'undefined') {
 					insert.push(list[k]);
 				}
 			}
-			erg = {};
+			var erg = {};
 			debug("To be removed: "+remove.length);
 			debug("To be updated: "+update.length);
 			debug("To be inserted: "+insert.length);
 			erg.remove = remove;
 			erg.update = update;
 			erg.insert = insert;
-			cb(null,erg);
+ 			cb(null,erg);
 		}
-	})
+	}) */
+var erg = {};
+      erg.remove = [];
+      erg.update = [];
+      erg.insert = data.elements;
+      cb(null,erg);
 }
 
 function removePOIFromPostgres(cb,result) {
@@ -222,7 +230,7 @@ function updatePOIFromPostgres(cb,result) {
 }
 
 function insertPOIFromPostgres(cb,result) {
-  debug("insertPOIFromMongo");
+  debug("insertPOIFromPostgres");
   var insert = result.mongo.insert;
   debug("To Be Inserted: "+insert.length + " DataSets");
   if (insert.length == 0) {
@@ -230,7 +238,7 @@ function insertPOIFromPostgres(cb,result) {
   	return;
   }
   POI.insertData(insert, function(err,result) {
-    debug("insertPOIFromMongo->CB");
+    debug("insertPOIFromPostgres->CB");
     if (err) {
     	console.log("Error "+ err);
     	cb(err,null);
@@ -324,7 +332,8 @@ function nominatim(cb,result) {
 
   debug("storePOI");
 
-  async.series([ function(cb) {
+  async.series([config.initialise, 
+       function(cb) {
        async.auto( {
              country: function(cb,result) {cb(null,"CH")},
              overpass: ["country",getPOIOverpass],
