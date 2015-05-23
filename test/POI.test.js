@@ -30,8 +30,28 @@ describe('POI', function() {
           bddone();
         })        
       })
-      it('should find pharmacies in AT',function(bddone){
+      it('should find pharmacies in AT with query object',function(bddone){
         POI.find({tags:{amenity:"pharmacy"},overpass:{country:"DE"}},{},function(err,data){
+          should.not.exist(err);
+          should(data.length).equal(1);
+          should(data[0].tags).eql({
+              "addr:city": "Graz",
+              "addr:country": "AT",
+              "addr:housenumber": "19",
+              "addr:postcode": "8020",
+              "addr:street": "Wiener Straße",
+              "amenity": "pharmacy",
+              "dispensing": "yes",
+              "name": "Löwen-Apotheke",
+              "phone": "+43 316 714691",
+              "wheelchair": "no"
+            })
+          bddone();
+
+        })
+      })
+      it.only('should find pharmacies in AT with where clause',function(bddone){
+        POI.find( "where data->'tags'->>'amenity' = 'pharmacy' and data->'overpass'->>'country'='DE'",function(err,data){
           should.not.exist(err);
           should(data.length).equal(1);
           should(data[0].tags).eql({

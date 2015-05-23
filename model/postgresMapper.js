@@ -110,15 +110,24 @@ function createFieldList(map) {
 
 
 exports.find = function find(query,options,cb) {
+  // This function supports 2 kind of parameter sets
+  // the old one, a mongo queryobject options and a callback
+  // and the new one, a where clause and a callback
   debug('%s.find',this.tableName);
 
   var map = this.map;
-  if (typeof(options) == 'function') {
+  var whereClause = "";
+  if (typeof query == 'string') {
+    whereClause = query;
     cb = options;
-    options = null;
+  } else {
+    if (typeof(options) == 'function') {
+      cb = options;
+      options = null;
+    }
+    whereClause = createWhereClause(map,query,options);
   }
 
-  var whereClause = createWhereClause(map,query,options);
   var fieldList = createFieldList(map);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {

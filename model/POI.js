@@ -89,7 +89,16 @@ function generateWhereClause(query) {
 
 POI.prototype.find = function(query,options,cb) {
   debug('POI.prototype.find');
-  var whereClause = generateWhereClause(query);
+  var whereClause = "";
+  if (typeof query == 'string') {
+    whereClause = query;
+    cb = options;
+  } else {
+    var whereClause = generateWhereClause(query);
+    if (typeof options == 'function') {
+      cb = options;
+    }
+  }
   
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
@@ -97,7 +106,8 @@ POI.prototype.find = function(query,options,cb) {
       pgdone();
       return;
     }
-    var queryStr = "select id,data from poi"+whereClause;
+    var queryStr = "select id,data from poi "+whereClause;
+    console.log(queryStr);
     var query = client.query(queryStr);
     var rows = [];
     query.on('row', function(row) {

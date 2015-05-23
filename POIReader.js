@@ -161,6 +161,7 @@ function removePOIFromPostgres(cb,result) {
   var remove = result.mongo.remove;
   if (remove.length==0) {
   	cb(null,null);
+    debug('remove: nothing to do');
   	return;
   }
   debug("To Be Removed: "+remove.length + " DataSets");
@@ -195,7 +196,7 @@ function updatePOIFromPostgres(cb,result) {
   debug("updatePOIFromPostgres");
   var update = result.mongo.update;
   if (update.length==0) {
-    debug("nothing to do");
+    debug("update: nothing to do");
   	cb(null,null);
   	return;
   }
@@ -234,6 +235,7 @@ function insertPOIFromPostgres(cb,result) {
   var insert = result.mongo.insert;
   debug("To Be Inserted: "+insert.length + " DataSets");
   if (insert.length == 0) {
+    debug('Insert: Nothing to do');
   	cb(null,null);
   	return;
   }
@@ -259,11 +261,7 @@ var nominatimUrl = nominatimMapQuestUrl;
 function nominatim(cb,result) {
   debug("nominatim");
   q = async.queue(function(task,cb) {
-    POI.findOne(
-                           {$or:[
-                           {"nominatim.timestamp":{$exists:0}},
-                           { "nominatim.timestamp":{$gte:"$timestamp"}}
-                             ]}, function(err, obj) {
+    POI.find("where data->'nominatim'->>'timestamp' >= now() limit 1", function(err, obj) {
       debug("nominatim->CB");
       if (err) {
         console.log("Error occured in function: QueueWorker.getNextJob");
