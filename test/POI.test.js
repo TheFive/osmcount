@@ -20,7 +20,7 @@ describe('POI', function() {
   })
   describe('import',function(bddone) {
     describe('should find data',function(){
-      before(function(bddone){
+      beforeEach(function(bddone){
         helper.initialiseTablePostgres(POI,"POI.test.json",bddone);
       });
       it('should import POI.test.json',function(bddone){
@@ -50,7 +50,7 @@ describe('POI', function() {
 
         })
       })
-      it.only('should find pharmacies in AT with where clause',function(bddone){
+      it('should find pharmacies in AT with where clause',function(bddone){
         POI.find( "where data->'tags'->>'amenity' = 'pharmacy' and data->'overpass'->>'country'='DE'",function(err,data){
           should.not.exist(err);
           should(data.length).equal(1);
@@ -68,6 +68,33 @@ describe('POI', function() {
             })
           bddone();
 
+        })
+      })
+      it('should save an object',function(bddone){
+        POI.find( "where data->'tags'->>'amenity' = 'pharmacy' and data->'overpass'->>'country'='DE'",function(err,data){
+          should.not.exist(err);
+          should(data.length).equal(1);
+          var object = data[0];
+          object.tags["addr:housenumber"] = "10";
+          POI.save(object,function(err,result){
+            should.not.exist(err);
+            POI.find( "where data->'tags'->>'amenity' = 'pharmacy' and data->'overpass'->>'country'='DE'",function(err,data){
+              should.not.exist(err);
+              should(data[0].tags).eql({
+                  "addr:city": "Graz",
+                  "addr:country": "AT",
+                  "addr:housenumber": "10",
+                  "addr:postcode": "8020",
+                  "addr:street": "Wiener Straße",
+                  "amenity": "pharmacy",
+                  "dispensing": "yes",
+                  "name": "Löwen-Apotheke",
+                  "phone": "+43 316 714691",
+                  "wheelchair": "no"
+                })
+              bddone();
+            })
+          });
         })
       })
     })

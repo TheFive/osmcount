@@ -427,3 +427,24 @@ exports.export = function(filename,cb){
   debug('%s.export',this.tableName);
   should(false,"not implemented yet");
 }
+
+
+// Defined for save not tested or used yet
+exports.save = function save(item) {
+  debug('%s.save',this.tableName);
+  pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    var valueList = this.getSaveQueryValueList();
+    var query = this.getSaveQueryString();
+
+
+    client.query(query,valueList, function(err,result) {
+
+      should.not.exist(err);
+      debug('Saved Object');
+      pgdone();
+      cb(err);
+      return;
+    })
+  })
+
+}

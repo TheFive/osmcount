@@ -261,7 +261,7 @@ var nominatimUrl = nominatimMapQuestUrl;
 function nominatim(cb,result) {
   debug("nominatim");
   q = async.queue(function(task,cb) {
-    POI.find("where data->'nominatim'->>'timestamp' >= now() limit 1", function(err, obj) {
+    POI.find("where ((data->'nominatim'->'timestamp') is not null) and (data->'nominatim'->>'timestamp')::timestamp >= now() limit 1", function(err, objList) {
       debug("nominatim->CB");
       if (err) {
         console.log("Error occured in function: QueueWorker.getNextJob");
@@ -269,17 +269,21 @@ function nominatim(cb,result) {
         cb(err,null);
         return;
       }
-      if (obj) {
+      var obj;
+      if (objList.length == 1) {
+        obj = objList[0];
+
         debug("found job %s %s",obj.type, obj.id);
+        console.dir(obj);
         osm_type="";
-		switch (obj.type) {
-		  case "node": osm_type = "osm_type=N";
-					 break;
-		  case "way": osm_type = "osm_type=W";
-					 break;
-		  case "relation": osm_type = "osm_type=R";
-					 break;
-		}
+    		switch (obj.type) {
+    		  case "node": osm_type = "osm_type=N";
+    					 break;
+    		  case "way": osm_type = "osm_type=W";
+    					 break;
+    		  case "relation": osm_type = "osm_type=R";
+    					 break;
+    		}
 		// return obj as job object
 		url = nominatimUrl+"?format=json&";
 		url += osm_type;
@@ -304,7 +308,7 @@ function nominatim(cb,result) {
 				obj.nominatim = elementData;
 			}
 			cleanObject(obj);
-			db.collection("POI").save(obj, function(err,result) {
+			POI.save(obj, function(err,result) {
 			  debug("nominatim->MongoCB");
 			  if (err) {
 				console.log("Error "+err);

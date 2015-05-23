@@ -52,11 +52,24 @@ POI.prototype.getInsertQueryString = function getInsertQueryString() {
   return "INSERT into poi (data) VALUES($1)";
 }
 
+
 POI.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
   var data = item;
   return  [data];
 }
 
+
+// Defined for save, not used yet to be synchronised with POI.save
+POI.prototype.getSaveQueryString = function getSaveQueryString() {
+  return "UPDATE poi (data) VALUES($2) where id = $1";
+}
+
+// Defined for save, not used yet to be synchronised with POI.save
+POI.prototype.getSaveQueryValueList = function getSaveQueryValueList(item) {  
+  var data = item.data;
+  var id = item.id;
+  return  [id,data];
+}
 
 
 
@@ -107,7 +120,6 @@ POI.prototype.find = function(query,options,cb) {
       return;
     }
     var queryStr = "select id,data from poi "+whereClause;
-    console.log(queryStr);
     var query = client.query(queryStr);
     var rows = [];
     query.on('row', function(row) {
@@ -185,6 +197,8 @@ POI.prototype.save = function savePOI(poi,cb) {
   })
 
 }
+
+
 
 
 module.exports = new POI();
