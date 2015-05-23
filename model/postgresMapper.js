@@ -252,6 +252,7 @@ exports.countUntilNow = function(query,cb) {
 exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream,cb) {
   debug('insertStreamToPostgres');
   pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
+    debug('insertStreamToPostgres.1');
     if (err) {
       cb(err);
       pgdone();
@@ -306,19 +307,22 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream
     var ls, mapper;
     var parser;
     if (internal) {
+      debug("internal initialising");
+
       ls = stream.pipe(es.map(insertData.bind(this)));
-      parser = ls;
-      mapper = ls;
+      //parser = ls;
+      //mapper = ls;
     }
     else {
+      debug(" not internal initialising");
       parser = JSONStream.parse();
       var mapper = es.map(insertData.bind(this));
       ls = stream.pipe(parser).pipe(mapper);
     }
     ls.wasCalled = false;
-    parser.on('end',function() {debug("parser.on('end');")})
-    stream.on('end',function() {debug("stream.on('end');")})
-    mapper.on('end',function() {debug("mapper.on('end');")})
+    //parser.on('end',function() {debug("parser.on('end');")})
+    //stream.on('end',function() {debug("stream.on('end');")})
+    //mapper.on('end',function() {debug("mapper.on('end');")})
     ls.on('end',function() {
       debug("ls.on('end')");
 
