@@ -136,7 +136,7 @@ describe('importCSV', function() {
       });
       it('should fail with no filename' , function(done) {
         DataCollection.importCSV('NonExistingFile.csv',{},function(err,data) {
-          should.equal(err.errno,34);
+          should.equal(err.code,'ENOENT');
           done();
         })
       });
