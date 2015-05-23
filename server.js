@@ -80,6 +80,7 @@ app.use('/object/WorkerQueue/IgnoreError', displayObject.ignoreError);
 app.use('/object/:collection/:id.html', displayObject.object);
 app.use('/overpass/:measure/:schluessel.html', displayAggregationTable.overpass);
 app.use('/wa/:aufgabe.html',displayText.wochenaufgabe);
+app.use('/list/pharmacy.html',displayText.pharmaciesNotImplemented);
 app.use('/list/:query.html',display.query);
 app.use('/', express.static(path.resolve(__dirname, "html")));
 
