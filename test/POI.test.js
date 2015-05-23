@@ -76,7 +76,7 @@ describe('POI', function() {
       POI.insertData([{type: "node","id": 39663366},
                      {type:"node","id": 1,a:1},
                      {type:"node","id": 2,a:1},
-                     {type:"way","id": 3,a:3}],
+                     {type:"way","id": 3,a:3,obj:{tag:1,tag2:3}}],
                      function(err,data) {
         should.not.exist(err);
         POI.find({},{},function(err,data){

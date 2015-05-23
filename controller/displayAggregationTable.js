@@ -317,7 +317,11 @@ function generateFilterTable(param,header) {
   var csvDownload = '<li><a href="'+csvDownloadLink+'" ><span class="glyphicon glyphicon-export" ></span></a></li>'
   page.addNavbarItem(csvDownload);
 
-  var infoLink = '<li><a href="/wa/'+param.measure+'.html" ><span class="glyphicon glyphicon-info-sign" ></span></a></li>'
+  var description = wochenaufgabe.map[param.measure].description;
+
+
+  if (typeof description  == 'undefined') description = param.measure 
+  var infoLink = '<li><a href="/wa/'+description+'.html" ><span class="glyphicon glyphicon-info-sign" ></span></a></li>'
   page.addNavbarItem(infoLink);
 
 

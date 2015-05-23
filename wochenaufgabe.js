@@ -45,7 +45,8 @@ var WAApotheke = {
 
 var WAApotheke_AT = {
   title : "Wochenaufgabe Apotheke (AT)",
-  name : "Wochenaufgabe_AT",
+  name : "Apotheke_AT",
+  description: "Apotheke",
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
@@ -61,7 +62,8 @@ var WAApotheke_AT = {
 var WAApotheke_CH = {
 	// Der Key wäre noch zu definieren und die Key Map zu generieren
   title : "Wochenaufgabe Apotheke (CH)",
-  name : "Wochenaufgabe_CH",
+  name : "Apotheke_CH",
+  description: "Apotheke",
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["XXXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
@@ -78,7 +80,8 @@ var WAApotheke_CH = {
 var WAApothekePLZ_DE= {
 	// Der Key wäre noch zu definieren und die Key Map zu generieren
   title : "Wochenaufgabe Apotheke (DE PLZ)",
-  name: "WochenaufgabePLZ_DE",
+  name: "Apotheke LZ_DE",
+  description: "Apotheke",
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
