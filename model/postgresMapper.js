@@ -238,8 +238,9 @@ exports.import = function(filename,cb) {
 
   async.auto(
     {checkFile:function (cb) {fs.exists(filename,function(result){var error;if (!result) error ="File Not Exist"; cb(error)});},
-     import:["checkFile",function (cb) {  var stream = getStream(filename);;
-      me.insertStreamToPostgres(false,stream,cb);}]},
+     import:["checkFile",function (cb) {  
+      var stream = getStream(filename);;
+      me.insertStreamToPostgres(stream,cb);}]},
       function (error,result) {cb(error,result.import);}
     );
   
@@ -258,9 +259,31 @@ exports.countUntilNow = function(query,cb) {
   exports.countUntilNowPostgres(this.map,query,cb);
 }
 
-exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream,cb) {
+exports.insertStreamToPostgres = function insertStreamToPostgres(stream,cb) {
+ 
+  // This Functions imports a stream or an array to postgres
+  // depending of the type of the first argument
+  // First detect type of first argumen
+
+  // Dummy, used as a workaround, as stream was not declared in dd otherwise
+  var streamx = stream;
+
+  var array;
+  var internal = false;
+  var arrayUsed = false;
+
+  // Check first parameter 
+  // is it an array, so switch to array import.
+  if (streamx instanceof Array) {
+    array = streamx;
+    streamx = null;
+    internal = true;
+    arrayUsed = true;
+  }
+
+
   debug('insertStreamToPostgres');
-  pg.connect(config.postgresConnectStr,function(err, client,pgdone) {
+  pg.connect(config.postgresConnectStr,function dd(err, client,pgdone) {
     debug('insertStreamToPostgres.1');
     if (err) {
       cb(err);
@@ -271,7 +294,7 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream
     var counter = 0;
     var bar;
     var versionDefined = false;
-
+   
 
     function insertData(item,callback) {
       debug('insertStreamToPostgres->insertData');
@@ -315,23 +338,21 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(internal,stream
 
     var ls, mapper;
     var parser;
-    if (internal) {
+    if (arrayUsed) {
       debug("internal initialising");
+      var streamx = es.readArray(array);
 
-      ls = stream.pipe(es.map(insertData.bind(this)));
-      //parser = ls;
-      //mapper = ls;
+      ls = streamx.pipe(es.map(insertData.bind(this)));
     }
     else {
       debug(" not internal initialising");
       parser = JSONStream.parse();
       var mapper = es.map(insertData.bind(this));
+      console.log(streamx);
       ls = stream.pipe(parser).pipe(mapper);
     }
     ls.wasCalled = false;
-    //parser.on('end',function() {debug("parser.on('end');")})
-    //stream.on('end',function() {debug("stream.on('end');")})
-    //mapper.on('end',function() {debug("mapper.on('end');")})
+
     ls.on('end',function() {
       debug("ls.on('end')");
 
@@ -356,10 +377,10 @@ exports.insertData = function insertData(data,cb) {
   debug('%s.insertData',this.tableName);
 
   // Turn Data into a stream
-  var reader = es.readArray(data);
+  //var reader = es.readArray(data);
 
   // use Stream Function to put data to Postgres
-  this.insertStreamToPostgres(true,reader,cb);
+  this.insertStreamToPostgres(data,cb);
 }
 
 function exportCollection(callback,result)
