@@ -50,7 +50,13 @@ function createWhereClause(map,query,options) {
 
 exports.countPostgres = function count(map,query,cb) {
   debug('count');
-  var whereClause = createWhereClause(map,query);
+  var whereClause;
+  if (typeof(query)!='string') {
+    whereClause = createWhereClause(map,query);
+  } else {
+    whereClause = query;
+  }
+  
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
       cb(err,null);
