@@ -2,6 +2,8 @@ var fs = require('fs');
 var path = require('path');
 
 
+var _osmCountVersion_ = "0.3.3";
+
 var osmCountBrand = '<div class="navbar-header"><a class="navbar-brand" style="font-family:comic sans ms;font-size: 21px; color: #555" href="/index.html">OSM Count</a></div>';
 
 
@@ -150,7 +152,7 @@ HtmlPage.prototype = {
     page = page.replace('###CONTENT###',content);
     page = page.replace('###MODALWINDOW###',modalWindow);
     page = page.replace('###FOOTER###',this.footer);
-    var odblLicense = 'OSM Count 0.3.2. Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
+    var odblLicense = 'OSM Count '+_osmCountVersion_+' Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
     page = page.replace('###ODBLLICENSE###',odblLicense);
   
     // head unused yet
