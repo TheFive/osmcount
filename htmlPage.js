@@ -9,6 +9,9 @@ var waStruct = [
 {name: "Apotheke",measure:"Apotheke"},
 {name: "Adressen ohne Strasse",measure:"AddrWOStreet"}];
 
+var poiStruct = [
+{name: "Apotheke",table:"pharmacy"}];
+
 var tablesStruct = [
 {name:"Apotheke",list:[{name:"Deutschland",measure:"Apotheke"},
                        {name:"Österreich",measure:"Apotheke_AT"},
@@ -27,6 +30,21 @@ function generateNavbarAufgabe() {
 
   for (var i = 0;i< waStruct.length;i++ ){
     waSelector += '<li><a href="/wa/'+waStruct[i].measure+'.html">'+waStruct[i].name+'</a></li>\n';
+  }
+  waSelector += '</ul>\n';
+  waSelector += '</li>\n';
+  return waSelector;
+
+}
+function generateNavbarPOI() {
+  var waSelector = '<li class="dropdown"><a  class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">POI<span class="caret"></span></a>\n'
+  waSelector += '<ul class="dropdown-menu" role="menu">\n' 
+           
+ 
+
+
+  for (var i = 0;i< poiStruct.length;i++ ){
+    waSelector += '<li><a href="/list/'+poiStruct[i].table+'.html">'+poiStruct[i].name+'</a></li>\n';
   }
   waSelector += '</ul>\n';
   waSelector += '</li>\n';
@@ -93,6 +111,7 @@ HtmlPage.prototype = {
     navbar += '<div id="navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav">'
     navbar += generateNavbarAufgabe();
     navbar += generateNavbarTabelle();
+    navbar += generateNavbarPOI();
 
     navbar += "</ul>";
     navbar += '<ul class="nav navbar-nav navbar-right">';
