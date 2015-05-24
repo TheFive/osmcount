@@ -176,54 +176,54 @@ exports.query=function(req,res) {
     	                             ["wheelchair","tags","wheelchair"],
 
     	                             ];
-    	                  query = {};options={};
+    	                  query = "";
     	                  queryMenu = "";
 
     	                  if (typeof(req.query.state)!='undefined' && req.query.state != "") {
-    	                    queryDefined = true;
-    	                    query["nominatim.state"] =req.query.state;
-    	                    queryMenu += '<label for="state">state:</label><input type="text" name="state" value="'+req.query.state+'">';
+                          query = "(data->'nominatim'->>'state'='"+req.query.state+"')";
+    	                    queryMenu += '<label for="state">state:</label><input class="form-control" type="text" name="state" value="'+req.query.state+'">';
     	                  } else queryMenu += '<label for="state">state:</label><input class="form-control" type="text" name="state">';
 
-   	                      if (typeof(req.query.state_district)!='undefined' && req.query.state_district != "") {
-    	                    queryDefined = true;
-    	                    query["nominatim.state_district"] =req.query.state_district;
-    	                    queryMenu += '<label for="state_district">state_district:</label><input type="text" name="state_district" value="'+req.query.state_district+'">';
+   	                    if (typeof(req.query.state_district)!='undefined' && req.query.state_district != "") {
+    	                    if (query != "") query += " and ";
+                          query += "(data->'nominatim'->>'state_district'='"+req.query.state_district+"')";
+    	                    queryMenu += '<label for="state_district">state_district:</label><input class="form-control" type="text" name="state_district" value="'+req.query.state_district+'">';
     	                  } else queryMenu += '<label for="state_district">state_district:</label>:<input class="form-control" type="text" name="state_district">';
 
-   	                      if (typeof(req.query.county)!='undefined' && req.query.county != "") {
-    	                    queryDefined = true;
-    	                    query["nominatim.county"] =req.query.county;
-    	                    queryMenu += '<label for="country">country:</label><input type="text" name="county" value="'+req.query.county+'">';
+   	                    if (typeof(req.query.county)!='undefined' && req.query.county != "") {
+                          if (query != "") query += " and ";
+                          query += "(data->'nominatim'->>'county'='"+req.query.county+"')";
+    	                    queryMenu += '<label for="country">country:</label><input class="form-control" type="text" name="county" value="'+req.query.county+'">';
     	                  } else queryMenu += '<label for="country">country:</label><input class="form-control" type="text" name="county">';
 
     	                  if (typeof(req.query.postcode)!='undefined' && req.query.postcode != "") {
-    	                    queryDefined = true;
-    	                    query["nominatim.postcode"] =req.query.postcode;
-    	                    queryMenu += '<label for="postcode">postcode:</label><input type="text" name="postcode" value="'+req.query.postcode+'">';
+                          if (query != "") query += " and ";
+                          query += "(data->'nominatim'->>'postcode'='"+req.query.postcode+"')";
+    	                    queryMenu += '<label for="postcode">postcode:</label><input class="form-control" type="text" name="postcode" value="'+req.query.postcode+'">';
     	                  } else queryMenu += '<label for="country">country:</label><input class="form-control" type="text" name="postcode">';
 
 
      	                  if (typeof(req.query.city)!='undefined' && req.query.city != "") {
-    	                    queryDefined = true;
-    	                    var q = [{"nominatim.town":req.query.city},
-    	                             {"nominatim.city":req.query.city},
-    	                             {"nominatim.village":req.query.city}];
-    	                    query["$or"] =q;
-    	                    queryMenu += '<label for="town">town:</label><input type="text" name="city" value="'+req.query.city+'">';
+                          if (query != "") query += " and ";
+                          query += " ((data->'nominatim'->>'town'='"+req.query.city+"') or " +
+                                   "  (data->'nominatim'->>'city'='"+req.query.city+"') or " +
+                                   "  (data->'nominatim'->>'village'='"+req.query.city+"'))";
+    	                    queryMenu += '<label for="town">town:</label><input class="form-control" type="text" name="city" value="'+req.query.city+'">';
     	                  } else queryMenu += '<label for="town">town:</label><input class="form-control" type="text" name="city">';
 
     	                  if (typeof(req.query.country)!='undefined' && req.query.country != "") {
-    	                    queryDefined = true;
+                          if (query != "") query += " and ";
+                          query += "(data->'nominatim'->>'country'='"+req.query.country+"')";
     	                    query["nominatim.country"] =req.query.country;
-    	                    queryMenu += '<label for="country">country:</label><input type="text" name="country" value="'+req.query.country+'">';
+    	                    queryMenu += '<label for="country">country:</label><input class="form-control" type="text" name="country" value="'+req.query.country+'">';
     	                  } else queryMenu += '<label for="country">country:</label><input class="form-control" type="text" name="country">';
 
     	                  if (typeof(req.query.missing)!='undefined' && req.query.missing != "") {
-    	                    queryDefined = true;
-    	                    query["nominatim.timestamp"] ={$exists:0};
-    	                    query["overpass.loadBy"] = req.query.missing;
+                          if (query != "") query += " and ";
+                          query += "((data->'nominatim'->'timestamp') is null)";
+                          query += "and (data->'overpass'->>'loadBy'='"+req.query.missing+"')";
      	                  }
+                        if (query != "") query = "where "+query;
      	                  queryMenu += '<label for="missing nominatim">missing nominatim</label> <select class="form-control" name="missing"> \
     	                                   <option value="">none</option> \
     	                                  <option value="DE">DE</option> \
@@ -237,7 +237,7 @@ exports.query=function(req,res) {
     	               columns = ["_id","type","status","measure"];
     	               query = {type:"insert"};
     }
-    if (collectionName != "POI" || queryDefined) {
+    if (collectionName != "POI" || query != "") {
     collection.find(query,options,function(err,data) {
     	if (err) {
     		res.set('Content-Type', 'text/html');
