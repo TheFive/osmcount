@@ -7,6 +7,7 @@ var htmlPage     = require('../htmlPage.js');
 var DataCollection = require('../model/DataCollection.js');
 var DataTarget     = require('../model/DataTarget.js');
 var WorkerQueue    = require('../model/WorkerQueue.js');
+var POI            = require('../model/POI.js');
 
 
 
@@ -48,6 +49,7 @@ exports.object = function(req,res) {
         case "DataTarget": collection=DataTarget;break;
         case "DataCollection": collection = DataCollection;break;
         case "WorkerQueue": collection = WorkerQueue;break;
+        case "POI": collection = POI;break;
     }
 
 	collection.find ({id:objid},{},function handleFindOneObject(err, obj) {
