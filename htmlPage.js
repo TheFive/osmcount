@@ -2,12 +2,17 @@ var fs = require('fs');
 var path = require('path');
 
 
+var _osmCountVersion_ = "0.3.3";
+
 var osmCountBrand = '<div class="navbar-header"><a class="navbar-brand" style="font-family:comic sans ms;font-size: 21px; color: #555" href="/index.html">OSM Count</a></div>';
 
 
 var waStruct = [
 {name: "Apotheke",measure:"Apotheke"},
 {name: "Adressen ohne Strasse",measure:"AddrWOStreet"}];
+
+var poiStruct = [
+{name: "Apotheke",table:"pharmacy"}];
 
 var tablesStruct = [
 {name:"Apotheke",list:[{name:"Deutschland",measure:"Apotheke"},
@@ -27,6 +32,21 @@ function generateNavbarAufgabe() {
 
   for (var i = 0;i< waStruct.length;i++ ){
     waSelector += '<li><a href="/wa/'+waStruct[i].measure+'.html">'+waStruct[i].name+'</a></li>\n';
+  }
+  waSelector += '</ul>\n';
+  waSelector += '</li>\n';
+  return waSelector;
+
+}
+function generateNavbarPOI() {
+  var waSelector = '<li class="dropdown"><a  class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">POI<span class="caret"></span></a>\n'
+  waSelector += '<ul class="dropdown-menu" role="menu">\n' 
+           
+ 
+
+
+  for (var i = 0;i< poiStruct.length;i++ ){
+    waSelector += '<li><a href="/list/'+poiStruct[i].table+'.html">'+poiStruct[i].name+'</a></li>\n';
   }
   waSelector += '</ul>\n';
   waSelector += '</li>\n';
@@ -93,6 +113,7 @@ HtmlPage.prototype = {
     navbar += '<div id="navbar" class="navbar-collapse collapse"><ul class="nav navbar-nav">'
     navbar += generateNavbarAufgabe();
     navbar += generateNavbarTabelle();
+    navbar += generateNavbarPOI();
 
     navbar += "</ul>";
     navbar += '<ul class="nav navbar-nav navbar-right">';
@@ -131,7 +152,7 @@ HtmlPage.prototype = {
     page = page.replace('###CONTENT###',content);
     page = page.replace('###MODALWINDOW###',modalWindow);
     page = page.replace('###FOOTER###',this.footer);
-    var odblLicense = 'OSM Count 0.3.2. Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
+    var odblLicense = 'OSM Count '+_osmCountVersion_+' Daten von <a href="http://www.openstreetmap.org/">OpenStreetMap</a> - Veröffentlicht unter <a href="http://opendatacommons.org/licenses/odbl/">ODbL</a>';
     page = page.replace('###ODBLLICENSE###',odblLicense);
   
     // head unused yet

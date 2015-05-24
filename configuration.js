@@ -75,7 +75,8 @@ exports.initialise = function(callback) {
   configurationInitialised = true;
 	console.log("Reading Config from: "+configurationFile);
 	configuration = JSON.parse(fs.readFileSync(configurationFile));
-   pg.defaults.poolSize = 25;
+  pg.defaults.poolSize = 40;
+  console.log("Postgres Poolsize = 40");
   exports.postgresConnectStr = getPostgresDBString();
 	if (callback) callback();
 }

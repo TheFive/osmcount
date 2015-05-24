@@ -53,10 +53,12 @@ function cleanTags(elementList) {
    }
 }
 
-function getPOIOverpass(cb,result) {
-	debug("getPOIByPLZOverpass");
-	var country = result.country;
+function getPOIOverpass(country,cb) {
+	debug("getPOIOverpass");
 	var filename = country+".json";
+
+  // Check, wether a file with the name exist
+  // than use that data
 	filename = path.resolve(__dirname, filename);
 	if (fs.existsSync(filename)) {
 		debug("Loading Data from "+filename);
@@ -67,10 +69,12 @@ function getPOIOverpass(cb,result) {
 		cb(null, data);
 		return;
 	}
+
+  // Start Overpass Query
 	console.log("Overpass Abfrage Starten für "+country);
 
 	loadOverpassData.overpassQuery(query[country], function(err,result) {
-		debug("getPOIByPLZOverpass->CB");
+		debug("getPOIOverpass->CB");
 		console.log("Overpass Abfrage Beendet für "+country);
 		if (err) {
 			console.log("Fehler: "+JSON.stringify(err));
@@ -88,15 +92,13 @@ function getPOIOverpass(cb,result) {
 
 
 
-function getPOIByPLZMongo(cb,result) {
-	debug("getPOIByPLZMongo");
+function splitOverpassResult(country,data,cb) {
+	debug("splitOverpassResult %s",country);
 
-	var country = result.country;
-	var data = result.overpass;
  
 	var list = {};
 	debug("Elemente geladen: "+data.elements.length+" für "+country);
-/*
+
 
 	for (i =0;i<data.elements.length;i++) {
 		var element = data.elements[i];
@@ -105,17 +107,19 @@ function getPOIByPLZMongo(cb,result) {
 		element.overpass["loadBy"] = country;
 		list[keyIntern] = element;
 	}
-	var query = { "overpass.loadBy":country, "tags.amenity": "pharmacy"}
 
-	POI.find(query,{},function(err,result) {
-	  debug("getPOIByPLZMongo->CB");
+  var query = "where data->'overpass'->>'loadBy' ='"+country+"' and data->'tags'->>'amenity' ='pharmacy' ";
+	POI.find(query,function(err,result) {
+	  debug("getPOIByPLZMongo->CB %s",country);
 		if (err) {
 			console.log("Fehler "+err);
 			cb(err,null);
+      return;
 		} else {
 			var remove = [];
 			var update = [];
 			var insert = [];
+      var unchanged = 0;
 			debug("Found "+result.length+ " POIs in DB");
 			for (var i=0;i<result.length;i++ ) {
 				element = result[i];
@@ -130,7 +134,9 @@ function getPOIByPLZMongo(cb,result) {
 					list[key]._id = element._id;
 					if (list[key].version != element.version) {
 						update.push(list[key]);
-					}
+					} else {
+            unchanged += 1;
+          }
 				}
 			}
 			// Check all not handled overpass result for insert
@@ -143,24 +149,20 @@ function getPOIByPLZMongo(cb,result) {
 			debug("To be removed: "+remove.length);
 			debug("To be updated: "+update.length);
 			debug("To be inserted: "+insert.length);
+      debug("Unchanged: " +unchanged);
 			erg.remove = remove;
 			erg.update = update;
 			erg.insert = insert;
  			cb(null,erg);
 		}
-	}) */
-var erg = {};
-      erg.remove = [];
-      erg.update = [];
-      erg.insert = data.elements;
-      cb(null,erg);
+	}) 
 }
 
-function removePOIFromPostgres(cb,result) {
-  debug("removePOIFromPostgres");
-  var remove = result.mongo.remove;
+function removePOIFromPostgres(country,remove,cb) {
+  debug("removePOIFromPostgres %s",country);
   if (remove.length==0) {
   	cb(null,null);
+    debug('remove: nothing to do');
   	return;
   }
   debug("To Be Removed: "+remove.length + " DataSets");
@@ -191,11 +193,10 @@ function removePOIFromPostgres(cb,result) {
 }
 
 
-function updatePOIFromPostgres(cb,result) {
-  debug("updatePOIFromPostgres");
-  var update = result.mongo.update;
+function updatePOIFromPostgres(country,update,cb) {
+  debug("updatePOIFromPostgres %s",country);
   if (update.length==0) {
-    debug("nothing to do");
+    debug("update: nothing to do");
   	cb(null,null);
   	return;
   }
@@ -229,11 +230,11 @@ function updatePOIFromPostgres(cb,result) {
   q.resume();
 }
 
-function insertPOIFromPostgres(cb,result) {
-  debug("insertPOIFromPostgres");
-  var insert = result.mongo.insert;
+function insertPOIFromPostgres(country,insert,cb) {
+  debug("insertPOIFromPostgres %s",country);
   debug("To Be Inserted: "+insert.length + " DataSets");
   if (insert.length == 0) {
+    debug('Insert: Nothing to do');
   	cb(null,null);
   	return;
   }
@@ -259,11 +260,7 @@ var nominatimUrl = nominatimMapQuestUrl;
 function nominatim(cb,result) {
   debug("nominatim");
   q = async.queue(function(task,cb) {
-    POI.findOne(
-                           {$or:[
-                           {"nominatim.timestamp":{$exists:0}},
-                           { "nominatim.timestamp":{$gte:"$timestamp"}}
-                             ]}, function(err, obj) {
+    POI.find("where ((data->'nominatim'->'timestamp') is  null)  limit 1", function(err, objList) {
       debug("nominatim->CB");
       if (err) {
         console.log("Error occured in function: QueueWorker.getNextJob");
@@ -271,17 +268,20 @@ function nominatim(cb,result) {
         cb(err,null);
         return;
       }
-      if (obj) {
+      var obj;
+      if (objList.length == 1) {
+        obj = objList[0];
+
         debug("found job %s %s",obj.type, obj.id);
         osm_type="";
-		switch (obj.type) {
-		  case "node": osm_type = "osm_type=N";
-					 break;
-		  case "way": osm_type = "osm_type=W";
-					 break;
-		  case "relation": osm_type = "osm_type=R";
-					 break;
-		}
+    		switch (obj.type) {
+    		  case "node": osm_type = "osm_type=N";
+    					 break;
+    		  case "way": osm_type = "osm_type=W";
+    					 break;
+    		  case "relation": osm_type = "osm_type=R";
+    					 break;
+    		}
 		// return obj as job object
 		url = nominatimUrl+"?format=json&";
 		url += osm_type;
@@ -289,10 +289,10 @@ function nominatim(cb,result) {
 		url += "&email=OSMUser_TheFive";
 		request.post(url , function (error, response, body) {
 		  if (error) {
-			console.log("Error "+error);
-			task.q.push({q:q});
-			cb (err,null);
-			return;
+  			console.log("Error "+error);
+  			task.q.push({q:q});
+  			cb (err,null);
+  			return;
 		  }
 		  if (response.statusCode==200) {
 			elementData = JSON.parse(body);
@@ -306,18 +306,18 @@ function nominatim(cb,result) {
 				obj.nominatim = elementData;
 			}
 			cleanObject(obj);
-			db.collection("POI").save(obj, function(err,result) {
-			  debug("nominatim->MongoCB");
+			POI.save(obj, function(err,result) {
+			  debug("nominatim->save");
 			  if (err) {
-				console.log("Error "+err);
-				console.dir(obj);
-				task.q.push({q:q});
-				cb(err,null);
-				return;
+  				console.log("Error "+err);
+  				console.dir(obj);
+  				task.q.push({q:q});
+  				cb(err,null);
+  				return;
 			  } else {
-				task.q.push({q:q});
-				cb (null,null);
-				return;
+  				task.q.push({q:q});
+  				cb (null,null);
+  				return;
 			  }
 			})
 		  }
@@ -326,58 +326,39 @@ function nominatim(cb,result) {
 	})
   },1);
   q.push({q:q});
-  cb(null,null);
+  if (cb) cb(null,null);
 }
 
 
   debug("storePOI");
 
-  async.series([config.initialise, 
-       function(cb) {
-       async.auto( {
-             country: function(cb,result) {cb(null,"CH")},
-             overpass: ["country",getPOIOverpass],
-             mongo:["overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromPostgres],
-             insert: ["mongo",insertPOIFromPostgres],
-             remove: ["mongo",removePOIFromPostgres],
-             nominatim: ["update","insert","remove",nominatim]},
-             function(err,results) {
-             	debug("READY with CH");
-             	cb();
+ 
+ async.auto( {
+       config: config.initialise,
+       overpassDE: ["config",function(cb){getPOIOverpass("DE",cb)}],
+       overpassAT: ["config","overpassDE",function(cb){getPOIOverpass("AT",cb)}],
+       overpassCH: ["config","overpassAT","overpassDE",function(cb){getPOIOverpass("CH",cb)}],
 
-             }
+       sorDE:["overpassDE",function(cb,r){splitOverpassResult("DE",r.overpassDE,cb)}],
+       sorAT:["overpassAT",function(cb,r){splitOverpassResult("AT",r.overpassAT,cb)}],
+       sorCH:["overpassCH",function(cb,r){splitOverpassResult("CH",r.overpassCH,cb)}],
 
-             )},function(cb) {
-          async.auto( {
-             country: function(cb,result) {cb(null,"DE")},
-             overpass: ["country",getPOIOverpass],
-             mongo:["overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromPostgres],
-             insert: ["mongo",insertPOIFromPostgres],
-             remove: ["mongo",removePOIFromPostgres],
-             nominatim: ["update","insert","remove",nominatim]},
-             function(err,results) {
-             	debug("READY with AT");
-             	cb();
+       updateDE: ["sorDE",function(cb,r) {updatePOIFromPostgres("DE",r.sorDE.update,cb)}],
+       updateAT: ["sorAT",function(cb,r) {updatePOIFromPostgres("AT",r.sorAT.update,cb)}],
+       updateCH: ["sorCH",function(cb,r) {updatePOIFromPostgres("CH",r.sorCH.update,cb)}],
 
-             }
+       insertDE: ["sorDE",function(cb,r) {insertPOIFromPostgres("DE",r.sorDE.insert,cb)}],
+       insertAT: ["sorAT",function(cb,r) {insertPOIFromPostgres("AT",r.sorAT.insert,cb)}],
+       insertCH: ["sorCH",function(cb,r) {insertPOIFromPostgres("CH",r.sorCH.insert,cb)}],
 
-             )},
-
-             function(cb) {
-          async.auto( {
-             country: function(cb,result) {cb(null,"AT")},
-             overpass: ["country",getPOIOverpass],
-             mongo:["overpass",getPOIByPLZMongo],
-             update: ["mongo",updatePOIFromPostgres],
-             insert: ["mongo",insertPOIFromPostgres],
-             remove: ["mongo",removePOIFromPostgres],
-             nominatim: ["update","insert","remove",nominatim]},
-             function(err,results) {
-             	debug("READY with DE");
-             	cb();
-
-             }
-
-             )}]);
+       removeDE: ["sorDE",function(cb,r) {removePOIFromPostgres("DE",r.sorDE.remove,cb)}],
+       removeAT: ["sorAT",function(cb,r) {removePOIFromPostgres("AT",r.sorAT.remove,cb)}],
+       removeCH: ["sorCH",function(cb,r) {removePOIFromPostgres("CH",r.sorCH.remove,cb)}]
+     },
+ 
+  
+       function(err,results) {
+       	console.log("Postres Updated");
+        console.log("Start Nominatim");
+        nominatim();
+       });

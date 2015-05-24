@@ -52,11 +52,24 @@ POI.prototype.getInsertQueryString = function getInsertQueryString() {
   return "INSERT into poi (data) VALUES($1)";
 }
 
+
 POI.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
   var data = item;
   return  [data];
 }
 
+
+// Defined for save, not used yet to be synchronised with POI.save
+POI.prototype.getSaveQueryString = function getSaveQueryString() {
+  return "UPDATE poi (data) VALUES($2) where id = $1";
+}
+
+// Defined for save, not used yet to be synchronised with POI.save
+POI.prototype.getSaveQueryValueList = function getSaveQueryValueList(item) {  
+  var data = item.data;
+  var id = item.id;
+  return  [id,data];
+}
 
 
 
@@ -72,6 +85,7 @@ function isBasisType(object) {
 
 function generateWhereClause(query) {
   var whereClause ='';
+  console.dir(query);
   for (var k in query) {
     if (whereClause != '') whereClause += " and ";
     if (isBasisType(query[k])) {
@@ -89,16 +103,27 @@ function generateWhereClause(query) {
 
 POI.prototype.find = function(query,options,cb) {
   debug('POI.prototype.find');
-  var whereClause = generateWhereClause(query);
-  
+  var whereClause = "";
+  if (typeof query == 'string') {
+    whereClause = query;
+    if (typeof (options) == 'function') {
+      cb = options;
+    }
+  } else {
+    var whereClause = generateWhereClause(query);
+    if (typeof (options) == 'function') {
+      cb = options;
+    }
+  }
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
       cb(err,null);
       pgdone();
       return;
     }
-    var queryStr = "select id,data from poi"+whereClause;
+    var queryStr = "select id,data from poi "+whereClause;
     var query = client.query(queryStr);
+    debug(queryStr);
     var rows = [];
     query.on('row', function(row) {
       row.data._id = row.id;
@@ -107,11 +132,13 @@ POI.prototype.find = function(query,options,cb) {
     query.on('end', function(result) {
       //fired once and only once, after the last row has been returned and after all 'row' events are emitted
       //in this example, the 'rows' array now contains an ordered set of all the rows which we received from postgres
+      pgdone();
       cb(null,rows);
     })  
     query.on('error', function(error) {
       //fired once and only once, after the last row has been returned and after all 'row' events are emitted
       //in this example, the 'rows' array now contains an ordered set of all the rows which we received from postgres
+      pgdone();
       cb(error);
     })  
   })
@@ -152,8 +179,8 @@ POI.prototype.save = function savePOI(poi,cb) {
   should.exist(poi._id);
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
-      cb(err,null);
       pgdone();
+      cb(err,null);
       return;
     }
     var queryStr = "update poi set (data) = ($1) where id = $2";
@@ -165,16 +192,20 @@ POI.prototype.save = function savePOI(poi,cb) {
     query.on('end', function(result) {
       //fired once and only once, after the last row has been returned and after all 'row' events are emitted
       //in this example, the 'rows' array now contains an ordered set of all the rows which we received from postgres
+      pgdone();
       cb(null,null);
     })  
     query.on('error', function(error) {
       //fired once and only once, after the last row has been returned and after all 'row' events are emitted
       //in this example, the 'rows' array now contains an ordered set of all the rows which we received from postgres
+      pgdone();
       cb(error);
     })  
   })
 
 }
+
+
 
 
 module.exports = new POI();
