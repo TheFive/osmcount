@@ -26,7 +26,8 @@ exports.status = function(req,res) {
 
 			var r = {length:a.length,itemCount:a.itemCount,_max:a._max}
 			cb(null,r)},
-		"Missing Nominatim POI": function(cb) {POI.count("where ((data->'nominatim'->'timestamp') is  null)",cb);}
+		"Missing Nominatim POI": function(cb) {POI.count("where ((data->'nominatim'->'timestamp') is  null)",cb);},
+		"Total POI": function(cb) {POI.count(" ",cb);}
 		
 
 	}, function(err,result) {
