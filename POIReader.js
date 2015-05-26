@@ -17,21 +17,36 @@ var async    = require('async');
 
 
 var query =
-{ DE:'[timeout:900][out:json];area["int_name"="Deutschland"]["admin_level"="2"]->.a;\
-(node(area.a)[amenity=pharmacy]; \
- way(area.a)[amenity=pharmacy]; \
- rel(area.a)[amenity=pharmacy]); \
-out center meta;',
- AT: '[timeout:900][out:json];area["int_name"="Österreich"]["admin_level"="2"]->.a;\
-(node(area.a)[amenity=pharmacy]; \
- way(area.a)[amenity=pharmacy]; \
- rel(area.a)[amenity=pharmacy]); \
-out center meta;',
- CH: '[timeout:900][out:json];area["int_name"="Schweiz"]["admin_level"="2"]->.a;\
-(node(area.a)[amenity=pharmacy]; \
- way(area.a)[amenity=pharmacy]; \
- rel(area.a)[amenity=pharmacy]); \
-out center meta;'
+{  DE: '[out:json][timeout:3600];area[name="Deutschland"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["de:amtlicher_gemeindeschluessel"];out ids; );  \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+            ["de:amtlicher_gemeindeschluessel"]; \
+          out;',
+ AT: '[out:json][timeout:3600];area[name="Österreich"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["ref:at:gkz"];out ids; );  \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+            ["ref:at:gkz"]; \
+          out;',
+CH: '[out:json][timeout:3600];area[name="Schweiz"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["ref:bfs_Gemeindenummer"];out ids; ); \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+            ["ref:bfs_Gemeindenummer"]; \
+          out;',
 }
 
 function cleanObject(obj) {
@@ -53,6 +68,63 @@ function cleanTags(elementList) {
    }
 }
 
+var tagsToCopy = 
+[
+  "de:regionalschluessel",
+  "de:amtlicher_gemeindeschluessel",
+  "ref:at:gkz"]
+
+exports.prepareData = function prepareData(data) {
+  debug("prepareData");
+  // First collect all Area Numbers in result
+  var areaList = {};
+  var actualElement;
+  var result = [];
+  debug("Data to be parsed %s",data.length);
+  for (var i = 0;i<data.length;i++) {
+    var element = data[i];
+ 
+    switch (element.type) {
+      case "node":
+      case "way":
+      case "relation":
+        {
+          actualElement = element;
+          result.push(actualElement);
+          break;
+        }
+      case "area":
+      {
+        var areaID = element.id;
+        if (typeof (element.tags) == 'undefined' ) {
+          if (typeof (areaList[areaID]) == 'undefined') {
+            areaList[areaID] = {};
+            //areaList[areaID].id = areaID;
+            //areaList[areaID].type = "area";
+          }
+          if (typeof(actualElement.osmArea) == 'undefined') {
+            actualElement.osmArea = [];
+          }
+          actualElement.osmArea.push(areaList[areaID]); 
+        } else {
+          if (typeof (areaList[areaID]) == 'undefined') {
+            areaList[areaID] = {};
+            //areaList[areaID].id = areaID;
+            //areaList[areaID].type = "area";
+          }
+          for (var j = 0;j<tagsToCopy.length;j++) {
+            var k = tagsToCopy[j];
+
+            if (typeof(element.tags[k]) != 'undefined') {
+               areaList[areaID][k] = element.tags[k];
+            }
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
 function getPOIOverpass(country,cb) {
 	debug("getPOIOverpass");
 	var filename = country+".json";
@@ -66,16 +138,17 @@ function getPOIOverpass(country,cb) {
 		var data = JSON.parse(result);
 		debug("Loaded Elemnts:"+data.elements.length);
 		cleanTags(data.elements);
-		cb(null, data);
+
+		cb(null, exports.prepareData(data));
 		return;
 	}
 
   // Start Overpass Query
-	console.log("Overpass Abfrage Starten für "+country);
+	console.log("Overpass Abfrage Starten für "+country+ (new Date()));
 
 	loadOverpassData.overpassQuery(query[country], function(err,result) {
 		debug("getPOIOverpass->CB");
-		console.log("Overpass Abfrage Beendet für "+country);
+		console.log("Overpass Abfrage Beendet für "+country + (new Date()));
 		if (err) {
 			console.log("Fehler: "+JSON.stringify(err));
 			console.log(JSON.stringify(result));
@@ -84,8 +157,8 @@ function getPOIOverpass(country,cb) {
 			fs.writeFileSync(filename,result);
 			var data = JSON.parse(result);
 			debug("Loaded Elements:"+data.elements.length);
-     		cleanTags(data.elements);
-			cb(null,data);
+     	cleanTags(data.elements);
+			cb(null,exports.prepareData(data));
 		}
 	})
 }
@@ -330,14 +403,18 @@ function nominatim(cb,result) {
 }
 
 
+exports.doReadPOI = function doReadPOI(callback) {
+
+
   debug("storePOI");
 
  
  async.auto( {
        config: config.initialise,
-       overpassDE: ["config",function(cb){getPOIOverpass("DE",cb)}],
-       overpassAT: ["config","overpassDE",function(cb){getPOIOverpass("AT",cb)}],
-       overpassCH: ["config","overpassAT","overpassDE",function(cb){getPOIOverpass("CH",cb)}],
+  
+       overpassAT: ["config",function(cb){getPOIOverpass("AT",cb)}],
+       overpassCH: ["config","overpassAT",function(cb){getPOIOverpass("CH",cb)}],
+       overpassDE: ["config","overpassAT","overpassCH",function(cb){getPOIOverpass("DE",cb)}],
 
        sorDE:["overpassDE",function(cb,r){splitOverpassResult("DE",r.overpassDE,cb)}],
        sorAT:["overpassAT",function(cb,r){splitOverpassResult("AT",r.overpassAT,cb)}],
@@ -361,4 +438,8 @@ function nominatim(cb,result) {
        	console.log("Postres Updated");
         console.log("Start Nominatim");
         nominatim();
+        callback();
        });
+
+
+}

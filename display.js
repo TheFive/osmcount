@@ -157,7 +157,8 @@ exports.query=function(req,res) {
 
      	               options={"sort":"exectime"}
     	               break;
-    	case "pharmacy": collection = POI;
+      case "firestation": 
+      case "pharmacy": collection = POI;
            collectionName = "POI";
             columns = ["Links",
                        ["name","tags","name"],
@@ -176,7 +177,7 @@ exports.query=function(req,res) {
                        ["wheelchair","tags","wheelchair"],
 
                        ];
-            query = "";
+            query = "(data->'tags'->>'amenity'='"+req.params.query+"')";
             queryMenu = "";
 
             function genQueryAndMenu(p) {
