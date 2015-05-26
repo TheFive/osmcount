@@ -26,7 +26,7 @@ exports.timeout = 1000 * 60 * 10; // Timeout after 10 minutes;
 
 
 function overpassQuery(query, cb, options) {
-	debug("overpassQuery");
+  debug("overpassQuery");
   options = options || {};
   if (typeof(options.uri)!= 'undefined') {
     options.uri = options.overpassUrl;

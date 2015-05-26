@@ -849,6 +849,9 @@ exports.table = function(req,res){
             if (data.type == "insert") {
               workingSchluessel = "Insert " + data.measure;
             }
+            if (data.type == "readpoi") {
+              workingSchluessel = "Read POIs ";
+            }
           }
           callback();
         });
