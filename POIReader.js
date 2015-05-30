@@ -17,7 +17,7 @@ var async    = require('async');
 
 
 var query =
-{  DE: '[out:json][timeout:3600];area[name="Deutschland"]->.a;( node(area.a)[amenity=pharmacy]; \
+{  DE: '[out:json][timeout:5000];area[name="Deutschland"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
                                                   rel(area.a)[amenity=pharmacy]; \
                                                     )->.pharmacies; \
@@ -27,7 +27,7 @@ var query =
           area._[boundary=administrative] \
             ["de:amtlicher_gemeindeschluessel"]; \
           out;',
- AT: '[out:json][timeout:3600];area[name="Österreich"]->.a;( node(area.a)[amenity=pharmacy]; \
+ AT: '[out:json][timeout:4000];area[name="Österreich"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
                                                   rel(area.a)[amenity=pharmacy]; \
                                                     )->.pharmacies; \
@@ -45,7 +45,6 @@ CH: '[out:json][timeout:3600];area[name="Schweiz"]->.a;( node(area.a)[amenity=ph
           ["ref:bfs_Gemeindenummer"];out ids; ); \
           .pharmacies is_in; \
           area._[boundary=administrative] \
-            ["ref:bfs_Gemeindenummer"]; \
           out;',
 }
 
@@ -80,9 +79,12 @@ exports.prepareData = function prepareData(data) {
   var areaList = {};
   var actualElement;
   var result = [];
-  debug("Data to be parsed %s",data.length);
-  for (var i = 0;i<data.length;i++) {
-    var element = data[i];
+
+  var timestamp_osm_base = data.timestamp_osm_base;
+
+  debug("Data to be parsed %s",data.elements.length);
+  for (var i = 0;i<data.elements.length;i++) {
+    var element = data.elements[i];
  
     switch (element.type) {
       case "node":
@@ -90,6 +92,7 @@ exports.prepareData = function prepareData(data) {
       case "relation":
         {
           actualElement = element;
+          actualElement.timestamp_osm_base = timestamp_osm_base;
           result.push(actualElement);
           break;
         }
@@ -170,11 +173,11 @@ function splitOverpassResult(country,data,cb) {
 
  
 	var list = {};
-	debug("Elemente geladen: "+data.elements.length+" für "+country);
+	debug("Elemente geladen: "+data.length+" für "+country);
 
 
-	for (i =0;i<data.elements.length;i++) {
-		var element = data.elements[i];
+	for (i =0;i<data.length;i++) {
+		var element = data[i];
 		var keyIntern = element.type + element.id;
 		element.overpass = {};
 		element.overpass["loadBy"] = country;

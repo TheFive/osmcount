@@ -1,6 +1,8 @@
+var util = require('./util.js');
 var loadDataFromDB = require('./model/LoadDataFromDB.js');
 
-exports.tagCounter = function tagCounter(osmdata,result) {
+
+function tagCounterInit(result) {
   result.missing = {};
   result.existing = {}
   result.existing.fixme = 0;
@@ -8,25 +10,69 @@ exports.tagCounter = function tagCounter(osmdata,result) {
   result.missing.phone=0;
   result.missing.wheelchair = 0;
   result.missing.name = 0;
+}
+
+function tagCounterCount(p,result) {
+    if (!p.hasOwnProperty("opening_hours")) {
+    result.missing.opening_hours += 1;
+    }
+    if (!p.hasOwnProperty("name")) {
+    result.missing.name += 1;
+    }
+    if (!p.hasOwnProperty("wheelchair")) {
+    result.missing.wheelchair += 1;
+    }
+    if (p.hasOwnProperty("fixme")) {
+    result.existing.fixme += 1;
+    }
+    if (!p.hasOwnProperty("phone") && ! p.hasOwnProperty("contact:phone")) {
+    result.missing.phone += 1;
+    } 
+}
+
+exports.tagCounter = function tagCounter(osmdata,result) {
+  tagCounterInit(result);
   for (var i = 0 ; i< osmdata.length;i++ ) {
-	  var p = osmdata[i].tags;
-	  if (!p.hasOwnProperty("opening_hours")) {
-		result.missing.opening_hours += 1;
-	  }
-	  if (!p.hasOwnProperty("name")) {
-		result.missing.name += 1;
-	  }
-	  if (!p.hasOwnProperty("wheelchair")) {
-		result.missing.wheelchair += 1;
-	  }
-	  if (p.hasOwnProperty("fixme")) {
-		result.existing.fixme += 1;
-	  }
-	  if (!p.hasOwnProperty("phone") && ! p.hasOwnProperty("contact:phone")) {
-		result.missing.phone += 1;
-	  }
+	  tagCounterCount(osmdata[i].tags,result);
   }
 }
+
+
+exports.tagCounter2 = function tagCounter2(osmdata,keyList,key,defJson) {
+  // osmdata
+  //   osmElemente, that are annotated by osmArea Json Array, that contains tag key
+  // keyList
+  //   List of keys, that has to be count
+  // Key
+  //   tag for the list of keys
+  // defJson
+  //   default Measure Object, that is copied for every element in keyList
+  var map = {};
+  for (var i =0;i<keyList.length;i++) {
+    var m = util.clone(defJson);
+    m.schluessel = keyList[i];
+    m.count = 0;
+    map[keyList[i]]=m;
+    tagCounterInit(m);
+  }
+  for (var i=0; i< osmdata.length;i++) {
+    for (var z=0;z<osmdata[i].osmArea.length;z++) {
+      var schluessel = osmdata[i].osmArea[z][key];
+      var m = map[schluessel];
+      if (typeof(m) != 'undefined') {
+        tagCounterCount(osmdata[i].tags,m);
+        m.count ++;
+      }
+    }
+  }
+  var result = [];
+  for (var k in map) {
+    result.push(map[k]);
+  }
+  return result;
+}
+
+
 
 var WAApotheke = {
   title : "Wochenaufgabe Apotheke",
