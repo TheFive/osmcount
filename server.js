@@ -54,6 +54,10 @@ async.auto( {
 process.on( 'SIGINT', function() {
   console.log( "\nRequest for Shutdown OSMCount, Please wait for OverpassQuery. SIGINT (Ctrl-C)" );
   queue.processSignal = 'SIGINT';
+  if (!queue.overpassRunning) {
+    process.exit();
+    return;
+  }
   console.log("Overpass Running:"+queue.overpassRunning);
   console.log("Overpass Running since:"+(new Date(queue.overpassStartTime)).toLocaleString());
   console.log('Overpass Measure:'+queue.overpassMeasure);
