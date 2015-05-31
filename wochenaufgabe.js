@@ -102,6 +102,7 @@ var WAApotheke_AT = {
   key: "ref:at:gkz",
   ranktype:"UP",
   tagCounter:exports.tagCounter,
+  tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:14
 }
 
@@ -120,6 +121,7 @@ var WAApotheke_CH = {
   key: "XXX",
   ranktype:"UP",
   tagCounter:exports.tagCounter,
+  tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:14
 }
 
@@ -138,6 +140,7 @@ var WAApothekePLZ_DE= {
   key: "postal_code",
   ranktype:"UP",
   tagCounter:null,
+  tagCounterGlobal:null,
   overpassEveryDays:28
 }
 
@@ -167,7 +170,8 @@ rel(r.associatedStreet:"house")->.asHouseRel; \n\
   map: loadDataFromDB.DE_RGS,
   key: "de:regionalschluessel",
   ranktype: "down",
-  tagCounter: null
+  tagCounter: null,
+  tagCounterGlobal: null
 }
 
 var wochenaufgaben= [];

@@ -151,7 +151,12 @@ function doReadPOI(cb,results) {
         job.status = "done";
       }
       cb(null,job);
+      return;
     });
+  }
+  else {
+    cb(null,job);
+    return;
   }
 }
 
