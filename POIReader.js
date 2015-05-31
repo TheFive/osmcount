@@ -4,11 +4,13 @@ var path     = require('path');
 var request  = require('request');
 var es          = require('event-stream');
 
+var wochenaufgabe    = require('./wochenaufgabe.js');
 var config           = require('./configuration.js');
 var loadDataFromDB   = require('./model/LoadDataFromDB.js');
 var loadOverpassData = require('./model/LoadOverpassData.js');
 
 var POI = require('./model/POI.js');
+var DataCollection = require('./model/DataCollection.js');
 
 
 var async    = require('async');
@@ -79,8 +81,7 @@ exports.prepareData = function prepareData(data) {
   var areaList = {};
   var actualElement;
   var result = [];
-
-  var timestamp_osm_base = data.timestamp_osm_base;
+  var timestamp_osm_base = data.osm3s.timestamp_osm_base;
 
   debug("Data to be parsed %s",data.elements.length);
   for (var i = 0;i<data.elements.length;i++) {
@@ -126,7 +127,8 @@ exports.prepareData = function prepareData(data) {
       }
     }
   }
-  return result;
+  data.elements= result;
+  return data;
 }
 function getPOIOverpass(country,cb) {
 	debug("getPOIOverpass");
@@ -180,8 +182,8 @@ function splitOverpassResult(country,data,cb) {
 	debug("Elemente geladen: "+data.length+" für "+country);
 
 
-	for (var i =0;i<data.length;i++) {
-		var element = data[i];
+	for (var i =0;i<data.elements.length;i++) {
+		var element = data.elements[i];
 		var keyIntern = element.type + element.id;
 		element.overpass = {};
 		element.overpass["loadBy"] = country;
@@ -408,45 +410,66 @@ function nominatim(callback,result) {
   q.push({q:q});
 }
 
+function countPOI(country,data,cb) {
+  debug('countPOI');
+  var wa = null;
+  var defJson = {};
+  if (country == "DE") {
+    var wa = wochenaufgabe.map["Apotheke"];
+    defJson.measure = "Apotheke";
+  }
+  if (country == "AT") {
+    var wa = wochenaufgabe.map["Apotheke_AT"];
+    defJson.measure = "Apotheke_AT";
+  }
+  if (wa == null) {
+    cb(null);
+    return;
+  }
+  defJson.schluessel = "undefined";
+  defJson.timestamp = data.osm3s.timestamp_osm_base;
+  var result = wa.tagCounterGlobal(data.elements,wa.map.list,wa.key,defJson);
+  async.eachSeries(result,DataCollection.save.bind(DataCollection),cb);
+  return;
+}
+ 
 
 exports.doReadPOI = function doReadPOI(callback) {
+  async.auto( {
+    config: config.initialise,
+
+    overpassAT: ["config",function(cb){getPOIOverpass("AT",cb)}],
+    overpassCH: ["config","overpassAT",function(cb){getPOIOverpass("CH",cb)}],
+    overpassDE: ["config","overpassAT","overpassCH",function(cb){getPOIOverpass("DE",cb)}],
+
+    sorDE:["overpassDE",function(cb,r){splitOverpassResult("DE",r.overpassDE,cb)}],
+    sorAT:["overpassAT",function(cb,r){splitOverpassResult("AT",r.overpassAT,cb)}],
+    sorCH:["overpassCH",function(cb,r){splitOverpassResult("CH",r.overpassCH,cb)}],
+
+    updateDE: ["sorDE",function(cb,r) {updatePOIFromPostgres("DE",r.sorDE.update,cb)}],
+    updateAT: ["sorAT",function(cb,r) {updatePOIFromPostgres("AT",r.sorAT.update,cb)}],
+    updateCH: ["sorCH",function(cb,r) {updatePOIFromPostgres("CH",r.sorCH.update,cb)}],
+
+    insertDE: ["sorDE",function(cb,r) {insertPOIFromPostgres("DE",r.sorDE.insert,cb)}],
+    insertAT: ["sorAT",function(cb,r) {insertPOIFromPostgres("AT",r.sorAT.insert,cb)}],
+    insertCH: ["sorCH",function(cb,r) {insertPOIFromPostgres("CH",r.sorCH.insert,cb)}],
+
+    removeDE: ["sorDE",function(cb,r) {removePOIFromPostgres("DE",r.sorDE.remove,cb)}],
+    removeAT: ["sorAT",function(cb,r) {removePOIFromPostgres("AT",r.sorAT.remove,cb)}],
+    removeCH: ["sorCH",function(cb,r) {removePOIFromPostgres("CH",r.sorCH.remove,cb)}],
+
+    closeDE: ["sorDE","updateDE","insertDE","removeDE",function(cb){cb()}],
+    closeAT: ["sorAT","updateAT","insertAT","removeAT",function(cb){cb()}],
+    closeCH: ["sorCH","updateCH","insertCH","removeCH",function(cb){cb()}],
+
+    countDE: ["overpassDE",function(cb,r) {countPOI("DE",r.overpassDE,cb)}],
+    countAT: ["overpassAT",function(cb,r) {countPOI("AT",r.overpassAT,cb)}]
 
 
-  debug("storePOI");
-
- 
- async.auto( {
-       config: config.initialise,
-  
-       overpassAT: ["config",function(cb){getPOIOverpass("AT",cb)}],
-       overpassCH: ["config","overpassAT",function(cb){getPOIOverpass("CH",cb)}],
-       overpassDE: ["config","overpassAT","overpassCH",function(cb){getPOIOverpass("DE",cb)}],
-
-       sorDE:["overpassDE",function(cb,r){splitOverpassResult("DE",r.overpassDE,cb)}],
-       sorAT:["overpassAT",function(cb,r){splitOverpassResult("AT",r.overpassAT,cb)}],
-       sorCH:["overpassCH",function(cb,r){splitOverpassResult("CH",r.overpassCH,cb)}],
-
-       updateDE: ["sorDE",function(cb,r) {updatePOIFromPostgres("DE",r.sorDE.update,cb)}],
-       updateAT: ["sorAT",function(cb,r) {updatePOIFromPostgres("AT",r.sorAT.update,cb)}],
-       updateCH: ["sorCH",function(cb,r) {updatePOIFromPostgres("CH",r.sorCH.update,cb)}],
-
-       insertDE: ["sorDE",function(cb,r) {insertPOIFromPostgres("DE",r.sorDE.insert,cb)}],
-       insertAT: ["sorAT",function(cb,r) {insertPOIFromPostgres("AT",r.sorAT.insert,cb)}],
-       insertCH: ["sorCH",function(cb,r) {insertPOIFromPostgres("CH",r.sorCH.insert,cb)}],
-
-       removeDE: ["sorDE",function(cb,r) {removePOIFromPostgres("DE",r.sorDE.remove,cb)}],
-       removeAT: ["sorAT",function(cb,r) {removePOIFromPostgres("AT",r.sorAT.remove,cb)}],
-       removeCH: ["sorCH",function(cb,r) {removePOIFromPostgres("CH",r.sorCH.remove,cb)}]
-
-
-     },
- 
-  
-       function(err,results) {
-       	console.log("Postres Updated");
-        console.log("Start Nominatim");
-        nominatim(callback);
-       });
-
-
+  },
+  function(err,results) {
+    console.log("Postres Updated");
+    console.log("Start Nominatim");
+    nominatim(callback);
+  });
 }
