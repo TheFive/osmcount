@@ -27,7 +27,7 @@ describe('Wochenaufgabe', function() {
       should(result).match({existing:{fixme:0},missing:{wheelchair:0,phone:0,name:0,opening_hours:0}});
     });
   });
-  describe.only('tagCounter2', function() {
+  describe('tagCounter2', function() {
     it('should count different OSM Objects and split them', function() {
       var osmData = [{tags:{fixme:1,wheelchair:1,"contact:phone":1,name:1,opening_hours:1},
                       osmArea:[{"key":"1"},{"key":"12"}]},

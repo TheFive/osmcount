@@ -131,13 +131,17 @@ exports.prepareData = function prepareData(data) {
 function getPOIOverpass(country,cb) {
 	debug("getPOIOverpass");
 	var filename = country+".json";
+  var testMode = false;
+  if (typeof (process.env.NODE_ENV) != 'undefined' && process.env.NODE_ENV == 'test') {
+    testMode = true;
+  }
 
   // Check, wether a file with the name exist
   // than use that data
 	filename = path.resolve(__dirname, filename);
-	if (fs.existsSync(filename)) {
+	if (!testMode && fs.existsSync(filename)) {
 		debug("Loading Data from "+filename);
-		result = fs.readFileSync(filename);
+		var result = fs.readFileSync(filename);
 		var data = JSON.parse(result);
 		debug("Loaded Elemnts:"+data.elements.length);
 		cleanTags(data.elements);
@@ -176,7 +180,7 @@ function splitOverpassResult(country,data,cb) {
 	debug("Elemente geladen: "+data.length+" für "+country);
 
 
-	for (i =0;i<data.length;i++) {
+	for (var i =0;i<data.length;i++) {
 		var element = data[i];
 		var keyIntern = element.type + element.id;
 		element.overpass = {};
@@ -199,7 +203,7 @@ function splitOverpassResult(country,data,cb) {
 			debug("Found "+result.length+ " POIs in DB");
 			for (var i=0;i<result.length;i++ ) {
 				element = result[i];
-				key = element.type + element.id;
+				var key = element.type + element.id;
 				if (typeof(list[key])=='undefined') {
 					// Element not found in Overpass Result
 					// Remove it.
@@ -333,9 +337,9 @@ var nominatimNominatimUrl = "http://nominatim.openstreetmap.org/reverse";
 
 var nominatimUrl = nominatimMapQuestUrl;
 
-function nominatim(cb,result) {
+function nominatim(callback,result) {
   debug("nominatim");
-  q = async.queue(function(task,cb) {
+  var q = async.queue(function(task,cb) {
     POI.find("where ((data->'nominatim'->'timestamp') is  null)  limit 1", function(err, objList) {
       debug("nominatim->CB");
       if (err) {
@@ -358,51 +362,50 @@ function nominatim(cb,result) {
     		  case "relation": osm_type = "osm_type=R";
     					 break;
     		}
-		// return obj as job object
-		url = nominatimUrl+"?format=json&";
-		url += osm_type;
-		url += "&osm_id="+obj.id+"&zoom=18&addressdetails=1";
-		url += "&email=OSMUser_TheFive";
-		request.post(url , function (error, response, body) {
-		  if (error) {
-  			console.log("Error "+error);
-  			task.q.push({q:q});
-  			cb (err,null);
-  			return;
-		  }
-		  if (response.statusCode==200) {
-			elementData = JSON.parse(body);
-			date = new Date();
+    		// return obj as job object
+    		url = nominatimUrl+"?format=json&";
+    		url += osm_type;
+    		url += "&osm_id="+obj.id+"&zoom=18&addressdetails=1";
+    		url += "&email=OSMUser_TheFive";
+    		request.post(url , function (error, response, body) {
+    		  if (error) {
+      			console.log("Error "+error);
+      			task.q.push({q:q});
+      			cb (err,null);
+      			return;
+    		  }
+    		  if (response.statusCode==200) {
+    			elementData = JSON.parse(body);
+    			var date = new Date();
 
-			if (typeof(elementData.error)=='undefined') {
-				elementData.address.timestamp = date;
-				obj.nominatim = elementData.address;
-			} else {
-				elementData.timestamp = date;
-				obj.nominatim = elementData;
-			}
-			cleanObject(obj);
-			POI.save(obj, function(err,result) {
-			  debug("nominatim->save");
-			  if (err) {
-  				console.log("Error "+err);
-  				console.dir(obj);
-  				task.q.push({q:q});
-  				cb(err,null);
-  				return;
-			  } else {
-  				task.q.push({q:q});
-  				cb (null,null);
-  				return;
-			  }
-			})
-		  }
-		})
-      }
+    			if (typeof(elementData.error)=='undefined') {
+    				elementData.address.timestamp = date;
+    				obj.nominatim = elementData.address;
+    			} else {
+    				elementData.timestamp = date;
+    				obj.nominatim = elementData;
+    			}
+    			cleanObject(obj);
+    			POI.save(obj, function(err,result) {
+    			  debug("nominatim->save");
+    			  if (err) {
+      				console.log("Error "+err);
+      				console.dir(obj);
+      				task.q.push({q:q});
+      				cb(err,null);
+      				return;
+    			  } else {
+      				task.q.push({q:q});
+      				cb (null,null);
+      				return;
+    			  }
+    			})
+    		  }
+    		})
+      } else callback(null,null)
 	})
   },1);
   q.push({q:q});
-  if (cb) cb(null,null);
 }
 
 
@@ -434,14 +437,15 @@ exports.doReadPOI = function doReadPOI(callback) {
        removeDE: ["sorDE",function(cb,r) {removePOIFromPostgres("DE",r.sorDE.remove,cb)}],
        removeAT: ["sorAT",function(cb,r) {removePOIFromPostgres("AT",r.sorAT.remove,cb)}],
        removeCH: ["sorCH",function(cb,r) {removePOIFromPostgres("CH",r.sorCH.remove,cb)}]
+
+
      },
  
   
        function(err,results) {
        	console.log("Postres Updated");
         console.log("Start Nominatim");
-        nominatim();
-        callback();
+        nominatim(callback);
        });
 
 

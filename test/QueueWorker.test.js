@@ -11,32 +11,60 @@ var DataCollection = require('../model/DataCollection.js');
 var QueueWorker    = require('../QueueWorker.js');
 var wochenaufgabe  = require('../wochenaufgabe.js');
 var LoadOverpassData  = require('../model/LoadOverpassData.js');
+var POI  = require('../model/POI.js');
 
 var helper = require('./helper.js');
 
+
+var query =
+{  DE: '[out:json][timeout:5000];area[name="Deutschland"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["de:amtlicher_gemeindeschluessel"];out ids; );  \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+            ["de:amtlicher_gemeindeschluessel"]; \
+          out;',
+ AT: '[out:json][timeout:4000];area[name="Österreich"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["ref:at:gkz"];out ids; );  \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+            ["ref:at:gkz"]; \
+          out;',
+CH: '[out:json][timeout:3600];area[name="Schweiz"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["ref:bfs_Gemeindenummer"];out ids; ); \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+          out;'
+}
+
 describe('QueueWorker',function(){
-  beforeEach(function(bddone){
-    helper.initUnallowedGlobals();
-    bddone();
-  })
-  afterEach(function(bddone){
-    helper.checkUnallowedGlobals();
-    bddone();
-  })
   beforeEach(function(bddone) {
+    helper.initUnallowedGlobals();
     async.series([
       WorkerQueue.dropTable.bind(WorkerQueue),
       WorkerQueue.createTable.bind(WorkerQueue),
       DataCollection.dropTable.bind(DataCollection),
-      DataCollection.createTable.bind(DataCollection)
+      DataCollection.createTable.bind(DataCollection),
+      POI.dropTable.bind(POI),
+      POI.createTable.bind(POI)
     ],function(err) {
       should.not.exist(err);
       bddone();
     });
   });
   afterEach(function(bddone){
-    should(query).equal("not used");
-    should(result).equal("not used");
+    helper.checkUnallowedGlobals();
     bddone();
   })
   describe('doNextJob',function() {   
@@ -158,14 +186,44 @@ describe('QueueWorker',function(){
         })
       })
     })
-    it('should work on readpoi Queries',function(bddone) {
+    it.only('should work on readpoi Queries',function(bddone) {
       // Adjust Timeout, as Overpass is Waiting a little bit
       this.timeout(1000*60*2+100);
       var singleStep = {id:"1",schluessel:"",measure:"",type:"readpoi",query:"",status:"open",exectime: new Date()};
       var valueList = [singleStep];
-      var scope = nock('http://overpass-api.de/api/interpreter')
-                  .post('',"data=This%20is%20an%20overpassquery")             
-                  .replyWithFile(200, __dirname + '/LoadOverpassData.test.json');
+      var scopeAT = nock('http://overpass-api.de/api/interpreter')
+                  .post('',"data=%5Bout%3Ajson%5D%5Btimeout%3A4000%5D%3Barea%5Bname%3D%22%C3%96sterreich%22%5D-%3E.a%3B%28%20node%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20way%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rel%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%29-%3E.pharmacies%3B%20%20%20%20%20%20%20%20%20%20%20foreach.pharmacies%28out%20center%20meta%3B%28._%3B%20._%20%3E%3B%29%3Bis_in%3Barea._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%5B%22ref%3Aat%3Agkz%22%5D%3Bout%20ids%3B%20%29%3B%20%20%20%20%20%20%20%20%20%20%20%20.pharmacies%20is_in%3B%20%20%20%20%20%20%20%20%20%20%20area._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%20%20%5B%22ref%3Aat%3Agkz%22%5D%3B%20%20%20%20%20%20%20%20%20%20%20out%3B")
+                   .reply(200,{elements:[]});
+      var scopeDE = nock('http://overpass-api.de/api/interpreter')
+                  .post('',"data=%5Bout%3Ajson%5D%5Btimeout%3A5000%5D%3Barea%5Bname%3D%22Deutschland%22%5D-%3E.a%3B%28%20node%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20way%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rel%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%29-%3E.pharmacies%3B%20%20%20%20%20%20%20%20%20%20%20foreach.pharmacies%28out%20center%20meta%3B%28._%3B%20._%20%3E%3B%29%3Bis_in%3Barea._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%5B%22de%3Aamtlicher_gemeindeschluessel%22%5D%3Bout%20ids%3B%20%29%3B%20%20%20%20%20%20%20%20%20%20%20%20.pharmacies%20is_in%3B%20%20%20%20%20%20%20%20%20%20%20area._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%20%20%5B%22de%3Aamtlicher_gemeindeschluessel%22%5D%3B%20%20%20%20%20%20%20%20%20%20%20out%3B")
+                  .replyWithFile(200, __dirname + '/POIPharmacyHaan.json');
+      var scopeCH = nock('http://overpass-api.de/api/interpreter')
+                  .post('',"data=%5Bout%3Ajson%5D%5Btimeout%3A3600%5D%3Barea%5Bname%3D%22Schweiz%22%5D-%3E.a%3B%28%20node%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20way%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rel%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%29-%3E.pharmacies%3B%20%20%20%20%20%20%20%20%20%20%20foreach.pharmacies%28out%20center%20meta%3B%28._%3B%20._%20%3E%3B%29%3Bis_in%3Barea._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%5B%22ref%3Abfs_Gemeindenummer%22%5D%3Bout%20ids%3B%20%29%3B%20%20%20%20%20%20%20%20%20%20%20.pharmacies%20is_in%3B%20%20%20%20%20%20%20%20%20%20%20area._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20out%3B")
+                   .reply(200,{elements:[]});
+      var scope1 = nock('http://open.mapquestapi.com/nominatim/v1/reverse.php')
+                  .post('?format=json&osm_type=N&osm_id=286404815&zoom=18&addressdetails=1&email=OSMUser_TheFive',"")
+                   .reply(200,{"place_id":"978017","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"286404815","lat":"51.1897635","lon":"6.9995844","display_name":"Bahnhof-Apotheke, 13, Bahnhofstra\u00dfe, Haan, Kreis Mettmann, Regierungsbezirk D\u00fcsseldorf, Nordrhein-Westfalen, 42781, Deutschland","address":{"pharmacy":"Bahnhof-Apotheke","house_number":"13","road":"Bahnhofstra\u00dfe","town":"Haan","county":"Kreis Mettmann","state_district":"Regierungsbezirk D\u00fcsseldorf","state":"Nordrhein-Westfalen","postcode":"42781","country":"Deutschland","country_code":"de"}});
+      var scope2 = nock('http://open.mapquestapi.com/nominatim/v1/reverse.php')
+                  .post('?format=json&osm_type=N&osm_id=291712654&zoom=18&addressdetails=1&email=OSMUser_TheFive',"")
+                   .reply(200,{"place_id":"1036425","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"291712654","lat":"51.1933829","lon":"7.0111183","display_name":"Schwanen Apotheke, 36, Neuer Markt, Haan, Kreis Mettmann, Regierungsbezirk D\u00fcsseldorf, Nordrhein-Westfalen, 42781, Deutschland","address":{"pharmacy":"Schwanen Apotheke","house_number":"36","pedestrian":"Neuer Markt","retail":"Neuer Markt","town":"Haan","county":"Kreis Mettmann","state_district":"Regierungsbezirk D\u00fcsseldorf","state":"Nordrhein-Westfalen","postcode":"42781","country":"Deutschland","country_code":"de"}});
+      var scope3 = nock('http://open.mapquestapi.com/nominatim/v1/reverse.php')
+                  .post('?format=json&osm_type=N&osm_id=291712655&zoom=18&addressdetails=1&email=OSMUser_TheFive',"")
+                   .reply(200,{"place_id":"1033075","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"291712655","lat":"51.1920584","lon":"7.0091031","display_name":"Adler-Apotheke, 19, Kaiserstra\u00dfe, Haan, Kreis Mettmann, Regierungsbezirk D\u00fcsseldorf, Nordrhein-Westfalen, 42781, Deutschland","address":{"pharmacy":"Adler-Apotheke","house_number":"19","road":"Kaiserstra\u00dfe","town":"Haan","county":"Kreis Mettmann","state_district":"Regierungsbezirk D\u00fcsseldorf","state":"Nordrhein-Westfalen","postcode":"42781","country":"Deutschland","country_code":"de"}});
+      var scope4 = nock('http://open.mapquestapi.com/nominatim/v1/reverse.php')
+                  .post('?format=json&osm_type=N&osm_id=291712657&zoom=18&addressdetails=1&email=OSMUser_TheFive',"")
+                   .reply(200,{"place_id":"1036285","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"291712657","lat":"51.1924984","lon":"7.0120785","display_name":"Markt Apotheke, 36, Kaiserstra\u00dfe, Haan, Kreis Mettmann, Regierungsbezirk D\u00fcsseldorf, Nordrhein-Westfalen, 42781, Deutschland","address":{"pharmacy":"Markt Apotheke","house_number":"36","road":"Kaiserstra\u00dfe","town":"Haan","county":"Kreis Mettmann","state_district":"Regierungsbezirk D\u00fcsseldorf","state":"Nordrhein-Westfalen","postcode":"42781","country":"Deutschland","country_code":"de"}});
+      var scope5 = nock('http://open.mapquestapi.com/nominatim/v1/reverse.php')
+                  .post('?format=json&osm_type=N&osm_id=291715366&zoom=18&addressdetails=1&email=OSMUser_TheFive',"")
+                   .reply(200,{"place_id":"1036312","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"291715366","lat":"51.1934206","lon":"7.0121372","display_name":"Bergische Apotheke, 22-24, Neuer Markt, Haan, Kreis Mettmann, Regierungsbezirk D\u00fcsseldorf, Nordrhein-Westfalen, 42781, Deutschland","address":{"pharmacy":"Bergische Apotheke","house_number":"22-24","pedestrian":"Neuer Markt","retail":"Neuer Markt","town":"Haan","county":"Kreis Mettmann","state_district":"Regierungsbezirk D\u00fcsseldorf","state":"Nordrhein-Westfalen","postcode":"42781","country":"Deutschland","country_code":"de"}});
+      var scope6 = nock('http://open.mapquestapi.com/nominatim/v1/reverse.php')
+                  .post('?format=json&osm_type=N&osm_id=287826898&zoom=18&addressdetails=1&email=OSMUser_TheFive',"")
+                   .reply(200,{"place_id":"997349","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"287826898","lat":"51.1943657","lon":"7.0089153","display_name":"Elefanten-Apotheke, 27-29, Neuer Markt, Haan, Kreis Mettmann, Regierungsbezirk D\u00fcsseldorf, Nordrhein-Westfalen, 42781, Deutschland","address":{"pharmacy":"Elefanten-Apotheke","house_number":"27-29","road":"Neuer Markt","town":"Haan","county":"Kreis Mettmann","state_district":"Regierungsbezirk D\u00fcsseldorf","state":"Nordrhein-Westfalen","postcode":"42781","country":"Deutschland","country_code":"de"}});
+      var scope7 = nock('http://open.mapquestapi.com/nominatim/v1/reverse.php')
+                  .post('?format=json&osm_type=N&osm_id=89997088&zoom=18&addressdetails=1&email=OSMUser_TheFive',"")
+                   .reply(200,{"place_id":"315796","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"89997088","lat":"51.2176076","lon":"7.0136172","display_name":"Gruitener Apotheke, 23, Bahnstra\u00dfe, Haan, Kreis Mettmann, Regierungsbezirk D\u00fcsseldorf, Nordrhein-Westfalen, 42781, Deutschland","address":{"pharmacy":"Gruitener Apotheke","house_number":"23","road":"Bahnstra\u00dfe","town":"Haan","county":"Kreis Mettmann","state_district":"Regierungsbezirk D\u00fcsseldorf","state":"Nordrhein-Westfalen","postcode":"42781","country":"Deutschland","country_code":"de"}});
+      
+  
+      
       WorkerQueue.insertData(valueList,function(err,data) {
         should.not.exist(err);
         should(data).equal('Datensätze: 1');
@@ -182,11 +240,12 @@ describe('QueueWorker',function(){
               })          
             },
             function(done) {
-              DataCollection.count({measure:"test",schluessel:"102",count:12},function(err,data){
+              POI.count({},function(err,data){
                 should.not.exist(err);
-                should(data).equal('1');
+                should(data).equal('7');
                 done();
               });
+
             }
             ],function(err) {
               should.not.exist(err);

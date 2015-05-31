@@ -18,10 +18,10 @@ describe('POIReader', function() {
     bddone();
   })
   describe('prepareData',function(){
-    it.only('should parse Data of Haan',function(bddone) {
+    it('should parse Data of Haan',function(bddone) {
       var filename = path.resolve(__dirname, "POIPharmacyHaan.json");
       var data = JSON.parse(fs.readFileSync(filename));
-      var result = POIReader.prepareData(data.elements);
+      var result = POIReader.prepareData(data);
       console.log(JSON.stringify(result,null,2));
       should(result.length).equal(7);
       bddone();
