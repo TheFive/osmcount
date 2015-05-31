@@ -1,8 +1,10 @@
+var debug = require('debug')('wochenaufgabe');
 var util = require('./util.js');
 var loadDataFromDB = require('./model/LoadDataFromDB.js');
 
 
 function tagCounterInit(result) {
+  debug('tagCounterInit');
   result.missing = {};
   result.existing = {}
   result.existing.fixme = 0;
@@ -13,24 +15,26 @@ function tagCounterInit(result) {
 }
 
 function tagCounterCount(p,result) {
-    if (!p.hasOwnProperty("opening_hours")) {
+  debug('tagCounterCount');
+  if (!p.hasOwnProperty("opening_hours")) {
     result.missing.opening_hours += 1;
-    }
-    if (!p.hasOwnProperty("name")) {
+  }
+  if (!p.hasOwnProperty("name")) {
     result.missing.name += 1;
-    }
-    if (!p.hasOwnProperty("wheelchair")) {
+  }
+  if (!p.hasOwnProperty("wheelchair")) {
     result.missing.wheelchair += 1;
-    }
-    if (p.hasOwnProperty("fixme")) {
+  }
+  if (p.hasOwnProperty("fixme")) {
     result.existing.fixme += 1;
-    }
-    if (!p.hasOwnProperty("phone") && ! p.hasOwnProperty("contact:phone")) {
+  }
+  if (!p.hasOwnProperty("phone") && ! p.hasOwnProperty("contact:phone")) {
     result.missing.phone += 1;
-    } 
+  } 
 }
 
 exports.tagCounter = function tagCounter(osmdata,result) {
+  debug('tagCounter');
   tagCounterInit(result);
   for (var i = 0 ; i< osmdata.length;i++ ) {
 	  tagCounterCount(osmdata[i].tags,result);
@@ -39,6 +43,7 @@ exports.tagCounter = function tagCounter(osmdata,result) {
 
 
 exports.tagCounter2 = function tagCounter2(osmdata,keyList,key,defJson) {
+  debug('tagCounter2');
   // osmdata
   //   osmElemente, that are annotated by osmArea Json Array, that contains tag key
   // keyList
@@ -48,6 +53,7 @@ exports.tagCounter2 = function tagCounter2(osmdata,keyList,key,defJson) {
   // defJson
   //   default Measure Object, that is copied for every element in keyList
   var map = {};
+  debug("Checking "+keyList.length+" keys for key "+key);
   for (var i =0;i<keyList.length;i++) {
     var m = util.clone(defJson);
     m.schluessel = keyList[i];
@@ -86,6 +92,7 @@ var WAApotheke = {
   key: "de:amtlicher_gemeindeschluessel",
   ranktype:"UP",
   tagCounter : exports.tagCounter,
+  tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:7
 }
 

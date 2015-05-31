@@ -23,7 +23,7 @@ describe('POIReader', function() {
       var data = JSON.parse(fs.readFileSync(filename));
       var result = POIReader.prepareData(data);
       console.log(JSON.stringify(result,null,2));
-      should(result.length).equal(7);
+      should(result.elements.length).equal(7);
       bddone();
 
     })
