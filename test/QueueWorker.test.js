@@ -49,6 +49,9 @@ CH: '[out:json][timeout:3600];area[name="Schweiz"]->.a;( node(area.a)[amenity=ph
 }
 
 describe('QueueWorker',function(){
+  before(function(bddone){
+    DataCollection.initialise(bddone);
+  })
   beforeEach(function(bddone) {
     helper.initUnallowedGlobals();
     async.series([
@@ -186,23 +189,24 @@ describe('QueueWorker',function(){
         })
       })
     })
-    it.only('should work on readpoi Queries',function(bddone) {
+    it('should work on readpoi Queries',function(bddone) {
       // Adjust Timeout, as Overpass is Waiting a little bit
-      this.timeout(1000*60*2+100);
+     // this.timeout(1000*60*2+100);
 
       // first prepare wochenaufgabe Map
       wochenaufgabe.map["Apotheke"].map.list=["05158008","05158007"];
+      wochenaufgabe.map["Apotheke_AT"].map.list=["700"];
       var singleStep = {id:"1",schluessel:"",measure:"",type:"readpoi",query:"",status:"open",exectime: new Date()};
       var valueList = [singleStep];
       var scopeAT = nock('http://overpass-api.de/api/interpreter')
                   .post('',"data=%5Bout%3Ajson%5D%5Btimeout%3A4000%5D%3Barea%5Bname%3D%22%C3%96sterreich%22%5D-%3E.a%3B%28%20node%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20way%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rel%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%29-%3E.pharmacies%3B%20%20%20%20%20%20%20%20%20%20%20foreach.pharmacies%28out%20center%20meta%3B%28._%3B%20._%20%3E%3B%29%3Bis_in%3Barea._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%5B%22ref%3Aat%3Agkz%22%5D%3Bout%20ids%3B%20%29%3B%20%20%20%20%20%20%20%20%20%20%20%20.pharmacies%20is_in%3B%20%20%20%20%20%20%20%20%20%20%20area._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%20%20%5B%22ref%3Aat%3Agkz%22%5D%3B%20%20%20%20%20%20%20%20%20%20%20out%3B")
-                   .reply(200,{osm3s:{timestamp_osm_base:"TestData from QueueWorker"},elements:[]});
+                   .reply(200,{osm3s:{timestamp_osm_base:"2015-05-26T07:44:02Z"},elements:[]});
       var scopeDE = nock('http://overpass-api.de/api/interpreter')
                   .post('',"data=%5Bout%3Ajson%5D%5Btimeout%3A5000%5D%3Barea%5Bname%3D%22Deutschland%22%5D-%3E.a%3B%28%20node%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20way%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rel%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%29-%3E.pharmacies%3B%20%20%20%20%20%20%20%20%20%20%20foreach.pharmacies%28out%20center%20meta%3B%28._%3B%20._%20%3E%3B%29%3Bis_in%3Barea._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%5B%22de%3Aamtlicher_gemeindeschluessel%22%5D%3Bout%20ids%3B%20%29%3B%20%20%20%20%20%20%20%20%20%20%20%20.pharmacies%20is_in%3B%20%20%20%20%20%20%20%20%20%20%20area._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%20%20%5B%22de%3Aamtlicher_gemeindeschluessel%22%5D%3B%20%20%20%20%20%20%20%20%20%20%20out%3B")
                   .replyWithFile(200, __dirname + '/POIPharmacyHaan.json');
       var scopeCH = nock('http://overpass-api.de/api/interpreter')
                   .post('',"data=%5Bout%3Ajson%5D%5Btimeout%3A3600%5D%3Barea%5Bname%3D%22Schweiz%22%5D-%3E.a%3B%28%20node%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20way%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rel%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%29-%3E.pharmacies%3B%20%20%20%20%20%20%20%20%20%20%20foreach.pharmacies%28out%20center%20meta%3B%28._%3B%20._%20%3E%3B%29%3Bis_in%3Barea._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%5B%22ref%3Abfs_Gemeindenummer%22%5D%3Bout%20ids%3B%20%29%3B%20%20%20%20%20%20%20%20%20%20%20.pharmacies%20is_in%3B%20%20%20%20%20%20%20%20%20%20%20area._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20out%3B")
-                   .reply(200,{osm3s:{timestamp_osm_base:"TestData from QueueWorker"},elements:[]});
+                   .reply(200,{osm3s:{timestamp_osm_base:"2015-05-26T07:44:02Z"},elements:[]});
       var scope1 = nock('http://open.mapquestapi.com/nominatim/v1/reverse.php')
                   .post('?format=json&osm_type=N&osm_id=286404815&zoom=18&addressdetails=1&email=OSMUser_TheFive',"")
                    .reply(200,{"place_id":"978017","licence":"Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http:\/\/www.openstreetmap.org\/copyright","osm_type":"node","osm_id":"286404815","lat":"51.1897635","lon":"6.9995844","display_name":"Bahnhof-Apotheke, 13, Bahnhofstra\u00dfe, Haan, Kreis Mettmann, Regierungsbezirk D\u00fcsseldorf, Nordrhein-Westfalen, 42781, Deutschland","address":{"pharmacy":"Bahnhof-Apotheke","house_number":"13","road":"Bahnhofstra\u00dfe","town":"Haan","county":"Kreis Mettmann","state_district":"Regierungsbezirk D\u00fcsseldorf","state":"Nordrhein-Westfalen","postcode":"42781","country":"Deutschland","country_code":"de"}});
@@ -260,6 +264,20 @@ describe('QueueWorker',function(){
                 done();
               });
 
+            },
+            function (done) {
+              DataCollection.find({},function(err,data) {
+                should.not.exist(err);
+                should(data.length).equal(3);
+                delete data[0].timestamp;
+                delete data[1].timestamp;
+                delete data[2].timestamp;
+
+                should(data).containEql({measure:"Apotheke",schluessel:"05158008",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:7});
+                should(data).containEql({measure:"Apotheke",schluessel:"05158007",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:0});
+                should(data).containEql({measure:"Apotheke_AT",schluessel:"700",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:0});
+                done();
+              })
             }
             ],function(err) {
               should.not.exist(err);

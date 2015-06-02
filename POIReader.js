@@ -16,7 +16,7 @@ var DataCollection = require('./model/DataCollection.js');
 var async    = require('async');
 
 
-
+var assert = require('assert');
 
 var query =
 {  DE: '[out:json][timeout:5000];area[name="Deutschland"]->.a;( node(area.a)[amenity=pharmacy]; \
@@ -46,11 +46,12 @@ CH: '[out:json][timeout:3600];area[name="Schweiz"]->.a;( node(area.a)[amenity=ph
           foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
           ["ref:bfs_Gemeindenummer"];out ids; ); \
           .pharmacies is_in; \
-          area._[boundary=administrative] \
+          area._[boundary=administrative]; \
           out;',
 }
 
 function cleanObject(obj) {
+  debug('cleanObject');
   for (var k in obj) {
     if (typeof (obj[k]) =='object') {
       cleanObject(obj[k]);
@@ -62,11 +63,11 @@ function cleanObject(obj) {
 }
 
 function cleanTags(elementList) {
-   debug("cleanTags");
-   for (var i = 0;i<elementList.length;i++) {
-     var data = elementList[i].tags;
-     cleanObject(data);
-   }
+  debug("cleanTags"); 
+  for (var i = 0;i<elementList.length;i++) {
+    var data = elementList[i].tags;
+    cleanObject(data);
+  } 
 }
 
 var tagsToCopy = 
@@ -131,7 +132,7 @@ exports.prepareData = function prepareData(data) {
   return data;
 }
 function getPOIOverpass(country,cb) {
-	debug("getPOIOverpass");
+	debug("getPOIOverpass %s",country);
 	var filename = country+".json";
   var testMode = false;
   if (typeof (process.env.NODE_ENV) != 'undefined' && process.env.NODE_ENV == 'test') {
@@ -145,7 +146,7 @@ function getPOIOverpass(country,cb) {
 		debug("Loading Data from "+filename);
 		var result = fs.readFileSync(filename);
 		var data = JSON.parse(result);
-		debug("Loaded Elemnts:"+data.elements.length);
+		debug("Loaded Elemnts %s:"+data.elements.length,country);
 		cleanTags(data.elements);
 
 		cb(null, exports.prepareData(data));
@@ -156,7 +157,7 @@ function getPOIOverpass(country,cb) {
 	console.log("Overpass Abfrage Starten für "+country+ (new Date()));
 
 	loadOverpassData.overpassQuery(query[country], function(err,result) {
-		debug("getPOIOverpass->CB");
+		debug("getPOIOverpass->CB %s",country);
 		console.log("Overpass Abfrage Beendet für "+country + (new Date()));
 		if (err) {
 			console.log("Fehler: "+JSON.stringify(err));
@@ -250,7 +251,7 @@ function removePOIFromPostgres(country,remove,cb) {
   debug("To Be Removed: "+remove.length + " DataSets");
 
   var q = async.queue(function (task, cb) {
-    debug("removePOIFromMongo->Queue");
+    debug("removePOIFromPostgres->Queue");
     POI.remove({type:task.data.type,id:task.data.id}, function(err,result) {
       debug("removePOIFromMongo->MongoCB");
       if (err) {
@@ -411,15 +412,15 @@ function nominatim(callback,result) {
 }
 
 function countPOI(country,data,cb) {
-  debug('countPOI');
+  debug('countPOI %s',country);
   var wa = null;
   var defJson = {};
   if (country == "DE") {
-    var wa = wochenaufgabe.map["Apotheke"];
+    wa = wochenaufgabe.map["Apotheke"];
     defJson.measure = "Apotheke";
   }
   if (country == "AT") {
-    var wa = wochenaufgabe.map["Apotheke_AT"];
+    wa = wochenaufgabe.map["Apotheke_AT"];
     defJson.measure = "Apotheke_AT";
   }
   if (wa == null) {
@@ -428,6 +429,7 @@ function countPOI(country,data,cb) {
   }
   defJson.schluessel = "undefined";
   defJson.timestamp = data.osm3s.timestamp_osm_base;
+  console.dir(wa);
   var result = wa.tagCounterGlobal(data.elements,wa.map.list,wa.key,defJson);
   async.eachSeries(result,DataCollection.save.bind(DataCollection),cb);
   return;
@@ -435,12 +437,14 @@ function countPOI(country,data,cb) {
  
 
 exports.doReadPOI = function doReadPOI(callback) {
-  async.auto( {
-    config: config.initialise,
+  debug('doReadPOI');
 
-    overpassAT: ["config",function(cb){getPOIOverpass("AT",cb)}],
-    overpassCH: ["config","overpassAT",function(cb){getPOIOverpass("CH",cb)}],
-    overpassDE: ["config","overpassAT","overpassCH",function(cb){getPOIOverpass("DE",cb)}],
+  async.auto( {
+    config: function(cb) {config.initialise(cb)},
+
+    overpassAT: ["config",function(cb){d1=true;getPOIOverpass("AT",cb)}],
+    overpassCH: ["config","overpassAT",function(cb){d2=true;getPOIOverpass("CH",cb)}],
+    overpassDE: ["config","overpassAT","overpassCH",function(cb){d3=true;getPOIOverpass("DE",cb)}],
 
     sorDE:["overpassDE",function(cb,r){splitOverpassResult("DE",r.overpassDE,cb)}],
     sorAT:["overpassAT",function(cb,r){splitOverpassResult("AT",r.overpassAT,cb)}],
@@ -450,7 +454,7 @@ exports.doReadPOI = function doReadPOI(callback) {
     updateAT: ["sorAT",function(cb,r) {updatePOIFromPostgres("AT",r.sorAT.update,cb)}],
     updateCH: ["sorCH",function(cb,r) {updatePOIFromPostgres("CH",r.sorCH.update,cb)}],
 
-    insertDE: ["sorDE",function(cb,r) {insertPOIFromPostgres("DE",r.sorDE.insert,cb)}],
+    insertDE: ["sorDE",function(cb,r) {insertPOIFromPostgres("DE",r.sorDE.insert,function() {cb()})}],
     insertAT: ["sorAT",function(cb,r) {insertPOIFromPostgres("AT",r.sorAT.insert,cb)}],
     insertCH: ["sorCH",function(cb,r) {insertPOIFromPostgres("CH",r.sorCH.insert,cb)}],
 
@@ -463,11 +467,16 @@ exports.doReadPOI = function doReadPOI(callback) {
     closeCH: ["sorCH","updateCH","insertCH","removeCH",function(cb){cb()}],
 
     countDE: ["overpassDE",function(cb,r) {countPOI("DE",r.overpassDE,cb)}],
-    countAT: ["overpassAT",function(cb,r) {countPOI("AT",r.overpassAT,cb)}]
+    countAT: ["overpassAT",function(cb,r) {countPOI("AT",r.overpassAT,cb)}],
 
-
+    close: ["closeDE","closeAT","closeCH","countDE","countAT",function(cb){cb();}]
   },
   function(err,results) {
+    debug('doReadPOI->CB');
+    if (err) {
+      console.log(err);
+      callback(err);
+    }
     console.log("Postres Updated");
     console.log("Start Nominatim");
     nominatim(callback);

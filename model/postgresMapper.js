@@ -354,7 +354,6 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(stream,cb) {
       debug(" not internal initialising");
       parser = JSONStream.parse();
       var mapper = es.map(insertData.bind(this));
-      console.log(streamx);
       ls = stream.pipe(parser).pipe(mapper);
     }
     ls.wasCalled = false;
