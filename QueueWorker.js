@@ -393,7 +393,7 @@ function doNextJob(callback) {
         console.log("Error occured in function: QueueWorker.doNextJob");
         console.log(err);
       }
-      if (results) debug("finished %s" ,results);
+      debug("doNextJob finished");
       var job = results.readjob;
       callback(null,job);
     }
