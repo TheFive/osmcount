@@ -189,14 +189,14 @@ describe('QueueWorker',function(){
         })
       })
     })
-    it('should work on readpoi Queries',function(bddone) {
+    it.only('should work on readpoi Queries',function(bddone) {
       // Adjust Timeout, as Overpass is Waiting a little bit
      // this.timeout(1000*60*2+100);
 
       // first prepare wochenaufgabe Map
       wochenaufgabe.map["Apotheke"].map.list=["05158008","05158007"];
       wochenaufgabe.map["Apotheke_AT"].map.list=["700"];
-      var singleStep = {id:"1",schluessel:"",measure:"",type:"readpoi",query:"",status:"open",exectime: new Date()};
+      var singleStep = {id:"1",schluessel:"",measure:"Apotheke",type:"readpoi",query:"",status:"open",exectime: new Date()};
       var valueList = [singleStep];
       var scopeAT = nock('http://overpass-api.de/api/interpreter')
                   .post('',"data=%5Bout%3Ajson%5D%5Btimeout%3A4000%5D%3Barea%5Bname%3D%22%C3%96sterreich%22%5D-%3E.a%3B%28%20node%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20way%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20rel%28area.a%29%5Bamenity%3Dpharmacy%5D%3B%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%29-%3E.pharmacies%3B%20%20%20%20%20%20%20%20%20%20%20foreach.pharmacies%28out%20center%20meta%3B%28._%3B%20._%20%3E%3B%29%3Bis_in%3Barea._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%5B%22ref%3Aat%3Agkz%22%5D%3Bout%20ids%3B%20%29%3B%20%20%20%20%20%20%20%20%20%20%20%20.pharmacies%20is_in%3B%20%20%20%20%20%20%20%20%20%20%20area._%5Bboundary%3Dadministrative%5D%20%20%20%20%20%20%20%20%20%20%20%20%20%5B%22ref%3Aat%3Agkz%22%5D%3B%20%20%20%20%20%20%20%20%20%20%20out%3B")
@@ -268,14 +268,14 @@ describe('QueueWorker',function(){
             function (done) {
               DataCollection.find({},function(err,data) {
                 should.not.exist(err);
-                should(data.length).equal(3);
+                should(data.length).equal(2);
                 delete data[0].timestamp;
                 delete data[1].timestamp;
-                delete data[2].timestamp;
+             //   delete data[2].timestamp;
 
                 should(data).containEql({measure:"Apotheke",schluessel:"05158008",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:7});
                 should(data).containEql({measure:"Apotheke",schluessel:"05158007",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:0});
-                should(data).containEql({measure:"Apotheke_AT",schluessel:"700",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:0});
+               // should(data).containEql({measure:"Apotheke_AT",schluessel:"700",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:0});
                 done();
               })
             }

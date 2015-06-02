@@ -83,10 +83,23 @@ exports.tagCounter2 = function tagCounter2(osmdata,keyList,key,defJson) {
 var WAApotheke = {
   title : "Wochenaufgabe Apotheke",
   name: "Apotheke",
+  description: "Apotheke",
+  osmArea: "Deutschland",
+  country_code: "DE",
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-  	querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
+  	querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+    fullQuery: '[out:json][timeout:5000];area[name="Deutschland"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["de:amtlicher_gemeindeschluessel"];out ids; );  \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+            ["de:amtlicher_gemeindeschluessel"]; \
+          out;'
   },
   map : loadDataFromDB.DE_AGS,
   key: "de:amtlicher_gemeindeschluessel",
@@ -100,10 +113,22 @@ var WAApotheke_AT = {
   title : "Wochenaufgabe Apotheke (AT)",
   name : "Apotheke_AT",
   description: "Apotheke",
+  osmArea: "Österreich",
+  country_code: "AT",
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-  	querySub: '[out:json];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
+  	querySub: '[out:json];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+    fullQuery: '[out:json][timeout:4000];area[name="Österreich"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["ref:at:gkz"];out ids; );  \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+            ["ref:at:gkz"]; \
+          out;'
   },
   map: loadDataFromDB.AT_AGS,
   key: "ref:at:gkz",
@@ -118,10 +143,21 @@ var WAApotheke_CH = {
   title : "Wochenaufgabe Apotheke (CH)",
   name : "Apotheke_CH",
   description: "Apotheke",
+  osmArea:"Schweiz",
+  country_code: "CH",
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["XXXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-  	querySub: '[out:json];area["XXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
+  	querySub: '[out:json];area["XXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+    fullQuery: '[out:json][timeout:3600];area[name="Schweiz"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["ref:bfs_Gemeindenummer"];out ids; ); \
+          .pharmacies is_in; \
+          area._[boundary=administrative]; \
+          out;'
   },
 
   map: loadDataFromDB.CH_AGS,
@@ -137,6 +173,7 @@ var WAApothekePLZ_DE= {
   title : "Wochenaufgabe Apotheke (DE PLZ)",
   name: "Apotheke LZ_DE",
   description: "Apotheke",
+  osmArea: "Deutschland",
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
