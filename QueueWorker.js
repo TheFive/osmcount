@@ -143,7 +143,7 @@ function doReadPOI(cb,results) {
   var job=results.readjob;
   if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type == "readpoi") {
     debug("Start: doReadPoi(cb,"+results+")");
-    POIReader.doReadPOI(function(err,result){
+    POIReader.doReadPOI(job.measure,function(err,result){
       if (err) {
         job.status = "error";
         job.error = err;
