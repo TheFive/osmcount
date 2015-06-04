@@ -26,6 +26,8 @@ function DataCollectionClass() {
   this.createTableString = 'CREATE TABLE datacollection \
               (measure text, \
                key text, \
+               keytype text, \
+               keylevel text, \
                stamp timestamp with time zone, \
                count integer,  \
                missing hstore, \
@@ -42,6 +44,8 @@ function DataCollectionClass() {
          hstore: ["missing","existing"],
          keys:{
           schluessel:'key',
+          keyType:  'keytype',
+          keyLevel: 'keylevel',
           source:'source',
           measure:'measure',
           timestamp:'stamp',
@@ -83,11 +87,13 @@ DataCollectionClass.prototype.importCSV =function(filename,defJson,cb) {
 }
 
 DataCollectionClass.prototype.getInsertQueryString = function getInsertQueryString() {
-  return "INSERT into datacollection (key,stamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6)";
+  return "INSERT into datacollection (key,keytype,keylevel,stamp,measure,count,missing,existing) VALUES($1,$2,$3,$4,$5,$6,$7,$8)";
 }
 
 DataCollectionClass.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
   var key = item.schluessel;
+  var keytype = item.keyType;
+  var keylevel = item.keyLevel;
   var timestamp = item.timestamp;
   var measure = item.measure;
   var count = item.count;
@@ -97,7 +103,7 @@ DataCollectionClass.prototype.getInsertQueryValueList = function getInsertQueryV
     if (existing != "" ) existing += ",";
     existing += '"' + k + '"=>"' +item.existing[k] + '"';
   }
-  return  [key,timestamp,measure,count,missing,existing];
+  return  [key,keytype,keylevel,timestamp,measure,count,missing,existing];
 }
 
 

@@ -42,8 +42,21 @@ exports.tagCounter = function tagCounter(osmdata,result) {
 }
 
 
-exports.tagCounter2 = function tagCounter2(osmdata,keyList,key,defJson) {
+
+function createDC(defJson,keyType,key,keyLevel) {
+  var r = util.clone(defJson);
+  r.schluessel = key;
+  r.keyType = keyType;
+  r.keyLevel = keyLevel;
+  r.count = 0;
+  tagCounterInit(r);
+  return r;
+}
+
+
+exports.tagCounter2 = function tagCounter2(osmdata,keyList,defJson) {
   debug('tagCounter2');
+  should(typeof(defJson)).equal('object');
   // osmdata
   //   osmElemente, that are annotated by osmArea Json Array, that contains tag key
   // keyList
@@ -53,20 +66,24 @@ exports.tagCounter2 = function tagCounter2(osmdata,keyList,key,defJson) {
   // defJson
   //   default Measure Object, that is copied for every element in keyList
   var map = {};
+
+
+
+
   debug("Checking "+keyList.length+" keys for key "+key);
-  for (var i =0;i<keyList.length;i++) {
-    var m = util.clone(defJson);
-    m.schluessel = keyList[i];
-    m.count = 0;
-    map[keyList[i]]=m;
-    tagCounterInit(m);
-  }
+
   for (var i=0; i< osmdata.length;i++) {
-    for (var z=0;z<osmdata[i].osmArea.length;z++) {
-      var schluessel = osmdata[i].osmArea[z][key];
-      var m = map[schluessel];
-      if (typeof(m) != 'undefined') {
-        tagCounterCount(osmdata[i].tags,m);
+    var od = osmdata[i];
+    for (var z=0;z<od.osmArea.length;z++) {
+      var oa = od.osmArea[z];
+      for (var k in oa) {
+        var schluessel = osmdata[i].osmArea[z][k];
+        var m = map[k+m];
+        if (typeof(m) == 'undefined') {
+          m = createDC(key,oa.keyType,oa,keyLevel).
+          map[k+m]= m;
+        }
+        tagCounterCount(od.tags,m);
         m.count ++;
       }
     }

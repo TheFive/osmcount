@@ -273,8 +273,8 @@ describe('QueueWorker',function(){
                 delete data[1].timestamp;
              //   delete data[2].timestamp;
 
-                should(data).containEql({measure:"Apotheke",schluessel:"05158008",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:7});
-                should(data).containEql({measure:"Apotheke",schluessel:"05158007",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:0});
+                should(data).containEql({measure:"Apotheke",schluessel:"05158008",keyLevel:null,keyType:null,missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:7});
+                should(data).containEql({measure:"Apotheke",schluessel:"05158007",keyLevel:null,keyType:null,missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:0});
                // should(data).containEql({measure:"Apotheke_AT",schluessel:"700",missing:{name:'0',wheelchair:'0',phone:'0',opening_hours:'0'},existing:{fixme:'0'},source:null,count:0});
                 done();
               })

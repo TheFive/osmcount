@@ -325,6 +325,7 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(stream,cb) {
       }
       var valueList = this.getInsertQueryValueList(item);
       var queryString = this.getInsertQueryString();
+
       var query = client.query(this.getInsertQueryString(),valueList);
       query.on("error",function(err){
         debug('Error after Insert'+err);

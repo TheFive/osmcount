@@ -43,7 +43,12 @@ var tagsToCopy =
 [
   "de:regionalschluessel",
   "de:amtlicher_gemeindeschluessel",
-  "ref:at:gkz"]
+  "ref:at:gkz",
+  "postal_code",
+  "swisstopo:KANTONSNUM",
+  "swisstopo:BEZIRKSNUM",
+  "swisstopo:BFS_NUMMER",
+  "admin_level"];
 
 exports.prepareData = function prepareData(data) {
   debug("prepareData");
