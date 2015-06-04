@@ -1,0 +1,448 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API",
+  "osm3s": {
+    "timestamp_osm_base": "2015-05-26T07:44:02Z",
+    "timestamp_areas_base": "2015-05-24T13:41:02Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 286404815,
+  "lat": 51.1897635,
+  "lon": 6.9995844,
+  "tags": {
+    "addr:city": "Haan",
+    "addr:country": "DE",
+    "addr:housenumber": "13",
+    "addr:postcode": "42781",
+    "addr:street": "Bahnhofstraße",
+    "amenity": "pharmacy",
+    "name": "Bahnhof-Apotheke",
+    "opening_hours": "mo-fr 08:00-18:30,sa 09:00-13:00",
+    "phone": "+49 2129 2304",
+    "website": "http://www.bahnhofapotheke-haan.de/",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "area",
+  "id": 3600062423
+}
+,
+{
+  "type": "area",
+  "id": 3600062761
+}
+,
+{
+  "type": "area",
+  "id": 3600063306
+}
+,
+{
+  "type": "area",
+  "id": 3600066527
+}
+,
+{
+  "type": "node",
+  "id": 291712654,
+  "lat": 51.1933829,
+  "lon": 7.0111183,
+  "tags": {
+    "addr:city": "Haan",
+    "addr:country": "DE",
+    "addr:housenumber": "36",
+    "addr:postcode": "42781",
+    "addr:street": "Neuer Markt",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "name": "Schwanen Apotheke",
+    "opening_hours": "Mo-Fr 08:00-18:30; Sa 08:00-13:30",
+    "phone": "Tel.: (02129) 59 100",
+    "website": "http://www.apotheken-dr-peterseim.de/",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "area",
+  "id": 3600062423
+}
+,
+{
+  "type": "area",
+  "id": 3600062761
+}
+,
+{
+  "type": "area",
+  "id": 3600063306
+}
+,
+{
+  "type": "area",
+  "id": 3600066527
+}
+,
+{
+  "type": "node",
+  "id": 291712655,
+  "lat": 51.1920584,
+  "lon": 7.0091031,
+  "tags": {
+    "addr:city": "Haan",
+    "addr:country": "DE",
+    "addr:housenumber": "19",
+    "addr:postcode": "42781",
+    "addr:street": "Kaiserstraße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "name": "Adler-Apotheke",
+    "opening_hours": "Mo-Fr 08:30-13:30,14:30-18:30; Sa 08:30-13:00",
+    "phone": "02129-9352-0",
+    "website": "http://www.apotheken-dr-peterseim.de/",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "area",
+  "id": 3600062423
+}
+,
+{
+  "type": "area",
+  "id": 3600062761
+}
+,
+{
+  "type": "area",
+  "id": 3600063306
+}
+,
+{
+  "type": "area",
+  "id": 3600066527
+}
+,
+{
+  "type": "node",
+  "id": 291712657,
+  "lat": 51.1924984,
+  "lon": 7.0120785,
+  "tags": {
+    "addr:city": "Haan",
+    "addr:country": "DE",
+    "addr:housenumber": "36",
+    "addr:postcode": "42781",
+    "addr:street": "Kaiserstraße",
+    "amenity": "pharmacy",
+    "dispensing": "yes",
+    "name": "Markt Apotheke",
+    "opening_hours": "mo-fr 08:00-18:30,sa 08:00-13:00",
+    "phone": "Tel.: (02129) 16 14",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "area",
+  "id": 3600062423
+}
+,
+{
+  "type": "area",
+  "id": 3600062761
+}
+,
+{
+  "type": "area",
+  "id": 3600063306
+}
+,
+{
+  "type": "area",
+  "id": 3600066527
+}
+,
+{
+  "type": "node",
+  "id": 291715366,
+  "lat": 51.1934206,
+  "lon": 7.0121372,
+  "tags": {
+    "addr:city": "Haan",
+    "addr:country": "DE",
+    "addr:housenumber": "22-24",
+    "addr:postcode": "42781",
+    "addr:street": "Neuer Markt",
+    "amenity": "pharmacy",
+    "contact:phone": "+49 2129 93930",
+    "dispensing": "yes",
+    "name": "Bergische Apotheke",
+    "opening_hours": "Mo-Fr 08:00-19:00;Sa 08:00-13:30",
+    "phone": "+49 2129 93930",
+    "website": "www.bergische-apotheke.de/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "area",
+  "id": 3600062423
+}
+,
+{
+  "type": "area",
+  "id": 3600062761
+}
+,
+{
+  "type": "area",
+  "id": 3600063306
+}
+,
+{
+  "type": "area",
+  "id": 3600066527
+}
+,
+{
+  "type": "node",
+  "id": 287826898,
+  "lat": 51.1943657,
+  "lon": 7.0089153,
+  "tags": {
+    "addr:city": "Haan",
+    "addr:country": "DE",
+    "addr:housenumber": "27-29",
+    "addr:postcode": "42781",
+    "addr:street": "Neuer Markt",
+    "amenity": "pharmacy",
+    "name": "Elefanten-Apotheke",
+    "opening_hours": "Mo-Fr 08:00-18:30; Sa 09:00-13:00",
+    "phone": "Tel.: (02129) 95 96 13",
+    "website": "http://www.apotheken-dr-peterseim.de/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "area",
+  "id": 3600062423
+}
+,
+{
+  "type": "area",
+  "id": 3600062761
+}
+,
+{
+  "type": "area",
+  "id": 3600063306
+}
+,
+{
+  "type": "area",
+  "id": 3600066527
+}
+,
+{
+  "type": "node",
+  "id": 89997088,
+  "lat": 51.2176076,
+  "lon": 7.0136172,
+  "tags": {
+    "addr:city": "Haan",
+    "addr:country": "DE",
+    "addr:housenumber": "23",
+    "addr:postcode": "42781",
+    "addr:street": "Bahnstraße",
+    "amenity": "pharmacy",
+    "name": "Gruitener Apotheke",
+    "opening_hours": "mo,tu,th,fr 08:30-13:00,15:00-18:30;we,sa 08:30-13:00",
+    "phone": "02104 60318",
+    "website": "http://www.gruitener-apotheke.de/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "area",
+  "id": 3600062423
+}
+,
+{
+  "type": "area",
+  "id": 3600062761
+}
+,
+{
+  "type": "area",
+  "id": 3600063306
+}
+,
+{
+  "type": "area",
+  "id": 3600066527
+}
+,
+{
+  "type": "area",
+  "id": 3600062423,
+  "tags": {
+    "TMC:cid_58:tabcd_1:Class": "Area",
+    "TMC:cid_58:tabcd_1:LCLversion": "8.00",
+    "TMC:cid_58:tabcd_1:LocationCode": "538",
+    "admin_level": "6",
+    "boundary": "administrative",
+    "de:amtlicher_gemeindeschluessel": "05158",
+    "de:place": "county",
+    "de:regionalschluessel": "05158",
+    "name": "Kreis Mettmann",
+    "type": "boundary",
+    "wikidata": "Q6257",
+    "wikipedia": "de:Kreis Mettmann"
+  }
+}
+,
+{
+  "type": "area",
+  "id": 3600062761,
+  "tags": {
+    "ISO3166-2": "DE-NW",
+    "TMC:cid_58:tabcd_1:Class": "Area",
+    "TMC:cid_58:tabcd_1:LCLversion": "12.0",
+    "TMC:cid_58:tabcd_1:LocationCode": "260",
+    "admin_level": "4",
+    "boundary": "administrative",
+    "boundary_type": "state",
+    "de:amtlicher_gemeindeschluessel": "05",
+    "de:regionalschluessel": "05",
+    "name": "Nordrhein-Westfalen",
+    "name:af": "Noordryn-Wesfale",
+    "name:an": "Renania d'o Norte-Westfalia",
+    "name:ar": "شمال الراين - وستفاليا",
+    "name:az": "Şimali Reyn-Vestfaliya",
+    "name:be": "Паўночны Рэйн-Вестфалія",
+    "name:be-x-old": "Паўночны Райн-Вэстфалія",
+    "name:bg": "Северен Рейн-Вестфалия",
+    "name:bs": "Sjeverna Rajna-Vestfalija",
+    "name:ca": "Rin del Nord - Westfàlia",
+    "name:co": "Nordu Renu-Westfalia",
+    "name:cs": "Severní Porýní-Vestfálsko",
+    "name:cv": "Çурçĕр Рейн-Вестфали",
+    "name:de": "Nordrhein-Westfalen",
+    "name:dsb": "Pódpołnocna Poryńska-Westfalska",
+    "name:el": "Βόρεια Ρηνανία-Βεστφαλία",
+    "name:en": "North Rhine-Westphalia",
+    "name:eo": "Nordrejn-Vestfalio",
+    "name:es": "Renania del Norte-Westfalia",
+    "name:eu": "Ipar Renania-Westfalia",
+    "name:fa": "نوردراین-وستفالن",
+    "name:fr": "Rhénanie-du-Nord-Westphalie",
+    "name:frr": "Nordrhin-Weestfåålen",
+    "name:fy": "Noardryn-Westfalen",
+    "name:ga": "Tuaisceart na Réine agus an Viostfáil",
+    "name:gl": "Renania do Norte-Westfalia",
+    "name:gv": "Yn Rhine Hwoaie-Westfalen",
+    "name:he": "נורדריין-וסטפאליה",
+    "name:hr": "Sjeverna Rajna - Vestfalija",
+    "name:hsb": "Sewjernorynsko-Westfalska",
+    "name:hu": "Észak-Rajna–Vesztfália",
+    "name:ia": "Rhenania del Nord - Westfalia",
+    "name:ie": "Nordrhein-Vestfalia",
+    "name:ilo": "Amiananhayn Lumauwalen",
+    "name:io": "Nordrheno-Vestfalia",
+    "name:is": "Norðurrín-Vestfalía",
+    "name:it": "Renania Settentrionale-Vestfalia",
+    "name:ja": "ノルトライン＝ヴェストファーレン州",
+    "name:ka": "ჩრდილოეთი რაინ-ვესტფალია",
+    "name:ko": "노르트라인베스트팔렌 주",
+    "name:ksh": "Noordrhing-Wääßfaale",
+    "name:la": "Rhenania Septentrionalis-Vestfalia",
+    "name:li": "Noordrien-Wesfale",
+    "name:lij": "Renania do Nòrd-Vestfall-ia",
+    "name:lmo": "Nord Reno-Westfalia",
+    "name:lt": "Šiaurės Reinas-Vestfalija",
+    "name:lv": "Ziemeļreina-Vestfālene",
+    "name:mk": "Северна Рајна-Вестфалија",
+    "name:mr": "नोर्डर्‍हाइन-वेस्टफालन",
+    "name:nah": "Rhein Mictlāmpa-Westfalen",
+    "name:nap": "Nord Reno-Westfalia",
+    "name:nds": "Noordrhien-Westfalen",
+    "name:nds-nl": "Noordrhain-Westfele",
+    "name:nl": "Noord-Rijnland-Westfalen",
+    "name:oc": "Ren del Nòrd-Vestfàlia",
+    "name:os": "Цæгат Рейн-Вестфали",
+    "name:pdc": "Nordrhoi-Wessfoale",
+    "name:pfl": "Nordrhoi-Weschdfaale",
+    "name:pl": "Nadrenia Północna-Westfalia",
+    "name:pms": "Nòrd Ren-Westfalia",
+    "name:pnb": "اتلا رائین لیندا فالی",
+    "name:prefix": "Bundesland",
+    "name:pt": "Renânia do Norte-Vestfália",
+    "name:rm": "Nord Rain-Vestfalia",
+    "name:ro": "Renania de Nord-Westfalia",
+    "name:ru": "Северный Рейн-Вестфалия",
+    "name:sco": "North Rhine-Westphalie",
+    "name:sh": "Sjeverna Rajna-Vestfalija",
+    "name:sk": "Severné Porýnie - Westfálsko",
+    "name:sl": "Severno Porenje-Vestfalija",
+    "name:sr": "Северна Рајна-Вестфалија",
+    "name:stq": "Noudrhien-Wäästfoalen",
+    "name:sw": "Rhine Kaskazini-Westfalia",
+    "name:th": "รัฐนอร์ดไรน์-เวสท์ฟาเลิน",
+    "name:tr": "Kuzey Ren-Vestfalya",
+    "name:uk": "Північний Рейн — Вестфалія",
+    "name:vec": "Nord Reno-Westfalia",
+    "name:vo": "Nolüdarinän-Vesfalän",
+    "name:zh": "北莱茵-威斯特法伦州",
+    "ref": "NRW",
+    "source": "http://wiki.openstreetmap.org/wiki/Import/Catalogue/Kreisgrenzen_Deutschland_2005",
+    "type": "boundary",
+    "wikidata": "Q1198",
+    "wikipedia": "de:Nordrhein-Westfalen"
+  }
+}
+,
+{
+  "type": "area",
+  "id": 3600063306,
+  "tags": {
+    "TMC:cid_58:tabcd_1:Class": "Area",
+    "TMC:cid_58:tabcd_1:LCLversion": "8.00",
+    "TMC:cid_58:tabcd_1:LocationCode": "279",
+    "admin_level": "5",
+    "boundary": "administrative",
+    "de:amtlicher_gemeindeschluessel": "051",
+    "de:regionalschluessel": "051",
+    "name": "Regierungsbezirk Düsseldorf",
+    "name:ru": "Дюссельдорф",
+    "type": "boundary",
+    "wikidata": "Q7926",
+    "wikipedia": "de:Regierungsbezirk Düsseldorf"
+  }
+}
+,
+{
+  "type": "area",
+  "id": 3600066527,
+  "tags": {
+    "TMC:cid_58:tabcd_1:Class": "Area",
+    "TMC:cid_58:tabcd_1:LCLversion": "9.00",
+    "TMC:cid_58:tabcd_1:LocationCode": "39536",
+    "admin_level": "8",
+    "boundary": "administrative",
+    "de:amtlicher_gemeindeschluessel": "05158008",
+    "de:place": "town",
+    "de:regionalschluessel": "051580008008",
+    "name": "Haan",
+    "name:prefix": "Stadt",
+    "type": "boundary",
+    "wikidata": "Q2974",
+    "wikipedia": "de:Haan"
+  }
+}
+
+
+  ]
+}

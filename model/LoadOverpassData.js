@@ -4,9 +4,9 @@ var should    = require('should');
 var request   = require('request');
 
 var configuration  = require('../configuration.js');
-var wochenaufgabe  = require('../wochenaufgabe.js');
 
 var loadDataFromDB = require('./LoadDataFromDB.js');
+var wochenaufgabe  = require('../wochenaufgabe.js');
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
 
@@ -21,12 +21,12 @@ var queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
 
-exports.timeout = 1000 * 60 * 10; // Timeout after 10 minutes;
+exports.timeout = 2* 1000 * 60 * 60; // Timeout after 2 hours minutes;
 
 
 
 function overpassQuery(query, cb, options) {
-	debug("overpassQuery");
+  debug("overpassQuery");
   options = options || {};
   if (typeof(options.uri)!= 'undefined') {
     options.uri = options.overpassUrl;

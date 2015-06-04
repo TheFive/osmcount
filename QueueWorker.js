@@ -12,6 +12,7 @@ var util        = require('./util.js')
 
 var DataCollection = require('./model/DataCollection.js')
 var wochenaufgabe = require('./wochenaufgabe.js');
+var POIReader = require('./POIReader.js');
 
 exports.processSignal = '';
 exports.processExit;
@@ -135,6 +136,28 @@ function doConsole(cb,results) {
     job.status = "done";
   }
   cb(null,job);
+}
+
+function doReadPOI(cb,results) {
+  debug("doReadPOI(cb,"+results+")");
+  var job=results.readjob;
+  if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type == "readpoi") {
+    debug("Start: doReadPoi(cb,"+results+")");
+    POIReader.doReadPOI(job.measure,function(err,result){
+      if (err) {
+        job.status = "error";
+        job.error = err;
+      }else {
+        job.status = "done";
+      }
+      cb(null,job);
+      return;
+    });
+  }
+  else {
+    cb(null,job);
+    return;
+  }
 }
 
 exports.overpassRunning = false;
@@ -358,10 +381,11 @@ function doNextJob(callback) {
   async.auto( {readjob:     getNextJob,
         saveWorking:     ["readjob",saveJobState],
         doConsole:       ["saveWorking", doConsole],
+        doReadPOI:       ["saveWorking", doReadPOI],
         doOverpass:      ["saveWorking", doOverpass],
         doInsertJobs:    ["saveWorking", doInsertJobs],
         doLoadBoudnaries:["saveWorking", doLoadBoundaries],
-        saveDone:        ["doConsole","doOverpass","doInsertJobs", "doLoadBoudnaries",saveJobState]
+        saveDone:        ["doReadPOI","doConsole","doOverpass","doInsertJobs", "doLoadBoudnaries",saveJobState]
     },
     function (err,results) {
       if (err && !(typeof(err.message) != "undefined" && err.message === 'No Job Loaded' )) {
@@ -369,7 +393,7 @@ function doNextJob(callback) {
         console.log("Error occured in function: QueueWorker.doNextJob");
         console.log(err);
       }
-      if (results) debug("finished %s" ,results);
+      debug("doNextJob finished");
       var job = results.readjob;
       callback(null,job);
     }
