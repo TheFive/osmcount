@@ -218,6 +218,38 @@ rel(r.associatedStreet:"house")->.asHouseRel; \n\
   tagCounterGlobal: null
 }
 
+
+var WAApothekeTestDE = {
+  title : "Wochenaufgabe Apotheke Test",
+  name: "Apotheke Haan",
+  description: "Apotheke",
+  osmArea: "Haan",
+  country_code: "DE-HAAN",
+  overpass : {
+    csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
+    query:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+    querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+    fullQuery: '[out:json][timeout:5000];area[name="Haan"]->.a;( node(area.a)[amenity=pharmacy]; \
+                                                   way(area.a)[amenity=pharmacy]; \
+                                                  rel(area.a)[amenity=pharmacy]; \
+                                                    )->.pharmacies; \
+          foreach.pharmacies(out center meta;(._; ._ >;);is_in;area._[boundary=administrative] \
+          ["de:amtlicher_gemeindeschluessel"];out ids; );  \
+          .pharmacies is_in; \
+          area._[boundary=administrative] \
+            ["de:amtlicher_gemeindeschluessel"]; \
+          out;'
+  },
+  map : loadDataFromDB.DE_AGS,
+  key: "de:amtlicher_gemeindeschluessel",
+  ranktype:"UP",
+  tagCounter : exports.tagCounter,
+  tagCounterGlobal:exports.tagCounter2,
+  overpassEveryDays:7
+}
+
+
+
 var wochenaufgaben= [];
 wochenaufgaben["Apotheke"]=WAApotheke;
 wochenaufgaben["Apotheke_AT"]=WAApotheke_AT;
