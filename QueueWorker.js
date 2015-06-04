@@ -209,6 +209,14 @@ function doOverpass(cb,results) {
               overpassNo429erFor = 0;
               job.status = "open";
               job.error.fix = "Was HTTP 429 Fixed automated for reason NotExcecuted, actual overpass slow down: "+overpassWaitTime+"ms";
+              if (err.body.indexOf("Another request from your IP is still running.")>0) {
+                // Several Request of this Sever are running on overpass Server
+                // call Kill Command
+                console.log("Try to kill Overpass Queries");
+
+                // Do not wait for any kill result
+                lod.killOverpass(function () {console.log("Overpass Queries Killed");})
+              }
             }
           } else {
             job.status="done";

@@ -21,6 +21,9 @@ var queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
 
+var overpassApiKillDE = "http://overpass-api.de/api/kill_my_queries";
+var overpassApiKillRU = "http://overpass.osm.rambler.ru/cgi/kill_my_queries";
+
 exports.timeout = 2* 1000 * 60 * 60; // Timeout after 2 hours minutes;
 
 
@@ -66,6 +69,37 @@ function overpassQuery(query, cb, options) {
 };
 
 exports.overpassQuery = overpassQuery;
+
+function killOverpass( cb) {
+  debug("killOverpass");
+  options =  {};
+  options.uri = overpassApiKillDE;
+  request.post(options, function (error, response, body) {
+    debug("killOverpass->CB ");
+    if (!error && response.statusCode === 200) {
+        cb(null, null);
+        return;
+    } else if (error) {
+    	console.log("Error occured in function: LoadOverpassData.Kill My Queries");
+    	console.log(error);
+    	console.log(body);
+        cb(error);
+        return;
+    } else if (response) {
+        cb({
+            message: 'Kill Request failed: HTTP ' + response.statusCode,
+            statusCode: response.statusCode,
+            body: body
+        });
+    } else {
+        cb({
+            message: 'Unknown error.',
+        });
+    }
+  });
+};
+
+exports.killOverpass = killOverpass;
 
 function loadBoundariesDE(cb,result) {
 	debug("loadBoundariesDE");
