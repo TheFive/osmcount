@@ -189,7 +189,7 @@ describe('QueueWorker',function(){
         })
       })
     })
-    it.only('should work on readpoi Queries',function(bddone) {
+    it('should work on readpoi Queries',function(bddone) {
       // Adjust Timeout, as Overpass is Waiting a little bit
      // this.timeout(1000*60*2+100);
 
