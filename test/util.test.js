@@ -49,7 +49,7 @@ describe('util',function(){
 
   describe('waitOneMin', function() {
     this.timeout(1000*60*2+100);
-    it.only('test Wait',function(done) {
+    it('test Wait',function(done) {
       var t1 = new Date();
       util.waitOneMin(function test() {
         var t2 = new Date();
