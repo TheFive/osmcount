@@ -9,7 +9,9 @@ var osmCountBrand = '<div class="navbar-header"><a class="navbar-brand" style="f
 
 var waStruct = [
 {name: "Apotheke",measure:"Apotheke"},
-{name: "Adressen ohne Strasse",measure:"AddrWOStreet"}];
+{name: "Adressen ohne Strasse",measure:"AddrWOStreet"},
+{name: "Wanderwegweiser",measure:"GuidePost"},
+];
 
 var poiStruct = [
 {name: "Apotheke",table:"pharmacy"}];
@@ -19,7 +21,11 @@ var tablesStruct = [
                        {name:"Österreich",measure:"Apotheke_AT"},
                        {name:"Deutsche PLZ",measure:"ApothekePLZ_DE"}]},
 {name:"Adressen Ohne Straße",measure:"AddrWOStreet"},
-{name:"Wanderwegweiser",measure:"Wanderwegweiser"},
+{name:"Wanderwegweiser",list:[{name:"information=guidepost (nodes)",measure:"GuidePost_Node"},
+                             {name:"relation=desination_sign (relation)",measure:"GuidePost_Rel"},
+                             {name:"path with Destination (way)",measure:"GuidePost_Path"}]}
+
+
 
 ];
   

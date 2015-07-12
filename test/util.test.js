@@ -55,7 +55,7 @@ describe('util',function(){
         var t2 = new Date();
         var rounder = 25;
 
-        should.equal(rounder * Math.round((t2-t1)/rounder),rounder * Math.round(config.getValue("waitTime",120)*1000)/rounder);
+        should.equal(rounder * Math.round((t2-t1)/rounder),rounder * Math.round(config.getValue("waitTime",120)*1000/rounder));
         done();
       })
     })

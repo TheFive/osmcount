@@ -157,7 +157,7 @@ describe('LoadOverpassData',function() {
     it ('should load and parse overpassdata',function(bddone){
       wochenaufgabe.map["test"]={map:{list:['1','2']},
                                  overpass:{query:"TEST :schluessel: TEST"},
-                                 tagCounter:wochenaufgabe.tagCounter};
+                                 tagCounter:wochenaufgabe.tagCounterPharmacy};
 
       var job = {measure:"test"};
       job.exectime = new Date();

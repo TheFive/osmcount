@@ -633,8 +633,10 @@ function generateQuery(measure,schluessel,sub) {
   }
   if (typeof(wa.map.keyList) != 'undefined') {
     var keys = wa.map.keyList;
+
     var o = keys[schluessel];
     if (typeof(o)=='undefined') return "";
+    if (typeof(o.osmkey)=='undefined') return "";
     query = query.replace(':key:',o.osmkey);
     query = query.replace(':value:',o.osmvalue);
     query = query.replace(':key:',o.osmkey);
@@ -1033,7 +1035,7 @@ exports.table = function(req,res){
 //
         if (param.html) {
           page =new htmlPage.create("table");
-          page.title = "Wochenaufgabe "+param.measure;
+          page.title = wochenaufgabe.map[param.measure].title;
           page.subtitle = param.sub;
           page.modal = generateFilterTable(param,header);
 

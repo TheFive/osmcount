@@ -19,6 +19,22 @@ function getKreisname(schluessel,kreisnamen) {
 	n = n.replace("ö","oe");
 	n = n.replace("ä","ae");
 	n = n.replace("ß","ss");
+	n = n.replace("Ü","Ue");
+	n = n.replace("Ö","Oe");
+	n = n.replace("Ä","Ae");
+	n = n.replace("ü","ue");
+	n = n.replace("ö","oe");
+	n = n.replace("ä","ae");
+	n = n.replace("ß","ss");
+	n = n.replace("Ü","Ue");
+	n = n.replace("Ö","Oe");
+	n = n.replace("Ä","Ae");
+	n = n.replace("è","e");
+	n = n.replace("è","e");
+	n = n.replace("è","e");
+	n = n.replace("â","a");
+	n = n.replace("â","a");
+
     return n;
 }
 

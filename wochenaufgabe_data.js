@@ -573,7 +573,7 @@ exports.dachKeyList = {"DE":{name:"Deutschland"},'DE01003':{name:'Lübeck',osmke
 'AT8':{name:'Vorarlberg'},
 'CH08':{name:'Glarus',osmkey:'swisstopo:KANTONSNUM',osmvalue:'8'},
 'CH03':{name:'Luzern',osmkey:'swisstopo:KANTONSNUM',osmvalue:'3'},
-'CH02':{name:'Bern – Berne',osmkey:'swisstopo:KANTONSNUM',osmvalue:'2'},
+'CH02':{name:'Bern - Berne',osmkey:'swisstopo:KANTONSNUM',osmvalue:'2'},
 'CH19':{name:'Aargau',osmkey:'swisstopo:KANTONSNUM',osmvalue:'19'},
 'CH13':{name:'Basel-Landschaft',osmkey:'swisstopo:KANTONSNUM',osmvalue:'13'},
 'CH09':{name:'Zug',osmkey:'swisstopo:KANTONSNUM',osmvalue:'9'},
