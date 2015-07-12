@@ -34,10 +34,10 @@ exports.plot = function(req,res){
     if (typeof(parseInt(lok))=='number') param.lengthOfKey = parseInt(lok);
 
     
-
-
-	var kreisnamen =  wochenaufgabe.map[param.measure].map.map;
-
+  var kreisnamen =  wochenaufgabe.map[param.measure].map.map;
+  var keyList = wochenaufgabe.map[param.measure].map.keyList;
+  if (typeof(kreisnamen)=='undefined') kreisnamen = keyList;
+  if (typeof(kreisnamen)=='undefined') kreisnamen = {};
 
  
     var items = [];

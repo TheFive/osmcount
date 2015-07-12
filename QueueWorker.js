@@ -17,7 +17,7 @@ var POIReader = require('./POIReader.js');
 exports.processSignal = '';
 exports.processExit;
 
-var overpassWaitTime = 4000; // Wait before another Overpass Query
+var overpassWaitTime = 100; // Wait before another Overpass Query
 var overpassWaitTimeSteps = 50;
 var overpassNo429erFor = 0;
 
@@ -221,9 +221,9 @@ function doOverpass(cb,results) {
           } else {
             job.status="done";
             overpassNo429erFor += 1;
-            if (overpassNo429erFor >100) {
+            if (overpassNo429erFor >25) {
                overpassWaitTime -= overpassWaitTimeSteps;
-               if (overpassWaitTime <=0)  overpassWaitTime = 0;
+               if (overpassWaitTime <=100)  overpassWaitTime = 100;
                overpassNo429erFor = 0;
             }
           }
@@ -309,7 +309,7 @@ function doInsertJobs(cb,results) {
       // No Jobs created
       console.log("Nothing loaded");
       job.status = "error";
-      job.error = "createQuery results in 0 Jobs";
+      job.error = {text:"createQuery results in 0 Jobs"};
       if (cb) cb(null,job);
       return;
     }

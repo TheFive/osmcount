@@ -1,62 +1,115 @@
+var should = require('should');
+var wochenaufgabe_data = require('./wochenaufgabe_data.js');
 var debug = require('debug')('wochenaufgabe');
 var util = require('./util.js');
 var loadDataFromDB = require('./model/LoadDataFromDB.js');
 
 
-function tagCounterInit(result) {
+
+function tagCounterInit(result,ssl) {
   debug('tagCounterInit');
+  should.exist(result);
+  should.exist(ssl);
   result.missing = {};
   result.existing = {}
-  result.existing.fixme = 0;
-  result.missing.opening_hours = 0;
-  result.missing.phone=0;
-  result.missing.wheelchair = 0;
-  result.missing.name = 0;
+  for (var k in ssl) {
+    var o = ssl[k];
+    result[o.type][o.prop]=0;
+  }
 }
 
-function tagCounterCount(p,result) {
-  debug('tagCounterCount');
-  if (!p.hasOwnProperty("opening_hours")) {
-    result.missing.opening_hours += 1;
-  }
-  if (!p.hasOwnProperty("name")) {
-    result.missing.name += 1;
-  }
-  if (!p.hasOwnProperty("wheelchair")) {
-    result.missing.wheelchair += 1;
-  }
-  if (p.hasOwnProperty("fixme")) {
-    result.existing.fixme += 1;
-  }
-  if (!p.hasOwnProperty("phone") && ! p.hasOwnProperty("contact:phone")) {
-    result.missing.phone += 1;
-  } 
+
+var apothekenSubSelectorList = {
+  "Name":{type:"missing",prop:"name"},
+  "Öffnungszeiten":{type:"missing",prop:"opening_hours"},
+  "fixme":{type:"existing",prop:"fixme"},
+  "phone":{type:"missing",prop:"phone",osmprops:["phone","contact:phone"]},
+  "Wheelchair":{type:"missing",prop:"wheelchair"}
+}
+var guidePostSubSelectorList = {
+  "hiking":{type:"existing",prop:"hiking"},
+  "bicycle":{type:"existing",prop:"bicycle"},
+  "note:destination":{type:"existing",prop:"note:destination"},
+  "name":{type:"existing",prop:"name"},
+  "inscription":{type:"existing",prop:"inscription"},
+  "description":{type:"existing",prop:"description"},
+  "operator":{type:"existing",prop:"operator"},
+  "ref":{type:"existing",prop:"ref"},
+  "material":{type:"existing",prop:"material"}
 }
 
+function tagCounterGeneric(p,result,ssl) {
+  debug('tagCounterGeneric');
+
+  for (var k in ssl) {
+    var o = ssl[k];
+    if (o.type == "existing") {
+      if (typeof(o.osmprops)== 'undefined') {
+        if (p.hasOwnProperty(o.prop)) {
+          result.existing[o.prop] +=1;
+        }
+      }
+      else {
+        for (var i=0;i<o.osmprops.length;i++) {
+          if (p.hasOwnProperty(o.osmprops[i])) {
+            result.existing[o.prop] +=1;
+            break;
+          }
+        }
+      }
+    }
+    if (o.type == "missing") {
+      if (typeof(o.osmprops)== 'undefined') {
+        if (!p.hasOwnProperty(o.prop)) {
+          result.missing[o.prop] +=1;
+        }
+      }
+      else {
+        var mis = 1;
+        for (var i=0;i<o.osmprops.length;i++) {
+          if (p.hasOwnProperty(o.osmprops[i])) {
+            mis = 0;
+            break;
+          }
+        }
+        result.missing[o.prop] += mis;
+      }
+    }
+  }
+}
 exports.tagCounter = function tagCounter(osmdata,result) {
   debug('tagCounter');
-  tagCounterInit(result);
+  tagCounterInit(result,apothekenSubSelectorList);
   for (var i = 0 ; i< osmdata.length;i++ ) {
-	  tagCounterCount(osmdata[i].tags,result);
+	  tagCounterGeneric(osmdata[i].tags,result,apothekenSubSelectorList);
   }
+}
+
+exports.tagCounterGuidePost = function tagCounter(osmdata,result) {
+  debug('tagCounterGuidePost');
+  tagCounterInit(result,guidePostSubSelectorList);
+  for (var i = 0 ; i< osmdata.length;i++ ) {
+    tagCounterGeneric(osmdata[i].tags,result,guidePostSubSelectorList);
+  }  
 }
 
 
 
-function createDC(defJson,keyType,key,keyLevel) {
+function createDC(defJson,keyType,key) {
   var r = util.clone(defJson);
   r.schluessel = key;
   r.keyType = keyType;
-  r.keyLevel = keyLevel;
   r.count = 0;
   tagCounterInit(r);
   return r;
 }
 
 
-exports.tagCounter2 = function tagCounter2(osmdata,keyList,defJson) {
+exports.tagCounter2 = function tagCounter2(osmdata,keyList,key,defJson) {
   debug('tagCounter2');
-  should(typeof(defJson)).equal('object');
+  console.log("Hallo");
+  console.log(defJson);
+  (typeof(defJson)).should.equal('object');
   // osmdata
   //   osmElemente, that are annotated by osmArea Json Array, that contains tag key
   // keyList
@@ -80,7 +133,7 @@ exports.tagCounter2 = function tagCounter2(osmdata,keyList,defJson) {
         var schluessel = osmdata[i].osmArea[z][k];
         var m = map[k+m];
         if (typeof(m) == 'undefined') {
-          m = createDC(key,oa.keyType,oa,keyLevel).
+          m = createDC(defJson,oa.keyType,key).
           map[k+m]= m;
         }
         tagCounterCount(od.tags,m);
@@ -97,16 +150,20 @@ exports.tagCounter2 = function tagCounter2(osmdata,keyList,defJson) {
 
 
 
+    
+
+
 var WAApotheke = {
   title : "Wochenaufgabe Apotheke",
   name: "Apotheke",
   description: "Apotheke",
   osmArea: "Deutschland",
   country_code: "DE",
+  ssl:apothekenSubSelectorList,
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-  	querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+  	querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;',
     fullQuery: '[out:json][timeout:5000];area[name="Deutschland"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
                                                   rel(area.a)[amenity=pharmacy]; \
@@ -132,10 +189,11 @@ var WAApotheke_AT = {
   description: "Apotheke",
   osmArea: "Österreich",
   country_code: "AT",
+  ssl:apothekenSubSelectorList,
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-  	querySub: '[out:json];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+  	querySub: '[out:json];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;',
     fullQuery: '[out:json][timeout:4000];area[name="Österreich"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
                                                   rel(area.a)[amenity=pharmacy]; \
@@ -162,10 +220,11 @@ var WAApotheke_CH = {
   description: "Apotheke",
   osmArea:"Schweiz",
   country_code: "CH",
+  ssl:apothekenSubSelectorList,
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["XXXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-  	querySub: '[out:json];area["XXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+  	querySub: '[out:json];area["XXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;',
     fullQuery: '[out:json][timeout:3600];area[name="Schweiz"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
                                                   rel(area.a)[amenity=pharmacy]; \
@@ -191,10 +250,11 @@ var WAApothekePLZ_DE= {
   name: "Apotheke LZ_DE",
   description: "Apotheke",
   osmArea: "Deutschland",
+  ssl:apothekenSubSelectorList,
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-  	querySub: '[out:json];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;'
+  	querySub: '[out:json];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;'
   },
 
   map: loadDataFromDB.DE_PLZ,
@@ -245,7 +305,7 @@ var WAApothekeTestDE = {
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
     query:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
-    querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:key:];\nway(area.a)[amenity=pharmacy][:key:];\nrel(area.a)[amenity=pharmacy][:key:]);\nout;',
+    querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;',
     fullQuery: '[out:json][timeout:5000];area[name="Haan"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
                                                   rel(area.a)[amenity=pharmacy]; \
@@ -265,6 +325,26 @@ var WAApothekeTestDE = {
   overpassEveryDays:7
 }
 
+var WA_GuidePost = {
+  title : "Wochenaufgabe Wanderwegweiser",
+  name: "Wochenaufgabe Wanderwegweiser",
+  description: "Wanderwegweiser",
+  osmArea: "Europa",
+  country_code: "EU",
+  ssl:guidePostSubSelectorList,
+  overpass : {
+    query:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[information=guidepost];);\nout center;',
+    querySub:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[information=guidepost][:subkey];);\nout center;',
+  },
+  map: {
+  keyList: wo
+
+  },
+  ranktype:"UP",
+  tagCounter : exports.tagCounterGuidePost,
+  tagCounterGlobal:exports.tagCounter2,
+  overpassEveryDays:7
+}
 
 
 var wochenaufgaben= [];
@@ -272,6 +352,7 @@ wochenaufgaben["Apotheke"]=WAApotheke;
 wochenaufgaben["Apotheke_AT"]=WAApotheke_AT;
 wochenaufgaben["AddrWOStreet"]=WAAddrWOStreet;
 wochenaufgaben["ApothekePLZ_DE"]=WAApothekePLZ_DE;
+wochenaufgaben["Wanderwegweiser"]=WA_GuidePost;
 
 exports.map = wochenaufgaben;
 

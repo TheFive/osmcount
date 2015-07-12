@@ -18,7 +18,9 @@ var tablesStruct = [
 {name:"Apotheke",list:[{name:"Deutschland",measure:"Apotheke"},
                        {name:"Österreich",measure:"Apotheke_AT"},
                        {name:"Deutsche PLZ",measure:"ApothekePLZ_DE"}]},
-{name:"Adressen Ohne Straße",measure:"AddrWOStreet"}
+{name:"Adressen Ohne Straße",measure:"AddrWOStreet"},
+{name:"Wanderwegweiser",measure:"Wanderwegweiser"},
+
 ];
   
 
@@ -85,6 +87,7 @@ function HtmlPage(type) {
 	this.type = type;
 	
 	this.title = "";
+  this.subtitle = "";
 	this.footer = "OSM Count ...";
 	this.menu = "";
   this.modal = "";
@@ -139,6 +142,7 @@ HtmlPage.prototype = {
     navbar += '</ul></div>';
 
     var content = '<h1>'+this.title+'</h1>';
+     if (this.subtitle != '') content += '<h2>'+this.subtitle+'</h2>';
      content += this.content;
   /*  if (typeof (this.menu) != 'undefined' && this.menu != "") {
       content = this.menu +"<br>"+this.content;

@@ -68,7 +68,7 @@ describe('util',function(){
       var t1 = new Date();
       a(function test() {
         var t2 = new Date();
-        should.equal(Math.round((t2-t1)/10),Math.round(2*1000)/10);
+        should.equal(Math.round((t2-t1)/20),Math.round(2*1000)/20);
         done();
       })
     })

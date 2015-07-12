@@ -27,7 +27,23 @@ describe('Wochenaufgabe', function() {
       should(result).match({existing:{fixme:0},missing:{wheelchair:0,phone:0,name:0,opening_hours:0}});
     });
   });
-  describe('tagCounter2', function() {
+  describe('tagCounterGuidePost', function() {
+    it('should count different OSM Objects', function() {
+    var result = {};
+    var osmData = [{tags:{hiking:1,"note:destination":1,"inscription":1,name:1,omaterial:1}},
+             {tags:{        bicycle:1,inscription:1,          name:1,               }},
+             {tags:{        w         :1                                        }}];
+    wochenaufgabe.tagCounterGuidePost(osmData,result);
+    should(result).match({existing:{bicycle:1,description:0,hiking:1,inscription:2,material:0,name:2,'note:destination':1,operator:0,ref:0},missing:{}});
+    });
+    it ('should handle empty Objects',function() {
+      var result = {};
+      var osmData = [];
+      wochenaufgabe.tagCounter(osmData,result);
+      should(result).match({existing:{fixme:0},missing:{wheelchair:0,phone:0,name:0,opening_hours:0}});
+    });
+  });
+  describe.skip('tagCounter2', function() {
     it('should count different OSM Objects and split them', function() {
       var osmData = [{tags:{fixme:1,wheelchair:1,"contact:phone":1,name:1,opening_hours:1},
                       osmArea:[{"key":"1"},{"key":"12"}]},

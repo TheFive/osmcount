@@ -20,7 +20,7 @@ var queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="
 
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
-
+                    
 var overpassApiKillDE = "http://overpass-api.de/api/kill_my_queries";
 var overpassApiKillRU = "http://overpass.osm.rambler.ru/cgi/kill_my_queries";
 
@@ -74,9 +74,11 @@ function killOverpass( cb) {
   debug("killOverpass");
   options =  {};
   options.uri = overpassApiKillDE;
+  console.log("Kill Overpass Query");
   request.post(options, function (error, response, body) {
     debug("killOverpass->CB ");
     if (!error && response.statusCode === 200) {
+    	console.dir(response.body);
         cb(null, null);
         return;
     } else if (error) {
@@ -265,6 +267,39 @@ exports.createQuery = function(referenceJob)
 
 		}
 		return jobs;
+	}
+
+	var keylist = wa.map.keyList;
+	if (typeof(keylist)!="undefined") {
+		var keys = keylist;
+		for (var k in keys) {
+			debug(keys[k]);
+
+			// No Data in Map, then cont.
+			if (typeof(keys[k].osmkey)=='undefined') continue;
+
+			var job = {};
+			job.measure=aufgabe;
+			job.schluessel=k;
+			should(job.schluessel).not.equal('undefined');
+			job.status='open';
+			job.exectime = exectime;
+			job.type = "overpass";
+			job.query = wochenaufgabe.map[aufgabe].overpass.query.replace(':key:',keys[k].osmkey);
+			job.query = job.query.replace(':value:',keys[k].osmvalue);
+			job.query = job.query.replace(':timestamp:',exectime.toISOString());
+			if (typeof(referenceJob._id)!='undefined') {
+			  job.source = referenceJob._id;	
+			}
+			if (typeof(referenceJob.id)!='undefined') {
+			  job.source = referenceJob.id;	
+			}
+			
+			jobs.push(job);
+
+		}
+		return jobs;
+
 	}
 	return [];
 }
