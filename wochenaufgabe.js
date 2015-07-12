@@ -337,7 +337,7 @@ var WA_GuidePost = {
     querySub:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[information=guidepost][:subkey];);\nout center;',
   },
   map: {
-  keyList: wo
+  keyList: wochenaufgabe_data.dachKeyList
 
   },
   ranktype:"UP",
