@@ -75,6 +75,7 @@ app.use(function(req, res, next){
 });
 
 app.use('/index.html', displayText.main);
+app.use('/manual.html', displayText.manual);
 app.use('/status.html', displayStatus.status);
 app.use('/waplot/:measure.html', plotlyexport.plot);
 app.use('/import/csvimport.html', importDataCollection.showPage);

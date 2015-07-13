@@ -1,0 +1,45 @@
+<h1> OSMCount Handbuch </h1>
+
+<h2>Die Menüführung</h2>
+
+<p>Die Menüleiste wird immer angezeigt. Ein Klick auf das OSMCount Logo führt auf die Startseite.</p>
+<p>Neben dem Logo befinden sich die folgenden Menüs.
+<ul>
+<li> Aufgaben<br>Liste der Aufgaben mit kurzen Beschreibungen </li>
+<li> Tabelle<br> Dreh und Angelpunkt von OSM Count, hier gibt es die Auswertungen</li>
+<li> POI <br> Experimentell, hier sollen in Zukunft aktuelle POI Daten von den unterschiedlichen Aufgaben gezeigt werden, wir zur Zeit eher sporadisch aktualisiert. </li>
+</ul>
+
+</p>
+<p>Im rechten Bereich der Menüleiste gibt es die kontextabhängigen Menüs. Dies sind:
+	<ul>
+<li><span class="glyphicon glyphicon-stats" ></span><br>Mit dem Grafiksymbol kann die Plotly Komponente aufgerufen werden</li>
+<li><span class="glyphicon glyphicon-export" ></span><br>Mit dem Exportsymbol wird der CSV Export aufgerufen</li>
+<li><span class="glyphicon glyphicon-info-sign" ></span><br>Das Informationszeichen springt zur Kurzbeschreibung der Aufgabe</li>
+<li><span class="glyphicon glyphicon-cog"></span><br>Das Zahnrad ruft unterschiedliche Funktionen auf. Dies die Konfiguration der Tabelle, oder aber auch die Aufhebung eines Fehlers</li>
+	</ul>
+
+</p>
+
+<h2>Die Tabellensicht</h2>
+
+<p>
+Die Tabellensicht kann über das <span class="glyphicon glyphicon-cog"></span> Icon eingestellt werden. Probiert bitte die unterschiedlichen Einstellungen aus.
+Eingestellt werden kann:
+<ul>
+	<li>Der Ort der Tabelle<br>Wurde die Tabelle durch Klick auf einen Schlüssel auf ein bestimmtes Gebiet eingeschränkt, so kann hier die Einschränkung stufenweise aufgehoben werden.</li>
+	<li> Anzeige des Feldes <br> Sollen nicht alle Objekte, sondern nur die mit einem bestimmten Tag (Subtag) dargestellt werden, so kann das hier ausgewählt werden.</li>
+	<li>Prozentanzeige<br>Falls die Anzeige in Prozent (von der Gesamtsumme oder Vorgabe) erfolgen soll </li>
+	<li>Zeitperiode<br>Ist die Zeitachse in Tag, Monat oder Jahr aufzuteilen</li>
+	<li>Anzeige Seit<br>Bei Bedarf kann hier eine zu lange Historie ausgeblendet werden </li>
+	<li>Anzahl der Stellen für den Schlüssel<br>OSM Count basiert auf dem "Schlüssel", über dessen Länge, die Informationen (Land, Bundesland, Gemeinde...) aufgeklappt werden können. Die Schlüssellänge korrespondiert aber nicht immer konkret mit einer Verwaltungsstufe</li>
+</ul>
+
+<h2>Weitere Informationen in der Tabelle</h2>
+Im Unteren Bereich der Tabelle werden die Informationen gibt es die folgenden Informatione.
+<ul>
+<li>Offene Queries<br>Gibt an, wie viele Queries für diese Tabelle noch an Overpass gesendet werden müssen. Solange dies nicht 0 ist, fehlen in der aktuellen Spalte Daten.</li>
+<li>Fehler<br>Gibt die Fehler für die Query an. Bitte anklicken und über das Gear Symbol die Fehler resetten, damit OSMCount diese erneut an die Overpass sendet</li>
+<li>Zeitplan<br>Hier ist der Zeitplan für die angezeigte Aufgabe</li>
+
+</ul>
