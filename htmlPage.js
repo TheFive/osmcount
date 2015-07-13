@@ -2,14 +2,16 @@ var fs = require('fs');
 var path = require('path');
 
 
-var _osmCountVersion_ = "0.3.3";
+var _osmCountVersion_ = "0.34";
 
 var osmCountBrand = '<div class="navbar-header"><a class="navbar-brand" style="font-family:comic sans ms;font-size: 21px; color: #555" href="/index.html">OSM Count</a></div>';
 
 
 var waStruct = [
 {name: "Apotheke",measure:"Apotheke"},
-{name: "Adressen ohne Strasse",measure:"AddrWOStreet"}];
+{name: "Adressen ohne Strasse",measure:"AddrWOStreet"},
+{name: "Wanderwegweiser",measure:"GuidePost"},
+];
 
 var poiStruct = [
 {name: "Apotheke",table:"pharmacy"}];
@@ -18,7 +20,13 @@ var tablesStruct = [
 {name:"Apotheke",list:[{name:"Deutschland",measure:"Apotheke"},
                        {name:"Österreich",measure:"Apotheke_AT"},
                        {name:"Deutsche PLZ",measure:"ApothekePLZ_DE"}]},
-{name:"Adressen Ohne Straße",measure:"AddrWOStreet"}
+{name:"Adressen Ohne Straße",measure:"AddrWOStreet"},
+{name:"Wanderwegweiser",list:[{name:"information=guidepost (nodes)",measure:"GuidePost_Node"},
+                             {name:"relation=desination_sign (relation)",measure:"GuidePost_Rel"},
+                             {name:"path with Destination (way)",measure:"GuidePost_Path"}]}
+
+
+
 ];
   
 
@@ -85,6 +93,7 @@ function HtmlPage(type) {
 	this.type = type;
 	
 	this.title = "";
+  this.subtitle = "";
 	this.footer = "OSM Count ...";
 	this.menu = "";
   this.modal = "";
@@ -139,6 +148,7 @@ HtmlPage.prototype = {
     navbar += '</ul></div>';
 
     var content = '<h1>'+this.title+'</h1>';
+     if (this.subtitle != '') content += '<h2>'+this.subtitle+'</h2>';
      content += this.content;
   /*  if (typeof (this.menu) != 'undefined' && this.menu != "") {
       content = this.menu +"<br>"+this.content;

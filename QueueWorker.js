@@ -12,11 +12,12 @@ var util        = require('./util.js')
 
 var DataCollection = require('./model/DataCollection.js')
 var wochenaufgabe = require('./wochenaufgabe.js');
+var POIReader = require('./POIReader.js');
 
 exports.processSignal = '';
 exports.processExit;
 
-var overpassWaitTime = 4000; // Wait before another Overpass Query
+var overpassWaitTime = 100; // Wait before another Overpass Query
 var overpassWaitTimeSteps = 50;
 var overpassNo429erFor = 0;
 
@@ -137,6 +138,28 @@ function doConsole(cb,results) {
   cb(null,job);
 }
 
+function doReadPOI(cb,results) {
+  debug("doReadPOI(cb,"+results+")");
+  var job=results.readjob;
+  if (job && typeof(job.status)!='undefined' && job.status =="working" && job.type == "readpoi") {
+    debug("Start: doReadPoi(cb,"+results+")");
+    POIReader.doReadPOI(job.measure,function(err,result){
+      if (err) {
+        job.status = "error";
+        job.error = err;
+      }else {
+        job.status = "done";
+      }
+      cb(null,job);
+      return;
+    });
+  }
+  else {
+    cb(null,job);
+    return;
+  }
+}
+
 exports.overpassRunning = false;
 exports.overpassStartTime= 0;
 exports.overpassLocation= "Not Defined";
@@ -186,13 +209,21 @@ function doOverpass(cb,results) {
               overpassNo429erFor = 0;
               job.status = "open";
               job.error.fix = "Was HTTP 429 Fixed automated for reason NotExcecuted, actual overpass slow down: "+overpassWaitTime+"ms";
+              if (err.body.indexOf("Another request from your IP is still running.")>0) {
+                // Several Request of this Sever are running on overpass Server
+                // call Kill Command
+                console.log("Try to kill Overpass Queries");
+
+                // Do not wait for any kill result
+                lod.killOverpass(function () {console.log("Overpass Queries Killed");})
+              }
             }
           } else {
             job.status="done";
             overpassNo429erFor += 1;
-            if (overpassNo429erFor >100) {
+            if (overpassNo429erFor >25) {
                overpassWaitTime -= overpassWaitTimeSteps;
-               if (overpassWaitTime <=0)  overpassWaitTime = 0;
+               if (overpassWaitTime <=100)  overpassWaitTime = 100;
                overpassNo429erFor = 0;
             }
           }
@@ -278,7 +309,7 @@ function doInsertJobs(cb,results) {
       // No Jobs created
       console.log("Nothing loaded");
       job.status = "error";
-      job.error = "createQuery results in 0 Jobs";
+      job.error = {text:"createQuery results in 0 Jobs"};
       if (cb) cb(null,job);
       return;
     }
@@ -358,10 +389,11 @@ function doNextJob(callback) {
   async.auto( {readjob:     getNextJob,
         saveWorking:     ["readjob",saveJobState],
         doConsole:       ["saveWorking", doConsole],
+        doReadPOI:       ["saveWorking", doReadPOI],
         doOverpass:      ["saveWorking", doOverpass],
         doInsertJobs:    ["saveWorking", doInsertJobs],
         doLoadBoudnaries:["saveWorking", doLoadBoundaries],
-        saveDone:        ["doConsole","doOverpass","doInsertJobs", "doLoadBoudnaries",saveJobState]
+        saveDone:        ["doReadPOI","doConsole","doOverpass","doInsertJobs", "doLoadBoudnaries",saveJobState]
     },
     function (err,results) {
       if (err && !(typeof(err.message) != "undefined" && err.message === 'No Job Loaded' )) {
@@ -369,7 +401,7 @@ function doNextJob(callback) {
         console.log("Error occured in function: QueueWorker.doNextJob");
         console.log(err);
       }
-      if (results) debug("finished %s" ,results);
+      debug("doNextJob finished");
       var job = results.readjob;
       callback(null,job);
     }

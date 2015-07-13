@@ -53,7 +53,9 @@ describe('util',function(){
       var t1 = new Date();
       util.waitOneMin(function test() {
         var t2 = new Date();
-        should.equal(Math.round((t2-t1)/10),Math.round(config.getValue("waitTime",120)*1000)/10);
+        var rounder = 25;
+
+        should.equal(rounder * Math.round((t2-t1)/rounder),rounder * Math.round(config.getValue("waitTime",120)*1000/rounder));
         done();
       })
     })
@@ -66,7 +68,7 @@ describe('util',function(){
       var t1 = new Date();
       a(function test() {
         var t2 = new Date();
-        should.equal(Math.round((t2-t1)/10),Math.round(2*1000)/10);
+        should.equal(Math.round((t2-t1)/20),Math.round(2*1000)/20);
         done();
       })
     })

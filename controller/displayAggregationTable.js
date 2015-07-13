@@ -153,26 +153,18 @@ function setParams(req,param) {
 function generateFilterTable(param,header) {
   debug("generateFilterTable");
 
-    var filterSub = "-"
     var filterSubPercent = "-";
     var subSelector = '';
     var subPercentSelector = "";
-    if (  (param.measure == "Apotheke")
-        ||(param.measure == "Apotheke_AT")
-        ||(param.measure == "ApothekePLZ_DE")) {
-      filterSub =  gl("[Name]", {sub:"missing.name"},param);
-      filterSub += gl("[Öffnungszeiten]", {sub:"missing.opening_hours"},param);
-      filterSub += gl("[fixme]", {sub:"existing.fixme"},param);
-      filterSub += gl("[phone]", {sub:"missing.phone"},param);
-      filterSub += gl("[wheelchair]", {sub:"missing.wheelchair"},param);
-      filterSub += gl("[ALLES]", {sub:""},param);
 
-      subSelector += optionValue("missing.name","Name",param.sub);
-      subSelector += optionValue("missing.opening_hours","Öffnungszeiten",param.sub);
-      subSelector += optionValue("existing.fixme","fixme",param.sub);
-      subSelector += optionValue("missing.phone","Telefon",param.sub);
-      subSelector += optionValue("missing.wheelchair","wheelchair",param.sub);
-      subSelector += optionValue("","Alle Apotheken",param.sub);
+    var ssl = wochenaufgabe.map[param.measure].ssl;
+    if (typeof(ssl)!='undefined') {
+
+      for (var k in ssl) {
+        var o= ssl[k];
+        subSelector += optionValue(o.type+"."+o.prop,k,param.sub);
+      }
+      subSelector += optionValue("","Alles",param.sub);
 
       subSelector = '<label for="Feldwahl">Anzeige des Feldes:</label><select class="form-control" name ="sub">'+subSelector+'</select>';
 
@@ -183,11 +175,11 @@ function generateFilterTable(param,header) {
         subPercentSelector = '<label for="Prozentanzeige">>Anzeige in Prozent/Anzahl:</label><select class="form-control" name="subPercent"> \
         <option value="Yes" selected>Prozentanzeige</option> \
         <option value="No">Anzahl</option> </select>'
-    } else {
+      } else {
         subPercentSelector = '<label for="Prozentanzeige">Anzeige in Prozent/Anzahl:</label><select class="form-control" name="subPercent"> \
         <option value="Yes">Prozentanzeige</option> \
         <option value="No" selected>Anzahl</option> </select>'
-    }
+      }
     }
 
 
@@ -218,6 +210,9 @@ function generateFilterTable(param,header) {
     var filterText = "";
     if (param.location!="") {
       var kreisnamen =  wochenaufgabe.map[param.measure].map.map;
+      var keyList = wochenaufgabe.map[param.measure].map.keyList;
+      if (typeof(kreisnamen)=='undefined') kreisnamen = keyList;
+      if (typeof(kreisnamen)=='undefined') kreisnamen = {};
 
       filterText+= param.locationName+" ("+param.location+")";
       filterSelector += optionValue(param.location,filterText,param.location);
@@ -516,9 +511,13 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
       if (param.sub != "") sub = "?sub="+param.sub;
       tablerow += "<td><a href=/overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
       query= generateQuery(param.measure,row,param.sub);
-      tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+"&R>R</a>"
-      query= generateQueryCSV(param.measure,row);
-      tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+">#</a></td>"
+      if (query != "") {
+        tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+"&R>R</a>"        
+      }
+      /*query= generateQueryCSV(param.measure,row);
+      if (query != "") {
+        tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+">#</a></td>"        
+      }*/
     }
     tablerow = "<tr>"+tablerow+"</tr>";
     tablebody += tablerow;
@@ -608,6 +607,9 @@ function generateCSVTable(param,header,firstColumn,table,delimiter) {
 function generateQuery(measure,schluessel,sub) {
   debug("generateQuery(%s,%s,%s)",measure,schluessel,sub);
 
+  var wa = wochenaufgabe.map[measure];
+
+
 
   var subQuery ="";
   if (sub == "missing.name") subQuery = "name!~'.'";
@@ -615,12 +617,35 @@ function generateQuery(measure,schluessel,sub) {
   if (sub == "missing.phone") subQuery = "phone!~'.']['contact:phone'!~'.'";
   if (sub == "missing.opening_hours") subQuery = "opening_hours!~'.'";
   if (sub == "existing.fixme") subQuery = "fixme";
+  if (sub == "existing.hiking") subQuery = "hiking";
+  if (sub == "existing.bicycle") subQuery = "bicycle";
+  if (sub == "existing.note:destination") subQuery = "note:destination";
+  if (sub == "existing.name") subQuery = "name";
+  if (sub == "existing.inscription") subQuery = "inscription";
+  if (sub == "existing.description") subQuery = "description";
+  if (sub == "existing.operator") subQuery = "operator";
+  if (sub == "existing.material") subQuery = "material";
+  if (sub == "existing.ref") subQuery = "ref";
 
-  var query = wochenaufgabe.map[measure].overpass.query;
+  var query = wa.overpass.query;
   if (sub !='') {
-    query = wochenaufgabe.map[measure].overpass.querySub;
+    query = wa.overpass.querySub;
   }
-  query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
+  if (typeof(wa.map.keyList) != 'undefined') {
+    var keys = wa.map.keyList;
+
+    var o = keys[schluessel];
+    if (typeof(o)=='undefined') return "";
+    if (typeof(o.osmkey)=='undefined') return "";
+    query = query.replace(':key:',o.osmkey);
+    query = query.replace(':value:',o.osmvalue);
+    query = query.replace(':key:',o.osmkey);
+    query = query.replace(':value:',o.osmvalue);
+    query = query.replace(':key:',o.osmkey);
+    query = query.replace(':value:',o.osmvalue);
+  } else {
+    query = query.replace('"=":schluessel:"','"~"^'+schluessel+'"');
+  }
   query = query.replace('[date:":timestamp:"]','');
 
 
@@ -633,14 +658,14 @@ function generateQuery(measure,schluessel,sub) {
   if (typeof(sub) != 'undefined') {
 
     // This should be better done in a while loop
-    query = query.replace(':key:',subQuery);
-    query = query.replace(':key:',subQuery);
-    query = query.replace(':key:',subQuery);
+    query = query.replace(':subkey:',subQuery);
+    query = query.replace(':subkey:',subQuery);
+    query = query.replace(':subkey:',subQuery);
   }
   return query;
 }
 
-function generateQueryCSV(measure,schluessel) {
+/*function generateQueryCSV(measure,schluessel) {
   debug("generateQueryCSV(%s,%s)",measure,schluessel);
   var query = wochenaufgabe.map[measure].overpass.query;
   query = wochenaufgabe.map[measure].overpass.query;
@@ -656,8 +681,7 @@ function generateQueryCSV(measure,schluessel) {
   query = query.replace("out ids;","out meta;");
 
   return query;
-}
-
+}*/
 
 
 
@@ -702,16 +726,17 @@ exports.table = function(req,res){
     }
 
   var kreisnamen =  wochenaufgabe.map[param.measure].map.map;
+  var keyList = wochenaufgabe.map[param.measure].map.keyList;
+  if (typeof(kreisnamen)=='undefined') kreisnamen = keyList;
+  if (typeof(kreisnamen)=='undefined') kreisnamen = {};
 
 
-
-
-
-    v = kreisnamen[param.location];
+  v = kreisnamen[param.location];
   if (typeof(v)!='undefined') {
     param.locationName=v.name;
-    param.locationType=v.typ;
+   param.locationType=v.typ;
   }
+
 
 
 
@@ -841,13 +866,18 @@ exports.table = function(req,res){
               workingSchluessel = data.measure+": "+data.schluessel;
               workingTimestamp = (new Date()-data.timestamp)/(1000*60);
               workingTimestamp = util.numeral(workingTimestamp).format('0.00');
+              if (typeof(kreisnamen)!='undefined') {
               var t =kreisnamen[workingSchluessel];
-              if (typeof(t)=='object') {
-                workingName = t.name;
+                if (typeof(t)=='object') {
+                  workingName = t.name;
+                }                
               }
             }
             if (data.type == "insert") {
               workingSchluessel = "Insert " + data.measure;
+            }
+            if (data.type == "readpoi") {
+              workingSchluessel = "Read POIs ";
             }
           }
           callback();
@@ -925,7 +955,7 @@ exports.table = function(req,res){
 
         }
 
-        header.unshift("Admin Level");
+        //header.unshift("Admin Level");
         header.unshift("Name");
         format["Name"] = {};
         format["Name"].toolTip = "Name aus OSM, Alternativ Teilschlüssel";
@@ -1005,7 +1035,8 @@ exports.table = function(req,res){
 //
         if (param.html) {
           page =new htmlPage.create("table");
-          page.title = "Wochenaufgabe "+param.measure;
+          page.title = wochenaufgabe.map[param.measure].title;
+          page.subtitle = param.sub;
           page.modal = generateFilterTable(param,header);
 
           generateSortHeader(param,header,format);
@@ -1045,8 +1076,7 @@ exports.table = function(req,res){
           pageFooter += separator;
           pageFooter += "Die Service Links bedeuten: \
                   <b>O</b> Zeige die Overpass Query \
-                  <b>R</b> Starte die Overpass Query \
-                  <b>#</b> Öffne Overpass Turbo mit CSV Abfrage";
+                  <b>R</b> Starte die Overpass Query ";
           pageFooter += "<br>Dauer Aggregate Funktion: "+(timeAggregate/1000)+ "s. Dauer Vorgaben: "+(timeVorgabe/1000)+"s. Dauer Aufbereitung: "+(timeTableGeneration/1000)+"s.";
           page.footer = pageFooter;
 
@@ -1092,7 +1122,7 @@ exports.table = function(req,res){
     if (typeof(sub) == 'undefined') sub = "";
       var query = generateQuery(measure,schluessel,sub);
 
-    if (!query) query = "Für die Aufgabe "+measure+" ist keine Query definiert";
+    if (query == "") query = "Für die Aufgabe "+measure+" und den Schlüssel "+schluessel+" kann keine Query erstellt werden";
 
     var text = "<h1>Overpass Abfrage</h1>"
     text += "<table><tr><td>Aufgabe</td><td>"+measure+"</td></tr> \

@@ -143,8 +143,8 @@ describe('importCSV', function() {
       it('should load 2 datasets' , function(done) {
         fs.writeFileSync(filename,"schluessel;count\na;2\nb;10");
         DataCollection.importCSV(filename,{name:"",count:0},function(err,data) {
-          should.equal(data,"Datensätze: 2");
           should.equal(err,null);
+          should.equal(data,"Datensätze: 2");
           pg.connect(configuration.postgresConnectStr, function(err,client,pgdone){
             should.equal(err,null);
             client.query("select key,count from DataCollection;",function(err,data){

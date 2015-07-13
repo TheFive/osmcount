@@ -4,9 +4,9 @@ var should    = require('should');
 var request   = require('request');
 
 var configuration  = require('../configuration.js');
-var wochenaufgabe  = require('../wochenaufgabe.js');
 
 var loadDataFromDB = require('./LoadDataFromDB.js');
+var wochenaufgabe  = require('../wochenaufgabe.js');
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
 
@@ -20,13 +20,16 @@ var queryBoundaries_CH='[out:json][timeout:900];area[type=boundary]["int_name"="
 
 var overpassApiLinkRU = "http://overpass.osm.rambler.ru/cgi/interpreter ";
 var overpassApiLinkDE = "http://overpass-api.de/api/interpreter";
+                    
+var overpassApiKillDE = "http://overpass-api.de/api/kill_my_queries";
+var overpassApiKillRU = "http://overpass.osm.rambler.ru/cgi/kill_my_queries";
 
-exports.timeout = 1000 * 60 * 10; // Timeout after 10 minutes;
+exports.timeout = 2* 1000 * 60 * 60; // Timeout after 2 hours minutes;
 
 
 
 function overpassQuery(query, cb, options) {
-	debug("overpassQuery");
+  debug("overpassQuery");
   options = options || {};
   if (typeof(options.uri)!= 'undefined') {
     options.uri = options.overpassUrl;
@@ -66,6 +69,39 @@ function overpassQuery(query, cb, options) {
 };
 
 exports.overpassQuery = overpassQuery;
+
+function killOverpass( cb) {
+  debug("killOverpass");
+  options =  {};
+  options.uri = overpassApiKillDE;
+  console.log("Kill Overpass Query");
+  request.post(options, function (error, response, body) {
+    debug("killOverpass->CB ");
+    if (!error && response.statusCode === 200) {
+    	console.dir(response.body);
+        cb(null, null);
+        return;
+    } else if (error) {
+    	console.log("Error occured in function: LoadOverpassData.Kill My Queries");
+    	console.log(error);
+    	console.log(body);
+        cb(error);
+        return;
+    } else if (response) {
+        cb({
+            message: 'Kill Request failed: HTTP ' + response.statusCode,
+            statusCode: response.statusCode,
+            body: body
+        });
+    } else {
+        cb({
+            message: 'Unknown error.',
+        });
+    }
+  });
+};
+
+exports.killOverpass = killOverpass;
 
 function loadBoundariesDE(cb,result) {
 	debug("loadBoundariesDE");
@@ -231,6 +267,39 @@ exports.createQuery = function(referenceJob)
 
 		}
 		return jobs;
+	}
+
+	var keylist = wa.map.keyList;
+	if (typeof(keylist)!="undefined") {
+		var keys = keylist;
+		for (var k in keys) {
+			debug(keys[k]);
+
+			// No Data in Map, then cont.
+			if (typeof(keys[k].osmkey)=='undefined') continue;
+
+			var job = {};
+			job.measure=aufgabe;
+			job.schluessel=k;
+			should(job.schluessel).not.equal('undefined');
+			job.status='open';
+			job.exectime = exectime;
+			job.type = "overpass";
+			job.query = wochenaufgabe.map[aufgabe].overpass.query.replace(':key:',keys[k].osmkey);
+			job.query = job.query.replace(':value:',keys[k].osmvalue);
+			job.query = job.query.replace(':timestamp:',exectime.toISOString());
+			if (typeof(referenceJob._id)!='undefined') {
+			  job.source = referenceJob._id;	
+			}
+			if (typeof(referenceJob.id)!='undefined') {
+			  job.source = referenceJob.id;	
+			}
+			
+			jobs.push(job);
+
+		}
+		return jobs;
+
 	}
 	return [];
 }

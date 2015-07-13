@@ -123,6 +123,8 @@ exports.insertValue = function insertValue(map,key,osmdoc) {
   }
 }
 
+
+
 exports.sortAndReduce = function sortAndReduce(list) {
 	list.sort();
 	for (i=list.length-2;i>=0;i--)

@@ -57,6 +57,49 @@ describe('LoadOverpassData',function() {
 
       bddone();
     });
+    it('should work with key lists', function (bddone) {
+
+      var keylist = {"DE":{name:"test"},
+                      "DE1":{osmkey:"key",osmvalue:"1",name:"DE1"},
+                      "DE2":{osmkey:"key",osmvalue:"2",name:"DE2"}}
+      wochenaufgabe.map["test"]={map:{keyList:keylist},overpass:{query:"TEST :key: TEST :value:"}};
+
+      var referenceJob = {};
+      referenceJob.measure = "test";
+      referenceJob.exectime = new Date();
+      var list = lod.createQuery(referenceJob);
+      should.exist(list);
+      should(list.length).equal(2);
+      should(list[0]).eql({measure:"test",
+                                 exectime:referenceJob.exectime,
+                                 status:"open",
+                                 query:"TEST key TEST 1",
+                                 schluessel:'DE1',
+                                 type:'overpass'
+                               });
+      should(list[1]).eql({measure:"test",
+                                 exectime:referenceJob.exectime,
+                                 status:"open",
+                                 query:"TEST key TEST 2",
+                                 schluessel:'DE2',
+                                 type:'overpass'
+                               });
+
+      bddone();
+    });
+    it('should return nothing', function (bddone) {
+
+     
+      wochenaufgabe.map["test"]={map:{},overpass:{query:"TEST :key: TEST :value:"}};
+
+      var referenceJob = {};
+      referenceJob.measure = "test";
+      referenceJob.exectime = new Date();
+      var list = lod.createQuery(referenceJob);
+      should.exist(list);
+      should(list.length).equal(0);
+      bddone();
+    });
   });
   describe('overpassQuery',function(bddone) {
     it('should handle a query',function(bddone) {
@@ -114,7 +157,7 @@ describe('LoadOverpassData',function() {
     it ('should load and parse overpassdata',function(bddone){
       wochenaufgabe.map["test"]={map:{list:['1','2']},
                                  overpass:{query:"TEST :schluessel: TEST"},
-                                 tagCounter:wochenaufgabe.tagCounter};
+                                 tagCounter:wochenaufgabe.tagCounterPharmacy};
 
       var job = {measure:"test"};
       job.exectime = new Date();

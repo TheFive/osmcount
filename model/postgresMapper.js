@@ -50,7 +50,13 @@ function createWhereClause(map,query,options) {
 
 exports.countPostgres = function count(map,query,cb) {
   debug('count');
-  var whereClause = createWhereClause(map,query);
+  var whereClause;
+  if (typeof(query)!='string') {
+    whereClause = createWhereClause(map,query);
+  } else {
+    whereClause = query;
+  }
+  
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
     if (err) {
       cb(err,null);
@@ -319,6 +325,7 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(stream,cb) {
       }
       var valueList = this.getInsertQueryValueList(item);
       var queryString = this.getInsertQueryString();
+
       var query = client.query(this.getInsertQueryString(),valueList);
       query.on("error",function(err){
         debug('Error after Insert'+err);
@@ -348,7 +355,6 @@ exports.insertStreamToPostgres = function insertStreamToPostgres(stream,cb) {
       debug(" not internal initialising");
       parser = JSONStream.parse();
       var mapper = es.map(insertData.bind(this));
-      console.log(streamx);
       ls = stream.pipe(parser).pipe(mapper);
     }
     ls.wasCalled = false;
