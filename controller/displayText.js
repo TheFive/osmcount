@@ -22,6 +22,13 @@ exports.main = function(req,res){
  	res.set('Content-Type', 'text/html');
 	res.end(page.generatePage());
 }
+exports.manual = function(req,res){
+	var page = htmlPage.create();
+	page.content = fs.readFileSync(path.resolve(__dirname,"..", "html","manual.html"),'utf8');
+  	page.footer = "OSM Count...";
+ 	res.set('Content-Type', 'text/html');
+	res.end(page.generatePage());
+}
 
 
 exports.wochenaufgabe = function(req,res) {
