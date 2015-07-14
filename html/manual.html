@@ -6,7 +6,7 @@
 <p>Neben dem Logo befinden sich die folgenden Menüs.
 <ul>
 <li> Aufgaben<br>Liste der Aufgaben mit kurzen Beschreibungen </li>
-<li> Tabelle<br> Dreh und Angelpunkt von OSM Count, hier gibt es die Auswertungen</li>
+<li> Tabelle<br> Dreh- und Angelpunkt von OSM Count, hier gibt es die Auswertungen</li>
 <li> POI <br> Experimentell, hier sollen in Zukunft aktuelle POI Daten von den unterschiedlichen Aufgaben gezeigt werden, wir zur Zeit eher sporadisch aktualisiert. </li>
 </ul>
 
@@ -21,7 +21,7 @@
 
 </p>
 
-<h2>Die Tabellensicht</h2>
+<h2>Einstellung der Tabellensicht</h2>
 
 <p>
 Die Tabellensicht kann über das <span class="glyphicon glyphicon-cog"></span> Icon eingestellt werden. Probiert bitte die unterschiedlichen Einstellungen aus.
@@ -35,11 +35,23 @@ Eingestellt werden kann:
 	<li>Anzahl der Stellen für den Schlüssel<br>OSM Count basiert auf dem "Schlüssel", über dessen Länge, die Informationen (Land, Bundesland, Gemeinde...) aufgeklappt werden können. Die Schlüssellänge korrespondiert aber nicht immer konkret mit einer Verwaltungsstufe</li>
 </ul>
 
-<h2>Weitere Informationen in der Tabelle</h2>
-Im Unteren Bereich der Tabelle werden die Informationen gibt es die folgenden Informatione.
+<h2>Die Tabelle</h2>
+<p> 
+Die Tabelle stellt in der ersten Spalte den Schlüssel dar. Dies ist z.B. der offizielle Gemeindenummernschlüssel, oder aber eine Kombination aus verschiedenen Schlüsseln.
+Klickt man auf einen solchen so werden nur noch Daten angezeigt, die mit diesem Schlüssel beginnen.<br>
+In der zweiten Spalte wird der Name (entnommen aus dem OSM Name Tag) des Gebietes dargestellt.
+Die weiteren Spalten sind dann zeitbezogen. Dabei wird aus der angegebenen Zeit immer der aktuellste Wert genommen. Läuft eine Abfrage noch, so kann so die aktuellste Spalte unvollständig sein.<br>
+Die Spalte Service hat die folgenden kurzen Links:<br>
+<ul>
+	<li>O<br>Overpass Abfrage, wird nur angezeigt, wenn für die Zeile eine Overpass Abfrage ausgeführt wurde.</li>
+	<li>R<br>Run Overpass Abfrage, führt die Overpass Abfrage direkt aus</li>
+</ul>
+</p>
+Im unteren Bereich der Tabelle werden die Informationen gibt es die folgenden Informationen.
 <ul>
 <li>Offene Queries<br>Gibt an, wie viele Queries für diese Tabelle noch an Overpass gesendet werden müssen. Solange dies nicht 0 ist, fehlen in der aktuellen Spalte Daten.</li>
-<li>Fehler<br>Gibt die Fehler für die Query an. Bitte anklicken und über das Gear Symbol die Fehler resetten, damit OSMCount diese erneut an die Overpass sendet</li>
+<li>Fehler<br>Gibt die Fehler für die Query an. Bitte anklicken und über das Zahnrad Symbol die Fehler resetten, damit OSMCount diese erneut an die Overpass sendet.</li>
+>>>>>>> release-0.35
 <li>Zeitplan<br>Hier ist der Zeitplan für die angezeigte Aufgabe</li>
 
 </ul>

@@ -509,9 +509,9 @@ function generateTable(param,header,firstColumn,table,format,rank, serviceLink) 
       var sub = "";
       var query;
       if (param.sub != "") sub = "?sub="+param.sub;
-      tablerow += "<td><a href=/overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
       query= generateQuery(param.measure,row,param.sub);
       if (query != "") {
+        tablerow += "<td><a href=/overpass/"+param.measure+"/"+row+".html"+sub+">O</a>";
         tablerow += " <a href=http://overpass-turbo.eu/?Q="+encodeURIComponent(query)+"&R>R</a>"        
       }
       /*query= generateQueryCSV(param.measure,row);

@@ -7,7 +7,7 @@ var WorkerQueue = require('../model/WorkerQueue.js');
 var DataCollection = require('../model/DataCollection.js');
 var POI = require('../model/POI.js');
 
-
+exports.serverStartTime;
 
 exports.status = function(req,res) {
 	debug("exports.status");
@@ -35,9 +35,11 @@ exports.status = function(req,res) {
 		page.title = "OSM Count Status"
 		var content;
 		content = "<h2>Result Status Object: </h2>";
+		content += "Server started at "+exports.serverStartTime+"<br>";
 		content += "<pre>"+JSON.stringify(result,null,2)+"</pre>";
 		content += "<h2>Error Object (Für Statusabfrage)</h2>";
 		content += "<pre>"+JSON.stringify(err,null,2)+"</pre>";
+
 
 		page.content = content;
 		res.set('Content-Type', 'text/html');
