@@ -245,7 +245,7 @@ var WAApotheke = {
   ranktype:"UP",
   tagCounter : exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:7
+  overpassEveryDays:28
 }
 
 var WAApotheke_AT = {
@@ -275,7 +275,7 @@ var WAApotheke_AT = {
   ranktype:"UP",
   tagCounter:exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:14
+  overpassEveryDays:28
 }
 
 var WAApotheke_CH = {
@@ -306,7 +306,7 @@ var WAApotheke_CH = {
   ranktype:"UP",
   tagCounter:exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:14
+  overpassEveryDays:28
 }
 
 var WAApothekePLZ_DE= {
@@ -387,7 +387,7 @@ var WAApothekeTestDE = {
   ranktype:"UP",
   tagCounter : exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:7
+  overpassEveryDays:2
 }
 
 var WA_GuidePost_Node = {
@@ -408,7 +408,7 @@ var WA_GuidePost_Node = {
   ranktype:"UP",
   tagCounter : exports.tagCounterGuidePost,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:7
+  overpassEveryDays:2
 }
 var WA_GuidePost_Rel = {
   title : "WA Wanderwegweiser (type=destination_sign)",
@@ -428,7 +428,7 @@ var WA_GuidePost_Rel = {
   ranktype:"UP",
   tagCounter : exports.tagCounterDestinationRel,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:7
+  overpassEveryDays:2
 }
 
 
@@ -451,7 +451,7 @@ var WA_GuidePost_Path = {
   ranktype:"UP",
   tagCounter : exports.tagCounterNoSubSelector,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:7
+  overpassEveryDays:2
 }
 
 
