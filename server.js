@@ -24,6 +24,8 @@ var displayStatus           = require('./controller/displayStatus.js')
 
 var app = express();
 
+displayStatus.serverStartTime = new Date();
+
 
 exports.dirname = __dirname;
 
