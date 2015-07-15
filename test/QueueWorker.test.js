@@ -290,7 +290,7 @@ describe('QueueWorker',function(){
     it('should work handle not parsable results',function(bddone) {
       this.timeout(1000*60*2+100);
       wochenaufgabe.map["test"]={map:{list:['1','2']},overpass:{query:"TEST :schluessel: TEST"}};
-      var singleStep = {id:"1",schluessel:"102",measure:"test",type:"overpass",query:"This is an overpassquery",status:"open",exectime: new Date()};
+      var singleStep = {id:"1",schluessel:"102",measure:"test",type:"overpass",query:"This is an overpassquery",status:"open",exectime: new Date(),overpasstime:0,errorcount:1};
       var valueList = [singleStep];
       var scope = nock('http://overpass-api.de/api/interpreter')
                   .post('',"data=This%20is%20an%20overpassquery")             

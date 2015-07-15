@@ -203,6 +203,7 @@ function doOverpass(cb,results) {
             console.log(err);
             job.status = "error";
             job.error = err;
+            job.errorcount += 1;
             // error is handled, so put null as error to save
             if (err.statusCode == "429") {
               overpassWaitTime += overpassWaitTimeSteps;
