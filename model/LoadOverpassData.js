@@ -195,6 +195,7 @@ exports.runOverpass= function(query, job,result, cb) {
 		debug("runOverpass->CB(");
 		var overpassEndTime = new Date().getTime();
 		var overpassTime = overpassEndTime - overpassStartTime;
+		console.log("Overpass time"+overpassTime)
 		job.overpassTime = overpassTime;
 		if (error) {
 			console.log("Error occured in function: LoadOverpassData.runOverpass");
@@ -253,6 +254,8 @@ exports.createQuery = function(referenceJob)
 			should(job.schluessel).not.equal('undefined');
 			job.status='open';
 			job.exectime = exectime;
+			job.errorcount = 0;
+			job.overpasstime = 0;
 			job.type = "overpass";
 			job.query = wochenaufgabe.map[aufgabe].overpass.query.replace(':schluessel:',job.schluessel);
 			job.query = job.query.replace(':timestamp:',exectime.toISOString());

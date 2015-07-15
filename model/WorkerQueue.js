@@ -24,6 +24,8 @@ function WorkerQueue() {
        stamp timestamp with time zone, \
         status text, \
         exectime timestamp with time zone, \
+        overpasstime integer, \
+        errorcount integer, \
         type text, \
         query text, \
         source text, \
@@ -49,6 +51,8 @@ function WorkerQueue() {
            timestamp:'stamp',
            exectime:'exectime',
            id:'id',
+           overpasstime:'overpasstime',
+           errorcount:'errorcount',
            query:'query',
            source:'source',
            prio:'prio'
@@ -76,7 +80,7 @@ WorkerQueue.prototype.importCSV =function(filename,defJson,cb) {
 }
 
 WorkerQueue.prototype.getInsertQueryString = function getInsertQueryString() {
-  return "INSERT into workerqueue (key,stamp,measure,status,exectime,type,query,source,error) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)";
+  return "INSERT into workerqueue (key,stamp,measure,status,exectime,overpasstime,errorcount,type,query,source,error) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)";
 }
 
 WorkerQueue.prototype.getInsertQueryValueList = function getInsertQueryValueList(item) {  
@@ -85,11 +89,13 @@ WorkerQueue.prototype.getInsertQueryValueList = function getInsertQueryValueList
   var measure = item.measure;
   var status = item.status;
   var exectime = item.exectime;
+  var overpasstime = item.overpasstime;
+  var errorcount = item.errorcount;
   var type = item.type;
   var query = item.query;
   var source = item._id;
   var error = util.toHStore(item.error);
-  return  [key,stamp,measure,status,exectime,type,query,source,error];
+  return  [key,stamp,measure,status,exectime,overpasstime,errorcount,type,query,source,error];
 }
 
 
@@ -138,6 +144,8 @@ function getNextTaskPostgresDB(status,cb) {
       result.measure = row.measure;
       result.status = row.status;
       result.exectime = row.exectime;
+      result.errorcount = row.errorcount;
+      result.overpasstime = row.overpasstime;
       result.type = row.type;
       result.query = row.query;
       result.source = row.source;
@@ -170,11 +178,15 @@ WorkerQueue.prototype.getNextOpenTask = function getNextOpenTask(cb) {
 function saveTaskPostgresDB(task,cb) {
   debug('saveTaskPostgresDB');
   pg.connect(config.postgresConnectStr,function(err,client,pgdone) {
+    if (typeof(task.overpasstime)=='undefined') task.overpasstime = 0;
+    if (typeof(task.errorcount)=='undefined') task.errorcount = 0;
     var key = task.schluessel;
     var stamp = task.timestamp;
     var measure = task.measure;
     var status = task.status;
     var exectime = task.exectime;
+    var overpasstime = task.overpassTime;
+    var errorcount = task.errorcount;
     var type = task.type;
     var query = task.query;
     var source = task._id;
@@ -182,10 +194,11 @@ function saveTaskPostgresDB(task,cb) {
     var id = task.id;
 
 
-    client.query("update workerqueue SET (key,stamp,measure,status,exectime,type,query,source,error)  \
-                                         = ($1,$2,$3,$4,$5,$6,$7,$8,$9) \
-                                         WHERE id = $10",
-                        [key,stamp,measure,status,exectime,type,query,source,error,id], function(err,result) {
+
+    client.query("update workerqueue SET (key,stamp,measure,status,exectime,overpasstime,errorcount,type,query,source,error)  \
+                                         = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) \
+                                         WHERE id = $12",
+                        [key,stamp,measure,status,exectime,overpasstime,errorcount,type,query,source,error,id], function(err,result) {
 
       should.not.exist(err);
       debug('Saved Rows %s with id %s status %s',result.rowCount,id,status);
