@@ -45,14 +45,18 @@ describe('LoadOverpassData',function() {
                                  status:"open",
                                  query:"TEST 1 TEST",
                                  schluessel:'1',
-                                 type:'overpass'
+                                 type:'overpass',
+                                 errorcount:0,
+                                 overpasstime:0
                                });
       should(list[1]).eql({measure:"test",
                                  exectime:referenceJob.exectime,
                                  status:"open",
                                  query:"TEST 2 TEST",
                                  schluessel:'2',
-                                 type:'overpass'
+                                 type:'overpass',
+                                 errorcount:0,
+                                 overpasstime:0
                                });
 
       bddone();

@@ -445,7 +445,7 @@ var WA_GuidePost_Path = {
     querySub:'not defined',
   },
   map: {
-  keyList: wochenaufgabe_data.dachKeyList
+  keyList: wochenaufgabe_data.dachKeyListShort
 
   },
   ranktype:"UP",

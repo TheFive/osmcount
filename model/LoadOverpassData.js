@@ -195,7 +195,6 @@ exports.runOverpass= function(query, job,result, cb) {
 		debug("runOverpass->CB(");
 		var overpassEndTime = new Date().getTime();
 		var overpassTime = overpassEndTime - overpassStartTime;
-		console.log("Overpass time"+overpassTime)
 		job.overpassTime = overpassTime;
 		if (error) {
 			console.log("Error occured in function: LoadOverpassData.runOverpass");
