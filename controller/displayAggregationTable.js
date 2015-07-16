@@ -116,7 +116,9 @@ function setParams(req,param) {
       if (param.lengthOfKey > 12) param.lengthOfKey = 12;
     }
 
-    param.lengthOfTime=7;
+    var lot = wochenaufgabe.map[param.measure].defaultLengthOfTime;
+    if (typeof(lot)=='undefined') lot = 7;
+    param.lengthOfTime=lot;
     param.period="Monat";
     if(req.query["period"]=="Jahr") {
       param.lengthOfTime=4;

@@ -245,7 +245,8 @@ var WAApotheke = {
   ranktype:"UP",
   tagCounter : exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:28
+  overpassEveryDays:28,
+  defaultLengthOfTime:7
 }
 
 var WAApotheke_AT = {
@@ -275,7 +276,8 @@ var WAApotheke_AT = {
   ranktype:"UP",
   tagCounter:exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:28
+  overpassEveryDays:28,
+  defaultLengthOfTime:7
 }
 
 var WAApotheke_CH = {
@@ -306,7 +308,8 @@ var WAApotheke_CH = {
   ranktype:"UP",
   tagCounter:exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:28
+  overpassEveryDays:28,
+  defaultLengthOfTime:7
 }
 
 var WAApothekePLZ_DE= {
@@ -327,7 +330,8 @@ var WAApothekePLZ_DE= {
   ranktype:"UP",
   tagCounter:null,
   tagCounterGlobal:null,
-  overpassEveryDays:28
+  overpassEveryDays:28,
+  defaultLengthOfTime:7
 }
 
 
@@ -357,7 +361,8 @@ rel(r.associatedStreet:"house")->.asHouseRel; \n\
   key: "de:regionalschluessel",
   ranktype: "down",
   tagCounter: null,
-  tagCounterGlobal: null
+  tagCounterGlobal: null,
+  defaultLengthOfTime:7
 }
 
 
@@ -387,7 +392,8 @@ var WAApothekeTestDE = {
   ranktype:"UP",
   tagCounter : exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:2
+  overpassEveryDays:2,
+  defaultLengthOfTime:7
 }
 
 var WA_GuidePost_Node = {
@@ -408,7 +414,8 @@ var WA_GuidePost_Node = {
   ranktype:"UP",
   tagCounter : exports.tagCounterGuidePost,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:2
+  overpassEveryDays:2,
+  defaultLengthOfTime:10
 }
 var WA_GuidePost_Rel = {
   title : "WA Wanderwegweiser (type=destination_sign)",
@@ -428,7 +435,8 @@ var WA_GuidePost_Rel = {
   ranktype:"UP",
   tagCounter : exports.tagCounterDestinationRel,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:2
+  overpassEveryDays:2,
+  defaultLengthOfTime:10
 }
 
 
@@ -451,7 +459,8 @@ var WA_GuidePost_Path = {
   ranktype:"UP",
   tagCounter : exports.tagCounterNoSubSelector,
   tagCounterGlobal:exports.tagCounter2,
-  overpassEveryDays:2
+  overpassEveryDays:2,
+  defaultLengthOfTime:10
 }
 
 
