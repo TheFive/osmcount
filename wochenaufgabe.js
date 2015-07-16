@@ -449,7 +449,7 @@ var WA_GuidePost_Path = {
   country_code: "EU",
   ssl:noSubSelectorList,
   overpass : {
-    query:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(way(area.a)[~"destination.*"~".*"][highway=path];way(area.a)[~"destination.*"~".*"][highway=footway];way(area.a)[~"destination.*"~".*"][highway=track];way(area.a)[~"destination.*"~".*"][highway=cycleway];);\nout tags;',
+    query:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;(way(area.a)[highway=path][~"destination:.*"~".*"];way(area.a)[highway=footway][~"destination:.*"~".*"];way(area.a)[highway=cycleway][~"destination:.*"~".*"];way(area.a)[highway=track][~"destination:.*"~".*"];);\nout tags;',
     querySub:'not defined',
   },
   map: {
