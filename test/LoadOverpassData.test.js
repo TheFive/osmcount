@@ -180,5 +180,27 @@ describe('LoadOverpassData',function() {
         bddone();
       });
     })
+    it.only('should load and parse overpassdata Function 2',function(bddone){
+      wochenaufgabe.map["test"]={map:{list:['1','2']},
+                                 overpass:{query:"TEST :schluessel: TEST"},
+                                 tagCounter:wochenaufgabe.tagCounterNoSubSelector};
+
+      var job = {measure:"test"};
+      job.exectime = new Date();
+      var result = {};
+      var scope = nock('http://overpass-api.de/api/interpreter')
+                    .post('',"data=This%20is%20an%20overpass%20query")
+                  
+                    .replyWithFile(200, __dirname+"/LoadOverpassData.test.2.json");
+      lod.runOverpass("This is an overpass query",job,result,function(error,body) {
+        should.not.exist(error);
+        should.exist(job.overpassTime);
+        should(result.timestamp).equal(job.exectime);
+        should(result.count).equal(116);
+        should(result.missing).eql({  });
+        should(result.existing).eql({  });
+        bddone();
+      });
+    })
   })
 });

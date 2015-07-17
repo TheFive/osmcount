@@ -216,6 +216,7 @@ exports.runOverpass= function(query, job,result, cb) {
 				cb(err);
 				return;
 			}
+			console.dir(jsonResult.length);
 			result.measure=measure;
 			result.count = jsonResult.length;
 
