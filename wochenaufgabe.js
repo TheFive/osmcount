@@ -227,7 +227,7 @@ var WAApotheke = {
   ssl:apothekenSubSelectorList,
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
-    query:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
   	querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;',
     fullQuery: '[out:json][timeout:5000];area[name="Deutschland"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
@@ -258,7 +258,7 @@ var WAApotheke_AT = {
   ssl:apothekenSubSelectorList,
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
-    query:'[out:json][date:":timestamp:"];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
   	querySub: '[out:json];area["ref:at:gkz"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;',
     fullQuery: '[out:json][timeout:4000];area[name="Österreich"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
@@ -290,7 +290,7 @@ var WAApotheke_CH = {
   ssl:apothekenSubSelectorList,
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
-    query:'[out:json][date:":timestamp:"];area["XXXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area["XXXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
   	querySub: '[out:json];area["XXX"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;',
     fullQuery: '[out:json][timeout:3600];area[name="Schweiz"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
@@ -321,7 +321,7 @@ var WAApothekePLZ_DE= {
   ssl:apothekenSubSelectorList,
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
-    query:'[out:json][date:":timestamp:"];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
   	querySub: '[out:json];area["postal_code"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;'
   },
 
@@ -374,7 +374,7 @@ var WAApothekeTestDE = {
   country_code: "DE-HAAN",
   overpass : {
     csvFieldList: '[out:csv(::id,::type,::lat,::lon,::version,::timestamp,::user,name,fixme,phone,"contact:phone",wheelchair;true;";")]',
-    query:'[out:json][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy];\nway(area.a)[amenity=pharmacy];\nrel(area.a)[amenity=pharmacy]);\nout center;',
     querySub: '[out:json];area["de:amtlicher_gemeindeschluessel"=":schluessel:"]->.a;\n(node(area.a)[amenity=pharmacy][:subkey:];\nway(area.a)[amenity=pharmacy][:subkey:];\nrel(area.a)[amenity=pharmacy][:subkey:]);\nout;',
     fullQuery: '[out:json][timeout:5000];area[name="Haan"]->.a;( node(area.a)[amenity=pharmacy]; \
                                                    way(area.a)[amenity=pharmacy]; \
@@ -404,7 +404,7 @@ var WA_GuidePost_Node = {
   country_code: "EU",
   ssl:guidePostSubSelectorList,
   overpass : {
-    query:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[information=guidepost];);\nout center;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[information=guidepost];);\nout center;',
     querySub:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[information=guidepost][:subkey];);\nout center;',
   },
   map: {
@@ -425,7 +425,7 @@ var WA_GuidePost_Rel = {
   country_code: "EU",
   ssl:destinationRelSubSelectorList,
   overpass : {
-    query:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(relation(area.a)[type=destination_sign];);\nout center;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(relation(area.a)[type=destination_sign];);\nout center;',
     querySub:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(relation(area.a)[type=destination_sign][:subkey];);\nout center;',
   },
   map: {
@@ -449,7 +449,7 @@ var WA_GuidePost_Path = {
   country_code: "EU",
   ssl:noSubSelectorList,
   overpass : {
-    query:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;(way(area.a)[highway=path][~"destination:.*"~".*"];way(area.a)[highway=footway][~"destination:.*"~".*"];way(area.a)[highway=cycleway][~"destination:.*"~".*"];way(area.a)[highway=track][~"destination:.*"~".*"];);\nout tags;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area[":key:"=":value:"]->.a;(way(area.a)[highway=path][~"destination:.*"~".*"];way(area.a)[highway=footway][~"destination:.*"~".*"];way(area.a)[highway=cycleway][~"destination:.*"~".*"];way(area.a)[highway=track][~"destination:.*"~".*"];);\nout tags;',
     querySub:'not defined',
   },
   map: {
