@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 
 
-var _osmCountVersion_ = "0.37";
+var _osmCountVersion_ = "0.38";
 
 var osmCountBrand = '<div class="navbar-header"><a class="navbar-brand" style="font-family:comic sans ms;font-size: 21px; color: #555" href="/index.html">OSM Count</a></div>';
 

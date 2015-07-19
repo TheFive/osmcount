@@ -1,0 +1,1563 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API",
+  "osm3s": {
+    "timestamp_osm_base": "2015-07-17T16:08:02Z",
+    "timestamp_areas_base": "2015-07-16T13:16:02Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "way",
+  "id": 15721788,
+  "tags": {
+    "destination:forward": "Ehra",
+    "highway": "track",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 18451309,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Braunschweig;Tankumsee",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "name": "Dannenbütteler Weg",
+    "surface": "gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 23978995,
+  "tags": {
+    "destination:forward": "🚲 Springe",
+    "foot": "yes",
+    "highway": "cycleway"
+  }
+},
+{
+  "type": "way",
+  "id": 23979030,
+  "tags": {
+    "destination:backward": "🚲 Springe",
+    "destination:forward": "🚲 Hannover",
+    "highway": "track",
+    "mofa": "yes",
+    "motor_vehicle": "agricultural",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 25830762,
+  "tags": {
+    "cycleway": "yes",
+    "description": "nördlicher Weg am Allerkanal",
+    "destination:backward": "Weyhausen",
+    "highway": "track",
+    "horse_drawn": "forestry;destination",
+    "lit": "no",
+    "motor_vehicle": "forestry;destination",
+    "smoothness": "intermediate",
+    "surface": "gravel",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 26123016,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Jembke",
+    "highway": "track",
+    "horse_drawn": "forestry",
+    "lit": "no",
+    "motor_vehicle": "forestry",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 26215257,
+  "tags": {
+    "agricultural": "no",
+    "bicycle": "yes",
+    "destination:backward": "Sandkamp",
+    "destination:forward": "Weyhausen;Osloß",
+    "foot": "yes",
+    "highway": "track",
+    "horse_drawn": "forestry;destination",
+    "lit": "no",
+    "motor_vehicle": "forestry;destination",
+    "name": "-VW Lkw Tor - Allerkanal",
+    "surface": "gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 26256998,
+  "tags": {
+    "bicycle": "yes",
+    "description": "südlicher Weg am Allerkanal",
+    "destination:backward": "Wolfsburg;Weyhausen",
+    "destination:forward": "Gifhorn;Celle",
+    "foot": "yes",
+    "highway": "track",
+    "horse": "yes",
+    "horse_drawn": "forestry;destination",
+    "lit": "no",
+    "motor_vehicle": "forestry;destination",
+    "smoothness": "intermediate",
+    "surface": "ground",
+    "tracktype": "grade3",
+    "vehicle": "forestry;destination"
+  }
+},
+{
+  "type": "way",
+  "id": 26687595,
+  "tags": {
+    "bicycle": "yes",
+    "destination:forward": "Ausgang",
+    "highway": "footway",
+    "incline": "up",
+    "lcn_ref": "Calberlah",
+    "lit": "yes",
+    "surface": "paving_stones"
+  }
+},
+{
+  "type": "way",
+  "id": 26822769,
+  "tags": {
+    "bicycle": "designated",
+    "destination:forward": "Altencelle;Deichweg",
+    "foot": "designated",
+    "highway": "path",
+    "name": "Osterdeich",
+    "segregated": "no",
+    "surface": "fine_gravel"
+  }
+},
+{
+  "type": "way",
+  "id": 27128491,
+  "tags": {
+    "destination:forward": "Brechtorf",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade4"
+  }
+},
+{
+  "type": "way",
+  "id": 27267846,
+  "tags": {
+    "destination:forward": "Lessien;Grußendorf",
+    "highway": "track",
+    "motor_vehicle": "agricultural",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 27461250,
+  "tags": {
+    "destination:forward": "Zur Eiche;Sternsee;Erlengrund",
+    "highway": "track",
+    "lit": "no",
+    "name": "Krümmeweg",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 29975779,
+  "tags": {
+    "access": "agricultural",
+    "bicycle": "yes",
+    "destination:backward": "Tankumsee",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "surface": "cobblestone",
+    "tracktype": "grade2",
+    "width": "3"
+  }
+},
+{
+  "type": "way",
+  "id": 31680056,
+  "tags": {
+    "access": "agricultural",
+    "bicycle": "yes",
+    "destination:forward": "Angelsee",
+    "foot": "yes",
+    "highway": "track",
+    "horse": "yes",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade3",
+    "vehicle": "agricultural;forestry;destination"
+  }
+},
+{
+  "type": "way",
+  "id": 33435819,
+  "tags": {
+    "bicycle": "yes",
+    "description": "südlicher Weg am Allerkanal",
+    "destination:backward": "Sandkamp;Weyhausen;Osloß",
+    "foot": "yes",
+    "highway": "track",
+    "horse": "no",
+    "lit": "no",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "smoothness": "intermediate",
+    "surface": "gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 33886401,
+  "tags": {
+    "access": "agricultural",
+    "bicycle": "yes",
+    "destination:forward": "Celle;Gifhorn;Mühlenmuseum",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "name": "Dannenbütteler Weg",
+    "surface": "concrete",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 35316927,
+  "tags": {
+    "destination:backward": "Bergfeld",
+    "highway": "track",
+    "lcn": "yes",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 39117945,
+  "tags": {
+    "agricultural": "yes",
+    "bicycle": "yes",
+    "destination:backward": "Ehra",
+    "highway": "track",
+    "lit": "no",
+    "motorcar": "no",
+    "surface": "asphalt",
+    "tracktype": "grade1",
+    "vehicle": "agricultural;forestry"
+  }
+},
+{
+  "type": "way",
+  "id": 54567137,
+  "tags": {
+    "bicycle": "yes",
+    "destination:forward": "Gifhorn Zentrum;Meinersen/Müden;Leiferde;Winkel",
+    "foot": "yes",
+    "highway": "path",
+    "lit": "no",
+    "surface": "ground",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "way",
+  "id": 65676303,
+  "tags": {
+    "destination:forward": "Waldfriedhof",
+    "highway": "path",
+    "lit": "no",
+    "surface": "fine_gravel"
+  }
+},
+{
+  "type": "way",
+  "id": 72452730,
+  "tags": {
+    "destination:backward": "Angelsee",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 79299287,
+  "tags": {
+    "destination:forward": "Fallersleben;Sülfeld",
+    "highway": "track",
+    "horse": "yes",
+    "lit": "no",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "surface": "gravel",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 79299288,
+  "tags": {
+    "destination:forward": "Sandkamp;Fallersleben;Sülfeld",
+    "highway": "track",
+    "horse": "yes",
+    "lit": "no",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "surface": "gravel",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 83027871,
+  "tags": {
+    "bicycle": "yes",
+    "destination:forward": "Boot Camp",
+    "foot": "yes",
+    "highway": "footway",
+    "lit": "no",
+    "surface": "ground"
+  }
+},
+{
+  "type": "way",
+  "id": 83028137,
+  "tags": {
+    "access": "forestry",
+    "destination:forward": "Heidjerpfad",
+    "embankment": "yes",
+    "highway": "track",
+    "surface": "asphalt",
+    "tracktype": "grade1",
+    "width": "3"
+  }
+},
+{
+  "type": "way",
+  "id": 83030461,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Westerbeck",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "surface": "gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 84030341,
+  "tags": {
+    "bicycle": "yes",
+    "description": "südlicher Weg am Allerkanal",
+    "destination:forward": "Sandkamp",
+    "foot": "yes",
+    "highway": "track",
+    "horse": "yes",
+    "horse_drawn": "forestry;destination",
+    "lit": "no",
+    "motor_vehicle": "forestry",
+    "surface": "ground",
+    "tracktype": "grade3",
+    "vehicle": "forestry;destination"
+  }
+},
+{
+  "type": "way",
+  "id": 100212377,
+  "tags": {
+    "destination:forward": "Knesebeck",
+    "highway": "track",
+    "lit": "no",
+    "surface": "grass",
+    "tracktype": "grade4"
+  }
+},
+{
+  "type": "way",
+  "id": 100212627,
+  "tags": {
+    "destination:forward": "Ohrdorf",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 106665531,
+  "tags": {
+    "access": "forestry",
+    "destination:forward": "Heidjerpfad",
+    "embankment": "yes",
+    "highway": "track",
+    "surface": "asphalt",
+    "tracktype": "grade1",
+    "width": "3"
+  }
+},
+{
+  "type": "way",
+  "id": 116452431,
+  "tags": {
+    "bicycle": "official",
+    "destination:backward": "Bokensdorf",
+    "foot": "official",
+    "highway": "path",
+    "lit": "no",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 127322445,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Schloss;Innenstadt",
+    "foot": "official",
+    "highway": "path",
+    "mofa": "yes",
+    "surface": "paving_stones"
+  }
+},
+{
+  "type": "way",
+  "id": 132708674,
+  "tags": {
+    "destination:forward": "Dannenbüttel",
+    "highway": "track",
+    "lit": "no",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 133116669,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Bokensdorf",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "maxspeed": "30",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 134217353,
+  "tags": {
+    "access": "forestry",
+    "destination:backward": "Heidjerpfad",
+    "embankment": "yes",
+    "highway": "track",
+    "surface": "asphalt",
+    "tracktype": "grade1",
+    "width": "3"
+  }
+},
+{
+  "type": "way",
+  "id": 134217359,
+  "tags": {
+    "access": "forestry",
+    "destination:forward": "Gedenkstein",
+    "embankment": "yes",
+    "highway": "track",
+    "surface": "gravel",
+    "tracktype": "grade2",
+    "width": "3"
+  }
+},
+{
+  "type": "way",
+  "id": 137197802,
+  "tags": {
+    "destination:backward": "Altendorf",
+    "highway": "track",
+    "lit": "no",
+    "name": "Wiswedeler Straße",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 150721264,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Mühlenmuseum",
+    "foot": "official",
+    "highway": "path",
+    "mofa": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 156995375,
+  "tags": {
+    "destination:backward": "Tülau;Bergfeld",
+    "destination:forward": "Lessien;Grußendorf",
+    "highway": "track",
+    "lit": "no",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 156998342,
+  "tags": {
+    "destination:backward": "Ehra",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 158677284,
+  "tags": {
+    "bicycle": "yes",
+    "destination:forward": "Bokensdorf",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade3",
+    "vehicle": "agricultural;forestry"
+  }
+},
+{
+  "type": "way",
+  "id": 158677780,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Dannenbüttel;Elbe-Seitenkanal",
+    "destination:forward": "Jembke;Bokensdorf",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "surface": "gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 158718580,
+  "tags": {
+    "bicycle": "official",
+    "destination:backward": "Dannenbüttel",
+    "foot": "official",
+    "highway": "path",
+    "lit": "yes",
+    "surface": "paving_stones",
+    "trail_visibility": "excellent",
+    "width": "1.5"
+  }
+},
+{
+  "type": "way",
+  "id": 159338341,
+  "tags": {
+    "bicycle": "designated",
+    "destination:forward": "Ehra",
+    "foot": "designated",
+    "highway": "path",
+    "segregated": "no",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 163173624,
+  "tags": {
+    "bicycle": "designated",
+    "destination:backward": "Wolfsburg;Fallersleben",
+    "foot": "designated",
+    "highway": "path",
+    "lit": "yes",
+    "segregated": "no",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 163173629,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Gifhorn;Dannenbüttel;Bokensdorf",
+    "foot": "official",
+    "highway": "path",
+    "lit": "yes",
+    "segregated": "no",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 163383980,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Tappenbeck",
+    "highway": "track",
+    "lcn": "yes",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade3",
+    "vehicle": "agricultural;forestry"
+  }
+},
+{
+  "type": "way",
+  "id": 164295750,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Dannenbüttel;Elbe-Seitenkanal",
+    "destination:forward": "Jembke und Bokensdorf",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 164296119,
+  "tags": {
+    "bicycle": "yes",
+    "destination:forward": "Dannenbüttel;Elbe-Seitenkanal",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 164919192,
+  "tags": {
+    "bicycle": "yes",
+    "destination:forward": "Tankumsee",
+    "foot": "yes",
+    "highway": "path",
+    "horse": "no",
+    "surface": "gravel",
+    "trail_visibility": "excellent",
+    "width": "1"
+  }
+},
+{
+  "type": "way",
+  "id": 165049287,
+  "tags": {
+    "destination:backward": "Lessien;Grußendorf",
+    "highway": "track",
+    "lit": "no",
+    "surface": "gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 165194267,
+  "tags": {
+    "bicycle": "yes",
+    "description": "südlicher Weg am Allerkanal",
+    "destination:backward": "Wolfsburg;Weyhausen",
+    "foot": "yes",
+    "highway": "track",
+    "horse": "yes",
+    "horse_drawn": "forestry;destination",
+    "lit": "no",
+    "motor_vehicle": "forestry;destination",
+    "smoothness": "intermediate",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 165989783,
+  "tags": {
+    "cycleway": "yes",
+    "description": "nördlicher Weg am Allerkanal",
+    "destination:backward": "Sandkamp;Weyhausen",
+    "destination:forward": "Tankumsee",
+    "highway": "track",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "smoothness": "intermediate",
+    "surface": "fine_gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 165989795,
+  "tags": {
+    "destination:forward": "Sandkamp;Fallersleben;Sülfeld",
+    "highway": "track",
+    "horse": "yes",
+    "lit": "no",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "surface": "cobblestone",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 165989801,
+  "tags": {
+    "bridge": "yes",
+    "destination:forward": "Sandkamp;Fallersleben;Sülfeld",
+    "highway": "track",
+    "horse": "yes",
+    "lit": "no",
+    "maxweight": "5",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 165989805,
+  "tags": {
+    "destination:forward": "Sandkamp;Fallersleben;Sülfeld",
+    "highway": "track",
+    "horse": "yes",
+    "lit": "no",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "surface": "cobblestone",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 165989811,
+  "tags": {
+    "destination:forward": "Sandkamp;Fallersleben;Sülfeld",
+    "highway": "track",
+    "horse": "yes",
+    "lit": "no",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "surface": "gravel",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 165989813,
+  "tags": {
+    "destination:backward": "Osloß",
+    "highway": "track",
+    "horse_drawn": "forestry;destination",
+    "lit": "no",
+    "surface": "gravel",
+    "tracktype": "grade2",
+    "vehicle": "forestry;destination"
+  }
+},
+{
+  "type": "way",
+  "id": 166313521,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Dannenbüttel;Elbe-Seitenkanal",
+    "destination:forward": "Jembke;Bokensdorf",
+    "foot": "yes",
+    "hazard": "uneven_road",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade2",
+    "traffic_sign": "DE:112"
+  }
+},
+{
+  "type": "way",
+  "id": 167310822,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Warmenau",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "mofa": "yes",
+    "motor_vehicle": "no",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 168000671,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Fallersleben Bahnhof",
+    "foot": "official",
+    "highway": "path",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 168027948,
+  "tags": {
+    "bridge": "yes",
+    "destination:forward": "Fallersleben;Sülfeld",
+    "highway": "track",
+    "horse": "yes",
+    "layer": "1",
+    "lit": "no",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "surface": "gravel",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 168027952,
+  "tags": {
+    "destination:forward": "Fallersleben;Sülfeld",
+    "highway": "track",
+    "horse": "yes",
+    "lit": "no",
+    "motorcar": "permissive",
+    "motorcycle": "no",
+    "surface": "gravel",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 168191721,
+  "tags": {
+    "access": "forestry",
+    "agricultural": "no",
+    "bicycle": "yes",
+    "destination:backward": "Sandkamp",
+    "destination:forward": "Weyhausen;Osloß",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "motorcar": "no",
+    "motorcycle": "no",
+    "name": "-VW Lkw Tor - Allerkanal",
+    "surface": "asphalt",
+    "tracktype": "grade1",
+    "vehicle": "forestry;destination"
+  }
+},
+{
+  "type": "way",
+  "id": 168191727,
+  "tags": {
+    "bicycle": "yes",
+    "destination:forward": "Sandkamp",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "mofa": "yes",
+    "motor_vehicle": "no",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 168191742,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Fallersleben;Sandkamp",
+    "foot": "yes",
+    "highway": "cycleway",
+    "motor_vehicle": "no",
+    "name": "Weyhäuser Weg",
+    "segregated": "no",
+    "sidewalk": "none",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 168249488,
+  "tags": {
+    "access": "forestry",
+    "agricultural": "no",
+    "bicycle": "yes",
+    "destination:backward": "Sandkamp",
+    "destination:forward": "Weyhausen;Osloß",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "motorcar": "no",
+    "motorcycle": "no",
+    "name": "-VW Lkw Tor - Allerkanal",
+    "surface": "asphalt",
+    "tracktype": "grade1",
+    "vehicle": "forestry;destination"
+  }
+},
+{
+  "type": "way",
+  "id": 168893321,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Winkel",
+    "foot": "official",
+    "highway": "footway",
+    "segregated": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 168893324,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Bahnhof Gifhorn Süd",
+    "foot": "official",
+    "highway": "path",
+    "segregated": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 168989118,
+  "tags": {
+    "bicycle": "designated",
+    "destination:forward": "Gifhorn Zentrum;Meinersen/Müden;Leiferde;Winkel",
+    "foot": "designated",
+    "highway": "path",
+    "lit": "yes",
+    "mofa": "yes",
+    "segregated": "yes",
+    "surface": "paving_stones"
+  }
+},
+{
+  "type": "way",
+  "id": 169111990,
+  "tags": {
+    "destination:forward": "Gifhorn Zentrum;Meinersen/Müden;Leiferde;Winkel",
+    "highway": "path",
+    "surface": "ground",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "way",
+  "id": 170373408,
+  "tags": {
+    "access": "agricultural",
+    "bicycle": "yes",
+    "destination:backward": "Braunschweig;Tankumsee",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "name": "Dannenbütteler Weg",
+    "parking:lane:both": "no_stopping",
+    "smoothness": "intermediate",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 170653787,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Winkel",
+    "foot": "official",
+    "highway": "footway",
+    "segregated": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 170653790,
+  "tags": {
+    "bicycle": "official",
+    "bridge": "yes",
+    "destination:forward": "Winkel",
+    "foot": "official",
+    "highway": "footway",
+    "layer": "1",
+    "segregated": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 176194123,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Gifhorn;Dannenbüttel",
+    "foot": "yes",
+    "highway": "path",
+    "horse": "no",
+    "lit": "no",
+    "surface": "gravel",
+    "trail_visibility": "excellent",
+    "width": "1"
+  }
+},
+{
+  "type": "way",
+  "id": 176196040,
+  "tags": {
+    "access": "agricultural",
+    "bicycle": "yes",
+    "bridge": "yes",
+    "destination:forward": "Celle;Gifhorn;Mühlenmuseum",
+    "foot": "yes",
+    "highway": "track",
+    "layer": "1",
+    "lit": "no",
+    "name": "Dannenbütteler Weg",
+    "surface": "concrete",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 176197118,
+  "tags": {
+    "access": "agricultural",
+    "bicycle": "yes",
+    "destination:backward": "Braunschweig;Tankumsee",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "name": "Dannenbütteler Weg",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 179859115,
+  "tags": {
+    "bicycle": "yes",
+    "destination:forward": "Ehra;Lessien",
+    "foot": "designated",
+    "highway": "path",
+    "lit": "yes",
+    "segregated": "no",
+    "surface": "paving_stones"
+  }
+},
+{
+  "type": "way",
+  "id": 182367466,
+  "tags": {
+    "destination:forward": "Schloss;Innenstadt",
+    "highway": "track",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 199347245,
+  "tags": {
+    "access": "forestry",
+    "bridge": "yes",
+    "destination:forward": "Heidjerpfad",
+    "embankment": "yes",
+    "highway": "track",
+    "layer": "1",
+    "surface": "asphalt",
+    "tracktype": "grade1",
+    "width": "3"
+  }
+},
+{
+  "type": "way",
+  "id": 199347246,
+  "tags": {
+    "access": "forestry",
+    "destination:forward": "Heidjerpfad",
+    "embankment": "yes",
+    "highway": "track",
+    "surface": "asphalt",
+    "tracktype": "grade1",
+    "width": "3"
+  }
+},
+{
+  "type": "way",
+  "id": 217522492,
+  "tags": {
+    "destination:backward": "Zisterne 5",
+    "highway": "track",
+    "lit": "no",
+    "name": "Boitzenhagener Weg",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 217522496,
+  "tags": {
+    "destination:forward": "Zisterne 1",
+    "highway": "track",
+    "lit": "no",
+    "name": "Vor dem Kreyenhoop",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 217522960,
+  "tags": {
+    "destination:forward": "Löschwasser-Entnahmestelle",
+    "highway": "track",
+    "lit": "no",
+    "name": "Teschendorfer Weg",
+    "surface": "ground:lanes",
+    "tracktype": "grade4"
+  }
+},
+{
+  "type": "way",
+  "id": 219091741,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Westerbeck",
+    "highway": "track",
+    "lit": "no",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 223723198,
+  "tags": {
+    "destination:forward": "Löschwasserbrunnen",
+    "highway": "track",
+    "lit": "no",
+    "surface": "grass",
+    "tracktype": "grade4"
+  }
+},
+{
+  "type": "way",
+  "id": 225069446,
+  "tags": {
+    "destination:forward": "Schloss;Innenstadt",
+    "highway": "track",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 225069447,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Mühlenmuseum",
+    "foot": "official",
+    "highway": "path",
+    "mofa": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 229061752,
+  "tags": {
+    "bicycle": "official",
+    "destination:backward": "Bokensdorf",
+    "foot": "official",
+    "highway": "path",
+    "lit": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 230707760,
+  "tags": {
+    "bicycle": "designated",
+    "destination:backward": "Fallersleben",
+    "foot": "designated",
+    "highway": "path",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "name": "Weyhäuser Weg",
+    "segregated": "no",
+    "sidewalk": "none",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 231678515,
+  "tags": {
+    "destination:forward": "Klein Bünstorfer Heide Hügelgräber",
+    "highway": "track",
+    "surface": "ground",
+    "tracktype": "grade3",
+    "width": "2"
+  }
+},
+{
+  "type": "way",
+  "id": 236427820,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Dannenbüttel;Elbe-Seitenkanal",
+    "destination:forward": "Jembke;Bokensdorf",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "surface": "gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 236427821,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Dannenbüttel;Elbe-Seitenkanal",
+    "destination:forward": "Jembke;Bokensdorf",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "surface": "gravel",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 254532493,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Elbe-Seitenkanal",
+    "highway": "track",
+    "lit": "no",
+    "surface": "grass",
+    "tracktype": "grade5"
+  }
+},
+{
+  "type": "way",
+  "id": 256253649,
+  "tags": {
+    "destination:forward": "Schneflingen",
+    "highway": "track",
+    "horse_drawn": "forestry",
+    "lit": "no",
+    "motor_vehicle": "forestry",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 260615704,
+  "tags": {
+    "bicycle": "designated",
+    "destination:forward": "Ehra",
+    "foot": "designated",
+    "highway": "path",
+    "lit": "no",
+    "segregated": "no",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 262989766,
+  "tags": {
+    "destination:forward": "Zisterne 7",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade4"
+  }
+},
+{
+  "type": "way",
+  "id": 271243090,
+  "tags": {
+    "access": "agricultural",
+    "bicycle": "yes",
+    "destination:backward": "Braunschweig;Tankumsee",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "name": "Dannenbütteler Weg",
+    "smoothness": "intermediate",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 271243091,
+  "tags": {
+    "access": "agricultural",
+    "bicycle": "yes",
+    "destination:backward": "Braunschweig;Tankumsee",
+    "foot": "yes",
+    "highway": "track",
+    "lit": "no",
+    "name": "Dannenbütteler Weg",
+    "parking:lane:both": "no_stopping",
+    "smoothness": "intermediate",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 274072004,
+  "tags": {
+    "destination:forward": "Schloss;Innenstadt",
+    "highway": "track",
+    "lit": "no",
+    "motor_vehicle": "no",
+    "surface": "ground",
+    "tracktype": "grade2"
+  }
+},
+{
+  "type": "way",
+  "id": 279073212,
+  "tags": {
+    "bicycle": "official",
+    "destination:forward": "Schloss;Innenstadt",
+    "foot": "official",
+    "highway": "path",
+    "mofa": "yes",
+    "surface": "paving_stones"
+  }
+},
+{
+  "type": "way",
+  "id": 286895581,
+  "tags": {
+    "destination:backward": "Zisterne 4",
+    "highway": "track",
+    "lit": "no",
+    "name": "Celler Weg",
+    "surface": "ground",
+    "tracktype": "grade4"
+  }
+},
+{
+  "type": "way",
+  "id": 286933402,
+  "tags": {
+    "destination:backward": "Zisterne 3",
+    "highway": "track",
+    "lit": "no",
+    "name": "Teschendorfer Weg",
+    "surface": "ground:lanes",
+    "tracktype": "grade4"
+  }
+},
+{
+  "type": "way",
+  "id": 288363807,
+  "tags": {
+    "destination:backward": "Friedhof",
+    "highway": "track",
+    "lit": "no",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 288514028,
+  "tags": {
+    "destination:forward": "Malloh",
+    "highway": "track",
+    "lit": "no",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 288862459,
+  "tags": {
+    "destination:forward": "Löschwasserstelle",
+    "highway": "track",
+    "horse_drawn": "forestry;destination",
+    "lit": "no",
+    "mofa": "no",
+    "motor_vehicle": "forestry;destination",
+    "surface": "grass",
+    "tracktype": "grade5"
+  }
+},
+{
+  "type": "way",
+  "id": 289674761,
+  "tags": {
+    "destination:forward": "Hochsitz Nummer 2",
+    "foot": "yes",
+    "highway": "path",
+    "lit": "no",
+    "surface": "ground",
+    "trail_visibility": "bad"
+  }
+},
+{
+  "type": "way",
+  "id": 292637639,
+  "tags": {
+    "bicycle": "yes",
+    "destination:backward": "Elbe-Seitenkanal",
+    "highway": "track",
+    "lit": "no",
+    "surface": "grass",
+    "tracktype": "grade4"
+  }
+},
+{
+  "type": "way",
+  "id": 305223292,
+  "tags": {
+    "bicycle": "yes",
+    "description": "südlicher Weg am Allerkanal",
+    "destination:forward": "Sandkamp",
+    "foot": "yes",
+    "highway": "track",
+    "horse": "yes",
+    "horse_drawn": "forestry;destination",
+    "lit": "no",
+    "motor_vehicle": "forestry",
+    "surface": "gravel",
+    "tracktype": "grade2",
+    "vehicle": "forestry;destination"
+  }
+},
+{
+  "type": "way",
+  "id": 307652276,
+  "tags": {
+    "bicycle": "yes",
+    "destination:lanes:forward": "Bovenden-West|Bovenden-Süd",
+    "highway": "track",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 309496478,
+  "tags": {
+    "destination:lanes:backward": "Bovenden-West|Göttingen,Königsbühl",
+    "foot": "designated",
+    "highway": "cycleway",
+    "segregated": "no",
+    "source": "survey 2014-10-12",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 315869722,
+  "tags": {
+    "destination:forward": "Friedhof",
+    "highway": "track",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 332456339,
+  "tags": {
+    "destination:forward": "Schneflingen",
+    "highway": "track",
+    "horse_drawn": "forestry",
+    "lit": "no",
+    "motor_vehicle": "forestry",
+    "surface": "ground",
+    "tracktype": "grade3"
+  }
+},
+{
+  "type": "way",
+  "id": 345647395,
+  "tags": {
+    "destination:backward": "Naturschutzgebiet",
+    "highway": "track",
+    "lcn": "yes",
+    "surface": "asphalt",
+    "tracktype": "grade1"
+  }
+},
+{
+  "type": "way",
+  "id": 349882376,
+  "tags": {
+    "bicycle": "official",
+    "destination:backward": "Dannenbüttel",
+    "foot": "official",
+    "highway": "path",
+    "lit": "yes",
+    "surface": "paving_stones",
+    "trail_visibility": "excellent",
+    "width": "1.5"
+  }
+}
+
+  ]
+}

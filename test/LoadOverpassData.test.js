@@ -121,6 +121,21 @@ describe('LoadOverpassData',function() {
         bddone();
       })
     })
+    it('should handle an alternative url',function(bddone) {
+      var scope = nock('http://alternative.overpass-api.de/api/interpreter')
+                  .post('',"data=This%20is%20an%20overpass%20query")
+                
+                  .reply(200, {
+                    name: 'someJsonData',
+                    data:[{name:3}]
+                  });
+      lod.overpassQuery("This is an overpass query",function(error,body) {
+        should.not.exist(error);
+        body = JSON.parse(body);
+        should(body).eql({name: 'someJsonData',data:[{name:3}]});
+        bddone();
+      },{overpassUrl:'http://alternative.overpass-api.de/api/interpreter'})
+    })
     it('should handle an Overcrowded',function(bddone) {
       var scope = nock('http://overpass-api.de/api/interpreter')
                   .post('',"data=This%20is%20an%20overpass%20query")
@@ -177,6 +192,51 @@ describe('LoadOverpassData',function() {
         should(result.count).equal(12);
         should(result.missing).eql({ opening_hours: 1, phone: 1, wheelchair: 5, name: 0 });
         should(result.existing).eql({ fixme: 0 });
+        bddone();
+      });
+    })
+    it ('should work with alternative Urls',function(bddone){
+      wochenaufgabe.map["test"]={map:{list:['1','2']},
+                                 overpass:{query:"TEST :schluessel: TEST"},
+                                 tagCounter:wochenaufgabe.tagCounterPharmacy,
+                                 overpassUrl:'http://alternative.overpass-api.de/api/interpreter'};
+
+      var job = {measure:"test"};
+      job.exectime = new Date();
+      var result = {};
+      var scope = nock('http://alternative.overpass-api.de/api/interpreter')
+                    .post('',"data=This%20is%20an%20overpass%20query")
+                  
+                    .replyWithFile(200, __dirname+"/LoadOverpassData.test.json");
+      lod.runOverpass("This is an overpass query",job,result,function(error,body) {
+        should.not.exist(error);
+        should.exist(job.overpassTime);
+        should(result.timestamp).equal(job.exectime);
+        should(result.count).equal(12);
+        should(result.missing).eql({ opening_hours: 1, phone: 1, wheelchair: 5, name: 0 });
+        should(result.existing).eql({ fixme: 0 });
+        bddone();
+      });
+    })
+    it('should load and parse overpassdata Function 2',function(bddone){
+      wochenaufgabe.map["test"]={map:{list:['1','2']},
+                                 overpass:{query:"TEST :schluessel: TEST"},
+                                 tagCounter:wochenaufgabe.tagCounterNoSubSelector};
+
+      var job = {measure:"test"};
+      job.exectime = new Date();
+      var result = {};
+      var scope = nock('http://overpass-api.de/api/interpreter')
+                    .post('',"data=This%20is%20an%20overpass%20query")
+                  
+                    .replyWithFile(200, __dirname+"/LoadOverpassData.test.2.json");
+      lod.runOverpass("This is an overpass query",job,result,function(error,body) {
+        should.not.exist(error);
+        should.exist(job.overpassTime);
+        should(result.timestamp).equal(job.exectime);
+        should(result.count).equal(116);
+        should(result.missing).eql({  });
+        should(result.existing).eql({  });
         bddone();
       });
     })
