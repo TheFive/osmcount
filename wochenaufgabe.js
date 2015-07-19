@@ -460,7 +460,8 @@ var WA_GuidePost_Path = {
   tagCounter : exports.tagCounterNoSubSelector,
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:2,
-  defaultLengthOfTime:10
+  defaultLengthOfTime:10,
+  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter'
 }
 
 

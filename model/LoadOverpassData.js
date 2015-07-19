@@ -31,7 +31,7 @@ exports.timeout = 2* 1000 * 60 * 60; // Timeout after 2 hours minutes;
 function overpassQuery(query, cb, options) {
   debug("overpassQuery");
   options = options || {};
-  if (typeof(options.uri)!= 'undefined') {
+  if (typeof(options.overpassUrl)!= 'undefined') {
     options.uri = options.overpassUrl;
   } else {
     options.uri = overpassApiLinkDE;
@@ -188,9 +188,10 @@ exports.importBoundaries = function(job,cb)  {
 
 
 exports.runOverpass= function(query, job,result, cb) {
-	debug("runOverpass(query,"+measure+",result,cb)");
+	debug("runOverpass(query,"+job.measure+",result,cb)");
 	var measure=job.measure;
 	var overpassStartTime = new Date().getTime();
+	var options = {overpassUrl:wochenaufgabe.map[measure].overpassUrl};
 	overpassQuery(query,function(error, data) {
 		debug("runOverpass->CB(");
 		var overpassEndTime = new Date().getTime();
@@ -216,7 +217,6 @@ exports.runOverpass= function(query, job,result, cb) {
 				cb(err);
 				return;
 			}
-			console.dir(jsonResult.length);
 			result.measure=measure;
 			result.count = jsonResult.length;
 
@@ -225,8 +225,7 @@ exports.runOverpass= function(query, job,result, cb) {
 			if (tagCounter) tagCounter(jsonResult,result);
 			cb(null);
 		}
-	}
-)}
+	},options)}
 
 
 
