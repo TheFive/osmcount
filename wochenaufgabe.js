@@ -77,6 +77,13 @@ var destinationRelSubSelectorList = {
   "distance":{type:"existing",prop:"distance"},
 }
 
+var destinationPathSubSelectorList = {
+  "destination:f/b":{type:'existing',prop:"destination:f/b",osmprops:['destination:forward','destination:backward']},
+  "destination:symbol:f/b":{type:'existing',prop:"destination:symbol:f/b",osmprops:['destination::symbol:forward','destination:symbol:backward']},
+  "destination:ref:f/b":{type:'existing',prop:"destination:ref:f/b",osmprops:['destination::ref:forward','destination:ref:backward']},
+  "destination:lang:f/b":{type:'existing',prop:"destination:lang:f/b",osmprops:['destination::lang:forward','destination:lang:backward']}
+}
+
 // This function looks up every tag in the subselector list
 // and increases the corresponding result counter 
 // if necessary
@@ -153,6 +160,15 @@ exports.tagCounterDestinationRel = function tagCounter(osmdata,result) {
     tagCounterGeneric(osmdata[i].tags,result,destinationRelSubSelectorList);
   }  
 }
+
+exports.tagCounterDestinationPath = function tagCounter(osmdata,result) {
+  debug('tagCounterDestinationRel');
+  tagCounterInit(result,destinationPathSubSelectorList);
+  for (var i = 0 ; i< osmdata.length;i++ ) {
+    tagCounterGeneric(osmdata[i].tags,result,destinationPathSubSelectorList);
+  }  
+}
+
 
 
 
@@ -459,7 +475,9 @@ var WA_GuidePost_Path = {
 
   },
   ranktype:"UP",
-  tagCounter : exports.tagCounterNoSubSelector,
+  tagCounter : exports.tagCounterDestinationPath,
+  ssl:destinationPathSubSelectorList,
+
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:2,
   defaultLengthOfTime:10,
