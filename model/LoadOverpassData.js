@@ -191,12 +191,14 @@ exports.runOverpass= function(query, job,result, cb) {
 	debug("runOverpass(query,"+job.measure+",result,cb)");
 	var measure=job.measure;
 	var overpassStartTime = new Date().getTime();
+	var overpassUrl = wochenaufgabe.map[measure].overpassUrl;
 	var options = {overpassUrl:wochenaufgabe.map[measure].overpassUrl};
 	overpassQuery(query,function(error, data) {
 		debug("runOverpass->CB(");
 		var overpassEndTime = new Date().getTime();
 		var overpassTime = overpassEndTime - overpassStartTime;
 		job.overpassTime = overpassTime;
+		job.overpassUrl = overpassUrl;
 		if (error) {
 			console.log("Error occured in function: LoadOverpassData.runOverpass");
 			console.log(error);

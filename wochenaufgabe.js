@@ -415,7 +415,8 @@ var WA_GuidePost_Node = {
   tagCounter : exports.tagCounterGuidePost,
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:2,
-  defaultLengthOfTime:10
+  defaultLengthOfTime:10,
+  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter'
 }
 var WA_GuidePost_Rel = {
   title : "WA Wanderwegweiser (type=destination_sign)",
@@ -436,7 +437,8 @@ var WA_GuidePost_Rel = {
   tagCounter : exports.tagCounterDestinationRel,
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:2,
-  defaultLengthOfTime:10
+  defaultLengthOfTime:10,
+  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter'
 }
 
 
@@ -453,7 +455,7 @@ var WA_GuidePost_Path = {
     querySub:'not defined',
   },
   map: {
-  keyList: wochenaufgabe_data.dachKeyListShort
+  keyList: wochenaufgabe_data.dachKeyList
 
   },
   ranktype:"UP",
