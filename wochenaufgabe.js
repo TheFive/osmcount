@@ -79,9 +79,10 @@ var destinationRelSubSelectorList = {
 
 var destinationPathSubSelectorList = {
   "destination:f/b":{type:'existing',prop:"destination:f/b",osmprops:['destination:forward','destination:backward']},
-  "destination:symbol:f/b":{type:'existing',prop:"destination:symbol:f/b",osmprops:['destination::symbol:forward','destination:symbol:backward']},
-  "destination:ref:f/b":{type:'existing',prop:"destination:ref:f/b",osmprops:['destination::ref:forward','destination:ref:backward']},
-  "destination:lang:f/b":{type:'existing',prop:"destination:lang:f/b",osmprops:['destination::lang:forward','destination:lang:backward']}
+  "destination:symbol:f/b":{type:'existing',prop:"destination:symbol:f/b",osmprops:['destination:symbol:forward','destination:symbol:backward']},
+  "destination:ref:f/b":{type:'existing',prop:"destination:ref:f/b",osmprops:['destination:ref:forward','destination:ref:backward']},
+  "destination:lang:f/b":{type:'existing',prop:"destination:lang:f/b",osmprops:['destination:lang:forward','destination:lang:backward']},
+  "destination:NESW":{type:'existing',prop:"destination:NESW",osmprops:['destination:N','destination:NE','destination:E','destination:SE','destination:S','destination:SW','destination:W','destination:NW']}
 }
 
 // This function looks up every tag in the subselector list
