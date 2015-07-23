@@ -263,7 +263,8 @@ var WAApotheke = {
   tagCounter : exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:28,
-  defaultLengthOfTime:7
+  defaultLengthOfTime:7,
+  wochenaufgabe_start:'2015-01-31'
 }
 
 var WAApotheke_AT = {
@@ -294,7 +295,8 @@ var WAApotheke_AT = {
   tagCounter:exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:28,
-  defaultLengthOfTime:7
+  defaultLengthOfTime:7,
+  wochenaufgabe_start:'2015-01-31'
 }
 
 var WAApotheke_CH = {
@@ -326,7 +328,8 @@ var WAApotheke_CH = {
   tagCounter:exports.tagCounterPharmacy,
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:28,
-  defaultLengthOfTime:7
+  defaultLengthOfTime:7,
+  wochenaufgabe_start:'2015-01-31'
 }
 
 var WAApothekePLZ_DE= {
@@ -348,7 +351,8 @@ var WAApothekePLZ_DE= {
   tagCounter:null,
   tagCounterGlobal:null,
   overpassEveryDays:28,
-  defaultLengthOfTime:7
+  defaultLengthOfTime:7,
+  wochenaufgabe_start:'2015-01-31'
 }
 
 
@@ -433,7 +437,8 @@ var WA_GuidePost_Node = {
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:2,
   defaultLengthOfTime:10,
-  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter'
+  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter',
+  wochenaufgabe_start:'2015-07-07'
 }
 var WA_GuidePost_Rel = {
   title : "WA Wanderwegweiser (type=destination_sign)",
@@ -455,7 +460,8 @@ var WA_GuidePost_Rel = {
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:2,
   defaultLengthOfTime:10,
-  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter'
+  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter',
+  wochenaufgabe_start:'2015-07-07'
 }
 
 
@@ -482,7 +488,8 @@ var WA_GuidePost_Path = {
   tagCounterGlobal:exports.tagCounter2,
   overpassEveryDays:2,
   defaultLengthOfTime:10,
-  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter'
+  overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter',
+  wochenaufgabe_start:'2015-07-07'
 }
 
 

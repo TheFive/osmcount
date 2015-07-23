@@ -734,6 +734,9 @@ exports.table = function(req,res){
     }
 
   var kreisnamen =  wochenaufgabe.map[param.measure].map.map;
+  var wa_start = wochenaufgabe.map[param.measure].wochenaufgabe_start;
+  if (typeof(wa_start)=='undefined') wa_start = '2000-01-01';
+
   var keyList = wochenaufgabe.map[param.measure].map.keyList;
   if (typeof(kreisnamen)=='undefined') kreisnamen = keyList;
   if (typeof(kreisnamen)=='undefined') kreisnamen = {};
@@ -994,11 +997,11 @@ exports.table = function(req,res){
             format["Diff"].func.op1  = header[header.length-2];
             format["Diff"].func.op2 = header[header.length-3];
 
-            var waApothekeStart = "2015-01-31"
-            if (header.indexOf(waApothekeStart) >=0) {
+            
+            if (header.indexOf(wa_start) >=0) {
               format["Diff"].title = "WA Diff";
-              format["Diff"].func.op2=waApothekeStart;
-              format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und Wochenaufgabenstart (31.1.15)";
+              format["Diff"].func.op2=wa_start;
+              format["Diff"].toolTip = "Differenz zwischen "+ header[header.length-2]+ " und Wochenaufgabenstart ("+wa_start+")";
           }
 
           if (displayVorgabe) {
