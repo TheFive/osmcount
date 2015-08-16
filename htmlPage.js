@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 
-var version = require('version.js');
+var version = require('./version.js');
 
 var _osmCountVersion_ = version.version;
 
