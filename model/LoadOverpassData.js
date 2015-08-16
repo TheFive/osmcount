@@ -7,6 +7,7 @@ var configuration  = require('../configuration.js');
 
 var loadDataFromDB = require('./LoadDataFromDB.js');
 var wochenaufgabe  = require('../wochenaufgabe.js');
+var version = require('../version.js');
 
 // Temporary Code to Load Overpass Basic Data Claims from OpenStreetMap
 
@@ -26,7 +27,7 @@ var overpassApiKillRU = "http://overpass.osm.rambler.ru/cgi/kill_my_queries";
 
 exports.timeout = 2* 1000 * 60 * 60; // Timeout after 2 hours minutes;
 
-
+var headers = {"User-Agent":"osmcount/"+version.version}
 
 function overpassQuery(query, cb, options) {
   debug("overpassQuery");
@@ -39,6 +40,9 @@ function overpassQuery(query, cb, options) {
   if (typeof(options.timeout) == 'undefined') {
     options.timeout = exports.timeout; // Timeout after 10 minutes
   }
+  
+  options.headers = headers;
+
   var start = (new Date()).getTime();
   request.post(options, function (error, response, body) {
     var end = (new Date()).getTime();

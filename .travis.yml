@@ -1,13 +1,13 @@
 language: node_js
 
 node_js:
- - "0.10"
  - "0.12"
 
 
 
 install:
  - npm install
+ - npm install codecov.io --save
 
 services:
 
@@ -24,6 +24,5 @@ before_script:
 
 
 script:
-  - export CODECOV_TOKEN="da541dee-74f2-45e3-9d3f-4962fa9e15d0"
   - npm test
 
