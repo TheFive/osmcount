@@ -18,7 +18,7 @@ function DataCollectionClass() {
   debug('DataCollectionClass');
   this.tableName = "DataCollection";
   this.collectionName = "DataCollection";
-  var lruOptions = { max: 1000000
+  var lruOptions = { max: 100000
                      , length: function (n) { return n.length }};
   this.aggregateCache=LRU(lruOptions);
   this.aggregateCacheKeys = {};
