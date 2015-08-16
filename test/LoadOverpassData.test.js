@@ -108,6 +108,7 @@ describe('LoadOverpassData',function() {
   describe('overpassQuery',function(bddone) {
     it('should handle a query',function(bddone) {
       var scope = nock('http://overpass-api.de/api/interpreter')
+                  .matchHeader('User-Agent', /osmcount\/.*/)
                   .post('',"data=This%20is%20an%20overpass%20query")
                 
                   .reply(200, {
