@@ -438,7 +438,7 @@ var WA_GuidePost_Node = {
   overpassEveryDays:2,
   defaultLengthOfTime:10,
   //overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter',
-  overpassUrl:'http://dev.overpass-api.de/api_mmd_test_only',
+  overpassUrl:'http://dev.overpass-api.de/api_mmd_test_only/interpreter',
   wochenaufgabe_start:'2015-07-07'
 }
 var WA_GuidePost_Rel = {
@@ -462,7 +462,7 @@ var WA_GuidePost_Rel = {
   overpassEveryDays:2,
   defaultLengthOfTime:10,
   //overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter',
-  overpassUrl:'http://dev.overpass-api.de/api_mmd_test_only',
+  overpassUrl:'http://dev.overpass-api.de/api_mmd_test_only/interpreter',
   wochenaufgabe_start:'2015-07-07'
 }
 
@@ -491,7 +491,7 @@ var WA_GuidePost_Path = {
   overpassEveryDays:2,
   defaultLengthOfTime:10,
   //overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter',
-  overpassUrl:'http://dev.overpass-api.de/api_mmd_test_only',
+  overpassUrl:'http://dev.overpass-api.de/api_mmd_test_only/interpreter',
   wochenaufgabe_start:'2015-07-07'
 }
 
