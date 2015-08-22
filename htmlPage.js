@@ -5,8 +5,7 @@ var version = require('./version.js');
 
 var _osmCountVersion_ = version.version;
 
-var osmCountBrand = '<div class="navbar-header"><a class="navbar-brand" style="font-family:comic sans ms;font-size: 21px; color: #555" href="/index.html">OSM Count</a></div>';
-
+var osmCountBrand ='';
 
 var waStruct = [
 {name: "Apotheke",measure:"Apotheke"},
