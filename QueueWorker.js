@@ -305,7 +305,7 @@ function doInsertJobs(cb,results) {
     debug("Start: doInsertJobs(cb,"+results+")");
 
     var subcode = "";
-    if (job.type = "insert:IT") subcode = "IT";
+    if (job.type == "insert:IT") subcode = "IT";
     var jobs = lod.createQuery(job,subcode);
     
     console.log("Trigger to load "+job.measure+" at "+job.exectime + " Number Jobs "+ jobs.length);
