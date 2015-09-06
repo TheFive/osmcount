@@ -301,9 +301,12 @@ function doInsertJobs(cb,results) {
   var job=results.readjob;
   should.exist(job);
   should.exist(job.status);
-  if (job.status =="working" && job.type=="insert") {
+  if (job.status =="working" && (job.type=="insert" || job.type=="insert:IT")) {
     debug("Start: doInsertJobs(cb,"+results+")");
-    var jobs = lod.createQuery(job);
+
+    var subcode = "";
+    if (job.type = "insert:IT") subcode = "IT";
+    var jobs = lod.createQuery(job,subcode);
     
     console.log("Trigger to load "+job.measure+" at "+job.exectime + " Number Jobs "+ jobs.length);
     if (jobs.length == 0) {
