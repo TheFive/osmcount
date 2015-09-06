@@ -235,9 +235,10 @@ exports.runOverpass= function(query, job,result, cb) {
 
 
 
-exports.createQuery = function(referenceJob)
+exports.createQuery = function(referenceJob,subcode)
 {
 	debug("createQuery");
+  if (typeof(subcode)=="undefined") subcode ="";
 	should.exist(referenceJob);
     var jobs = [];
 	var aufgabe = referenceJob.measure;
@@ -282,6 +283,10 @@ exports.createQuery = function(referenceJob)
 		var keys = keylist;
 		for (var k in keys) {
 			debug(keys[k]);
+      if (subcode.length>0) {
+        // only insert key if it contains subcode at start.
+        if (k.substring(0,subcode.length) != subcode) continue;
+      }
 
 			// No Data in Map, then cont.
 			if (typeof(keys[k].osmkey)=='undefined') continue;
