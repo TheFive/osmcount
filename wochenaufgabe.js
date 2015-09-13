@@ -85,6 +85,17 @@ var destinationPathSubSelectorList = {
   "destination:NESW":{type:'existing',prop:"destination:NESW",osmprops:['destination:N','destination:NE','destination:E','destination:SE','destination:S','destination:SW','destination:W','destination:NW']}
 }
 
+//This is the SubSelector List for the GuidePost Nodes
+var iceCreamSubSelectorList = {
+  "Name":{type:"missing",prop:"name"},
+  "Outdoor Seating":{type:"missing",prop:"outdoor_seating"},
+  "Opening Hours":{type:"missing",prop:"opening_hours"},
+  "fixme":{type:"existing",prop:"fixme"},
+  "Website":{type:"missing",prop:"website"},
+  "Phone":{type:"missing",prop:"phone",osmprops:["phone","contact:phone"]},
+  "Wheelchair":{type:"missing",prop:"wheelchair"}
+}
+
 // This function looks up every tag in the subselector list
 // and increases the corresponding result counter 
 // if necessary
@@ -167,6 +178,14 @@ exports.tagCounterDestinationPath = function tagCounter(osmdata,result) {
   tagCounterInit(result,destinationPathSubSelectorList);
   for (var i = 0 ; i< osmdata.length;i++ ) {
     tagCounterGeneric(osmdata[i].tags,result,destinationPathSubSelectorList);
+  }  
+}
+
+exports.tagCounterIceCream = function tagCounter(osmdata,result) {
+  debug('tagCounterIceCream');
+  tagCounterInit(result,iceCreamSubSelectorList);
+  for (var i = 0 ; i< osmdata.length;i++ ) {
+    tagCounterGeneric(osmdata[i].tags,result,iceCreamSubSelectorList);
   }  
 }
 
@@ -496,6 +515,31 @@ var WA_GuidePost_Path = {
 }
 
 
+var WA_IceCream = {
+  title : "WA Ice Cream",
+  name: "IceCream",
+  description: "IceCream",
+  osmArea: "Europa",
+  country_code: "EU",
+  ssl:iceCreamSubSelectorList,
+  overpass : {
+    query:'[out:json][timeout:900][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[amenity=ice_cream];);\nout center;',
+    querySub:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[amenity=ice_cream][:subkey];);\nout center;',
+  },
+  map: {
+  keyList: wochenaufgabe_data.dachKeyList
+
+  },
+  ranktype:"UP",
+  tagCounter : exports.tagCounterIceCream,
+  tagCounterGlobal:exports.tagCounter2,
+  overpassEveryDays:2,
+  defaultLengthOfTime:10,
+  //overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter',
+  overpassUrl:'http://dev.overpass-api.de/api_mmd_test_only/interpreter',
+  wochenaufgabe_start:'2015-09-XX'
+}
+
 var wochenaufgaben= [];
 wochenaufgaben["Apotheke"]=WAApotheke;
 wochenaufgaben["Apotheke_AT"]=WAApotheke_AT;
@@ -504,6 +548,7 @@ wochenaufgaben["ApothekePLZ_DE"]=WAApothekePLZ_DE;
 wochenaufgaben["GuidePost_Node"]=WA_GuidePost_Node;
 wochenaufgaben["GuidePost_Rel"]=WA_GuidePost_Rel;
 wochenaufgaben["GuidePost_Path"]=WA_GuidePost_Path;
+wochenaufgaben["IceCream"]=WA_IceCream;
 
 exports.map = wochenaufgaben;
 
