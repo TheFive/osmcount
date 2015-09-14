@@ -93,7 +93,8 @@ var iceCreamSubSelectorList = {
   "fixme":{type:"existing",prop:"fixme"},
   "Website":{type:"missing",prop:"website"},
   "Phone":{type:"missing",prop:"phone",osmprops:["phone","contact:phone"]},
-  "Wheelchair":{type:"missing",prop:"wheelchair"}
+  "Wheelchair":{type:"missing",prop:"wheelchair"},
+  "amenity=ice_cream":{type:"existing",prop:"amenity=ice_cream"}
 }
 
 // This function looks up every tag in the subselector list
@@ -184,8 +185,10 @@ exports.tagCounterDestinationPath = function tagCounter(osmdata,result) {
 exports.tagCounterIceCream = function tagCounter(osmdata,result) {
   debug('tagCounterIceCream');
   tagCounterInit(result,iceCreamSubSelectorList);
+  result.existing["amenity=ice_cream"] = 0;
   for (var i = 0 ; i< osmdata.length;i++ ) {
     tagCounterGeneric(osmdata[i].tags,result,iceCreamSubSelectorList);
+    if (osmdata[i].tags["amenity"]=="ice_cream")  result.existing["amenity=ice_cream"] += 1;
   }  
 }
 
@@ -523,8 +526,11 @@ var WA_IceCream = {
   country_code: "EU",
   ssl:iceCreamSubSelectorList,
   overpass : {
-    query:'[out:json][timeout:900][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[amenity=ice_cream];);\nout center;',
-    querySub:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[amenity=ice_cream][:subkey];);\nout center;',
+    query:'[out:json][timeout:900][date:":timestamp:"];area[":key:"~":value:"]->.a;\n\
+            (node(area.a)[amenity=ice_cream];way(area.a)[amenity=ice_cream];rel(area.a)[amenity=ice_cream];\
+            node(area.a)[amenity=cafe][cuisine=ice_cream];way(area.a)[amenity=cafe][cuisine=ice_cream];rel(area.a)[amenity=cafe][cuisine=ice_cream];\
+              );\nout center;',
+    querySub:'[out:json][date:":timestamp:"];area[":key:"~"^:value:"]->.a;\n(node(area.a)[amenity=ice_cream][:subkey];way(area.a)[amenity=ice_cream][:subkey];rel(area.a)[amenity=ice_cream][:subkey];);\nout center;',
   },
   map: {
   keyList: wochenaufgabe_data.dachKeyList
@@ -537,7 +543,7 @@ var WA_IceCream = {
   defaultLengthOfTime:10,
   //overpassUrl:'http://dev.overpass-api.de/api_mmd/interpreter',
   overpassUrl:'http://dev.overpass-api.de/api_mmd_test_only/interpreter',
-  wochenaufgabe_start:'2015-09-XX'
+  wochenaufgabe_start:'2015-09-19'
 }
 
 var wochenaufgaben= [];
