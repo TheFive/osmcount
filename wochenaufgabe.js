@@ -526,11 +526,11 @@ var WA_IceCream = {
   country_code: "EU",
   ssl:iceCreamSubSelectorList,
   overpass : {
-    query:'[out:json][timeout:900][date:":timestamp:"];area[":key:"~":value:"]->.a;\n\
+    query:'[out:json][timeout:900][date:":timestamp:"];area[":key:"=":value:"]->.a;\n\
             (node(area.a)[amenity=ice_cream];way(area.a)[amenity=ice_cream];rel(area.a)[amenity=ice_cream];\
             node(area.a)[amenity=cafe][cuisine=ice_cream];way(area.a)[amenity=cafe][cuisine=ice_cream];rel(area.a)[amenity=cafe][cuisine=ice_cream];\
               );\nout center;',
-    querySub:'[out:json][date:":timestamp:"];area[":key:"~"^:value:"]->.a;\n(node(area.a)[amenity=ice_cream][:subkey];way(area.a)[amenity=ice_cream][:subkey];rel(area.a)[amenity=ice_cream][:subkey];);\nout center;',
+    querySub:'[out:json][date:":timestamp:"];area[":key:"=":value:"]->.a;\n(node(area.a)[amenity=ice_cream][:subkey];way(area.a)[amenity=ice_cream][:subkey];rel(area.a)[amenity=ice_cream][:subkey];);\nout center;',
   },
   map: {
   keyList: wochenaufgabe_data.dachKeyList
