@@ -10,7 +10,7 @@ var htmlPage       = require('../htmlPage.js');
 exports.main = function(req,res){
 	var page = htmlPage.create();
 
-	var a = fs.readFileSync(path.resolve(__dirname,"..", "html","index.html"),'utf8');
+	var a = fs.readFileSync(path.resolve(__dirname,"..", "html","osmbcindex.html"),'utf8');
 	//page.menu = fs.readFileSync(path.resolve(__dirname,"..", "html","menu2.html"));
 	page.content = a.replace('<a href=/index.html>HOME</a>','');
   
