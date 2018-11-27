@@ -1,3 +1,10 @@
+This Project was used to do some statistics for OpenStreetMap "Wochenaufgaben".
+As it was also a "Training" project for the developer, and is not in use any longer,
+repository is archived was archived in November 2018
+
+-----
+
+
 osmcount
 ========
 
